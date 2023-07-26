@@ -1,0 +1,179 @@
+import os
+import copy
+import yaml
+
+from collections import defaultdict
+
+from kocher_pipelines.processIO import standardizeInput, returnSamples, returnPaths
+from kocher_pipelines.snakemakeIO import parseSnakemakefile, copySnakemakeFile, createSnakemakeFile
+
+def loadPipelineConfigs (directory):
+
+	# Create dicts to store the relevant yaml data
+	pipeline_config_args = {}
+	pipeline_setup = {}
+	pipeline_cmd_line = {}
+	pipeline_snakefiles = defaultdict(list)
+	
+	# Check the config directory exists
+	config_dir = os.path.join(directory, 'configs')
+	if not os.path.isdir(config_dir): raise Exception(f'Unable to find pipeline directory: {config_dir}')
+
+	# Loop the configs
+	for config_filename in os.listdir(config_dir):
+		config_file = os.path.join(config_dir, config_filename)
+
+		with open(config_file, "r") as config_stream:
+			try: config_yaml = yaml.safe_load(config_stream)
+			except: raise Exception('Error opening YAML')
+
+			# Check pipeline_names for repeats, and if found report error
+			if config_yaml['pipeline'] in pipeline_config_args:
+				raise Exception(f"Pipeline {config_yaml['pipeline']} has already been assigned. Please check pipeline configs")
+
+			pipeline_config_args[config_yaml['pipeline']] = config_yaml['parser']
+			pipeline_setup[config_yaml['pipeline']] = config_yaml['setup']
+			pipeline_cmd_line[config_yaml['pipeline']] = config_yaml['command-line']
+			pipeline_snakefiles[config_yaml['pipeline']] = config_yaml['snakefiles']
+		
+	return pipeline_config_args, pipeline_setup, pipeline_cmd_line, pipeline_snakefiles
+
+def processPipelineSetup (pipeline_setup, pipeline_args):
+
+	# Create list to store setup args
+	process_dict = {}
+
+	for setup_name, setup_methods in pipeline_setup.items():
+		for method_args in setup_methods.values():
+			
+			# Assign the arg groups
+			input_args = method_args['input']
+
+			# Confirm expected args were specified
+			method_missing_args = [_a for _a in input_args['args'] if not pipeline_args[_a.replace('-', '_')]]
+
+			# Skip if missing arguments
+			if method_missing_args: continue
+
+			if 'standardize' in method_args:
+
+				# Create a dict of the standardize args
+				std_args = copy.deepcopy(method_args['standardize'])
+
+				# Update the arguments
+				for std_arg, arg_params in std_args['args'].items():
+					if not isinstance(arg_params, str): continue
+					std_args['args'][std_arg] = arg_params.replace('-', '_').format(**pipeline_args)
+
+				# Standardize the input
+				standardizeInput(**std_args)
+
+				# Assign the method paths
+				method_paths = returnPaths(**std_args)
+
+				# Check for method paths
+				if len(method_paths) > 0: 
+					
+					# Check if the args have already been created
+					if 'singularity-args' not in process_dict:
+						process_dict['singularity-args'] = defaultdict(list)
+
+					# Return any paths that need to be accounted for
+					process_dict['singularity-args']['bind'].extend(method_paths)
+
+			if 'samples' in method_args:
+
+				# Create a dict of the standardize args
+				samples_args = copy.deepcopy(method_args['samples'])
+
+				# Update the arguments
+				for samples_arg, arg_params in samples_args['args'].items():
+					if not isinstance(arg_params, str): continue
+					samples_args['args'][samples_arg] = arg_params.replace('-', '_').format(**pipeline_args)
+
+				# Assign the samples from the method
+				method_samples = returnSamples(**samples_args)
+
+				# Confirm the samples are not already assigned
+				if method_samples and 'samples' in process_dict: raise Exception(f'Samples already assigned')
+
+				# Standardize the input
+				process_dict['samples'] = method_samples
+
+	return process_dict
+
+def processSnakemakeModules (snakemake_modules, pipeline_dir, pipeline_args):
+
+	# Create the path of the module files
+	module_file_directory = os.path.join(pipeline_dir, 'modules')
+
+	if len(snakemake_modules) > 1:
+
+		snakemake_config = defaultdict(list)
+
+		# Create lists to store snakemake input and module filenames
+		snakemake_input = []
+
+		# Create the module directory
+		snakemake_module_dir = os.path.join(pipeline_args['pipeline_config_dir'], 'modules')
+		if not os.path.exists(snakemake_module_dir): os.makedirs(snakemake_module_dir)
+
+		# Confirm, read, and copy the snakemake files
+		for snakemake_module in snakemake_modules:
+			snakemake_file = os.path.join(module_file_directory, snakemake_module)
+
+			# Check if the snakemake file exists
+			if not os.path.isfile(snakemake_file):
+				raise Exception(f'Unable to find snakemake file: {snakemake_file}')
+
+			# Parse the snakemake file
+			snakemake_file_config, snakemake_file_input = parseSnakemakefile(snakemake_file)
+
+			# Update the config dict
+			for _k, _v in snakemake_file_config.items():
+				for _i in _v:
+					if _i not in snakemake_config[_k]: snakemake_config[_k].append(_i)
+				
+			# Store the input of the file
+			snakemake_input.extend(snakemake_file_input)
+		
+			# Copy the snakemake file
+			copySnakemakeFile(snakemake_file, out_filename = snakemake_module, out_dir = snakemake_module_dir)
+
+		# Create the main snakefile
+		createSnakemakeFile(pipeline_args['snakemake_job_prefix'], snakemake_input, snakemake_module_dir, snakemake_modules)
+
+	else:
+
+		# Copy the snakemake file
+		snakemake_file = os.path.join(module_file_directory, snakemake_modules[0])
+		snakemake_config, _ = parseSnakemakefile(snakemake_file)
+		copySnakemakeFile(snakemake_file, out_prefix = pipeline_args['snakemake_job_prefix'], keep_blocks = True)
+
+	return snakemake_config
+
+def processPipelineCmdLine (pipeline_cmd_line, pipeline_args):
+
+	# Create list to store the command line arguments
+	cmd_line_list = ['snakemake']
+
+	# Process the command line
+	for cmd_arg, cmd_value in pipeline_cmd_line.items():
+
+		# Add the basic args
+		if isinstance(cmd_value, bool): cmd_line_list.append(f'--{cmd_arg}')
+		else: cmd_line_list.extend([f'--{cmd_arg}', cmd_value])
+		
+		# Check if using singularity
+		if cmd_arg == 'use-singularity' and cmd_value and 'singularity-args' in pipeline_args:
+
+			# Assign the singularity args
+			singularity_args_list = []
+			for singularity_arg, singularity_value in pipeline_args['singularity-args'].items():
+				singularity_args_list.append(f'--{singularity_arg} ' + ','.join(singularity_value))
+
+			# Add the singularity args
+			singularity_args_str = ','.join(singularity_args_list)
+			cmd_line_list.extend(['--singularity-args', f'"{singularity_args_str}"'])
+
+	return ' '.join(map(str,cmd_line_list))
