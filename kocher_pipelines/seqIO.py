@@ -205,6 +205,9 @@ class SeqTableIO ():
 					# Confirm the row column (i.e. index) is a filename
 					if self._file_column not in file_col: continue
 
+					# Skip if sample filename is blank (e.g. No R2 filename)
+					if not sample_filename: continue
+
 					# Confirm the file exists
 					if not os.path.isfile(sample_filename):
 						raise IOError(f"Unable to locate file. Column: {file_col}. Filename: {sample_filename}")
