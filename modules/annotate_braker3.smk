@@ -1,13 +1,13 @@
-rule config:
+module config:
 	params:
 		species
 		assembly_version
 		annotation_version
-		paths:
-			assembly_dir
-			rnaseq_bam_dir
-			homology_dir
-			annotations_dir
+	paths:
+		assembly_dir
+		rnaseq_bam_dir
+		homology_dir
+		annotations_dir
 
 rule all:
 	input:

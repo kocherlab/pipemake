@@ -1,9 +1,9 @@
-rule config:
+module config:
 	params:
 		samples
-		paths:
-			atac_seq_aligned_bam_dir
-			atac_seq_sorted_bam_dir
+	paths:
+		atac_seq_aligned_bam_dir
+		atac_seq_sorted_bam_dir
 
 rule all:
 	input:

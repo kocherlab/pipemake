@@ -1,10 +1,10 @@
-rule config:
+module config:
 	params:
 		species
 		assembly_version
-		paths:
-			assembly_dir
-			repeatmodeler_dir
+	paths:
+		assembly_dir
+		repeatmodeler_dir
 
 rule all:
 	input:

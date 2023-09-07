@@ -1,13 +1,13 @@
-rule config:
+module config:
 	params:
 		samples
 		species
 		assembly_version
-		paths:
-			assembly_dir
-			index_dir
-			atac_seq_fastq_dir
-			atac_seq_aligned_bam_dir
+	paths:
+		assembly_dir
+		index_dir
+		atac_seq_fastq_dir
+		atac_seq_aligned_bam_dir
 
 ruleorder: bwa_mem_pair_end_atac_seq > bwa_mem_single_end_atac_seq
 

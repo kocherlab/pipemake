@@ -1,11 +1,11 @@
-rule config:
+module config:
 	params:
 		species
 		assembly_version
 		busco_database
-		paths:
-			assembly_dir
-			downloads_dir
+	paths:
+		assembly_dir
+		downloads_dir
 
 rule all:
 	input:

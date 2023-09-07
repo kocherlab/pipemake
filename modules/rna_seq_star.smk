@@ -1,13 +1,13 @@
-rule config:
+module config:
 	params:
 		samples
 		species
 		assembly_version
-		paths:
-			assembly_dir
-			index_dir
-			rnaseq_fastq_dir
-			rnaseq_aligned_bam_dir
+	paths:
+		assembly_dir
+		index_dir
+		rnaseq_fastq_dir
+		rnaseq_aligned_bam_dir
 
 ruleorder: star_pair_end > star_single_end
 

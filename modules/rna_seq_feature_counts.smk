@@ -1,4 +1,4 @@
-rule config:
+module config:
 	params:
 		samples
 		species

@@ -1,12 +1,12 @@
-rule config:
+module config:
 	params:
 		species
 		assembly_version
 		annotation_version
 		busco_database
-		paths:
-			annotations_dir
-			downloads_dir
+	paths:
+		annotations_dir
+		downloads_dir
 
 rule all:
 	input:

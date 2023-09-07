@@ -45,7 +45,7 @@ class SnakePipelineIO ():
 		if 'input' not in smkm_rule_all_dict: raise Exception(f'Unable to parse rule all in: {smkm_filename}')
 
 		# Create the config dict
-		smkm_config_dict = smkm_file.returnRuleDict('config')
+		smkm_config_dict = smkm_file.returnRuleDict('config', pipeline_module_rule = True)
 
 		### CAN THIS BE OPTIONAL?
 		# Check that the config dict is valid 
@@ -100,7 +100,7 @@ class SnakeFileIO ():
 		self.filename = smk_filename
 		self._indent_style = None
 		self._exclude_rules = ['config', 'refs', 'all']
-
+		
 		# Assign the indent style
 		self._assignIndent()
 
@@ -195,8 +195,8 @@ class SnakeFileIO ():
 				# Check if within a rule block
 				elif smk_list[0]:
 
-					# Confirm the rule block
-					if smk_list[0].split(' ') == 'rule' and not smk_list[0].endswith(':'):
+					# Confirm the module block
+					if smk_list[0].split(' ')[0] != 'rule' and not smk_list[0].endswith(':'):
 						raise Exception (f'Error copying rule: {smk_list[0]}')
 
 					# Assign the rule name
@@ -204,14 +204,17 @@ class SnakeFileIO ():
 					
 					# Assign the exclusion bool
 					if rule_name in exclude_rules: within_exclusion_block = True
-					else: within_exclusion_block = False	
+					else: within_exclusion_block = False
+
+					if smk_list[0].split(' ')[0] == 'module' and within_exclusion_block:
+						raise Exception (f'Module blocks copying: {smk_list[0]}')
 
 				# Write output if not being excluded
 				if not within_exclusion_block: snakemake_output_file.write(smk_line)
 
 		logging.info(f"Copied snakemake module: {self.filename} to {out_path}")
 
-	def returnRuleDict (self, rule_name):
+	def returnRuleDict (self, rule_name, pipeline_module_rule = False):
 
 		# Create the param dict
 		param_dict = defaultdict(list)
@@ -235,7 +238,8 @@ class SnakeFileIO ():
 
 				# Check if within a rule
 				if smk_list[0]:
-					if rule_name in smk_list[0]: within_rule_block = True
+					if not pipeline_module_rule and rule_name in smk_list[0]: within_rule_block = True
+					elif pipeline_module_rule and smk_list[0].startswith('module') and rule_name in smk_list[0]: within_rule_block = True
 					elif within_rule_block: break
 					else: within_rule_block = False
 					continue
@@ -261,4 +265,4 @@ class SnakeFileIO ():
 		logging.info(f"Created param dict for rule: {rule_name} from {self.filename}")
 
 		return param_dict
-
+	

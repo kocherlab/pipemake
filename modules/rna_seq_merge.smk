@@ -1,11 +1,11 @@
-rule config:
+module config:
 	params:
 		samples
 		species
 		assembly_version
-		paths:
-			rnaseq_sorted_bam_dir
-			rnaseq_bam_dir
+	paths:
+		rnaseq_sorted_bam_dir
+		rnaseq_bam_dir
 
 rule all:
 	input:

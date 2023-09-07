@@ -1,9 +1,9 @@
-rule config:
+module config:
 	params:
 		samples
-		paths: 
-			rnaseq_aligned_bam_dir
-			rnaseq_sorted_bam_dir
+	paths: 
+		rnaseq_aligned_bam_dir
+		rnaseq_sorted_bam_dir
 
 rule all:
 	input:

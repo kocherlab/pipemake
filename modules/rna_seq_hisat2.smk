@@ -1,13 +1,13 @@
-rule config:
+module config:
 	params:
 		samples
 		species
 		assembly_version
-		paths:
-			assembly_dir
-			index_dir
-			rnaseq_fastq_dir
-			rnaseq_aligned_bam_dir
+	paths:
+		assembly_dir
+		index_dir
+		rnaseq_fastq_dir
+		rnaseq_aligned_bam_dir
 
 ruleorder: hisat2_pair_end > hisat2_single_end
 
