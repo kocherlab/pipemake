@@ -144,7 +144,7 @@ class SeqTableIO ():
 	@classmethod
 	def fromFilenameStr (cls, table_filename, sep = '\t', **kwargs):
 
-		return cls(table_dataframe = pd.read_csv(table_filename, sep = sep), **kwargs)
+		return cls(table_dataframe = pd.read_csv(table_filename, sep = sep, dtype = str).fillna(''), **kwargs)
 
 	def standardizedFiles (self, standardized_wildcard, **kwargs):
 
@@ -173,10 +173,13 @@ class SeqTableIO ():
 				# Confirm the row column (i.e. index) is a filename
 				if self._file_column not in file_col: continue
 
+				# Skip if sample filename is blank (e.g. No R2 filename)
+				if not sample_filename: continue
+
 				# Confirm the file exists
 				if not os.path.isfile(sample_filename):
 					raise IOError(f"Unable to locate file. Column: {file_col}. Filename: {sample_filename}")
-					
+
 				# Create the wilcard dict for the sample
 				file_wildcard_dict = dict([file_col.split(':')])
 				file_wildcard_dict.update(str_wildcards)
@@ -201,6 +204,9 @@ class SeqTableIO ():
 
 					# Confirm the row column (i.e. index) is a filename
 					if self._file_column not in file_col: continue
+
+					# Skip if sample filename is blank (e.g. No R2 filename)
+					if not sample_filename: continue
 
 					# Confirm the file exists
 					if not os.path.isfile(sample_filename):
