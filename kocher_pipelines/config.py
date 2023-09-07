@@ -5,7 +5,7 @@ import yaml
 from collections import defaultdict
 
 from kocher_pipelines.processIO import standardizeInput, returnSamples, returnPaths
-from kocher_pipelines.snakemakeIO import parseSnakemakefile, copySnakemakeFile, createSnakemakeFile
+from kocher_pipelines.snakemakeIO import SnakePipelineIO
 
 def loadPipelineConfigs (directory):
 
@@ -102,55 +102,27 @@ def processPipelineSetup (pipeline_setup, pipeline_args):
 
 	return process_dict
 
-def processSnakemakeModules (snakemake_modules, pipeline_dir, pipeline_args):
+def processSnakemakeModules (smkm_filenames, pipeline_dir, pipeline_args):
 
-	# Create the path of the module files
-	module_file_directory = os.path.join(pipeline_dir, 'modules')
+	# Create the module directory
+	smkm_pipeline_dir = os.path.join(pipeline_args['pipeline_config_dir'], 'modules')
+	if not os.path.exists(smkm_pipeline_dir): os.makedirs(smkm_pipeline_dir)
 
-	if len(snakemake_modules) > 1:
+	# Create the snakemake pipeline
+	with SnakePipelineIO.open(pipeline_args['snakemake_job_prefix']) as snake_pipeline:
 
-		snakemake_config = defaultdict(list)
+		# Add the module to the pipeline
+		for smkm_filename in smkm_filenames:
+			smkm_filepath = os.path.join(pipeline_dir, 'modules', smkm_filename)
+			snake_pipeline.addSnakeModule(smkm_filepath, out_dir = smkm_pipeline_dir)
 
-		# Create lists to store snakemake input and module filenames
-		snakemake_input = []
+		# Assign the pipeline config parameters
+		smkp_config_params = snake_pipeline.returnConfigParams()
 
-		# Create the module directory
-		snakemake_module_dir = os.path.join(pipeline_args['pipeline_config_dir'], 'modules')
-		if not os.path.exists(snakemake_module_dir): os.makedirs(snakemake_module_dir)
+		# Write the pipeline
+		snake_pipeline.writePipeline()
 
-		# Confirm, read, and copy the snakemake files
-		for snakemake_module in snakemake_modules:
-			snakemake_file = os.path.join(module_file_directory, snakemake_module)
-
-			# Check if the snakemake file exists
-			if not os.path.isfile(snakemake_file):
-				raise Exception(f'Unable to find snakemake file: {snakemake_file}')
-
-			# Parse the snakemake file
-			snakemake_file_config, snakemake_file_input = parseSnakemakefile(snakemake_file)
-
-			# Update the config dict
-			for _k, _v in snakemake_file_config.items():
-				for _i in _v:
-					if _i not in snakemake_config[_k]: snakemake_config[_k].append(_i)
-				
-			# Store the input of the file
-			snakemake_input.extend(snakemake_file_input)
-		
-			# Copy the snakemake file
-			copySnakemakeFile(snakemake_file, out_filename = snakemake_module, out_dir = snakemake_module_dir)
-
-		# Create the main snakefile
-		createSnakemakeFile(pipeline_args['snakemake_job_prefix'], snakemake_input, snakemake_module_dir, snakemake_modules)
-
-	else:
-
-		# Copy the snakemake file
-		snakemake_file = os.path.join(module_file_directory, snakemake_modules[0])
-		snakemake_config, _ = parseSnakemakefile(snakemake_file)
-		copySnakemakeFile(snakemake_file, out_prefix = pipeline_args['snakemake_job_prefix'], keep_blocks = True)
-
-	return snakemake_config
+	return smkp_config_params
 
 def processPipelineCmdLine (pipeline_cmd_line, pipeline_args):
 

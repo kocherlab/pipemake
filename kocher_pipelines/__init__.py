@@ -2,7 +2,7 @@ import sys
 
 # Basic Information
 __name__ = "kocher_pipelines"
-__version__ = "0.1"
+__version__ = "0.2"
 __summary__ = "Kocher Pipelines"
 __url__ = "https://github.com/kocherlab/kocher_pipelines"
 __code__ = "https://github.com/kocherlab/kocher_pipelines"

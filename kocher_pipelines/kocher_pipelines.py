@@ -204,7 +204,7 @@ def main():
 	yaml_dict = {'workdir': pipeline_args['work_dir']}
 
 	for group, config_list in snakemake_config.items():
-		if group == 'root':
+		if group == 'params':
 			for config in config_list:
 				yaml_dict[config] = pipeline_args[config.replace('-', '_')]
 		else:
