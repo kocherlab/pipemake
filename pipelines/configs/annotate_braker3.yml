@@ -1,0 +1,211 @@
+pipeline: annotate-braker3
+parser:
+  help: Annotate an assembly using BRAKER3
+  groups:
+    input_parser:
+      type: mutually_exclusive
+      args:
+        required: True
+  args:
+    rnaseq-wildcard:
+      help: "Wildcard statement to represent RNAseq FASTQs"
+      type: str
+      group: input_parser
+    rnaseq-table:
+      help: "Table with sample and FASTQs filenames"
+      type: str
+      group: input_parser
+      action: confirmFile
+    rnaseq-copy-method:
+      help: "Socifies if RNAseq FASTQs should be copied or symbolically linked."
+      choices:
+        - 'symbolic_link'
+        - 'copy'
+      default: 'symbolic_link'
+    rnaseq-standardized-wildcard:
+      help: "Standardized wildcard statement used to store RNAseq FASTQs"
+      type: str
+      default: 
+        str: "{sample}_{read}.fq.gz"
+    assembly-fasta:
+      help: "Assembly file"
+      type: str
+      required: True
+      action: confirmFile
+    hints-fasta:
+      help: "Protein hints file"
+      type: str
+      required: True
+      action: confirmFile
+    busco-database:
+      help: "Name of BUSCO database"
+      type: str
+      required: True
+    assembly-dir:
+      help: "Directory to store assembly"
+      type: str
+      default: "Assembly"
+    homology-dir:
+      help: "Directory to store hint"
+      type: str
+      default: "Homology"
+    index-dir:
+      help: "Directory to store indices"
+      type: str
+      default: "Indices"
+    downloads-dir:
+      help: "Directory to store downloads"
+      type: str
+      default: "Downlaods"
+    rnaseq-fastq-dir:
+      help: "Directory to store the FASTQs files"
+      type: str
+      default: "RNAseq/FASTQs"
+    rnaseq-bam-dir:
+      help: "Directory to store BAM files"
+      type: str
+      default: "RNAseq/BAMs"
+    rnaseq-aligned-bam-dir:
+      help: "Directory to store sorted BAM files"
+      type: str
+      default: "RNAseq/BAMs/Aligned"
+    rnaseq-sorted-bam-dir:
+      help: "Directory to store sorted BAM files"
+      type: str
+      default: 
+        str: "RNAseq/BAMs/Sorted"
+    annotations-dir:
+      help: "Directory to store annotations"
+      type: str
+      default: 
+        str: "Annotations"
+    repeatmodeler-dir:
+      help: "Directory to store RepeatModeler output"
+      type: str
+      default: "Assembly/RepeatModeler"
+    assembly-version:
+      help: "Assembly Version"
+      type: str
+      default:
+        str: "v"
+        suffix:
+          - function: jobRandomString
+    annotation-version:
+      help: "Annotation Version"
+      type: str
+      default:
+        str: "v"
+        suffix:
+          - function: jobRandomString
+    species:
+      help: "Species name"
+      type: str
+      default:
+        str: "Sp"
+        suffix:
+          - function: jobRandomString
+    work-dir:
+      help: "Assign the working directory for snakemake"
+      type: str
+      default:
+        str: "Assembly"
+        suffix:
+          - function: jobTimeStamp
+          - function: jobRandomString
+    snakemake-job-prefix:
+      help: "Assign the snakemake job prefix"
+      type: str
+      default:
+        str: "AnnotateBraker3"
+        suffix:
+          - function: jobTimeStamp
+          - function: jobRandomString
+setup:
+  rnaseq_input:
+    wildcard-method:
+      input:
+        args:
+          - "work-dir"
+          - "rnaseq-wildcard"
+          - "rnaseq-standardized-wildcard"
+          - "rnaseq-fastq-dir"
+      standardize:
+        method: "wildcard-str"
+        args:
+          wildcard_str: "{rnaseq-wildcard}"
+          standardized_filename: "{rnaseq-standardized-wildcard}"
+          out_dir: "{rnaseq-fastq-dir}"
+          work_dir: '{work-dir}'
+          copy_method: '{rnaseq_copy_method}'
+          gzipped: True
+      samples:
+        method: "wildcard-str"
+        args:
+          wildcard_str: "{rnaseq-wildcard}"
+          sample_wildcard: 'sample'
+
+    table-method:
+      input:
+        args:
+          - "work-dir"
+          - "rnaseq-table"
+          - "rnaseq-standardized-wildcard"
+          - "rnaseq-fastq-dir"
+      standardize:
+        method: "table-file"
+        args:
+          table_filename: "{rnaseq-table}"
+          standardized_filename: "{rnaseq-standardized-wildcard}"
+          out_dir: "{rnaseq-fastq-dir}"
+          work_dir: '{work-dir}'
+          copy_method: '{rnaseq_copy_method}'
+          gzipped: True
+      samples:
+        method: "table-file"
+        args:
+          table_filename: "{rnaseq-table}"
+  assembly_input:
+    file-method:
+      input:
+        args:
+          - "work-dir"
+          - "assembly-fasta"
+          - "assembly-dir"
+      standardize:
+        method: "file-str"
+        args:
+          input_filename: "{assembly-fasta}"
+          standardized_filename: "{species}_{assembly_version}.fa"
+          out_dir: "{assembly-dir}"
+          work_dir: '{work-dir}'
+          gzipped: False
+
+  hints_input:
+    file-method:
+      input:
+        args:
+          - "work-dir"
+          - "hints-fasta"
+          - "homology-dir"
+      standardize:
+        method: "file-str"
+        args:
+          input_filename: "{hints-fasta}"
+          standardized_filename: "ProteinHints.fa"
+          out_dir: "{homology-dir}"
+          work_dir: '{work-dir}'
+          gzipped: False
+
+command-line:
+  cores: 20
+  use-singularity: True
+
+snakefiles:
+  - rna_seq_hisat2
+  - rna_seq_sort
+  - rna_seq_merge
+  - repeatmasking
+  - annotate_braker3
+  - download_compleasm
+  - assembly_compleasm
+  - annotations_busco
