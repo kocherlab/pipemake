@@ -7,96 +7,96 @@ parser:
       args:
         required: True
   args:
-    rnaseq-wildcard:
-      help: "Wildcard statement to represent RNAseq FASTQs"
-      type: str
-      group: input_parser
-    rnaseq-table:
-      help: "Table with sample and FASTQs filenames"
-      type: str
-      group: input_parser
-      action: confirmFile
-    rnaseq-copy-method:
-      help: "Socifies if RNAseq FASTQs should be copied or symbolically linked."
-      choices:
-        - 'symbolic_link'
-        - 'copy'
-      default: 'symbolic_link'
-    rnaseq-standardized-wildcard:
-      help: "Standardized wildcard statement used to store RNAseq FASTQs"
-      type: str
-      default: 
-        str: "{sample}_{read}.fq.gz"
-    assembly-fasta:
-      help: "Assembly fasta"
-      type: str
-      required: True
-      action: confirmFile
-    assembly-gtf:
-      help: "Assembly GTF"
-      type: str
-      required: True
-      action: confirmFile
-    assembly-dir:
-      help: "Directory to store assembly"
-      type: str
-      default: "Assembly"
-    index-dir:
-      help: "Directory to store indices"
-      type: str
-      default: "Indices"
-    rnaseq-fastq-dir:
-      help: "Directory to store the FASTQs files"
-      type: str
-      default: "RNAseq/FASTQs"
-    rnaseq-bam-dir:
-      help: "Directory to store BAM files"
-      type: str
-      default: "RNAseq/BAMs"
-    rnaseq-aligned-bam-dir:
-      help: "Directory to store sorted BAM files"
-      type: str
-      default: "RNAseq/BAMs/Aligned"
-    rnaseq-sorted-bam-dir:
-      help: "Directory to store sorted BAM files"
-      type: str
-      default: 
-        str: "RNAseq/BAMs/Sorted"
-    rnaseq-count-dir:
-      help: "Directory to store RNAseq counts"
-      type: str
-      default: 
-        str: "RNAseq/Counts"
-    assembly-version:
-      help: "Assembly Version"
-      type: str
-      default:
-        str: "v"
-        suffix:
-          - function: jobRandomString
-    species:
-      help: "Species name"
-      type: str
-      default:
-        str: "Sp"
-        suffix:
-          - function: jobRandomString
-    work-dir:
-      help: "Assign the working directory for snakemake"
-      type: str
-      default:
-        str: "RNAseqCounts"
-        suffix:
-          - function: jobTimeStamp
-          - function: jobRandomString
-    snakemake-job-prefix:
-      help: "Assign the snakemake job prefix"
-      type: str
-      default:
-        str: "countSTAR"
-        suffix:
-          - function: jobTimeStamp
-          - function: jobRandomString
+    default:
+      rnaseq-wildcard:
+        help: "Wildcard statement to represent RNAseq FASTQs"
+        type: str
+        group: input_parser
+      rnaseq-table:
+        help: "Table with sample and FASTQs filenames"
+        type: str
+        group: input_parser
+        action: confirmFile
+      rnaseq-copy-method:
+        help: "Socifies if RNAseq FASTQs should be copied or symbolically linked."
+        choices:
+          - 'symbolic_link'
+          - 'copy'
+        default: 'symbolic_link'
+      rnaseq-standardized-wildcard:
+        help: "Standardized wildcard statement used to store RNAseq FASTQs"
+        type: str
+        default: 
+          str: "{sample}_{read}.fq.gz"
+      assembly-fasta:
+        help: "Assembly fasta"
+        type: str
+        required: True
+        action: confirmFile
+      assembly-gtf:
+        help: "Assembly GTF"
+        type: str
+        required: True
+        action: confirmFile
+      assembly-version:
+        help: "Assembly Version"
+        type: str
+        default:
+          str: "v"
+          suffix:
+            - function: jobRandomString
+      species:
+        help: "Species name"
+        type: str
+        default:
+          str: "Sp"
+          suffix:
+            - function: jobRandomString
+      work-dir:
+        help: "Assign the working directory for snakemake"
+        type: str
+        default:
+          str: "RNAseqCounts"
+          suffix:
+            - function: jobTimeStamp
+            - function: jobRandomString
+      snakemake-job-prefix:
+        help: "Assign the snakemake job prefix"
+        type: str
+        default:
+          str: "countSTAR"
+          suffix:
+            - function: jobTimeStamp
+            - function: jobRandomString
+    paths:
+      assembly-dir:
+        help: "Directory to store assembly"
+        type: str
+        default: "Assembly"
+      index-dir:
+        help: "Directory to store indices"
+        type: str
+        default: "Indices"
+      rnaseq-fastq-dir:
+        help: "Directory to store the FASTQs files"
+        type: str
+        default: "RNAseq/FASTQs"
+      rnaseq-bam-dir:
+        help: "Directory to store BAM files"
+        type: str
+        default: "RNAseq/BAMs"
+      rnaseq-aligned-bam-dir:
+        help: "Directory to store sorted BAM files"
+        type: str
+        default: "RNAseq/BAMs/Aligned"
+      rnaseq-sorted-bam-dir:
+        help: "Directory to store sorted BAM files"
+        type: str
+        default: "RNAseq/BAMs/Sorted"
+      rnaseq-count-dir:
+        help: "Directory to store RNAseq counts"
+        type: str
+        default: "RNAseq/Counts" 
 setup:
   rnaseq_input:
     wildcard-method:

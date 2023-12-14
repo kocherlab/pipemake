@@ -23,6 +23,9 @@ def loadPipelineConfigs (directory):
 	for config_filename in os.listdir(config_dir):
 		config_file = os.path.join(config_dir, config_filename)
 
+		# Confirm the path is a file
+		if not os.path.isfile(config_file): continue
+
 		with open(config_file, "r") as config_stream:
 			try: config_yaml = yaml.safe_load(config_stream)
 			except: raise Exception('Error opening YAML')

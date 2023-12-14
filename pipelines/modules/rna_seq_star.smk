@@ -23,12 +23,15 @@ rule star_genome_generate_rnaseq:
 	params:
 		index_dir=directory(os.path.join(config['paths']['index_dir'], "STAR"))
 	resources:
-		mem_b=32000000000
+		mem_mb=32000
 	singularity:
 		"docker://quay.io/biocontainers/star:2.7.8a--0"
 	threads: 4
 	shell:
-		"STAR --runThreadN {threads} --runMode genomeGenerate --genomeDir {params.index_dir} --genomeFastaFiles {input} --limitGenomeGenerateRAM {resources.mem_b} --genomeSAindexNbases 13"
+		"""
+		let "index_mem_b={resources.mem_mb} * 10**6"
+		STAR --runThreadN {threads} --runMode genomeGenerate --genomeDir {params.index_dir} --genomeFastaFiles {input} --limitGenomeGenerateRAM $index_mem_b --genomeSAindexNbases 13
+		"""
 
 rule star_single_end_rnaseq:
 	input:

@@ -8,7 +8,10 @@ class SnakePipelineIO ():
 
 		# Assign the basic arguments
 		self._smkp_prefix = smkp_prefix
-		self.smkp_filename = f'{smkp_prefix}.smk'
+
+		# Assign the snakemake pipeline filename
+		if smkp_prefix.endswith('.smk'): self.smkp_filename = smkp_prefix
+		else: self.smkp_filename = f'{smkp_prefix}.smk'
 
 		# Confirm the file exists
 		if os.path.isfile(self.smkp_filename) and not overwrite:
@@ -34,6 +37,10 @@ class SnakePipelineIO ():
 		return cls(*args, **kwargs)
 	
 	def addSnakeModule (self, smkm_filename, **kwargs):
+
+		# Assign the snakemake module filename
+		if smkm_filename.endswith('.smk'): smkm_filename = smkm_filename
+		else: smkm_filename = f'{smkm_filename}.smk'
 
 		# Open the snakemake module file
 		smkm_file = SnakeFileIO.open(smkm_filename)
@@ -155,7 +162,7 @@ class SnakeFileIO ():
 						raise Exception('Unable to assign indent style')
 
 				# Check if within first rule block 
-				if smk_line.startswith('rule'): in_rule_block = True
+				if smk_line.split(' ')[0] == 'rule': in_rule_block = True
 			
 	@classmethod
 	def open (cls, *args, **kwargs):
@@ -170,7 +177,7 @@ class SnakeFileIO ():
 		within_exclusion_block = False
 
 		if not out_prefix and not out_filename:
-			raise Exception(f'No output method given for snakefile')
+			raise Exception(f'No output method given for snakefile: {self.filename}')
 
 		# Create the output file
 		if out_prefix: out_path = f'{out_prefix}.smk'
@@ -210,7 +217,10 @@ class SnakeFileIO ():
 						raise Exception (f'Module blocks copying: {smk_list[0]}')
 
 				# Write output if not being excluded
-				if not within_exclusion_block: snakemake_output_file.write(smk_line)
+				if not within_exclusion_block: 
+					snakemake_output_file.write(smk_line)
+					#print(smk_line.strip())
+				
 
 		logging.info(f"Copied snakemake module: {self.filename} to {out_path}")
 

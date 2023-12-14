@@ -9,6 +9,7 @@ import logging
 import argparse
 import datetime
 
+from pydoc import locate
 from collections import defaultdict
 
 from kocher_pipelines.logger import *
@@ -79,11 +80,26 @@ def pipeline_parser (config_parser_pipelines):
 	# Assign the arguments for each pipeline
 	for pipeline_name, pipeline_params in config_parser_pipelines.items():
 
-		# Create the sub parser and groups
+		# Create the subparser
 		pipeline_subparser = pipeline_subparsers.add_parser(pipeline_name, help = pipeline_params['help'], add_help = False)
+
+		# Add the argument categories: required, optional, and config-assigned
 		pipeline_required = pipeline_subparser.add_argument_group(f"{pipeline_name} required arguments")
 		pipeline_optional = pipeline_subparser.add_argument_group(f"{pipeline_name} optional arguments")
-		pipeline_groups = {}
+		pipeline_arg_categories = {}
+
+		# Add argument groups, for special cases such as mutually exclusive arguments
+		pipeline_arg_groups = {}
+
+		# Create additional categories, if needed
+		for pipeline_arg_category in pipeline_params['args']:
+
+			# Skip the default subparser, as args are stored in required and optional
+			if pipeline_arg_category == 'default': continue
+
+			# Create the subparser if it doesn't exist
+			if pipeline_arg_category not in pipeline_arg_categories:
+				pipeline_arg_categories[pipeline_arg_category] = pipeline_subparser.add_argument_group(f"{pipeline_name} {pipeline_arg_category}")
 
 		# Check for pipeline groups
 		if 'groups' in pipeline_params:
@@ -95,63 +111,83 @@ def pipeline_parser (config_parser_pipelines):
 				if 'type' not in group_info:
 					raise Exception(f'Cannot create group {pipeline_group}. No type given.')
 
-				if 'required' in group_info['args']: group_parser = pipeline_required
+				# Check if a category was specified, then assign the group to the category
+				if 'category' in group_info['args']:
+					if group_info['args']['category'] not in pipeline_arg_categories:
+						raise Exception(f'Cannot create group {pipeline_group}. Category {group_info["args"]["category"]} does not exist.')
+					group_parser = pipeline_arg_categories[group_info['args']['category']]
+
+				# Assign to required if no category was specified and the group is required
+				elif 'required' in group_info['args']: group_parser = pipeline_required
+
+				# Assign to optional if no category was specified and the group is optional
 				else: group_parser = pipeline_optional
 
-				# Assign the group subparser
+				# Check if the group type is mutually exclusive, then add the group
 				if group_info['type'] == 'mutually_exclusive':
+					pipeline_arg_groups[pipeline_group] = group_parser.add_mutually_exclusive_group(**group_info['args'])
 
-					pipeline_groups[pipeline_group] = group_parser.add_mutually_exclusive_group(**group_info['args'])
+				# Raise exception if group type is not supported
+				else: raise Exception(f'Group type not supported: {group_info["type"]}')
 
 		# Loop the pipeline arguments
-		for pipeline_arg, arg_params in pipeline_params['args'].items():
+		for pipeline_arg_category, pipeline_args in pipeline_params['args'].items():
+			for pipeline_arg, arg_params in pipeline_args.items():
+				
+				'''
+				1. Store the argument in the appropriate parser
+					a) If the argument is in a special group, add it to the group
+					b) If the argument is in a defined category, add it to the category
+					c) If the argument is required, add it to the required parser
+					d) Otherwise, add it to the optional parser
+				'''
+				if 'group' in arg_params:
+					argument_parser = pipeline_arg_groups[arg_params['group']]
+					del arg_params['group']
+				elif pipeline_arg_category != 'default': 
+					argument_parser = pipeline_arg_categories[pipeline_arg_category]
+				elif 'required' in arg_params: argument_parser = pipeline_required
+				else: argument_parser = pipeline_optional
+				
+				# Set the datatypes
+				if 'type' in arg_params: 
+					try: arg_params['type'] = locate(arg_params['type'])
+					except: raise Exception(f"Unable to locate type: {arg_params['type']}")
+	
+				# Configure the action parameter, if specified
+				if 'action' in arg_params:
+					if arg_params['action'] == 'confirmDir': arg_params['action'] = confirmDir()
+					elif arg_params['action'] == 'confirmFile': arg_params['action'] = confirmFile()
 
-			# Assign the argument to a group
-			if 'group' in arg_params:
-				pipeline_group = pipeline_groups[arg_params['group']]
-				del arg_params['group']
-			elif 'required' in arg_params: pipeline_group = pipeline_required
-			else: pipeline_group = pipeline_optional
-			
-			# Set the datatypes
-			if 'type' in arg_params: 
-				if arg_params['type'] == 'str': arg_params['type'] = str
-				else: print(arg_params['type'])
+				# Configure the default parameter, if specified
+				if 'default' in arg_params and not isinstance(arg_params['default'], str):
+					default_str = arg_params['default']['str']
+					if 'suffix' in arg_params['default']:
+						if isinstance(arg_params['default']['suffix'], str): arg_params['default']['suffix'] = [arg_params['default']['suffix']]
+						for suffix in arg_params['default']['suffix']:
 
-			# Configure the action parameter
-			if 'action' in arg_params:
-				if arg_params['action'] == 'confirmDir': arg_params['action'] = confirmDir()
-				elif arg_params['action'] == 'confirmFile': arg_params['action'] = confirmFile()
+							# Add underscores if needed
+							if default_str: default_str += '_'
 
-			# Configure the default parameter
-			if 'default' in arg_params and not isinstance(arg_params['default'], str):
-				default_str = arg_params['default']['str']
-				if 'suffix' in arg_params['default']:
-					if isinstance(arg_params['default']['suffix'], str): arg_params['default']['suffix'] = [arg_params['default']['suffix']]
-					for suffix in arg_params['default']['suffix']:
+							# Process suffix strings
+							if isinstance(suffix, str): default_str += suffix
 
-						# Add underscores if needed
-						if default_str: default_str += '_'
+							# Process suffix dicts
+							elif isinstance(suffix, dict):
 
-						# Process suffix strings
-						if isinstance(suffix, str): default_str += suffix
+								# Convert the suffix dict to lowercase keys
+								suffix_dict =  {_k.lower():_v for _k, _v in suffix.items()}
 
-						# Process suffix dicts
-						elif isinstance(suffix, dict):
+								if 'function' not in suffix_dict: raise Exception(f"Suffix dict not supported: {suffix_dict}")
 
-							# Convert the suffix dict to lowercase keys
-							suffix_dict =  {_k.lower():_v for _k, _v in suffix.items()}
+								if suffix['function'] == 'jobTimeStamp':  default_str += jobTimeStamp()
+								elif suffix['function'] == 'jobRandomString':  default_str += jobRandomString()
+								else: raise Exception(f"Function not supported: {suffix['function']}")
+							
+					arg_params['default'] = default_str
 
-							if 'function' not in suffix_dict: raise Exception(f"Suffix dict not supported: {suffix_dict}")
-
-							if suffix['function'] == 'jobTimeStamp':  default_str += jobTimeStamp()
-							elif suffix['function'] == 'jobRandomString':  default_str += jobRandomString()
-							else: raise Exception(f"Function not supported: {suffix['function']}")
-						
-				arg_params['default'] = default_str
-
-			# Assign the argument
-			pipeline_group.add_argument(f'--{pipeline_arg}', **arg_params)
+				# Assign the argument to the parser
+				argument_parser.add_argument(f'--{pipeline_arg}', **arg_params)
 
 		# Add the help argument back, but at the end of the list
 		pipeline_optional.add_argument('-h', '--help', action = 'help', help = 'show this help message and exit')
