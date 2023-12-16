@@ -1,17 +1,22 @@
 import os
+import yaml
 import logging
 
 from collections import defaultdict
 
+class MyDumper(yaml.Dumper):
+	def increase_indent(self, flow=False, indentless=False):
+		return super(MyDumper, self).increase_indent(flow, False)
+
 class SnakePipelineIO (): 
-	def __init__ (self, smkp_prefix, indent_style = '\t', overwrite = True, **kwargs):
+	def __init__ (self, snakemake_job_prefix = '', pipeline_storage_dir  = '', pipeline_config_dir = '', work_dir = '', indent_style = '\t', overwrite = True, **kwargs):
 
 		# Assign the basic arguments
-		self._smkp_prefix = smkp_prefix
+		self._snakemake_job_prefix = snakemake_job_prefix
 
 		# Assign the snakemake pipeline filename
-		if smkp_prefix.endswith('.smk'): self.smkp_filename = smkp_prefix
-		else: self.smkp_filename = f'{smkp_prefix}.smk'
+		if snakemake_job_prefix.endswith('.smk'): self.smkp_filename = snakemake_job_prefix
+		else: self.smkp_filename = f'{snakemake_job_prefix}.smk'
 
 		# Confirm the file exists
 		if os.path.isfile(self.smkp_filename) and not overwrite:
@@ -21,10 +26,22 @@ class SnakePipelineIO ():
 		self._pipe_file = open(self.smkp_filename, 'w')
 		self._indent_style = indent_style
 
+		# Assign the module storage directory
+		self._module_storage_dir = os.path.join(pipeline_storage_dir, 'modules')
+		if not os.path.exists(self._module_storage_dir): os.makedirs(self._module_storage_dir)
+
+		# Assign the module config directory
+		self._module_config_dir = os.path.join(pipeline_config_dir, 'modules')
+		if not os.path.exists(self._module_config_dir): os.makedirs(self._module_config_dir)
+
+		# Assign the work directory
+		self._work_dir = work_dir
+		
 		# Create arguments to populate
 		self._module_filenames = []
 		self._all_input = []
 		self._config_params = defaultdict(list)
+		self._resource_params = defaultdict(lambda: defaultdict(str))
 
 	def __enter__ (self):
 		return self
@@ -35,24 +52,32 @@ class SnakePipelineIO ():
 	@classmethod
 	def open (cls, *args, **kwargs):
 		return cls(*args, **kwargs)
-	
+
 	def addSnakeModule (self, smkm_filename, **kwargs):
 
 		# Assign the snakemake module filename
-		if smkm_filename.endswith('.smk'): smkm_filename = smkm_filename
-		else: smkm_filename = f'{smkm_filename}.smk'
+		if not smkm_filename.endswith('.smk'): smkm_filename = f'{smkm_filename}.smk'
+
+		# Create the snakemake module filepath
+		smkm_filepath = os.path.join(self._module_storage_dir, smkm_filename)
+
+		if not os.path.isfile(smkm_filepath):
+			raise IOError (f'Unable to open: {smkm_filepath}. Please confirm the file exists.')
 
 		# Open the snakemake module file
-		smkm_file = SnakeFileIO.open(smkm_filename)
+		smkm_file = SnakeFileIO.open(smkm_filepath)
 
 		# Create the rule dict
-		smkm_rule_all_dict = smkm_file.returnRuleDict('all')
+		smkm_rule_all_dict = smkm_file.returnBlockDict('all')
 
 		# Check that the rule all dict is valid
 		if 'input' not in smkm_rule_all_dict: raise Exception(f'Unable to parse rule all in: {smkm_filename}')
 
 		# Create the config dict
-		smkm_config_dict = smkm_file.returnRuleDict('config', pipeline_module_rule = True)
+		smkm_config_dict = smkm_file.returnBlockDict('config', pipeline_module_block = True)
+
+		# Create the resource dict
+		smkm_resource_dict = smkm_file.returnBlockDict('resources', pipeline_module_block = True, dict_w_defaults = True)
 
 		### CAN THIS BE OPTIONAL?
 		# Check that the config dict is valid 
@@ -62,21 +87,39 @@ class SnakePipelineIO ():
 		self._module_filenames.append(smkm_filename)
 		self._all_input.extend(smkm_rule_all_dict['input'])
 		for _a, _v in smkm_config_dict.items(): self._config_params[_a].extend(_v)
+		for _a, _v in smkm_resource_dict.items(): self._resource_params[_a].update(_v)
+
+		print(self._resource_params)
 
 		# Copy the pipeline module
-		smkm_file.copy(out_filename = os.path.basename(smkm_filename), **kwargs)
+		smkm_file.copy(out_filename = os.path.basename(smkm_filename), out_dir = self._module_config_dir, **kwargs)
 
 		logging.info(f"Module added to pipeline: {smkm_filename}")
 
-	def returnConfigParams (self):
+	def writeConfig (self, pipeline_args):
 		
-		# Return the config parameters
-		return self._config_params
+		# Build YAML
+		yaml_dict = {'workdir': self._work_dir}
+
+		for group, config_list in self._config_params.items():
+			if group == 'params':
+				for config in config_list:
+					yaml_dict[config] = pipeline_args[config.replace('-', '_')]
+			else:
+				group_dict = {}
+				for config in config_list:
+					group_dict[config] = pipeline_args[config.replace('-', '_')]
+				yaml_dict[group] = group_dict
+
+		# Create the YAML file
+		yaml_file = open(f"{self._snakemake_job_prefix}.yml", 'w')
+		yaml_file.write(yaml.dump(yaml_dict, Dumper = MyDumper, sort_keys = False))
+		yaml_file.close()
 
 	def writePipeline (self):
 
 		# Assign the config file and working directory
-		self._pipe_file.write(f"configfile: '{self._smkp_prefix}.yml'\n\n")
+		self._pipe_file.write(f"configfile: '{self._snakemake_job_prefix}.yml'\n\n")
 		self._pipe_file.write("workdir: config['workdir']\n\n")
 
 		# Create the rule all block
@@ -106,7 +149,7 @@ class SnakeFileIO ():
 		# Assign the basic arguments
 		self.filename = smk_filename
 		self._indent_style = None
-		self._exclude_rules = ['config', 'refs', 'all']
+		self._exclude_rules = ['all']
 		
 		# Assign the indent style
 		self._assignIndent()
@@ -196,38 +239,41 @@ class SnakeFileIO ():
 				# Split the line by the indent style (rule, attribute, param)
 				smk_list = smk_line.rstrip().split(self._indent_style)
 
-				# Include non-rule functions
-				if smk_list[0] and smk_list[0].split(' ')[0] != 'rule': within_exclusion_block = False
+				# Assign the class name
+				class_name = smk_list[0].split(' ')[0]
 
+				# Include non-rule functions
+				if smk_list[0] and class_name not in ['rule', 'module']: within_exclusion_block = False
+	
 				# Check if within a rule block
 				elif smk_list[0]:
 
 					# Confirm the module block
-					if smk_list[0].split(' ')[0] != 'rule' and not smk_list[0].endswith(':'):
+					if class_name != 'rule' and not smk_list[0].endswith(':'):
 						raise Exception (f'Error copying rule: {smk_list[0]}')
 
 					# Assign the rule name
-					rule_name = smk_list[0].split(' ')[1].strip(':')
+					block_name = smk_list[0].split(' ')[1].strip(':')
 					
 					# Assign the exclusion bool
-					if rule_name in exclude_rules: within_exclusion_block = True
+					if block_name in exclude_rules: within_exclusion_block = True
+					elif class_name == 'module': within_exclusion_block = True
 					else: within_exclusion_block = False
 
-					if smk_list[0].split(' ')[0] == 'module' and within_exclusion_block:
-						raise Exception (f'Module blocks copying: {smk_list[0]}')
+					if class_name == 'module' and not within_exclusion_block:
+						raise Exception (f'Module copy error: {smk_list[0]}')
 
 				# Write output if not being excluded
 				if not within_exclusion_block: 
 					snakemake_output_file.write(smk_line)
-					#print(smk_line.strip())
-				
 
 		logging.info(f"Copied snakemake module: {self.filename} to {out_path}")
 
-	def returnRuleDict (self, rule_name, pipeline_module_rule = False):
+	def returnBlockDict (self, block_name, pipeline_module_block = False, dict_w_defaults = False):
 
 		# Create the param dict
-		param_dict = defaultdict(list)
+		if not dict_w_defaults: param_dict = defaultdict(list)
+		else: param_dict = defaultdict(lambda: defaultdict(str))
 
 		# Create str and int for param assignment check
 		param_attribute_name = ''
@@ -248,8 +294,8 @@ class SnakeFileIO ():
 
 				# Check if within a rule
 				if smk_list[0]:
-					if not pipeline_module_rule and rule_name in smk_list[0]: within_rule_block = True
-					elif pipeline_module_rule and smk_list[0].startswith('module') and rule_name in smk_list[0]: within_rule_block = True
+					if not pipeline_module_block and block_name in smk_list[0]: within_rule_block = True
+					elif pipeline_module_block and smk_list[0].startswith('module') and block_name in smk_list[0]: within_rule_block = True
 					elif within_rule_block: break
 					else: within_rule_block = False
 					continue
@@ -260,19 +306,35 @@ class SnakeFileIO ():
 					# Loop the snakefile line by level
 					for smk_level, smk_item in enumerate(smk_list):
 						if not smk_item: continue
-						
+
 						# Assign the param attribute
 						if smk_item.endswith(':'):
-							param_attribute_name = smk_item[:-1]
+							param_attribute_name = smk_item[:-1].strip()
 							param_attribute_level = smk_level
 
 						# Assign the param
 						else:
 							if (smk_level - param_attribute_level) != 1:
 								raise Exception (f'Parameter assignment error')
-							param_dict[param_attribute_name].append(smk_item)
 
-		logging.info(f"Created param dict for rule: {rule_name} from {self.filename}")
+							# Assign the default value, if possible
+							if ':' not in smk_item: smk_value = None
+							else: 
+								smk_item, smk_value = smk_item.split(':')
+								smk_item = smk_item.strip()
+								smk_value = smk_value.strip()
+
+							# Check if default values are expected and assigned
+							if dict_w_defaults and not smk_value:
+								raise Exception (f'No default value assigned for: {param_attribute_name}: {smk_item}')
+							
+							# Assign the param to the dict
+							if dict_w_defaults: param_dict[param_attribute_name][smk_item] = smk_value
+							else: param_dict[param_attribute_name].append(smk_item)
+
+							
+
+		logging.info(f"Created param dict for rule: {block_name} from {self.filename}")
 
 		return param_dict
 	

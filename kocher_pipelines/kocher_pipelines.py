@@ -13,11 +13,8 @@ from pydoc import locate
 from collections import defaultdict
 
 from kocher_pipelines.logger import *
-from kocher_pipelines.config import loadPipelineConfigs, processPipelineSetup, processPipelineCmdLine, processSnakemakeModules
-
-class MyDumper(yaml.Dumper):
-	def increase_indent(self, flow=False, indentless=False):
-		return super(MyDumper, self).increase_indent(flow, False)
+from kocher_pipelines.config import *
+from kocher_pipelines.snakemakeIO import SnakePipelineIO
 
 def jobRandomString (num_chars = 4):
 	global random_string
@@ -144,7 +141,7 @@ def pipeline_parser (config_parser_pipelines):
 				if 'group' in arg_params:
 					argument_parser = pipeline_arg_groups[arg_params['group']]
 					del arg_params['group']
-				elif pipeline_arg_category != 'default': 
+				elif pipeline_arg_category != 'params': 
 					argument_parser = pipeline_arg_categories[pipeline_arg_category]
 				elif 'required' in arg_params: argument_parser = pipeline_required
 				else: argument_parser = pipeline_optional
@@ -159,7 +156,7 @@ def pipeline_parser (config_parser_pipelines):
 					if arg_params['action'] == 'confirmDir': arg_params['action'] = confirmDir()
 					elif arg_params['action'] == 'confirmFile': arg_params['action'] = confirmFile()
 
-				# Configure the default parameter, if specified
+				# Configure the default params, if specified
 				if 'default' in arg_params and not isinstance(arg_params['default'], str):
 					default_str = arg_params['default']['str']
 					if 'suffix' in arg_params['default']:
@@ -201,17 +198,20 @@ time_stamp = None
 def main():
 
 	# Assign the pipeline directory
-	if os.environ.get('KPDIR'): pipeline_dir = os.environ.get('KPDIR')
-	else: pipeline_dir = 'Snakemake'
+	if os.environ.get('KPDIR'): pipeline_storage_dir = os.environ.get('KPDIR')
+	else: pipeline_storage_dir = 'Snakemake'
 
 	# Confirm the pipeline directory exists
-	if not os.path.isdir(pipeline_dir): raise Exception(f'Unable to find pipeline directory: {pipeline_dir}')
+	if not os.path.isdir(pipeline_storage_dir): raise Exception(f'Unable to find pipeline directory: {pipeline_storage_dir}')
 
-	# Loads the cofigs
-	pipeline_config_args, pipeline_setup, pipeline_cmd_line, pipeline_snakefiles = loadPipelineConfigs(pipeline_dir)
+	# Loads the configs
+	pipeline_config_args, pipeline_setup, pipeline_cmd_line, pipeline_snakefiles = loadPipelineConfigs(pipeline_storage_dir)
 
 	# Parse the aguments from the configs
 	pipeline_args = pipeline_parser(pipeline_config_args)
+
+	# Update the pipeline args with the pipeline directory
+	pipeline_args['pipeline_storage_dir'] = pipeline_storage_dir
 
 	# Check that a pipeline was assigned
 	if not pipeline_args['pipeline']: raise Exception(f'No pipeline specified')
@@ -233,26 +233,21 @@ def main():
 	# Update the pipeline args if the setup created new args
 	if setup_arg_dict: pipeline_args.update(setup_arg_dict)
 
-	# Process the snakemake modules
-	snakemake_config = processSnakemakeModules(pipeline_snakefiles[pipeline_args['pipeline']], pipeline_dir, pipeline_args)
+	# Create the snakemake pipeline
+	snakemake_pipeline = SnakePipelineIO.open(**pipeline_args)
 
-	# Build YAML
-	yaml_dict = {'workdir': pipeline_args['work_dir']}
+	# Add the snakemake modules to the pipeline
+	for smkm_filename in pipeline_snakefiles[pipeline_args['pipeline']]:
+		snakemake_pipeline.addSnakeModule(smkm_filename)
 
-	for group, config_list in snakemake_config.items():
-		if group == 'params':
-			for config in config_list:
-				yaml_dict[config] = pipeline_args[config.replace('-', '_')]
-		else:
-			group_dict = {}
-			for config in config_list:
-				group_dict[config] = pipeline_args[config.replace('-', '_')]
-			yaml_dict[group] = group_dict
+	# Create the snakemake config file
+	snakemake_pipeline.writeConfig(pipeline_args)
 
-	# Create the YAML file
-	yaml_file = open(f"{pipeline_args['snakemake_job_prefix']}.yml", 'w')
-	yaml_file.write(yaml.dump(yaml_dict, Dumper = MyDumper, sort_keys = False))
-	yaml_file.close()
+	# Create the snakemake piepline file
+	snakemake_pipeline.writePipeline()
+
+	# Close the snakemake pipeline
+	snakemake_pipeline.close()
 
 	# Create the command line
 	print(processPipelineCmdLine(pipeline_cmd_line[pipeline_args['pipeline']], pipeline_args))

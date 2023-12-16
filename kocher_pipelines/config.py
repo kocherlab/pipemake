@@ -105,28 +105,6 @@ def processPipelineSetup (pipeline_setup, pipeline_args):
 
 	return process_dict
 
-def processSnakemakeModules (smkm_filenames, pipeline_dir, pipeline_args):
-
-	# Create the module directory
-	smkm_pipeline_dir = os.path.join(pipeline_args['pipeline_config_dir'], 'modules')
-	if not os.path.exists(smkm_pipeline_dir): os.makedirs(smkm_pipeline_dir)
-
-	# Create the snakemake pipeline
-	with SnakePipelineIO.open(pipeline_args['snakemake_job_prefix']) as snake_pipeline:
-
-		# Add the module to the pipeline
-		for smkm_filename in smkm_filenames:
-			smkm_filepath = os.path.join(pipeline_dir, 'modules', smkm_filename)
-			snake_pipeline.addSnakeModule(smkm_filepath, out_dir = smkm_pipeline_dir)
-
-		# Assign the pipeline config parameters
-		smkp_config_params = snake_pipeline.returnConfigParams()
-
-		# Write the pipeline
-		snake_pipeline.writePipeline()
-
-	return smkp_config_params
-
 def processPipelineCmdLine (pipeline_cmd_line, pipeline_args):
 
 	# Create list to store the command line arguments
