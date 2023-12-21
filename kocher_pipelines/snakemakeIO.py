@@ -4,12 +4,8 @@ import logging
 
 from collections import defaultdict
 
-class MyDumper(yaml.Dumper):
-	def increase_indent(self, flow=False, indentless=False):
-		return super(MyDumper, self).increase_indent(flow, False)
-
 class SnakePipelineIO (): 
-	def __init__ (self, snakemake_job_prefix = '', pipeline_storage_dir  = '', pipeline_config_dir = '', work_dir = '', indent_style = '\t', overwrite = True, **kwargs):
+	def __init__ (self, snakemake_job_prefix = '', pipeline_storage_dir  = '', pipeline_config_dir = '', work_dir = '', resource_yml = None, scale_threads = 0, scale_mem = 0, indent_style = '\t', overwrite = True, **kwargs):
 
 		# Assign the basic arguments
 		self._snakemake_job_prefix = snakemake_job_prefix
@@ -24,6 +20,10 @@ class SnakePipelineIO ():
 	
 		# Assign the basic arguments
 		self._pipe_file = open(self.smkp_filename, 'w')
+		self._resource_yml = resource_yml
+		self._scale_threads = scale_threads
+		self._scale_mem = scale_mem
+		self._mem_types = ['mem_b', 'mem_kb', 'mem_mb', 'mem_gb', 'mem_tb', 'mem_pb', 'mem_kib', 'mem_mib', 'mem_gib', 'mem_tib', 'mem_pib']
 		self._indent_style = indent_style
 
 		# Assign the module storage directory
@@ -86,10 +86,16 @@ class SnakePipelineIO ():
 		# Update the pipeline with the module
 		self._module_filenames.append(smkm_filename)
 		self._all_input.extend(smkm_rule_all_dict['input'])
+		
+		# Create the config dict
 		for _a, _v in smkm_config_dict.items(): self._config_params[_a].extend(_v)
-		for _a, _v in smkm_resource_dict.items(): self._resource_params[_a].update(_v)
-
-		print(self._resource_params)
+		
+		# Create and scale the resource dict
+		for _r, _adict in smkm_resource_dict.items():
+			for _a, _v in _adict.items():
+				if _a == 'threads' and self._scale_threads: _v = self._scaler(_v, self._scale_threads)
+				elif 'mem_' in _a and _a.lower() in self._mem_types and self._scale_mem: _v = self._scaler(_v, self._scale_mem)
+				self._resource_params[_r][_a] = _v
 
 		# Copy the pipeline module
 		smkm_file.copy(out_filename = os.path.basename(smkm_filename), out_dir = self._module_config_dir, **kwargs)
@@ -98,29 +104,44 @@ class SnakePipelineIO ():
 
 	def writeConfig (self, pipeline_args):
 		
-		# Build YAML
-		yaml_dict = {'workdir': self._work_dir}
+		# Create yml dicts
+		yml_config_dict = {'workdir': self._work_dir}
+		yml_resource_dict = {'resources': {}}
 
+		# Populate the config yml dict with the pipeline args
 		for group, config_list in self._config_params.items():
 			if group == 'params':
 				for config in config_list:
-					yaml_dict[config] = pipeline_args[config.replace('-', '_')]
+					yml_config_dict[config] = pipeline_args[config.replace('-', '_')]
 			else:
 				group_dict = {}
 				for config in config_list:
 					group_dict[config] = pipeline_args[config.replace('-', '_')]
-				yaml_dict[group] = group_dict
+				yml_config_dict[group] = group_dict
 
-		# Create the YAML file
-		yaml_file = open(f"{self._snakemake_job_prefix}.yml", 'w')
-		yaml_file.write(yaml.dump(yaml_dict, Dumper = MyDumper, sort_keys = False))
-		yaml_file.close()
+		# Populate the resource yml dict
+		for rule_name, rule_resource_dict in self._resource_params.items():
+			if not rule_resource_dict: continue
+
+			# Create the rule resource dict
+			yml_resource_dict['resources'][rule_name] = {}
+
+			# Populate the rule resource dict
+			for resource_name, resource_value in rule_resource_dict.items():
+				yml_resource_dict['resources'][rule_name][resource_name] = resource_value
+
+		# Check if the resource yml should be a separate file
+		if not self._resource_yml: yml_config_dict.update(yml_resource_dict)
+		else: self._createYml(yml_resource_dict, f"{self._snakemake_job_prefix}.resources.yml")
+
+		self._createYml(yml_config_dict, f"{self._snakemake_job_prefix}.yml")
 
 	def writePipeline (self):
 
-		# Assign the config file and working directory
-		self._pipe_file.write(f"configfile: '{self._snakemake_job_prefix}.yml'\n\n")
-		self._pipe_file.write("workdir: config['workdir']\n\n")
+		# Assign the config file(s) and working directory
+		self._pipe_file.write(f"configfile: '{self._snakemake_job_prefix}.yml'\n")
+		if self._resource_yml: self._pipe_file.write(f"configfile: '{self._snakemake_job_prefix}.resources.yml'\n")
+		self._pipe_file.write("\nworkdir: config['workdir']\n\n")
 
 		# Create the rule all block
 		self._pipe_file.write('rule all:\n')
@@ -139,6 +160,30 @@ class SnakePipelineIO ():
 	def close(self):
 		self._pipe_file.close()
 	
+	@staticmethod
+	def _scaler (value, scaler, value_type = float, output_type = int, **kwargs):
+
+		# Confirm a scaler was given
+		if not scaler: raise Exception(f'No scaler given for: {value}')
+
+		# Convert the value to the correct type
+		try: value = value_type(value)
+		except: raise Exception(f'Unable to convert value to type: {value}')
+
+		# Scale and return the input
+		return output_type(value * scaler)
+
+	@staticmethod
+	def _createYml (yml_dict, yml_filename, **kwargs):
+
+		class MyDumper(yaml.Dumper):
+			def increase_indent(self, flow=False, indentless=False):
+				return super(MyDumper, self).increase_indent(flow, False)
+
+		yml_file = open(yml_filename, 'w')
+		yml_file.write(yaml.dump(yml_dict, Dumper = MyDumper, sort_keys = False))
+		yml_file.close()
+		
 class SnakeFileIO ():
 	def __init__ (self, smk_filename, **kwargs):
 
@@ -285,7 +330,7 @@ class SnakeFileIO ():
 		# Parse the snakefile
 		with open(self.filename) as smk_file:
 			for smk_line in smk_file:
-				
+
 				# Skip blank lines
 				if not smk_line.strip(): continue
 
@@ -299,10 +344,10 @@ class SnakeFileIO ():
 					elif within_rule_block: break
 					else: within_rule_block = False
 					continue
-				
+
 				# Check if within the config block
 				if within_rule_block:
-					
+
 					# Loop the snakefile line by level
 					for smk_level, smk_item in enumerate(smk_list):
 						if not smk_item: continue
@@ -331,8 +376,6 @@ class SnakeFileIO ():
 							# Assign the param to the dict
 							if dict_w_defaults: param_dict[param_attribute_name][smk_item] = smk_value
 							else: param_dict[param_attribute_name].append(smk_item)
-
-							
 
 		logging.info(f"Created param dict for rule: {block_name} from {self.filename}")
 

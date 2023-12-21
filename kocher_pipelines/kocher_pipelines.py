@@ -69,8 +69,7 @@ def pipeline_parser (config_parser_pipelines):
 	# Create the pipeline selection parser
 	pipeline_parser = MyParser(formatter_class = SubcommandHelpFormatter)
 	pipeline_parser._positionals.title = "Pipeline selection argument options (positional)"
-	#pipeline_parser.add_argument('--singularity-dir', help = 'Assign different directory of singularity images', type = str, default = '/Genomics/argo/users/aewebb/.local/images/')
-	
+		
 	# Create the subparsers
 	pipeline_subparsers = pipeline_parser.add_subparsers(dest = 'pipeline', required = True)
 
@@ -186,7 +185,11 @@ def pipeline_parser (config_parser_pipelines):
 				# Assign the argument to the parser
 				argument_parser.add_argument(f'--{pipeline_arg}', **arg_params)
 
-		# Add the help argument back, but at the end of the list
+		# Add the common optional arguments, but at the end of the list
+		pipeline_optional.add_argument('--scale-threads', help = 'Scale the threads for each task', type = float, default = 1.0)
+		pipeline_optional.add_argument('--scale-mem', help = 'Scale the memory (RAM) for each task', type = float, default = 1.0)
+		pipeline_optional.add_argument('--resource-yml', help = 'Create a seperate resource yaml', action = 'store_true')
+		pipeline_optional.add_argument('--singularity-dir', help = 'Assign different directory of singularity images', type = str, default = '/Genomics/argo/users/aewebb/.local/images/')
 		pipeline_optional.add_argument('-h', '--help', action = 'help', help = 'show this help message and exit')
 
 	return vars(pipeline_parser.parse_args())
