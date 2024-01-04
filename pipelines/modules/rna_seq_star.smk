@@ -73,7 +73,10 @@ rule star_pair_end_rnaseq:
 		bam_prefix=os.path.join(config['paths']['rnaseq_aligned_bam_dir'], "{sample}.")
 	singularity:
 		"docker://quay.io/biocontainers/star:2.7.8a--0"
-	threads: config['resources']['star_pair_end_rnaseq']['threads']
+	threads: 12
+	resources:
+		mem_mb=32000,
+		mem_xb=lambda wc, input: max(2.5 * input.size_mb, resources['mem_yb']: {300})
 	shell:
 		"STAR --runThreadN {threads} --runMode alignReads --genomeDir {params.index_dir} --outSAMtype BAM Unsorted --outFileNamePrefix {params.bam_prefix} --readFilesCommand zcat --readFilesIn {input.r1_reads} {input.r2_reads} && "
 		"mv {params.bam_prefix}.Aligned.out.bam {params.bam_prefix}.Aligned.bam"
