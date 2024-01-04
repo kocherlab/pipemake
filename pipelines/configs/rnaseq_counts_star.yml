@@ -7,7 +7,7 @@ parser:
       args:
         required: True
   args:
-    default:
+    params:
       rnaseq-wildcard:
         help: "Wildcard statement to represent RNAseq FASTQs"
         type: str
