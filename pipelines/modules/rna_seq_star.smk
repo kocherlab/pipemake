@@ -1,24 +1,3 @@
-module config:
-	params:
-		samples
-		species
-		assembly_version
-	paths:
-		assembly_dir
-		index_dir
-		rnaseq_fastq_dir
-		rnaseq_aligned_bam_dir
-module resources:
-	star_genome_generate_rnaseq:
-		threads: 4
-		mem_mb: 32000
-	star_single_end_rnaseq:
-		threads: 4
-	star_pair_end_rnaseq:
-		threads: 4
-
-		
-
 ruleorder: star_pair_end > star_single_end
 
 rule all:
@@ -33,10 +12,10 @@ rule star_genome_generate_rnaseq:
 	params:
 		index_dir=directory(os.path.join(config['paths']['index_dir'], "STAR"))
 	resources:
-		mem_mb=config['resources']['star_genome_generate_rnaseq']['mem_mb']
+		mem_mb=3200
 	singularity:
 		"docker://quay.io/biocontainers/star:2.7.8a--0"
-	threads: config['resources']['star_genome_generate_rnaseq']['threads]
+	threads: 12
 	shell:
 		"""
 		let "index_mem_b={resources.mem_mb} * 10**6"
@@ -55,7 +34,7 @@ rule star_single_end_rnaseq:
 		bam_prefix=os.path.join(config['paths']['rnaseq_aligned_bam_dir'], "{sample}.")
 	singularity:
 		"docker://quay.io/biocontainers/star:2.7.8a--0"
-	threads: config['resources']['star_single_end_rnaseq']['threads']
+	threads: 12
 	shell:
 		"STAR --runThreadN {threads} --runMode alignReads --genomeDir {params.index_dir} --outSAMtype BAM Unsorted --outFileNamePrefix {params.bam_prefix} --readFilesCommand zcat --readFilesIn {input.r1_reads} && "
 		"mv {params.bam_prefix}.Aligned.out.bam {params.bam_prefix}.Aligned.bam"
@@ -74,9 +53,6 @@ rule star_pair_end_rnaseq:
 	singularity:
 		"docker://quay.io/biocontainers/star:2.7.8a--0"
 	threads: 12
-	resources:
-		mem_mb=32000,
-		mem_xb=lambda wc, input: max(2.5 * input.size_mb, resources['mem_yb']: {300})
 	shell:
 		"STAR --runThreadN {threads} --runMode alignReads --genomeDir {params.index_dir} --outSAMtype BAM Unsorted --outFileNamePrefix {params.bam_prefix} --readFilesCommand zcat --readFilesIn {input.r1_reads} {input.r2_reads} && "
 		"mv {params.bam_prefix}.Aligned.out.bam {params.bam_prefix}.Aligned.bam"

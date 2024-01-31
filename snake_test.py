@@ -1,9 +1,210 @@
 import os
 import re
 import sys
+import copy
+import yaml
 import logging
 
 from collections import defaultdict
+
+class SnakePipelineIO (): 
+	def __init__ (self, snakemake_job_prefix = '', pipeline_storage_dir  = '', pipeline_job_dir = '', work_dir = '', resource_yml = None, scale_threads = 0, scale_mem = 0, indent_style = '\t', overwrite = True, **kwargs):
+
+		# Assign the basic arguments
+		self._snakemake_job_prefix = snakemake_job_prefix
+
+		# Assign the snakemake pipeline filename
+		if snakemake_job_prefix.endswith('.smk'): self.smkp_filename = snakemake_job_prefix
+		else: self.smkp_filename = f'{snakemake_job_prefix}.smk'
+
+		# Confirm the file exists
+		if os.path.isfile(self.smkp_filename) and not overwrite:
+			raise IOError (f'SnakePipeline file already exists: {self.smkp_filename}. Please rename the SnakePipeline file or overwrite')
+	
+		# Assign the basic arguments
+		self._pipe_file = open(self.smkp_filename, 'w')
+		self._resource_yml = resource_yml
+		self._scale_threads = scale_threads
+		self._scale_mem = scale_mem
+		self._mem_types = ['mem_b', 'mem_kb', 'mem_mb', 'mem_gb', 'mem_tb', 'mem_pb', 'mem_kib', 'mem_mib', 'mem_gib', 'mem_tib', 'mem_pib']
+		self._indent_style = indent_style
+
+		# Assign the module storage directory
+		self._module_storage_dir = os.path.join(pipeline_storage_dir, 'modules')
+		if not os.path.exists(self._module_storage_dir): os.makedirs(self._module_storage_dir)
+
+		# Assign the module config directory
+		self._module_job_dir = os.path.join(pipeline_job_dir, 'modules')
+		if not os.path.exists(self._module_job_dir): os.makedirs(self._module_job_dir)
+
+		# Assign the work directory
+		self._work_dir = work_dir
+		
+		# Create arguments to populate
+		self._module_filenames = []
+		self._output_list = []
+		self._config_params = set()
+		self._resource_params = defaultdict(lambda: defaultdict(int))
+		#self._container_params = defaultdict(list, {'urls': [], 'paths': []})
+
+	def __enter__ (self):
+		return self
+
+	def __exit__ (self, exc_type, exc_value, traceback):
+		self.close()
+
+	@classmethod
+	def open (cls, *args, **kwargs):
+		return cls(*args, **kwargs)
+
+	def addModule (self, module_filename, **kwargs):
+
+		# Update the module filename, if necessary
+		if not module_filename.endswith('.smk'): module_filename = f'{module_filename}.smk'
+
+		# Create the filepath to the stored module
+		storage_module_path = os.path.join(self._module_storage_dir, module_filename)
+
+		# Confirm the stored module exists
+		if not os.path.isfile(storage_module_path):
+			raise IOError (f'Unable to open: {storage_module_path}. Please confirm the file exists.')		
+
+		# Open and process the stored module file
+		smk_module = SnakeFileIO.open(storage_module_path)
+
+		# Loops the file rules in test
+		for rule in smk_module._file_rules:
+
+			# Save the config params and output list from the rule
+			self._output_list.extend(rule._rule_output_list)
+			self._config_params.update(rule._rule_config_params)
+
+			# Scale and save the resource params
+			for resource_type, resource_value in rule._rule_resource_params.items():
+				if resource_type == 'threads' and self._scale_threads: resource_value = self._scaler(resource_value, self._scale_threads)
+				elif 'mem_' in resource_type and resource_type.lower() in self._mem_types and self._scale_mem: resource_value = self._scaler(resource_value, self._scale_mem)
+				self._resource_params[rule.rule_name][resource_type] = resource_value
+
+		# Create the job module filepath
+		storage_module_path = os.path.join(self._module_job_dir, module_filename)
+
+		# Create the job module file
+		smk_module.write(storage_module_path)
+
+		# Add the module filename to the list
+		self._module_filenames.append(module_filename)
+
+		logging.info(f"Module added to pipeline: {module_filename}")	
+
+	def writeConfig (self, pipeline_args):
+
+		# Create a list of pipeline args to make sure they are all used
+		pipeline_args_unused = set(pipeline_args.keys())
+		
+		# Create yml dicts
+		yml_config_dict = {'workdir': self._work_dir}
+		yml_resource_dict = {'resources': {}}
+
+		# Create a list of config params to sort by length
+		config_params_list = list(self._config_params)
+		config_params_list.sort(key = lambda t: len(t))
+
+		# Populate the config yml dict with the pipeline args
+		for config_param in config_params_list:
+
+			# Check if the config param is within a group
+			if len(config_param) > 1: group, config_arg = config_param
+			
+			# Assign the config arg from the config param
+			else:
+				group = None
+				config_arg = config_param[0]
+
+			# Create the equivalent pipeline arg for the config arg
+			pipeline_arg = config_arg.replace('-', '_')
+
+			# Raise an error if the pipeline arg is not in the pipeline args
+			if pipeline_arg not in pipeline_args: raise Exception (f'Pipeline arg not found: {pipeline_arg}')
+
+			# Remove the pipeline arg from the unused list
+			pipeline_args_unused.remove(pipeline_arg)
+				
+			# Check if the group is not in the yml dict
+			if group and group not in yml_config_dict: yml_config_dict[group] = {}
+
+			if not group: yml_config_dict[config_arg] = pipeline_args[pipeline_arg]
+			else: yml_config_dict[group][config_arg] = pipeline_args[pipeline_arg]
+
+		# Check if there are unused pipeline args
+		if pipeline_args_unused:
+
+			# Report the unused pipeline args
+			for unused_arg in pipeline_args_unused: logging.warning(f"Configuration argument not found in Snakemake modules: {unused_arg}")
+
+		# Populate the resource yml dict
+		for rule_name, rule_resource_dict in self._resource_params.items():
+			if not rule_resource_dict: continue
+
+			# Create the rule resource dict
+			yml_resource_dict['resources'][rule_name] = {}
+
+			# Populate the rule resource dict
+			for resource_name, resource_value in rule_resource_dict.items():
+				yml_resource_dict['resources'][rule_name][resource_name] = resource_value
+
+		# Check if the resource yml should be a separate file
+		if not self._resource_yml: yml_config_dict.update(yml_resource_dict)
+		else: self._createYml(yml_resource_dict, f"{self._snakemake_job_prefix}.resources.yml")
+
+		self._createYml(yml_config_dict, f"{self._snakemake_job_prefix}.yml")
+
+	def writePipeline (self):
+
+		# Assign the config file(s) and working directory
+		self._pipe_file.write(f"configfile: '{self._snakemake_job_prefix}.yml'\n")
+		if self._resource_yml: self._pipe_file.write(f"configfile: '{self._snakemake_job_prefix}.resources.yml'\n")
+		self._pipe_file.write("\nworkdir: config['workdir']\n\n")
+
+		# Create the rule all block
+		self._pipe_file.write('rule all:\n')
+		self._pipe_file.write(f'{self._indent_style}input:\n')
+		
+		# Add the rule all input
+		indented_input = [f'{self._indent_style}{self._indent_style}{_output}' for _output in self._output_list]
+		self._pipe_file.write(',\n'.join(indented_input) + '\n\n')
+		
+		# Create the input block of modules
+		for module_filename in self._module_filenames :
+			self._pipe_file.write(f'include: "{module_filename}"\n')
+
+		logging.info(f"Pipeline written successfully")
+	
+	def close(self):
+		self._pipe_file.close()
+	
+	@staticmethod
+	def _scaler (value, scaler, value_type = float, output_type = int, **kwargs):
+
+		# Confirm a scaler was given
+		if not scaler: raise Exception(f'No scaler given for: {value}')
+
+		# Convert the value to the correct type
+		try: value = value_type(value)
+		except: raise Exception(f'Unable to convert value to type: {value}')
+
+		# Scale and return the input
+		return output_type(value * scaler)
+
+	@staticmethod
+	def _createYml (yml_dict, yml_filename, **kwargs):
+
+		class MyDumper(yaml.Dumper):
+			def increase_indent(self, flow=False, indentless=False):
+				return super(MyDumper, self).increase_indent(flow, False)
+
+		yml_file = open(yml_filename, 'w')
+		yml_file.write(yaml.dump(yml_dict, Dumper = MyDumper, sort_keys = False))
+		yml_file.close()
 
 class SnakeFileIO ():
 	def __init__ (self, smk_filename, **kwargs):
@@ -15,8 +216,10 @@ class SnakeFileIO ():
 		# Assign the basic arguments
 		self.filename = smk_filename
 		self._indent_style = None
-		self._exclude_rules = ['all']
+		self._output_rule = 'all'
+		self._exclude_rules = [self._output_rule]
 		self._file_rules = []
+		self._non_rule_text = ''
 		
 		# Assign the indent style
 		self._assignIndent()
@@ -97,7 +300,7 @@ class SnakeFileIO ():
 
 				if smk_list[0] and not (smk_list[0].startswith('rule') and smk_line.rstrip().endswith(':')):
 					within_rule_block = False
-
+					
 				# Check if the line is the start of a rule
 				if smk_list[0].startswith('rule') and smk_line.rstrip().endswith(':'):
 
@@ -105,147 +308,85 @@ class SnakeFileIO ():
 
 					# Check if a previous rule block was found
 					if rule_block:
-						#parseRule(rule_block)
+						self._file_rules.append(SnakeRuleIO.read(rule_block, indent_style = self._indent_style, output_rule = self._output_rule))
 						rule_block = ''
-					
+				
+				# Add the line to the rule block
 				if within_rule_block and smk_line.strip(): rule_block += smk_line
 
+				# Save text that is not within a rule
+				if not within_rule_block and smk_line.strip(): self._non_rule_text += smk_line
+
 			# Parse the final rule block
-			if rule_block: SnakeRuleIO.read(rule_block, indent_style=self._indent_style)
-			
+			if rule_block: 
+				self._file_rules.append(SnakeRuleIO.read(rule_block, indent_style = self._indent_style, output_rule = self._output_rule))
+
+	def write (self, filename):
+
+		# Open the file
+		with open(filename, 'w') as smk_file:
+
+			# Check if there is any non-rule text
+			if self._non_rule_text: smk_file.write(self._non_rule_text)
+
+			# Loop the file rules
+			for rule in self._file_rules:
+
+				# Write the rule, if included in the output
+				if rule.in_output: smk_file.write(f'\n{rule}')
+
+			# Write the final newline
+			smk_file.write('\n')
+
 	@classmethod
 	def open (cls, *args, **kwargs):
 		return cls(*args, **kwargs)
 
 class SnakeRuleIO ():
-	def __init__ (self, rule_list, indent_style = None, **kwargs):
+	def __init__ (self, rule_list, indent_style = None, output_rule = '', **kwargs):
 
 		# Assign the rule argument to populate
 		self.rule_name = rule_list[0].split()[1][: -1]
+		self.in_output = False if self.rule_name == output_rule else True
 		self._indent_style = indent_style
-		self._rule_attributes = defaultdict(list)
-		self._rule_config_params = defaultdict(list)
-		self._rule_resource_params = defaultdict(lambda: defaultdict(str))
+		self._rule_config_params = set()
+		self._rule_singularity_line = ''
+		self._rule_resource_params = defaultdict(int)
+		self._rule_text = rule_list[0] + '\n'
+		self._rule_output_list = []
 		
 		# Assign the fixed arguments
 		self._resource_attributes = ['threads', 'resources']
-
+		
+		# Parse the rule
 		self._parseRule(rule_list[1:])
+
+	def __str__ (self):
+		return self._rule_text
+	
+	def __repr__ (self):
+		return self._rule_text
 
 	def _parseRule (self, rule_list):
 
-		def processAttribute (rule_attribute, rule_value_str):
+		def processAttribute (rule_attribute, rule_line):
 
-			if rule_value_str.endswith(','): rule_value_str = rule_value_str[:-1]
+			# Assign the rule attribute
+			processed_attribute = SnakeAttributeIO.process(self.rule_name, rule_attribute, rule_line, indent_style = self._indent_style)
 
-			# Check if the rule attribute is a resource attribute
-			if rule_attribute in self._resource_attributes:
+			# Update the SnakeFile, if a resource
+			if processed_attribute.is_resource: rule_line = processed_attribute.updateSnakeFile()
 
-				if rule_attribute == 'threads': rule_resource = 'threads'
-				elif rule_attribute == 'resources':
+			# Update the rule params
+			if processed_attribute.is_resource: self._rule_resource_params.update(processed_attribute.updateParams())
+			elif processed_attribute.is_container: self._rule_singularity_line = processed_attribute.updateParams()
+			else: self._rule_config_params.update(processed_attribute.updateParams())
 
-					if self._attributeLevel(rule_value_str.split(self._indent_style)) != 2: 
-						raise Exception (f'Config resource error: {rule_value_str}')
-					
-					# Assign the resource name and value
-					rule_resource, rule_value_str = [_v.strip() for _v in rule_value_str.strip().split('=', 1)]
+			# Check if the rule is output, confirm the attribute is input, and update the rule output
+			if not self.in_output and rule_attribute == 'input': self._rule_output_list.append(rule_line.strip())
+	
+			return rule_line
 
-				# Check for a simple integer assignment
-				try:
-					int(rule_value_str)
-					self._rule_resource_params[self.rule_name][rule_resource] = int(rule_value_str)
-					self._rule_attributes[rule_attribute].append(f"{rule_resource}=config['resource']['{self.rule_name}']['{rule_resource}']")
-				
-				except:
-					
-					# Find all occurences of the word resources followed by one or more sets of square brackets ending with a colon
-					for rule_resource_match in re.finditer(r'resources(\[(.*?)\])+\:', rule_value_str):
-
-						# Get the resource str
-						rule_resource_str = rule_resource_match.group(0)
-
-						# Split the param str by either square brackets using regex
-						rule_resource_list = [_p for _p in re.split(r'\[|\]', rule_resource_str[:-1].replace('"','').replace("'",'')) if _p][1:]
-						
-						# Check that the resource list is a single argument
-						if len(rule_resource_list) != 1: raise Exception (f'Config resource error: {rule_resource_list}')
-
-						# Assign the resource argument
-						rule_resource_arg = rule_resource_list[0]
-
-						# Get text after rule_resourcem_str in rule_value_str
-						rule_resource_substr = rule_value_str[rule_value_str.find(rule_resource_str) + len(rule_resource_str):]
-
-						# Get the match between curly brackets without returning the brackets
-						rule_resource_value_match = re.search(r' ?{(.*?)}', rule_resource_substr)
-
-						# Assign the match str and value
-						rule_resource_value_str = rule_resource_value_match.group(0)
-						rule_resource_value = rule_resource_value_match.group(1)
-
-						# Assign the rule resource category, argument, and value
-						self._rule_resource_params[self.rule_name][rule_resource_arg] = int(rule_resource_value)
-
-						# Create string for resource assignment replacement
-						rule_resource_assignment_str = f"config['resource']['{self.rule_name}']['{rule_resource_arg}']"
-
-						# Convert the the text
-						rule_value_str = rule_value_str.replace(rule_resource_str + rule_resource_value_str, rule_resource_assignment_str)
-
-						# Replace the resource assignment with the string
-						self._rule_attributes[rule_attribute].append(f'{rule_resource}={rule_value_str}')
-						
-						# Assign the rule resource category, argument, and value
-						self._rule_resource_params[self.rule_name][rule_resource] = rule_resource_value
-				
-				return
-
-			# Find all occurences of the word config follpwed by one or more sets of square brackets
-			for rule_param in re.finditer(r'config(\[(.*?)\])+', rule_value_str):
-
-				# Get the param str
-				rule_param_str = rule_param.group(0)
-
-				# Split the param str by either square brackets using regex
-				rule_param_list = [_p for _p in re.split(r'\[|\]', rule_param_str.replace('"','').replace("'",'')) if _p][1:]
-
-				# Check if the param has a value by position
-				rule_param_w_value_pos = rule_value_str.find(f'{rule_param_str}:')
-
-				# Check if the param does not have a value, i.e. config argument
-				if rule_param_w_value_pos == -1:
-					if len(rule_param_list) != 2: raise Exception (f'Config param error: {rule_param_str}')
-
-					# Assign the rule config category and argument
-					rule_config_category, rule_config_arg = rule_param_list
-					self._rule_config_params[rule_config_category].append(rule_config_arg)
-
-					print(rule_config_category, rule_config_arg)
-				
-				# Check if the param has a value, i.e. resource argument
-				else:
-
-					if len(rule_param_list) != 3: raise Exception (f'Config param error: {rule_param_str}')
-
-					# Assign the rule config category and argument
-					_, rule_config_category, rule_config_arg = rule_param_list
-
-					# Get text after rule_param_str in rule_value_str
-					rule_param_substr = rule_value_str[rule_param_w_value_pos + len(f'{rule_param_str}:'):]
-
-					# Get the match between curly brackets without returning the brackets
-					rule_value_match = re.search(r'{(.*?)}', rule_param_substr)
-
-					# Assign the match str and value
-					rule_value_str = rule_value_match.group(0)
-					rule_value = rule_value_match.group(1)
-
-					# Assign the rule resource category, argument, and value
-					self._rule_resource_params[rule_config_category][rule_config_arg] = rule_value
-
-					print(rule_config_category, rule_config_arg, rule_value)
-				
-			
 		# Assign the current rule attribute
 		rule_attribute = ''
 
@@ -257,7 +398,7 @@ class SnakeRuleIO ():
 			rule_line_list = rule_line.rstrip().split(self._indent_style)
 
 			# Assign the attribute level
-			attribute_level = self._attributeLevel(rule_line_list)
+			attribute_level = _attributeLevel(rule_line_list)
 
 			# Check if the line is a rule attribute (without an assigned value)
 			if attribute_level == 1 and rule_line.rstrip().endswith(':'):
@@ -268,263 +409,193 @@ class SnakeRuleIO ():
 				
 				# Split the attribute, confirm a value is assigned
 				split_attribute = [_a.strip() for _a in rule_line_list[1].split(':', 1)]
-				if len(split_attribute) != 2: raise Exception (f'Rule attribute error: {rule_line_list[1]}')
-				processAttribute(*split_attribute)
+				if len(split_attribute) != 2: raise Exception (f'Rule attribute error. Unable to assign attribute: {rule_line_list[1]}')
 
-			# Check if the line is a atrribute value line
-			elif attribute_level == 2:
+				# Process the attribute
+				rule_line = processAttribute(split_attribute[0], rule_line)
 
-				# Assign the value to the current rule attribute
-				#self._rule_attributes[rule_attribute] += rule_line
-
-				processAttribute(rule_attribute, rule_line)
+			# Check if the line is a atrribute value line and if so, process the attribute
+			elif attribute_level == 2: rule_line = processAttribute(rule_attribute, rule_line)
 
 			# Raise an error if the attribute level is not 1 or 2
 			else: raise Exception (f'Attribute level error: {rule_line}')
 
-		'''	
-				
-		# Loop the rule attribute values
-		for rule_values_str in self._rule_attributes.values():
-
-			# Find all occurences of the word config follwed by one or more sets of square brackets
-			for rule_param in re.finditer(r'config(\[(.*?)\])+', rule_values_str):
-
-				# Get the param str
-				rule_param_str = rule_param.group(0)
-
-				# Split the param str by either square brackets using regex
-				rule_param_list = [_p for _p in re.split(r'\[|\]', rule_param_str.replace('"','').replace("'",'')) if _p][1:]
-
-				# Check if the param has a value by position
-				rule_param_w_value_pos = rule_values_str.find(f'{rule_param_str}:')
-
-				# Check if the param does not have a value, i.e. config argument
-				if rule_param_w_value_pos == -1:
-					if len(rule_param_list) != 2: raise Exception (f'Config param error: {rule_param_str}')
-
-					# Assign the rule config category and argument
-					rule_config_category, rule_config_arg = rule_param_list
-					self._rule_config_params[rule_config_category].append(rule_config_arg)
-				
-				# Check if the param has a value, i.e. resource argument
-				else:
-
-					if len(rule_param_list) != 3: raise Exception (f'Config param error: {rule_param_str}')
-
-					# Assign the rule config category and argument
-					_, rule_config_category, rule_config_arg = rule_param_list
-
-					# Get text after rule_param_str in rule_values_str
-					rule_param_substr = rule_values_str[rule_param_w_value_pos + len(f'{rule_param_str}:'):]
-
-					# Get the match between curly brackets without returning the brackets
-					rule_value_match = re.search(r'{(.*?)}', rule_param_substr)
-
-					# Assign the match str and value
-					rule_value_str = rule_value_match.group(0)
-					rule_value = rule_value_match.group(1)
-
-					# Assign the rule resource category, argument, and value
-					self._rule_resource_params[rule_config_category][rule_config_arg] = rule_value
-
-					print(rule_config_category, rule_config_arg, rule_value)
-		'''
-					
-
-
-
-
-		'''
-
-				# Check if there is a next character
-				if rule_config_param_end == len(rule_values_str): self._rule_config_params_wo_values[rule_config_param_str] 
-				
-				# Check if the next character is a colon
-				if rule_values_str[rule_config_param_end] == ':':
-					self._rule_config_params_wo_values[rule_config_param] = None
-				else:
-					self._rule_config_params_w_values[rule_config_param] = rule_values_str[rule_config_param_end: ]
-				print(len(rule_values_str), rule_config_param_end, rule_values_str)
-
-		'''
-		#print(rule_values_str[rule_config_param_end])
-
-		print('--END--')
+			# Update the rule text
+			self._rule_text += rule_line + '\n'
 
 	@classmethod
 	def read (cls, rule_str, *args, **kwargs):
 		return cls(rule_str.splitlines(), *args, **kwargs)
 	
-	@staticmethod
-	def _attributeLevel (attribute_list):
-		for attribute_level, attribute_item in enumerate(attribute_list):
-			if not attribute_item: continue
-			return attribute_level
-	
+class SnakeAttributeIO ():
+	def __init__ (self, rule_name, attribute_type, attribute_text, indent_style = None, resource_attributes = ['threads', 'resources'], **kwargs):
 
+		# Assign the required attributes
+		self._rule_name = rule_name
+		self._type = attribute_type
+		self._indent_style = indent_style
+		self._original_text = attribute_text
+		self._multiline_text = True if attribute_text.endswith(',') else False
+		self._resource_attributes = resource_attributes
+		self.is_resource = True if attribute_type in self._resource_attributes else False
+		self.is_container = True if attribute_type == 'singularity' else False
+		self._resource_assignment_type = ':'
 
-
-SnakeFileIO.open(sys.argv[1])
-
-
-pipeline_module_block = False
-dict_w_defaults = False
-block_name = 'rule'
-
-def parseRule (rule_block_str):
-
-	# Split the rule block into a list
-	rule_block_list = rule_block_str.splitlines()
-
-	# Create a dict to store the rule attributes
-	rule_attributes = defaultdict(str)
-
-	# Assign the rule name
-	rule_name = rule_block_list[0].split()[1][: -1]
-
-	# Assign the current rule attribute
-	rule_attribute = ''
-
-	# Loop the rule block and parse the attributes
-	for rule_line in rule_block_list[1:]:
-		if not rule_line.strip(): continue
-
-		# Split the line by the indent style
-		rule_line_list = rule_line.rstrip().split('\t')
-
-		# Assign the attribute level
-		attribute_level = attributeLevel(rule_line_list)
-
-		# Check if the line is a rule attribute (without an assigned value)
-		if attribute_level == 1 and rule_line.rstrip().endswith(':'):
-			rule_attribute = rule_line_list[1][:-1]
+		# Assign the config attributes
+		self._resource_assignment_dict = defaultdict(int)
+		self._resource_replacment_dict = defaultdict(str)
+		self._config_assignment_set = set()
 		
-		# Check if the line is a rule attribute (with an assigned value)
-		elif attribute_level == 1 and not rule_line.rstrip().endswith(':'):
+		# Process the attribute
+		if self.is_resource: self._parseResource()
+		elif self.is_container: pass
+		else: self._parseConfig()
+
+	@classmethod
+	def process (cls, *args, **kwargs):
+		return cls(*args, **kwargs)
+
+	def _parseResource (self):
+
+		# Create the working text
+		working_text = copy.deepcopy(self._original_text) if not self._multiline_text else self._original_text[:-1]
+
+		# Create a string to store the resource name
+		resource_name = ''
+
+		# Assign the resource as threads, for a single argument assignment
+		if self._type == 'threads':
+
+			# Confirm the threads is threads assignment
+			if _attributeLevel(working_text.split(self._indent_style)) != 1:
+				raise Exception (f'Config threads error. Incorrect number of indents: {self._original_text}')
+
+			# Confirm a single colon sign is present
+			if working_text.count(':') != 1:
+				raise Exception (f'Config threads error. Expected colon: {self._original_text}')
 			
-			# Split the attribute, confirm a value is assigned
-			split_attribute = [_a.strip() for _a in rule_line_list[1].split(':')]
-			if len(split_attribute) != 2: raise Exception (f'Rule attribute error: {rule_line_list[1]}')
-			rule_attributes[split_attribute[0]] = split_attribute[1]
+			# Update the resource name and working text, by splitting the text by the assignment type
+			resource_name, working_text = [_v.strip() for _v in working_text.strip().split(self._resource_assignment_type, 1)]
 
-		# Check if the line is a atrribute value line
-		elif attribute_level == 2:
+		# Check if the resource is a resources, for single or multiple argument assignment
+		elif self._type == 'resources':
 
-			# Assign the value to the current rule attribute
-			rule_attributes[rule_attribute] += rule_line
+			# Confirm the resource is resource assignment
+			if _attributeLevel(working_text.split(self._indent_style)) != 2:
+				raise Exception (f'Config resource error. Incorrect number of indents: {self._original_text}')
 
-		# Raise an error if the attribute level is not 1 or 2
-		else: raise Exception (f'Attribute level error: {rule_line}')
-			
-	# Loop the rule attribute values
-	for rule_values_str in rule_attributes.values():
+			# Confirm a single equal sign is present
+			if working_text.count('=') != 1:
+				raise Exception (f'Config resource error. Expected equals siqn: {self._original_text}')
 
-		# Find all occurences of the word config follwed by one or more sets of square brackets
-		rule_values_config = re.finditer(r'config(\[(.*?)\])+', rule_values_str)
+			# Update the resource assignment type
+			self._resource_assignment_type = '='
 
+			# Update the resource name and working text, by splitting the text by the assignment type
+			resource_name, working_text = [_v.strip() for _v in working_text.strip().split(self._resource_assignment_type, 1)]
 
+		# Check for a simple resource (integer) assignment
+		if working_text.isdigit():
 
-		#rule_values_config = re.findall(r'config\[(.*?)\]', rule_values_str)
+			# Confirm the resource has a name
+			if not resource_name: raise Exception (f'Config resource error. No resource name: {self._original_text}')
+
+			# Add the resource assignment to the dict
+			self._resource_assignment_dict[resource_name] = int(working_text)
+			self._resource_replacment_dict[working_text] = f"config['resource']['{self._rule_name}']['{resource_name}']"
 		
+		# Check for a complex resource assignment
+		else:
 
-		#rule_values_config = re.findall(r'config(\[(.*?)\])+', rule_values_str)
-		for i in rule_values_config:
-			print(i.group(0))
-		#print(rule_values_str)
+			# Find all occurences of the word resources followed by one or more sets of square brackets ending with a colon
+			for resource_match in re.finditer(r'resources(\[(.*?)\])+\:', working_text):
 
+				# Get the resource str
+				resource_str = resource_match.group(0)
 
-		
-	#	print(rule_name, rule_attribute, rule_value)
+				# Split the param str by either square brackets using regex
+				resource_list = [_p for _p in re.split(r'\[|\]', resource_str[:-1].replace('"','').replace("'",'')) if _p][1:]
 
+				# Check that the resource list is a single argument
+				if len(resource_list) != 1: raise Exception (f'Config resource error. Too many arguments in complex assignment: {self._original_text}')
 
+				# Assign the resource argument
+				resource_name = resource_list[0]
 
-# Create the param dict
-if not dict_w_defaults: param_dict = defaultdict(list)
-else: param_dict = defaultdict(lambda: defaultdict(str))
+				# Get text after resource_str in the working_text
+				resource_suffix = working_text[working_text.find(resource_str) + len(resource_str):]
 
-sys.exit()
+				# Get the first match between curly brackets without returning the brackets
+				resource_suffix_match = re.search(r' ?{(.*?)}', resource_suffix)
 
-# Create bool to check if in the config block
-within_rule_block = False
+				# Assign the match str and value
+				resource_value_str = resource_suffix_match.group(0)
+				resource_value = resource_suffix_match.group(1)
 
-rule_block = ''
+				# Add the resource assignment to the dict
+				self._resource_assignment_dict[resource_name] = int(resource_value)
+				self._resource_replacment_dict[resource_str + resource_value_str] = f"config['resource']['{self._rule_name}']['{resource_name}']"
 
-# Parse the snakefile
-with open(filename) as smk_file:
-	for smk_line in smk_file:
+	def _parseConfig (self):
 
-		# Skip blank lines
-		if not smk_line.strip(): continue
+		# Find all occurences of the word config follpwed by one or more sets of square brackets
+		for config_match in re.finditer(r'config(\[(.*?)\])+', self._original_text):
 
-		# Split the line by the indent style (rule, attribute, param)
-		smk_list = smk_line.rstrip().split('\t')
+			# Get the config match str
+			config_str = config_match.group(0)
 
-		if smk_list[0] and not (smk_list[0].startswith('rule') and smk_line.rstrip().endswith(':')):
-			within_rule_block = False
+			# Split the param str by either square brackets using regex
+			config_list = [_p for _p in re.split(r'\[|\]', config_str.replace('"','').replace("'",'')) if _p][1:]
 
-		# Check if the line is the start of a rule
-		if smk_list[0].startswith('rule') and smk_line.rstrip().endswith(':'):
+			# Check if the match is associated with a value
+			config_has_value = False if self._original_text.find(f'{config_str}:') == -1 else True
 
-			within_rule_block = True
+			# Check if the param does not have a value, i.e. config argument
+			if config_has_value: raise Exception (f'Config param error. Has value: {self._original_text}')
 
-			# Check if a previous rule block was found
-			if rule_block:
-				parseRule(rule_block)
-				rule_block = ''
+			# Confirm the config list isn't more than two parameters
+			if len(config_list) > 2: raise Exception (f'Config param error. Too many param levels: {self._original_text}')
+
+			# Add the config assignment to the set
+			self._config_assignment_set.add(tuple(config_list))
+
+	def updateSnakeFile (self):
+
+		# Check if the attribute is not a resource
+		if not self.is_resource: self._original_text
+
+		# Loop the resource assignments
+		for resource_original_text, resource_assignment in self._resource_replacment_dict.items():
+
+			# Replace the resource assignment with the string
+			self._original_text = self._original_text.replace(resource_original_text, resource_assignment)
+
+		return self._original_text
+
+	def updateParams (self):
+
+		# Check if the attribute is a container
+		if self.is_container:
+
+			# Check if the attribute is a multiline text
+			if self._multiline_text: raise Exception (f'Container assignment error. Cannot be multiline text: {self._original_text}')
 			
-		if within_rule_block and smk_line.strip(): rule_block += smk_line
+			# Return the container line
+			return self._original_text.strip()
 
-	# Parse the final rule block
-	if rule_block: parseRule(rule_block)
+		# Check if the attribute is a resource, return the resource assignment dict
+		elif self.is_resource: return self._resource_assignment_dict
 
-	'''
-		continue
+		# If not a resource or container, return the config assignment set
+		else: return self._config_assignment_set
 
-		# Check if within a rule
-		if smk_list[0]:
-			if not pipeline_module_block and block_name in smk_list[0]: within_rule_block = True
-			elif pipeline_module_block and smk_list[0].startswith('module') and block_name in smk_list[0]: within_rule_block = True
-			elif within_rule_block: break
-			else: within_rule_block = False
-			continue
+def _attributeLevel (attribute_list):
+	for attribute_level, attribute_item in enumerate(attribute_list):
+		if not attribute_item: continue
+		return attribute_level
 
-		# Check if within the config block
-		if within_rule_block:
-
-			#print(within_rule_block, smk_list)
-
-			continue
-
-			# Loop the snakefile line by level
-			for smk_level, smk_item in enumerate(smk_list):
-				if not smk_item: continue
-
-				print(smk_level, smk_item)
-
-				# Assign the param attribute
-				if smk_item.endswith(':'):
-					param_attribute_name = smk_item[:-1].strip()
-					param_attribute_level = smk_level
-
-				# Assign the param
-				else:
-					if (smk_level - param_attribute_level) != 1:
-						#print(smk_level, smk_item, param_attribute_level)
-						raise Exception (f'Parameter assignment error')
-
-					# Assign the default value, if possible
-					if ':' not in smk_item or '://' in smk_item: smk_value = None
-					else: 
-						smk_item, smk_value = smk_item.split(':')
-						smk_item = smk_item.strip()
-						smk_value = smk_value.strip()
-
-					# Check if default values are expected and assigned
-					if dict_w_defaults and not smk_value:
-						raise Exception (f'No default value assigned for: {param_attribute_name}: {smk_item}')
-					
-					# Assign the param to the dict
-					if dict_w_defaults: param_dict[param_attribute_name][smk_item] = smk_value
-					else: param_dict[param_attribute_name].append(smk_item)
-	'''
+test_p = SnakePipelineIO('test', pipeline_storage_dir = 'pipelines', pipeline_job_dir = 'wd/pipeline', work_dir = 'wd', resource_yml = None, scale_threads = 2, scale_mem = 0, indent_style = '\t', overwrite = True)
+test_m = 'rna_seq_star'
+test_p.addModule(test_m)
+test_p.writePipeline()
+test_p.writeConfig({'samples': [1,2,3], 'assembly_dir': 'test', 'index_dir': 'test', 'assembly_version': 'testV', 'rnaseq_fastq_dir': 'test', 'species': 'testSP', 'rnaseq_aligned_bam_dir': 'test'})

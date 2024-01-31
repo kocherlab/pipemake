@@ -1,14 +1,3 @@
-module config:
-	params:
-		samples
-		species
-		assembly_version
-	paths:
-		assembly_dir
-		rnaseq_fastq_dir
-		rnaseq_sorted_bam_dir
-		rnaseq_count_dir
-
 rule all:
 	input:
 		os.path.join(config['paths']['rnaseq_count_dir'], f"{config['species']}_{config['assembly_version']}.featurecounts.tsv")

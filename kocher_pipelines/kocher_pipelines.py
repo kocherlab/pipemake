@@ -202,7 +202,7 @@ def main():
 
 	# Assign the pipeline directory
 	if os.environ.get('KPDIR'): pipeline_storage_dir = os.environ.get('KPDIR')
-	else: pipeline_storage_dir = 'Snakemake'
+	else: pipeline_storage_dir = 'pipelines'
 
 	# Confirm the pipeline directory exists
 	if not os.path.isdir(pipeline_storage_dir): raise Exception(f'Unable to find pipeline directory: {pipeline_storage_dir}')
@@ -222,13 +222,13 @@ def main():
 	# Create the working directory
 	if not os.path.exists(pipeline_args['work_dir']): os.makedirs(pipeline_args['work_dir'])
 
-	# Create the pipeline config directory
-	pipeline_args['pipeline_config_dir'] = os.path.join(pipeline_args['work_dir'], f'.pipeline')
-	if not os.path.exists(pipeline_args['pipeline_config_dir']): os.makedirs(pipeline_args['pipeline_config_dir'])
+	# Create the pipeline job directory
+	pipeline_args['pipeline_job_dir'] = os.path.join(pipeline_args['work_dir'], f'.pipeline')
+	if not os.path.exists(pipeline_args['pipeline_job_dir']): os.makedirs(pipeline_args['pipeline_job_dir'])
 
 	# Start logger and log the arguments
-	startLogger(os.path.join(pipeline_args['pipeline_config_dir'], f'pipeline.log'))
-	logArgDict(pipeline_args, omit = ['pipeline_config_dir'])
+	startLogger(os.path.join(pipeline_args['pipeline_job_dir'], f'pipeline.log'))
+	logArgDict(pipeline_args, omit = ['pipeline_job_dir'])
 
 	# Process the pipeline setup
 	setup_arg_dict = processPipelineSetup(pipeline_setup[pipeline_args['pipeline']], pipeline_args)
@@ -241,7 +241,7 @@ def main():
 
 	# Add the snakemake modules to the pipeline
 	for smkm_filename in pipeline_snakefiles[pipeline_args['pipeline']]:
-		snakemake_pipeline.addSnakeModule(smkm_filename)
+		snakemake_pipeline.addModule(smkm_filename)
 
 	# Create the snakemake config file
 	snakemake_pipeline.writeConfig(pipeline_args)
