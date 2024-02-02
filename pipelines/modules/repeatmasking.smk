@@ -24,15 +24,15 @@ rule repeat_modeler_r1:
 		"/Genomics/argo/users/aewebb/.local/images/dfam-tetools-latest.sif"
 	shell:
 		r"""
-		mkdir {params.db_dir} &&
-		mkdir {params.wd_dir} &&
-		BuildDatabase -name {params.repeatmodeler_db} {input} &&
-		RepeatModeler -database {params.repeatmodeler_db} -threads {threads} &&
-		rm_working_dir=$(grep 'Using output directory' {params.repeatmodeler_db}-rmod.log | grep -o '[^/]*$') &&
-		tar -czf {params.wd_dir}/RepeatModeler_R1_WD.tar.gz $rm_working_dir &&
-		rm -rf $rm_working_dir &&
-		mv {params.repeatmodeler_db}-families.fa {output} &&
-		mv {params.repeatmodeler_db}-families.stk {params.wd_dir} &&
+		mkdir -p {params.db_dir}
+		mkdir -p {params.wd_dir}
+		BuildDatabase -name {params.repeatmodeler_db} {input}
+		RepeatModeler -database {params.repeatmodeler_db} -threads {threads}
+		rm_working_dir=$(grep 'Using output directory' {params.repeatmodeler_db}-rmod.log | grep -o '[^/]*$')
+		tar -czf {params.wd_dir}/RepeatModeler_R1_WD.tar.gz $rm_working_dir
+		rm -rf $rm_working_dir
+		mv {params.repeatmodeler_db}-families.fa {output}
+		mv {params.repeatmodeler_db}-families.stk {params.wd_dir}
 		mv {params.repeatmodeler_db}-rmod.log {params.wd_dir}
 		"""
 
