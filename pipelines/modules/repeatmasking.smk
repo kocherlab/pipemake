@@ -1,11 +1,3 @@
-module config:
-	params:
-		species
-		assembly_version
-	paths:
-		assembly_dir
-		repeatmodeler_dir
-
 rule all:
 	input:
 		os.path.join(config['paths']['assembly_dir'], f"{config['species']}_{config['assembly_version']}.fa.masked")
