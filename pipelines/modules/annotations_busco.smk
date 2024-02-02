@@ -1,13 +1,3 @@
-module config:
-	params:
-		species
-		assembly_version
-		annotation_version
-		busco_database
-	paths:
-		annotations_dir
-		downloads_dir
-
 rule all:
 	input:
 		os.path.join(config['paths']['annotations_dir'], 'BUSCO', 'summary.txt')
@@ -23,7 +13,9 @@ rule annotations_compleasm:
 		busco_db=config['busco_database']
 	singularity:
 		"/Genomics/argo/users/aewebb/.local/images/busco.sif"
-	threads: 20
+	resources:
+		mem_mb=12000
+	threads: 12
 	shell:
 		r"""
 		busco -i {input} -o {params.output_dir} -l {params.busco_db} -m proteins -c {threads} --download_path {params.download_dir} -f &&

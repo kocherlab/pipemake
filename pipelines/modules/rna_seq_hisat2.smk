@@ -1,14 +1,3 @@
-module config:
-	params:
-		samples
-		species
-		assembly_version
-	paths:
-		assembly_dir
-		index_dir
-		rnaseq_fastq_dir
-		rnaseq_aligned_bam_dir
-
 ruleorder: hisat2_pair_end > hisat2_single_end
 
 rule all:
@@ -31,6 +20,8 @@ rule hisat2_build:
 		index_prefix=os.path.join(config['paths']['index_dir'], 'hisat2', 'hisat2_index')
 	singularity:
 		"/Genomics/argo/users/aewebb/.local/images/kocherSEQ.sif"
+	resources:
+		mem_mb=16000
 	threads: 4
 	shell:
 		"hisat2-build -p {threads} {input} {params.index_prefix}"
@@ -45,6 +36,8 @@ rule hisat2_single_end:
 		index_prefix=os.path.join(config['paths']['index_dir'], 'hisat2', 'hisat2_index')
 	singularity:
 		"/Genomics/argo/users/aewebb/.local/images/kocherSEQ.sif"
+	resources:
+		mem_mb=16000
 	threads: 4
 	shell:
 		"hisat2 --threads {threads} --dta -q -x {params.index_prefix} -U {input.r1_reads} | samtools view -@ {threads} -bh -o {output}"
@@ -60,6 +53,8 @@ rule hisat2_pair_end:
 		index_prefix=os.path.join(config['paths']['index_dir'], 'hisat2', 'hisat2_index')
 	singularity:
 		"/Genomics/argo/users/aewebb/.local/images/kocherSEQ.sif"
+	resources:
+		mem_mb=16000
 	threads: 4
 	shell:
 		"hisat2 --threads {threads} --dta -q -x {params.index_prefix} -1 {input.r1_reads} -2 {input.r2_reads} | samtools view -@ {threads} -bh -o {output}"

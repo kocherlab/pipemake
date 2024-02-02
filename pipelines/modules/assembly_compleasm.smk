@@ -23,6 +23,8 @@ rule assembly_compleasm:
 		busco_db=config['busco_database']
 	singularity:
 		"/Genomics/argo/users/aewebb/.local/images/compleasm.sif"
-	threads: 20
+	resources:
+		mem_mb=12000
+	threads: 12
 	shell:
 		"compleasm run -t{threads} -L {params.download_dir} -l {params.busco_db} -a {input.assembly_fasta} -o {params.output_dir}"

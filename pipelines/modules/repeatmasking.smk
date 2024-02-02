@@ -11,6 +11,8 @@ rule repeat_modeler_r1:
 		repeatmodeler_db=os.path.join(config['paths']['repeatmodeler_dir'], 'R1', 'DB', f"{config['species']}_{config['assembly_version']}_DB"),
 		db_dir=os.path.join(config['paths']['repeatmodeler_dir'], 'R1', 'DB'),
 		wd_dir=os.path.join(config['paths']['repeatmodeler_dir'], 'R1', 'WorkingDirectory')
+	resources:
+		mem_mb=40000
 	threads: 20
 	singularity: 
 		"/Genomics/argo/users/aewebb/.local/images/dfam-tetools-latest.sif"
@@ -36,7 +38,9 @@ rule repeat_masker_r1:
 		os.path.join(config['paths']['repeatmodeler_dir'], 'R1', 'MaskedAssembly', f"{config['species']}_{config['assembly_version']}.fa.masked")
 	params:
 		mask_dir=os.path.join(config['paths']['repeatmodeler_dir'], 'R1', 'MaskedAssembly')
-	threads: 20
+	resources:
+		mem_mb=24000
+	threads: 12
 	singularity: 
 		"/Genomics/argo/users/aewebb/.local/images/dfam-tetools-latest.sif"
 	shell:
@@ -50,5 +54,8 @@ rule softmask_r1:
 		os.path.join(config['paths']['assembly_dir'], f"{config['species']}_{config['assembly_version']}.fa.masked")
 	singularity: 
 		"/Genomics/argo/users/aewebb/.local/images/BioPython.sif"
+	resources:
+		mem_mb=2000
+	threads: 1
 	shell:
 		"softmask.py {input.assembly} {input.masked_assembly} {output}"

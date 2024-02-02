@@ -14,6 +14,8 @@ rule feature_counts_pair_end:
 		os.path.join(config['paths']['rnaseq_count_dir'], "featureCounts", "{sample}.featurecounts.txt")
 	singularity:
 		"/Genomics/argo/users/aewebb/.local/images/kocherSEQ.sif"
+	resources:
+		mem_mb=4000
 	threads: 4
 	shell:
 		"featureCounts -p -T {threads} -a {input.gtf_file} -o {output} {input.sorted_bam}"
@@ -27,6 +29,8 @@ rule feature_counts_single_end:
 		os.path.join(config['paths']['rnaseq_count_dir'], "featureCounts", "{sample}.featurecounts.txt")
 	singularity:
 		"/Genomics/argo/users/aewebb/.local/images/kocherSEQ.sif"
+	resources:
+		mem_mb=4000
 	threads: 4
 	shell:
 		"featureCounts -T {threads} -a {input.gtf_file} -o {output} {input.sorted_bam}"
@@ -40,5 +44,8 @@ rule feature_counts_report:
 		count_dir=os.path.join(config['paths']['rnaseq_count_dir'], "featureCounts")
 	singularity:
 		"/Genomics/argo/users/aewebb/.local/images/BioPython.sif"
+	resources:
+		mem_mb=2000
+	threads: 1
 	shell:
 		"featureCounts_report.py {params.count_dir} {output}"

@@ -1,14 +1,3 @@
-module config:
-	params:
-		samples
-		species
-		assembly_version
-	paths:
-		assembly_dir
-		index_dir
-		atac_seq_fastq_dir
-		atac_seq_aligned_bam_dir
-
 ruleorder: bwa_mem_pair_end_atac_seq > bwa_mem_single_end_atac_seq
 
 rule all:
@@ -29,6 +18,8 @@ rule bwa_index_atac_seq:
 		index_fasta=os.path.join(config['paths']['index_dir'], "BWA", f"{config['species']}_{config['assembly_version']}.fa")
 	singularity:
 		"docker://quay.io/biocontainers/bwa:0.7.17--he4a0461"
+	resources:
+		mem_mb=16000
 	threads: 4
 	shell:
 		"cp {input} {params.index_fasta} && "
@@ -43,6 +34,8 @@ rule bwa_mem_single_end_atac_seq:
 		os.path.join(config['paths']['atac_seq_aligned_bam_dir'], "{sample}.Aligned.bam")
 	singularity:
 		"docker://quay.io/biocontainers/bwa:0.7.17--he4a0461"
+	resources:
+		mem_mb=32000
 	threads: 4
 	shell:
 		"bwa mem -t {threads} {input.index_fasta} {input.r1_reads} | samtools view --threads {threads} -bh -o {output}"
@@ -56,6 +49,8 @@ rule bwa_mem_pair_end_atac_seq:
 		os.path.join(config['paths']['atac_seq_aligned_bam_dir'], "{sample}.Aligned.bam")
 	singularity:
 		"docker://quay.io/biocontainers/bwa:0.7.17--he4a0461"
+	resources:
+		mem_mb=32000
 	threads: 4
 	shell:
 		"bwa mem -t {threads} {input.index_fasta} {input.r1_reads} {input.r2_reads} | samtools view --threads {threads} -bh -o {output}"

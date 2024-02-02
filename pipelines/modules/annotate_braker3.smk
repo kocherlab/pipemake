@@ -1,14 +1,3 @@
-module config:
-	params:
-		species
-		assembly_version
-		annotation_version
-	paths:
-		assembly_dir
-		rnaseq_bam_dir
-		homology_dir
-		annotations_dir
-
 rule all:
 	input:
 		os.path.join(config['paths']['annotations_dir'], f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.gff3") 
@@ -27,6 +16,8 @@ rule annotate_braker3:
 		augustus_config="/Genomics/argo/users/aewebb/.augustus"
 	singularity:
 		"/Genomics/argo/users/aewebb/.local/images/braker3.sif"
+	resources:
+		mem_mb=32000
 	threads: 20
 	shell:
 		"braker.pl --genome {input.masked_assembly} --prot_seq {input.protein_hints} --bam {input.merged_bam} -gff3 --softmasking --threads {threads} --workingdir {params.annotations_dir} --AUGUSTUS_CONFIG_PATH {params.augustus_config}"
@@ -47,5 +38,8 @@ rule process_braker3:
 		annotation_version=config['annotation_version']
 	singularity:
 		"/Genomics/argo/users/aewebb/.local/images/kocherSEQ.sif"
+	resources:
+		mem_mb=2000
+	threads: 1
 	shell:
 		"process-braker --gff {input.braker3_gff} --fasta-cds {input.braker3_cds} --fasta-aa {input.braker3_aa} --out-dir {params.out_dir} --species {params.species} --assembly-version {params.assembly_version} --annotation-version {params.annotation_version}"
