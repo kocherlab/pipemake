@@ -2,7 +2,7 @@ ruleorder: hisat2_pair_end > hisat2_single_end
 
 rule all:
 	input:
-		expand(os.path.join(config['paths']['rnaseq_aligned_bam_dir'], "{sample}.Aligned.out.bam"), sample=config['samples'])
+		expand(os.path.join(config['paths']['rnaseq_aligned_bam_dir'], "{sample}.Aligned.bam"), sample=config['samples'])
 
 rule hisat2_build:
 	input:
