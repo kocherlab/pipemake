@@ -108,7 +108,7 @@ class SnakePipelineIO ():
 		# Create a list of config params to sort by length
 		config_params_list = list(self._config_params)
 		config_params_list.sort(key = lambda t: len(t))
-
+		
 		# Populate the config yml dict with the pipeline args
 		for config_param in config_params_list:
 
@@ -174,8 +174,8 @@ class SnakePipelineIO ():
 		self._pipe_file.write(',\n'.join(indented_input) + '\n\n')
 		
 		# Create the input block of modules
-		for module_filename in self._module_filenames :
-			self._pipe_file.write(f'include: "{module_filename}"\n')
+		for module_filename in self._module_filenames:
+			self._pipe_file.write(f'include: "{os.path.join(self._module_job_dir, module_filename)}"\n')
 
 		logging.info(f"Pipeline written successfully")
 	
@@ -502,7 +502,7 @@ class SnakeAttributeIO ():
 
 			# Add the resource assignment to the dict
 			self._resource_assignment_dict[resource_name] = int(working_text)
-			self._resource_replacment_dict[working_text] = f"config['resource']['{self._rule_name}']['{resource_name}']"
+			self._resource_replacment_dict[working_text] = f"config['resources']['{self._rule_name}']['{resource_name}']"
 		
 		# Check for a complex resource assignment
 		else:
@@ -534,7 +534,7 @@ class SnakeAttributeIO ():
 
 				# Add the resource assignment to the dict
 				self._resource_assignment_dict[resource_name] = int(resource_value)
-				self._resource_replacment_dict[resource_str + resource_value_str] = f"config['resource']['{self._rule_name}']['{resource_name}']"
+				self._resource_replacment_dict[resource_str + resource_value_str] = f"config['resources']['{self._rule_name}']['{resource_name}']"
 
 	def _parseConfig (self):
 
