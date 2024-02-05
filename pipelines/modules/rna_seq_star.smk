@@ -6,20 +6,23 @@ rule all:
 
 rule star_genome_generate_rnaseq:
 	input:
-		os.path.join(config['paths']['assembly_dir'], f"{config['species']}_{config['assembly_version']}.fa")
+		fasta_file=os.path.join(config['paths']['assembly_dir'], f"{config['species']}_{config['assembly_version']}.fa"),
+		gtf_file=os.path.join(config['paths']['assembly_dir'], f"{config['species']}_{config['assembly_version']}.gtf")
 	output:
 		index_file=os.path.join(config['paths']['index_dir'], "STAR", "SAindex")
 	params:
-		index_dir=directory(os.path.join(config['paths']['index_dir'], "STAR"))
+		index_dir=directory(os.path.join(config['paths']['index_dir'], "STAR")),
+		read_len=config['read_len']
 	singularity:
 		"docker://quay.io/biocontainers/star:2.7.8a--0"
 	resources:
-		mem_mb=32000
+		mem_mb=3200
 	threads: 12
 	shell:
 		"""
 		let "index_mem_b={resources.mem_mb} * 10**6"
-		STAR --runThreadN {threads} --runMode genomeGenerate --genomeDir {params.index_dir} --genomeFastaFiles {input} --limitGenomeGenerateRAM $index_mem_b --genomeSAindexNbases 13
+		let "index_read_len={params.read_len} - 1"
+		STAR --runThreadN {threads} --runMode genomeGenerate --genomeDir {params.index_dir} --genomeFastaFiles {input.fasta_file} --limitGenomeGenerateRAM $index_mem_b --genomeSAindexNbases 13 --sjdbGTFfile {input.gtf_file} --sjdbOverhang $index_read_len
 		"""
 
 rule star_single_end_rnaseq:

@@ -1,6 +1,6 @@
-pipeline: rnaseq-counts-star
+pipeline: unmapped-fastqs-star
 parser:
-  help: Count RNAseq reads within a genome assembly using STAR and featureCounts
+  help: Create unmapped FASTQs using STAR
   groups:
     input_parser:
       type: mutually_exclusive
@@ -60,7 +60,7 @@ parser:
         help: "Assign the working directory for snakemake"
         type: str
         default:
-          str: "RNAseqCounts"
+          str: "RNAseqUnmappedFASTQs"
           suffix:
             - function: jobTimeStamp
             - function: jobRandomString
@@ -68,7 +68,7 @@ parser:
         help: "Assign the snakemake job prefix"
         type: str
         default:
-          str: "countSTAR"
+          str: "RNAseqUnmappedFASTQs"
           suffix:
             - function: jobTimeStamp
             - function: jobRandomString
@@ -96,11 +96,8 @@ parser:
       rnaseq-sorted-bam-dir:
         help: "Directory to store sorted BAM files"
         type: str
-        default: "RNAseq/BAMs/Sorted"
-      rnaseq-count-dir:
-        help: "Directory to store RNAseq counts"
-        type: str
-        default: "RNAseq/Counts" 
+        default: 
+          str: "RNAseq/BAMs/Sorted"
 setup:
   rnaseq_input:
     wildcard-method:
@@ -183,8 +180,6 @@ command-line:
   use-singularity: True
 
 snakefiles:
-  - rna_seq_star
-  - rna_seq_sort
-  - rna_seq_feature_counts
+  - rna_seq_star_multimap_fastqs
 
 

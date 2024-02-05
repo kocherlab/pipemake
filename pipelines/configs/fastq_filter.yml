@@ -1,0 +1,108 @@
+pipeline: fastq-filter
+parser:
+  help: Filter FASTQ files using fastp
+  groups:
+    input_parser:
+      type: mutually_exclusive
+      args:
+        required: True
+  args:
+    params:
+      fastq-wildcard:
+        help: "Wildcard statement to represent FASTQs"
+        type: str
+        group: input_parser
+      fastq-table:
+        help: "Table with sample and FASTQs filenames"
+        type: str
+        group: input_parser
+        action: confirmFile
+      fastq-copy-method:
+        help: "Socifies if FASTQs should be copied or symbolically linked."
+        choices:
+          - 'symbolic_link'
+          - 'copy'
+        default: 'symbolic_link'
+      fastq-standardized-wildcard:
+        help: "Standardized wildcard statement used to store FASTQs"
+        type: str
+        default: 
+          str: "{sample}_{read}.fq.gz"
+      work-dir:
+        help: "Assign the working directory for snakemake"
+        type: str
+        default:
+          str: "RNAseqCounts"
+          suffix:
+            - function: jobTimeStamp
+            - function: jobRandomString
+      snakemake-job-prefix:
+        help: "Assign the snakemake job prefix"
+        type: str
+        default:
+          str: "countSTAR"
+          suffix:
+            - function: jobTimeStamp
+            - function: jobRandomString
+    paths:
+      unfiltered-fastq-dir:
+        help: "Directory to store unfiltered FASTQ files"
+        type: str
+        default: 
+          str: "FASTQ/Unfiltered"
+      filtered-fastq-dir:
+        help: "Directory to store filtered FASTQ files"
+        type: str
+        default: 
+          str: "FASTQ/Filtered"
+setup:
+  fastq_input:
+    wildcard-method:
+      input:
+        args:
+          - "work-dir"
+          - "fastq-wildcard"
+          - "fastq-standardized-wildcard"
+          - "unfiltered-fastq-dir"
+      standardize:
+        method: "wildcard-str"
+        args:
+          wildcard_str: "{fastq-wildcard}"
+          standardized_filename: "{fastq-standardized-wildcard}"
+          out_dir: "{unfiltered-fastq-dir}"
+          work_dir: '{work-dir}'
+          copy_method: '{fastq_copy_method}'
+          gzipped: True
+      samples:
+        method: "wildcard-str"
+        args:
+          wildcard_str: "{fastq-wildcard}"
+          sample_wildcard: 'sample'
+
+    table-method:
+      input:
+        args:
+          - "work-dir"
+          - "fastq-table"
+          - "fastq-standardized-wildcard"
+          - "unfiltered-fastq-dir"
+      standardize:
+        method: "table-file"
+        args:
+          table_filename: "{fastq-table}"
+          standardized_filename: "{fastq-standardized-wildcard}"
+          out_dir: "{unfiltered-fastq-dir}"
+          work_dir: '{work-dir}'
+          copy_method: '{fastq_copy_method}'
+          gzipped: True
+      samples:
+        method: "table-file"
+        args:
+          table_filename: "{fastq-table}"
+
+command-line:
+  cores: 20
+  use-singularity: True
+
+snakefiles:
+  - fastq_filter_fastp

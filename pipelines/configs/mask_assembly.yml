@@ -1,0 +1,72 @@
+pipeline: mask-assembly
+parser:
+  help: Annotate an assembly using BRAKER3
+  args:
+    params:
+      assembly-fasta:
+        help: "Assembly file"
+        type: str
+        required: True
+        action: confirmFile
+      assembly-version:
+        help: "Assembly Version"
+        type: str
+        default:
+          str: "v"
+          suffix:
+            - function: jobRandomString
+      species:
+        help: "Species name"
+        type: str
+        default:
+          str: "Sp"
+          suffix:
+            - function: jobRandomString
+      work-dir:
+        help: "Assign the working directory for snakemake"
+        type: str
+        default:
+          str: "Assembly"
+          suffix:
+            - function: jobTimeStamp
+            - function: jobRandomString
+      snakemake-job-prefix:
+        help: "Assign the snakemake job prefix"
+        type: str
+        default:
+          str: "AnnotateBraker3"
+          suffix:
+            - function: jobTimeStamp
+            - function: jobRandomString
+    paths:
+      assembly-dir:
+        help: "Directory to store assembly"
+        type: str
+        default: "Assembly"
+      repeatmodeler-dir:
+        help: "Directory to store RepeatModeler output"
+        type: str
+        default: "Assembly/RepeatModeler"
+setup:
+  assembly_input:
+    file-method:
+      input:
+        args:
+          - "work-dir"
+          - "assembly-fasta"
+          - "assembly-dir"
+      standardize:
+        method: "file-str"
+        args:
+          input_filename: "{assembly-fasta}"
+          standardized_filename: "{species}_{assembly_version}.fa"
+          out_dir: "{assembly-dir}"
+          work_dir: '{work-dir}'
+          gzipped: False
+
+command-line:
+  cores: 20
+  use-singularity: True
+
+snakefiles:
+  - repeatmasking
