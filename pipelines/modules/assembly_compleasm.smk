@@ -1,12 +1,3 @@
-module config:
-	params:
-		species
-		assembly_version
-		busco_database
-	paths:
-		assembly_dir
-		downloads_dir
-
 rule all:
 	input:
 		os.path.join(config['paths']['assembly_dir'], 'compleasm', 'summary.txt')
