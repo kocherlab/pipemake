@@ -9,7 +9,7 @@ rule annotate_braker3:
 		protein_hints=os.path.join(config['paths']['homology_dir'], 'ProteinHints.fa')
 	output:
 		os.path.join(config['paths']['annotations_dir'], 'BRAKER3', 'braker.gff3'),
-		os.path.join(config['paths']['annotations_dir'], 'BRAKER3', 'braker.codingseq')
+		os.path.join(config['paths']['annotations_dir'], 'BRAKER3', 'braker.codingseq'),
 		os.path.join(config['paths']['annotations_dir'], 'BRAKER3', 'braker.aa')
 	params:
 		annotations_dir=os.path.join(config['paths']['annotations_dir'], 'BRAKER3'),
