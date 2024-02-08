@@ -1,0 +1,109 @@
+pipeline: annotate-utrs-peaks2utr
+parser:
+  help: Annotate an 3prime-UTRs using peaks2utr using a merged BAM file
+  args:
+    params:
+      rnaseq-bam:
+        help: "RNAseq BAM file"
+        type: str
+        required: True
+        action: confirmFile
+      annotations-gff:
+        help: "Annotations GFF"
+        type: str
+        required: True
+        action: confirmFile
+      assembly-version:
+        help: "Assembly Version"
+        type: str
+        default:
+          str: "v"
+          suffix:
+            - function: jobRandomString
+      annotation-version:
+        help: "Annotation Version"
+        type: str
+        default:
+          str: ""
+          suffix:
+            - function: jobRandomString
+      utr-version:
+        help: "UTR Version"
+        type: str
+        default:
+          str: ""
+          suffix:
+            - function: jobRandomString
+      species:
+        help: "Species name"
+        type: str
+        default:
+          str: "Sp"
+          suffix:
+            - function: jobRandomString
+      work-dir:
+        help: "Assign the working directory for snakemake"
+        type: str
+        default:
+          str: "Assembly"
+          suffix:
+            - function: jobTimeStamp
+            - function: jobRandomString
+      snakemake-job-prefix:
+        help: "Assign the snakemake job prefix"
+        type: str
+        default:
+          str: "AnnotateBraker3"
+          suffix:
+            - function: jobTimeStamp
+            - function: jobRandomString
+    paths:
+      rnaseq-bam-dir:
+        help: "Directory to store BAM files"
+        type: str
+        default: "RNAseq/BAMs"
+      annotations-dir:
+        help: "Directory to store annotations"
+        type: str
+        default: 
+          str: "Annotations"
+setup:
+  rnaseq_input:
+    file-method:
+      input:
+        args:
+          - "work-dir"
+          - "rnaseq-bam"
+          - "rnaseq-bam-dir"
+      standardize:
+        method: "file-str"
+        args:
+          input_filename: "{rnaseq-bam}"
+          standardized_filename: "{species}_{assembly-version}.bam"
+          out_dir: "{rnaseq-bam-dir}"
+          work_dir: '{work-dir}'
+          copy_method: 'symbolic_link'
+          gzipped: True
+
+  gff_input:
+    file-method:
+      input:
+        args:
+          - "work-dir"
+          - "annotations-gff"
+          - "annotations-dir"
+      standardize:
+        method: "file-str"
+        args:
+          input_filename: "{annotations-gff}"
+          standardized_filename: "{species}_{assembly-version}.{annotation-version}.gff3"
+          out_dir: "{annotations-dir}"
+          work_dir: '{work-dir}'
+          gzipped: False
+
+command-line:
+  cores: 20
+  use-singularity: True
+
+snakefiles:
+  - annotate_3primeUTRs_peaks2utr

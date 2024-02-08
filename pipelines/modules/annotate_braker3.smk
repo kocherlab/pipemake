@@ -1,6 +1,6 @@
 rule all:
 	input:
-		os.path.join(config['paths']['annotations_dir'], f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.gff3") 
+		os.path.join(config['paths']['annotations_dir'], f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.gff3")
 
 rule annotate_braker3:
 	input:
