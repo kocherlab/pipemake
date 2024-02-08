@@ -383,7 +383,9 @@ class SnakeRuleIO ():
 			else: self._rule_config_params.update(processed_attribute.updateParams())
 
 			# Check if the rule is output, confirm the attribute is input, and update the rule output
-			if not self.in_output and rule_attribute == 'input': self._rule_output_list.append(rule_line.strip())
+			if not self.in_output and rule_attribute == 'input':
+				output_line = rule_line.strip()[:-1] if rule_line.strip().endswith(',') else rule_line.strip()
+				self._rule_output_list.append(output_line)
 	
 			return rule_line
 
