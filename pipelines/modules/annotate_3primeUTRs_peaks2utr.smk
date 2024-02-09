@@ -8,8 +8,6 @@ rule annotate_3prime_utrs_peaks2utr:
 		base_gff=os.path.join(config['paths']['annotations_dir'], f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}.gff3")
 	output:
 		os.path.join(config['paths']['annotations_dir'], 'peaks2utr', f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}.{config['utr_version']}.gff3")
-	params:
-		out_prefix=os.path.join(config['paths']['annotations_dir'], 'peaks2utr', f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}.{config['utr_version']}")
 	resources:
 		mem_mb=120000
 	threads: 10
