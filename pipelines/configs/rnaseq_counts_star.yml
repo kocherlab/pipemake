@@ -40,7 +40,7 @@ parser:
         action: confirmFile
       read-len:
         help: "Read Length"
-        type: str
+        type: int
         required: True
       assembly-version:
         help: "Assembly Version"
@@ -85,6 +85,10 @@ parser:
         help: "Directory to store the FASTQs files"
         type: str
         default: "RNAseq/FASTQs"
+      rnaseq-splice-aligned-dir:
+        help: "Directory to store BAM files"
+        type: str
+        default: "RNAseq/SpliceJunctions/Aligned"
       rnaseq-bam-dir:
         help: "Directory to store BAM files"
         type: str
@@ -183,7 +187,7 @@ command-line:
   use-singularity: True
 
 snakefiles:
-  - rna_seq_star
+  - rna_seq_2pass_star
   - rna_seq_sort
   - rna_seq_feature_counts
 

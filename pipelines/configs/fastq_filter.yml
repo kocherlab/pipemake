@@ -28,6 +28,11 @@ parser:
         type: str
         default: 
           str: "{sample}_{read}.fq.gz"
+      min-length:
+        help: "Minimum length of reads to keep"
+        type: int
+        default:
+          str: "50"
       work-dir:
         help: "Assign the working directory for snakemake"
         type: str
