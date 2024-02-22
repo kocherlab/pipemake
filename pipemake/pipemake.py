@@ -12,9 +12,9 @@ import datetime
 from pydoc import locate
 from collections import defaultdict
 
-from kocher_pipelines.logger import *
-from kocher_pipelines.config import *
-from kocher_pipelines.snakemakeIO import SnakePipelineIO
+from pipemake.logger import *
+from pipemake.config import *
+from pipemake.snakemakeIO import SnakePipelineIO
 
 def jobRandomString (num_chars = 4):
 	global random_string

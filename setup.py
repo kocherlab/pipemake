@@ -3,7 +3,7 @@ import os
 
 from setuptools import setup
 
-import kocher_pipelines
+import pipemake
 
 with io.open("README.rst", "rt", encoding="utf8") as f:
     readme = f.read()
@@ -17,23 +17,23 @@ if os.path.isfile(requirement_path):
         requirements = f.read().splitlines()
 
 setup(
-    name=kocher_pipelines.__name__,
-    version=kocher_pipelines.__version__,
+    name=pipemake.__name__,
+    version=pipemake.__version__,
     project_urls={
-        "Documentation": kocher_pipelines.__docs__,
-        "Code": kocher_pipelines.__code__,
-        "Issue tracker": kocher_pipelines.__issue__,
+        "Documentation": pipemake.__docs__,
+        "Code": pipemake.__code__,
+        "Issue tracker": pipemake.__issue__,
     },
-    license=kocher_pipelines.__license__,
-    url=kocher_pipelines.__url__,
-    description=kocher_pipelines.__summary__,
+    license=pipemake.__license__,
+    url=pipemake.__url__,
+    description=pipemake.__summary__,
     long_description_content_type="text/x-rst",
     long_description=readme,
-    packages=["kocher_pipelines"],
+    packages=["pipemake"],
     install_requires=requirements,
     entry_points={
         "console_scripts": [
-            "kocher-pipelines=kocher_pipelines.kocher_pipelines:main",
+            "pipemake=pipemake.pipemake:main",
         ],
     },
     python_requires=">=3.7",

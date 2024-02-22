@@ -1,5 +1,5 @@
-from kocher_pipelines.seqIO import SeqFileIO, SeqTableIO
-from kocher_pipelines.wildcardIO import WildcardIO
+from pipemake.seqIO import SeqFileIO, SeqTableIO
+from pipemake.wildcardIO import WildcardIO
 
 class ProcessIO ():
 	def __init__ (self, processIO, standardize_func = None, **kwargs):

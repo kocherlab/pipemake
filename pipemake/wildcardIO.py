@@ -3,7 +3,7 @@ import sys
 import copy
 import itertools
 
-from kocher_pipelines.seqIO import SeqFileIO
+from pipemake.seqIO import SeqFileIO
 
 from snakemake.io import expand, glob_wildcards
 

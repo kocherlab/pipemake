@@ -4,8 +4,8 @@ import yaml
 
 from collections import defaultdict
 
-from kocher_pipelines.processIO import standardizeInput, returnSamples, returnPaths
-from kocher_pipelines.snakemakeIO import SnakePipelineIO
+from pipemake.processIO import standardizeInput, returnSamples, returnPaths
+from pipemake.snakemakeIO import SnakePipelineIO
 
 def loadPipelineConfigs (directory):
 
