@@ -1,10 +1,11 @@
 name: pipesnake
 channels:
+  - bioconda
   - conda-forge
   - defaults
 dependencies:
   - python=3.11
-  - conda-forge::snakemake>=8.4.12
+  - bioconda::snakemake>=8.4.12
   - conda-forge::biopython>=1.81
   - conda-forge::pip>=23.2.1
   - pip:

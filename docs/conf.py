@@ -15,8 +15,8 @@
 import os
 import sys
 
-import docs.utils
-import naps
+#import docs.utils
+import pipemake
 
 sys.path.insert(0, os.path.abspath(".."))
 
