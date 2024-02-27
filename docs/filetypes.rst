@@ -10,31 +10,38 @@ Pipemake operates using a combination of two file types: Snakemake files and pip
 Snakemake files (Modules)
 *************************
 
-The primary goal of a Snakemake file in Pipemake is to define a **Module**. A **Module** consists of one or more rules (and/or checkpoints) that are used to perform a specific pipeline task (align reads, call variants, annotate a genome, etc.). Another important aspect of a **Module** is a standardized set of configurable input and output files for each rule. This is important for two reasons: 1) it allows Pipemake to properly assign input and output files and 2) it allows for a **Module** to be easily reused in other pipelines.
+Snakemake files are used to define Pipemake **Modules**. In general, **Modules** follow the same structure and nomenclature as typical Snakemake files. However, Pipemake **Modules** are focused on being reusable. This is achieved by following a few key principles:
+* Limiting a **Module** to a collection of rules used to perform a particular task (align reads, call variants, annotate a genome, etc.)
+* Consistent input and output usage, which may be either hard-coded or generated from a set of configurable terms
+* Using singularity containers to ensure a consistent software environment
 
-For example, a basic snakemake file that aligns reads from a sample to a reference genome might have the following rules:
+By following these principles, Pipemake **Modules** may be easily used in multiple pipelines. For example, a basic snakemake file that aligns reads from a sample to a reference genome might have the following rules:
 
 .. code-block:: python
 
     rule index_reference:
         input:
-            "reference.fasta"
+            "myref.fasta"
         output:
-            "reference.fasta.bwt"
+            "myref.fasta.bwt"
+        singularity:
+		    "docker://quay.io/biocontainers/bwa:0.7.8"
         shell:
             "bwa index {input}"
 
     rule align_reads:
         input:
             reads="Sample1.R1.fastq.gz",
-            ref="reference.fasta",
-            index="reference.fasta.bwt"
+            ref="myref.fasta",
+            index="myref.fasta.bwt"
         output:
             "Sample1.bam"
+        singularity:
+		    "docker://quay.io/biocontainers/bwa:0.7.8"
         shell:
             "bwa mem -t 8 {input.ref} {input.reads} | samtools view -bS - > {output}"
 
-To convert this into a Pipemake **Module**, we would only need to modify the input and output files as follows:
+To convert this into a Pipemake **Module** with configurable files, we would only need to modify the input and output files as follows:
 
 .. code-block:: python
 
@@ -43,6 +50,8 @@ To convert this into a Pipemake **Module**, we would only need to modify the inp
             os.path.join(config['paths']['assembly_dir'], f"{config['species']}_{config['assembly_version']}.fa")
         output:
             os.path.join(config['paths']['assembly_dir'], f"{config['species']}_{config['assembly_version']}.fa.bwt")
+        singularity:
+		    "docker://quay.io/biocontainers/bwa:0.7.8"
         shell:
             "bwa index {input}"
 
@@ -53,21 +62,56 @@ To convert this into a Pipemake **Module**, we would only need to modify the inp
             index=os.path.join(config['paths']['assembly_dir'], f"{config['species']}_{config['assembly_version']}.fa.bwt")
         output:
             os.path.join(config['paths']['rnaseq_aligned_bam_dir'], "{sample}.bam")
+        singularity:
+		    "docker://quay.io/biocontainers/bwa:0.7.8"
         shell:
             "bwa mem -t 8 {input.ref} {input.reads} | samtools view -bS - > {output}"
 
-In this example, we have replaced the hard-coded file names with a set of configurable terms: 
+In this example, we have replaced the unique filenames with the following set of configurable terms: 
 * `config['species']`
 * `config['assembly_version']`
 * `config['paths']['assembly_dir']`
 * `config['paths']['rnaseq_fastq_dir']`
 * `config['paths']['rnaseq_aligned_bam_dir']`
 
-Pipemake uses these terms to generate a Snakemake configuration file with appropriate values. Terms may also be grouped together in the configuration file. For example, the filepath terms `config['paths']['assembly_dir']`, `config['paths']['rnaseq_fastq_dir']`, and `config['paths']['rnaseq_aligned_bam_dir']` are stored together within `config['paths']`. Grouping related terms together allows for a more organized configuration file, but is not required.
+By consistently using these configurable term (or standardized filenames), it is possible to easily connect multiple **Modules** together to form pipelines. For example, the output of the `align_reads` rule may be used as the input for another **Module** to count reads:
+
+.. code-block:: python
+
+    rule count_reads:
+        input:
+            bam=os.path.join(config['paths']['rnaseq_aligned_bam_dir'], "{sample}.bam"),
+            gtf=os.path.join(config['paths']['annotation_dir'], f"{config['species']}_{config['annotation_version']}.gtf")
+        output:
+            os.path.join(config['paths']['rnaseq_count_dir'], "{sample}.counts")
+        singularity:
+            "docker://quay.io/biocontainers/subread:1.6.4--py36pl5.22.0_0"
+        shell:
+            "featureCounts -a {input.gtf} -o {output} {input.bam}"
+
+In the above example, the `count_reads` rule uses BAM files stored within the `config['paths']['rnaseq_aligned_bam_dir']` directory. As the name implies, the directory contains aligned RNAseq reads in BAM format and thus we may use this path whenever we need to gain access to them. By consistently using the same terms, such as `config['paths']['rnaseq_aligned_bam_dir']`, we are easily able to connect **Modules** together to form pipelines.
+
+.. note::
+
+    Pipemake is designed to detect configurable terms and will ensure the terms are properly assigned in the configuration file. Configurable terms may also be grouped together in the configuration file. For example, the filepath terms `config['paths']['assembly_dir']`, `config['paths']['rnaseq_fastq_dir']`, and `config['paths']['rnaseq_aligned_bam_dir']` will be stored together within `config['paths']`. Grouping related terms together allows for a more organized configuration file, but is not required.
+
+.. attention::
+
+    While the usage of configurable terms is not required, it is highly recommended.
 
 ****************************
 Pipeline configuration files
 ****************************
+
+Pipemake uses YAML-formatted files to define **Pipelines**. These files are used to define the following aspects of a pipeline:
+* The **Pipeline** name and description
+* Input files
+* Configurable terms
+* **Pipeline** settings and/or parameters
+* Steps needed to standardize the input files for the **Pipeline**
+* And lastly, the **Modules** used within the **Pipeline**
+
+The following is an example of a **Pipeline** configuration file:
 
 .. code-block:: bash
 
