@@ -4,9 +4,7 @@
 Pipemake Installation Instructions
 ##################################
 
-.. attention::
-
-    We recommend installing Pipemake using Conda. This is the simplest and most reliable installation method to ensure that all dependencies are installed correctly.
+We recommend installing Pipemake using Conda. This is the simplest and most reliable installation method to ensure that all dependencies are installed correctly.
 
 *****
 Conda
