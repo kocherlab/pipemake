@@ -156,7 +156,7 @@ def pipeline_parser (config_parser_pipelines):
 					elif arg_params['action'] == 'confirmFile': arg_params['action'] = confirmFile()
 
 				# Configure the default params, if specified
-				if 'default' in arg_params and not isinstance(arg_params['default'], str):
+				if 'default' in arg_params and isinstance(arg_params['default'], dict):
 					default_str = arg_params['default']['str']
 					if 'suffix' in arg_params['default']:
 						if isinstance(arg_params['default']['suffix'], str): arg_params['default']['suffix'] = [arg_params['default']['suffix']]

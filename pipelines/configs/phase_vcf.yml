@@ -1,0 +1,65 @@
+pipeline: phase-vcf
+parser:
+  help: Phase VCF using SHAPEIT2
+  args:
+    params:
+      reseq-vcf:
+        help: "Resequencing VCF file"
+        type: str
+        required: True
+        action: confirmFile
+      vcf-prefix:
+        help: "VCF prefix"
+        type: str
+        required: True
+      work-dir:
+        help: "Assign the working directory for snakemake"
+        type: str
+        default:
+          str: "PhaseVCF"
+          suffix:
+            - function: jobTimeStamp
+            - function: jobRandomString
+      snakemake-job-prefix:
+        help: "Assign the snakemake job prefix"
+        type: str
+        default:
+          str: "PhaseVCF"
+          suffix:
+            - function: jobTimeStamp
+            - function: jobRandomString
+    paths:
+      reseq-vcf-unphased-dir:
+        help: "Directory to store unphased VCFs files"
+        type: str
+        default: "reSEQ/VCFs/Unphased"
+      reseq-vcf-phased-dir:
+        help: "Directory to store phased VCFs files"
+        type: str
+        default: "reSEQ/VCFs/Phased"
+setup:
+  reseq_vcf:
+    file-method:
+      input:
+        args:
+          - "work-dir"
+          - "reseq-vcf"
+          - "vcf-prefix"
+          - "reseq-vcf-unphased-dir"
+      standardize:
+        method: "file-str"
+        args:
+          input_filename: "{reseq-vcf}"
+          standardized_filename: "{vcf-prefix}.vcf.gz"
+          out_dir: "{reseq-vcf-unphased-dir}"
+          work_dir: '{work-dir}'
+          gzipped: True
+  
+command-line:
+  cores: 20
+  use-singularity: True
+
+snakefiles:
+  - reseq_phase_shapeit5
+
+
