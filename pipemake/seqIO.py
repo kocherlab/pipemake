@@ -87,7 +87,6 @@ class SeqFileIO ():
 
 		# Copy to a compressed status
 		elif not self.gzipped and gzipped:
-			print(self.filename, dest_filename)
 			with open(self.filename, 'r') as f_in, gzip.open(dest_filename, 'wt') as f_out:
 				shutil.copyfileobj(f_in, f_out)
 

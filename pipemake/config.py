@@ -54,7 +54,6 @@ def processPipelineSetup (pipeline_setup, pipeline_args):
 			
 			# Check for missing arguments
 			for input_arg in input_args['args']:
-				print(input_arg)
 				if input_arg.replace('-', '_') not in pipeline_args: raise Exception(f'Setup argument {input_arg} not found among pipeline argument')
 
 			# Confirm expected args were specified

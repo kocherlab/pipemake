@@ -242,7 +242,7 @@ class SnakeFileIO ():
 				if self._indent_style:
 
 					# Skip rules as they have no indent
-					if smk_line.startswith('rule'): continue
+					if smk_line.startswith('rule') or smk_line.startswith('checkpoint') or smk_line.startswith('def'): continue
 					
 					if not smk_line.startswith(self._indent_style):
 						raise Exception(f'Inconsistent indent style "{smk_line[0]}"')
