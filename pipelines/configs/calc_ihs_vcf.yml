@@ -1,6 +1,6 @@
-pipeline: phase-vcf
+pipeline: calc-ihs-vcf
 parser:
-  help: Phase VCF using SHAPEIT2
+  help: Calculate iHS from phased VCF using selscan
   args:
     params:
       reseq-vcf:
@@ -12,6 +12,10 @@ parser:
         help: "Species name"
         type: str
         required: True
+      maf:
+        help: "Minor allele frequency"
+        type: float
+        default: 0.05
       work-dir:
         help: "Assign the working directory for snakemake"
         type: str
@@ -37,6 +41,10 @@ parser:
         help: "Directory to store phased VCFs files"
         type: str
         default: "reSEQ/VCFs/Phased"
+      reseq-popgen-analyses-dir:
+        help: "Directory to store resequencing population genetics analyses"
+        type: str
+        default: "reSEQ/PopGenAnalyses"
 setup:
   reseq_vcf:
     file-method:
