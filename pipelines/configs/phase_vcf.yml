@@ -8,8 +8,8 @@ parser:
         type: str
         required: True
         action: confirmFile
-      vcf-prefix:
-        help: "VCF prefix"
+      species:
+        help: "Species name"
         type: str
         required: True
       work-dir:
@@ -44,13 +44,13 @@ setup:
         args:
           - "work-dir"
           - "reseq-vcf"
-          - "vcf-prefix"
+          - "species"
           - "reseq-vcf-unphased-dir"
       standardize:
         method: "file-str"
         args:
           input_filename: "{reseq-vcf}"
-          standardized_filename: "{vcf-prefix}.vcf.gz"
+          standardized_filename: "{species}.vcf.gz"
           out_dir: "{reseq-vcf-unphased-dir}"
           work_dir: '{work-dir}'
           gzipped: True
@@ -60,6 +60,6 @@ command-line:
   use-singularity: True
 
 snakefiles:
-  - reseq_phase_shapeit5
+  - reseq_phase_shapeit4
 
 

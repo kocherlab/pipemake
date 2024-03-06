@@ -21,6 +21,7 @@ checkpoint split_by_chrom_bcftools:
 		bcftools index -f {input}
 		bcftools index -s {input} | cut -f 1 | while read chrom; do bcftools view -O b -o {params.out_prefix}${{chrom}}.bcf {input} '${{chrom}}'; done
 		"""
+		
 rule phase_chroms_shapeit5:
 	input:
 		os.path.join(config['paths']['reseq_vcf_unphased_dir'], 'Split', '{chrom}.bcf')
