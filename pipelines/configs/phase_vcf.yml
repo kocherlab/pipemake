@@ -61,5 +61,4 @@ command-line:
 
 snakefiles:
   - reseq_phase_shapeit4
-
-
+  - reseq_sweep_selscan

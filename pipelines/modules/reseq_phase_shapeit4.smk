@@ -2,20 +2,20 @@ rule all:
 	input:
 		os.path.join(config['paths']['reseq_vcf_phased_dir'], f"{config['species']}.vcf.gz")
 
-rule vcf_header_bcftools:
+rule reseq_header_bcftools:
 	input:
 		os.path.join(config['paths']['reseq_vcf_unphased_dir'], f"{config['species']}.vcf.gz")
 	output:
 		temp(os.path.join(config['paths']['reseq_vcf_unphased_dir'], f"{config['species']}.header"))
 	singularity:
-		"/Genomics/argo/users/aewebb/.local/images/bcftools.sif"
+		"/home/aewebb/kocher_POP.sif"
 	resources:
 		mem_mb=2000
 	threads: 1
 	shell:
 		"bcftools view -h {input} > {output}"
 
-checkpoint split_by_chrom_bcftools:
+checkpoint reseq_split_unphased_bcftools:
 	input:
 		os.path.join(config['paths']['reseq_vcf_unphased_dir'], f"{config['species']}.vcf.gz")
 	output:
@@ -24,7 +24,7 @@ checkpoint split_by_chrom_bcftools:
 		out_dir=os.path.join(config['paths']['reseq_vcf_unphased_dir'], 'SplitByChrom'),
 		out_prefix=os.path.join(config['paths']['reseq_vcf_unphased_dir'], 'SplitByChrom', '')
 	singularity:
-		"/Genomics/argo/users/aewebb/.local/images/bcftools.sif"
+		"/home/aewebb/kocher_POP.sif"
 	resources:
 		mem_mb=2000
 	threads: 1
@@ -35,14 +35,14 @@ checkpoint split_by_chrom_bcftools:
 		bcftools index -s {input} | cut -f 1 | while read chrom; do bcftools view --regions $chrom -O z -o {params.out_prefix}${{chrom}}.vcf.gz {input}; done
 		"""
 
-rule phase_chroms_shapeit4:
+rule reseq_phase_chroms_shapeit4:
 	input:
 		vcf=os.path.join(config['paths']['reseq_vcf_unphased_dir'], 'SplitByChrom', '{chrom}.vcf.gz'),
 		header=os.path.join(config['paths']['reseq_vcf_unphased_dir'], f"{config['species']}.header")
 	output:
 		temp(os.path.join(config['paths']['reseq_vcf_phased_dir'], 'SplitByChrom', '{chrom}.vcf.gz'))
 	singularity:
-		"/Genomics/argo/users/aewebb/.local/images/shapeit4.sif"
+		"/home/aewebb/kocher_POP.sif"
 	resources:
 		mem_mb=24000
 	threads: 12
@@ -55,20 +55,20 @@ rule phase_chroms_shapeit4:
 		shapeit4 --input {input.vcf} --region {wildcards.chrom} --output {output} --thread {threads}
 		"""
 
-def aggregate_phased (wildcards):
+def aggregate_phased_reseq (wildcards):
 	checkpoint_output = checkpoints.split_by_chrom_bcftools.get(**wildcards).output[0]
 	return expand(os.path.join(config['paths']['reseq_vcf_phased_dir'], 'SplitByChrom', '{chrom}.vcf.gz'), chrom = glob_wildcards(os.path.join(checkpoint_output, "{chrom}.vcf.gz")).chrom)
 
-rule cat_phased_chroms_bcftools:
+rule reseq_cat_phased_bcftools:
 	input:
-		vcfs=aggregate_phased,
+		vcfs=aggregate_phased_reseq,
 		header=os.path.join(config['paths']['reseq_vcf_unphased_dir'], f"{config['species']}.header")
 	output:
 		temp(os.path.join(config['paths']['reseq_vcf_phased_dir'], f"{config['species']}.shapeit_header.vcf.gz"))
 	params:
 		unphased_split_dir=os.path.join(config['paths']['reseq_vcf_unphased_dir'], 'SplitByChrom')
 	singularity:
-		"/Genomics/argo/users/aewebb/.local/images/bcftools.sif"
+		"/home/aewebb/kocher_POP.sif"
 	resources:
 		mem_mb=8000
 	threads: 4
@@ -81,14 +81,14 @@ rule cat_phased_chroms_bcftools:
 		rm -r {params.unphased_split_dir}
 		"""
 
-rule replace_shapit_header_bcftools:
+rule reseq_replace_header_bcftools:
 	input:
 		shapeit_vcf=os.path.join(config['paths']['reseq_vcf_phased_dir'], f"{config['species']}.shapeit_header.vcf.gz"),
 		header=os.path.join(config['paths']['reseq_vcf_unphased_dir'], f"{config['species']}.header")
 	output:
 		os.path.join(config['paths']['reseq_vcf_phased_dir'], f"{config['species']}.vcf.gz")
 	singularity:
-		"/Genomics/argo/users/aewebb/.local/images/bcftools.sif"
+		"/home/aewebb/kocher_POP.sif"
 	resources:
 		mem_mb=2000
 	threads: 1
