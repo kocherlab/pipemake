@@ -8,7 +8,7 @@ rule reseq_phased_map_plink:
 	output:
 		temp(os.path.join(config['paths']['reseq_vcf_phased_dir'], 'SplitByChrom', '{chrom}.map')),
 		temp(os.path.join(config['paths']['reseq_vcf_phased_dir'], 'SplitByChrom', '{chrom}.ped')),
-		temp(os.path.join(config['paths']['reseq_vcf_phased_dir'], 'SplitByChrom', '{chrom}.nosex'))
+		temp(os.path.join(config['paths']['reseq_vcf_phased_dir'], 'SplitByChrom', '{chrom}.log')),
 	params:
 		out_prefix=os.path.join(config['paths']['reseq_vcf_phased_dir'], 'SplitByChrom', '{chrom}')
 	singularity:
