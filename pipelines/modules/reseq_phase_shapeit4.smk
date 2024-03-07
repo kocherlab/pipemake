@@ -56,7 +56,7 @@ rule reseq_phase_chroms_shapeit4:
 		"""
 
 def aggregate_phased_reseq (wildcards):
-	checkpoint_output = checkpoints.split_by_chrom_bcftools.get(**wildcards).output[0]
+	checkpoint_output = checkpoints.reseq_split_unphased_bcftools.get(**wildcards).output[0]
 	return expand(os.path.join(config['paths']['reseq_vcf_phased_dir'], 'SplitByChrom', '{chrom}.vcf.gz'), chrom = glob_wildcards(os.path.join(checkpoint_output, "{chrom}.vcf.gz")).chrom)
 
 rule reseq_cat_phased_bcftools:

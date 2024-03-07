@@ -16,6 +16,10 @@ parser:
         help: "Minor allele frequency"
         type: float
         default: 0.05
+      bins:
+        help: "Number of bins for normalization"
+        type: int
+        default: 100
       work-dir:
         help: "Assign the working directory for snakemake"
         type: str
