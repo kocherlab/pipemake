@@ -18,8 +18,8 @@ parser:
         type: str
         required: True
         action: confirmFile
-      model-categories:
-        help: "Model categories"
+      categories:
+        help: "Category names"
         type: str
         nargs: '+'
         required: True

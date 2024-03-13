@@ -1,6 +1,6 @@
 rule all:
 	input:
-		expand(os.path.join(config['paths']['reseq_gwas_dir'], 'GEMMA', f"{config['species']}_{config['assembly_version']}.{{category}}.lmm.filtered.assoc.txt"), category=config['model_categories'])
+		expand(os.path.join(config['paths']['reseq_gwas_dir'], 'GEMMA', f"{config['species']}_{config['assembly_version']}.{{category}}.lmm.filtered.assoc.txt"), category=config['categories'])
 
 rule category_ind_file:
 	input:
@@ -16,7 +16,7 @@ rule category_ind_file:
 	singularity:
 		"/Genomics/argo/users/aewebb/.local/images/pipemake_utils.sif"
 	shell:
-		"model-category-inds --model {input} --model-category {wildcards.category} --out-prefix {params.out_prefix}"
+		"model-inds --model {input} --model-name {wildcards.category} --out-prefix {params.out_prefix}"
 
 rule gemma_category_bed:
 	input:
