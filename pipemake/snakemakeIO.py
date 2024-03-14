@@ -298,11 +298,15 @@ class SnakeFileIO ():
 				# Split the line by the indent style (rule, attribute, param)
 				smk_list = smk_line.rstrip().split(self._indent_style)
 
-				if smk_list[0] and not (smk_list[0].startswith('rule') and smk_line.rstrip().endswith(':')):
+				# Assign if line is a rule or checkpoint
+				is_rule_line = ((smk_list[0].startswith('rule') or smk_list[0].startswith('checkpoint')) and smk_line.rstrip().endswith(':'))
+
+				# Check if the line is the end of a rule
+				if smk_list[0] and not is_rule_line:
 					within_rule_block = False
 					
 				# Check if the line is the start of a rule
-				if smk_list[0].startswith('rule') and smk_line.rstrip().endswith(':'):
+				if is_rule_line:
 
 					within_rule_block = True
 

@@ -2,7 +2,7 @@ import sys
 
 # Basic Information
 __name__ = "pipemake"
-__version__ = "0.3"
+__version__ = "0.4"
 __summary__ = "Pipemake: A pipeline creation tool using Snakemake"
 __url__ = "https://github.com/kocherlab/pipemake"
 __code__ = "https://github.com/kocherlab/pipemake"
