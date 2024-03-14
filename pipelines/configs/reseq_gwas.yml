@@ -121,5 +121,6 @@ command-line:
   use-singularity: True
 
 snakefiles:
+  - reseq_model_ind_files.smk
   - reseq_gwas_gemma.smk
 

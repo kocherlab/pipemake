@@ -1,12 +1,12 @@
 rule all:
 	input:
-		os.path.join(config['paths']['reseq_vcf_phased_dir'], f"{config['species']}.vcf.gz")
+		os.path.join(config['paths']['reseq_phased_vcf_dir'], f"{config['species']}.vcf.gz")
 
 rule reseq_header_bcftools:
 	input:
-		os.path.join(config['paths']['reseq_vcf_unphased_dir'], f"{config['species']}.vcf.gz")
+		os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}.vcf.gz")
 	output:
-		temp(os.path.join(config['paths']['reseq_vcf_unphased_dir'], f"{config['species']}.header"))
+		temp(os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}.header"))
 	singularity:
 		"/home/aewebb/kocher_POP.sif"
 	resources:
@@ -17,12 +17,12 @@ rule reseq_header_bcftools:
 
 checkpoint reseq_split_unphased_bcftools:
 	input:
-		os.path.join(config['paths']['reseq_vcf_unphased_dir'], f"{config['species']}.vcf.gz")
+		os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}.vcf.gz")
 	output:
-		temp(directory(os.path.join(config['paths']['reseq_vcf_unphased_dir'], 'SplitByChrom')))
+		temp(directory(os.path.join(config['paths']['reseq_filtered_vcf_dir'], 'SplitByChrom')))
 	params:
-		out_dir=os.path.join(config['paths']['reseq_vcf_unphased_dir'], 'SplitByChrom'),
-		out_prefix=os.path.join(config['paths']['reseq_vcf_unphased_dir'], 'SplitByChrom', '')
+		out_dir=os.path.join(config['paths']['reseq_filtered_vcf_dir'], 'SplitByChrom'),
+		out_prefix=os.path.join(config['paths']['reseq_filtered_vcf_dir'], 'SplitByChrom', '')
 	singularity:
 		"/home/aewebb/kocher_POP.sif"
 	resources:
@@ -37,10 +37,10 @@ checkpoint reseq_split_unphased_bcftools:
 
 rule reseq_phase_chroms_shapeit4:
 	input:
-		vcf=os.path.join(config['paths']['reseq_vcf_unphased_dir'], 'SplitByChrom', '{chrom}.vcf.gz'),
-		header=os.path.join(config['paths']['reseq_vcf_unphased_dir'], f"{config['species']}.header")
+		vcf=os.path.join(config['paths']['reseq_filtered_vcf_dir'], 'SplitByChrom', '{chrom}.vcf.gz'),
+		header=os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}.header")
 	output:
-		temp(os.path.join(config['paths']['reseq_vcf_phased_dir'], 'SplitByChrom', '{chrom}.vcf.gz'))
+		temp(os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}.vcf.gz'))
 	singularity:
 		"/home/aewebb/kocher_POP.sif"
 	resources:
@@ -57,16 +57,16 @@ rule reseq_phase_chroms_shapeit4:
 
 def aggregate_phased_reseq (wildcards):
 	checkpoint_output = checkpoints.reseq_split_unphased_bcftools.get(**wildcards).output[0]
-	return expand(os.path.join(config['paths']['reseq_vcf_phased_dir'], 'SplitByChrom', '{chrom}.vcf.gz'), chrom = glob_wildcards(os.path.join(checkpoint_output, "{chrom}.vcf.gz")).chrom)
+	return expand(os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}.vcf.gz'), chrom = glob_wildcards(os.path.join(checkpoint_output, "{chrom}.vcf.gz")).chrom)
 
 rule reseq_cat_phased_bcftools:
 	input:
 		vcfs=aggregate_phased_reseq,
-		header=os.path.join(config['paths']['reseq_vcf_unphased_dir'], f"{config['species']}.header")
+		header=os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}.header")
 	output:
-		temp(os.path.join(config['paths']['reseq_vcf_phased_dir'], f"{config['species']}.shapeit_header.vcf.gz"))
+		temp(os.path.join(config['paths']['reseq_phased_vcf_dir'], f"{config['species']}.shapeit_header.vcf.gz"))
 	params:
-		unphased_split_dir=os.path.join(config['paths']['reseq_vcf_unphased_dir'], 'SplitByChrom')
+		unphased_split_dir=os.path.join(config['paths']['reseq_filtered_vcf_dir'], 'SplitByChrom')
 	singularity:
 		"/home/aewebb/kocher_POP.sif"
 	resources:
@@ -83,10 +83,10 @@ rule reseq_cat_phased_bcftools:
 
 rule reseq_replace_header_bcftools:
 	input:
-		shapeit_vcf=os.path.join(config['paths']['reseq_vcf_phased_dir'], f"{config['species']}.shapeit_header.vcf.gz"),
-		header=os.path.join(config['paths']['reseq_vcf_unphased_dir'], f"{config['species']}.header")
+		shapeit_vcf=os.path.join(config['paths']['reseq_phased_vcf_dir'], f"{config['species']}.shapeit_header.vcf.gz"),
+		header=os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}.header")
 	output:
-		os.path.join(config['paths']['reseq_vcf_phased_dir'], f"{config['species']}.vcf.gz")
+		os.path.join(config['paths']['reseq_phased_vcf_dir'], f"{config['species']}.vcf.gz")
 	singularity:
 		"/home/aewebb/kocher_POP.sif"
 	resources:
