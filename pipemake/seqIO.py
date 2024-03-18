@@ -7,7 +7,6 @@ import hashlib
 
 import pandas as pd
 
-from Bio import SeqIO
 from collections import defaultdict
 from snakemake.io import get_wildcard_names
 
