@@ -22,9 +22,24 @@ rule reseq_phased_map_plink:
 	shell:
 		"plink2 --vcf {input} --export ped --out {params.out_prefix} --set-all-var-ids @:# --allow-extra-chr"
 
+rule reseq_phased_ids_bcftools:
+	input:
+		os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}.vcf.gz')
+	output:
+		temp(os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}.id.vcf.gz'))
+	params:
+		out_prefix=os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}')
+	singularity:
+		"/Genomics/argo/users/aewebb/.local/images/kocherPOP.sif"
+	resources:
+		mem_mb=2000
+	threads: 1
+	shell:
+		"bcftools annotate --set-id '%CHROM\_%POS' {input} -O z -o {output}"
+
 rule reseq_ihs_selscan:
 	input:
-		vcf=os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}.vcf.gz'),
+		vcf=os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}.id.vcf.gz'),
 		map=os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}.map')
 	output:
 		temp(os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', '{chrom}.ihs.out')),
