@@ -17,7 +17,7 @@ rule reseq_indep_pairwise_plink:
 		ld_window_step={config['ld_window_step']},
 		ld_threshold={config['ld_threshold']}
 	singularity:
-		"/home/aewebb/plink.sif"
+		"/Genomics/argo/users/aewebb/.local/images/plink.sif"
 	resources:
 		mem_mb=8000
 	threads: 1
@@ -38,7 +38,7 @@ rule reseq_ld_prune_plink:
 		input_prefix=os.path.join(config['paths']['reseq_filtered_plink_dir'], f"{config['species']}.filtered"),
 		output_prefix=os.path.join(config['paths']['reseq_pruned_plink_dir'], f"{config['species']}.pruned")
 	singularity:
-		"/home/aewebb/plink.sif"
+		"/Genomics/argo/users/aewebb/.local/images/plink.sif"
 	resources:
 		mem_mb=2000
 	threads: 1

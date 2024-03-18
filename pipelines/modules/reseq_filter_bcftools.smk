@@ -1,0 +1,22 @@
+rule all:
+	input:
+		os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.filtered.vcf.gz")
+
+rule filter_basic_vcf_bcftools:
+	input:
+		os.path.join(config['paths']['reseq_unfiltered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.vcf.gz")
+	output:
+		os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.filtered.vcf.gz")
+	params:
+		min_alleles = config['min_alleles'],
+		max_alleles = config['max_alleles'],
+		maf = config['maf_cutoff'],
+		qual = config['qual_cutoff'],
+		missing_cutoff=config['missing_cutoff']
+	resources:
+		mem_mb=16000
+	threads: 4
+	singularity:
+		"/Genomics/argo/users/aewebb/.local/images/kocher_POP.sif"
+	shell:
+		"bcftools view --min-alleles {params.min_alleles} --max-alleles {params.max_alleles} --types snps --include 'MAF>={params.maf} && QUAL>={params.qual} && F_MISSING<{params.missing_cutoff}' --output-type z --output-file {output} --threads {threads} {input}"

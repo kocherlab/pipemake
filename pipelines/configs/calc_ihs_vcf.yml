@@ -24,7 +24,7 @@ parser:
         help: "Assign the working directory for snakemake"
         type: str
         default:
-          str: "PhaseVCF"
+          str: "Calc_iHS"
           suffix:
             - function: jobTimeStamp
             - function: jobRandomString
@@ -32,23 +32,23 @@ parser:
         help: "Assign the snakemake job prefix"
         type: str
         default:
-          str: "PhaseVCF"
+          str: "Calc_iHS"
           suffix:
             - function: jobTimeStamp
             - function: jobRandomString
     paths:
-      reseq-vcf-unphased-dir:
-        help: "Directory to store unphased VCFs files"
+      reseq-filtered-vcf-dir:
+        help: "Directory to store filtered VCFs files"
         type: str
         default: "reSEQ/VCFs/Unphased"
-      reseq-vcf-phased-dir:
+      reseq-phased-vcf-dir:
         help: "Directory to store phased VCFs files"
         type: str
         default: "reSEQ/VCFs/Phased"
-      reseq-popgen-analyses-dir:
+      reseq-popgen-dir:
         help: "Directory to store resequencing population genetics analyses"
         type: str
-        default: "reSEQ/PopGenAnalyses"
+        default: "reSEQ/PopGen"
 setup:
   reseq_vcf:
     file-method:
@@ -57,13 +57,13 @@ setup:
           - "work-dir"
           - "reseq-vcf"
           - "species"
-          - "reseq-vcf-unphased-dir"
+          - "reseq-filtered-vcf-dir"
       standardize:
         method: "file-str"
         args:
           input_filename: "{reseq-vcf}"
           standardized_filename: "{species}.vcf.gz"
-          out_dir: "{reseq-vcf-unphased-dir}"
+          out_dir: "{reseq-filtered-vcf-dir}"
           work_dir: '{work-dir}'
           gzipped: True
   
