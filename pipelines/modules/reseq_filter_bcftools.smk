@@ -17,6 +17,6 @@ rule filter_basic_vcf_bcftools:
 		mem_mb=16000
 	threads: 4
 	singularity:
-		"/Genomics/argo/users/aewebb/.local/images/kocher_POP.sif"
+		"/Genomics/argo/users/aewebb/.local/images/kocherPOP.sif"
 	shell:
 		"bcftools view --min-alleles {params.min_alleles} --max-alleles {params.max_alleles} --types snps --include 'MAF>={params.maf} && QUAL>={params.qual} && F_MISSING<{params.missing_cutoff}' --output-type z --output-file {output} --threads {threads} {input}"
