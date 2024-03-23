@@ -245,7 +245,7 @@ class SnakeFileIO ():
 					if smk_line.startswith('rule') or smk_line.startswith('checkpoint') or smk_line.startswith('def'): continue
 					
 					if not smk_line.startswith(self._indent_style):
-						raise Exception(f'Inconsistent indent style "{smk_line[0]}"')
+						raise Exception(f'Inconsistent indent style "{smk_line[0]}" in: {self.filename}')
 
 					# Get the count of the indent style
 					indent_count = len(smk_line) - len(smk_line.lstrip())

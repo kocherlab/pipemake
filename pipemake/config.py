@@ -57,10 +57,10 @@ def processPipelineSetup (pipeline_setup, pipeline_args):
 				if input_arg.replace('-', '_') not in pipeline_args: raise Exception(f'Setup argument {input_arg} not found among pipeline argument')
 
 			# Confirm expected args were specified
-			#method_missing_args = [_a for _a in input_args['args'] if not pipeline_args[_a.replace('-', '_')]]
+			method_missing_args = [_a for _a in input_args['args'] if not pipeline_args[_a.replace('-', '_')]]
 
 			# Skip if missing arguments
-			#if method_missing_args: continue
+			if method_missing_args: continue
 
 			if 'standardize' in method_args:
 
