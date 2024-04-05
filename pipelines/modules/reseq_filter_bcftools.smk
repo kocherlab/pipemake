@@ -19,4 +19,4 @@ rule filter_basic_vcf_bcftools:
 	singularity:
 		"/Genomics/argo/users/aewebb/.local/images/kocherPOP.sif"
 	shell:
-		"bcftools view --min-alleles {params.min_alleles} --max-alleles {params.max_alleles} --types snps --include 'MAF>={params.maf} && QUAL>={params.qual} && F_MISSING<{params.missing_cutoff}' --output-type z --output-file {output} --threads {threads} {input}"
+		"bcftools view --min-alleles {params.min_alleles} --max-alleles {params.max_alleles} --types snps --include 'MAF>={params.maf} && QUAL>={params.qual} && F_MISSING<={params.missing_cutoff}' --output-type z --output-file {output} --threads {threads} {input}"

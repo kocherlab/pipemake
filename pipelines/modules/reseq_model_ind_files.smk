@@ -1,8 +1,7 @@
 rule all:
 	input:
 		expand(os.path.join(config['paths']['models_dir'], f"{config['species']}.{{model}}.ind.txt"), model=config['models']),
-        expand(os.path.join(config['paths']['models_dir'], f"{config['species']}.{{model}}.ind.log"), model=config['models'])
-        
+		expand(os.path.join(config['paths']['models_dir'], f"{config['species']}.{{model}}.ind.log"), model=config['models'])
 
 rule model_fst_ind_file:
 	input:
@@ -18,4 +17,4 @@ rule model_fst_ind_file:
 	singularity:
 		"/Genomics/argo/users/aewebb/.local/images/pipemake_utils.sif"
 	shell:
-		"model-inds --model {input} --model-name {wildcards.model} --out-prefix {params.out_prefix}"
+		"model-inds --model-file {input} --model-name {wildcards.model} --out-prefix {params.out_prefix}"

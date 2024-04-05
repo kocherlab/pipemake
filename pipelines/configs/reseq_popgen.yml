@@ -1,0 +1,162 @@
+pipeline: reseq-popgen
+parser:
+  help: Run basic PopGen analyses on resequencing data
+  args:
+    params:
+      reseq-vcf:
+        help: "Resequencing VCF file"
+        type: str
+        required: True
+        action: confirmFile
+      reseq-copy-method:
+        help: "Socifies if resequencing files should be copied or symbolically linked."
+        choices:
+          - 'symbolic_link'
+          - 'copy'
+        default: 'symbolic_link'
+      model-file:
+        help: "Model filename"
+        type: str
+        required: True
+        action: confirmFile
+      models:
+        help: "Category names"
+        type: str
+        nargs: '+'
+        required: True
+      ld-window-size:
+        help: "LD window size"
+        type: str
+        default: 50
+      ld-window-step:
+        help: "LD window step"
+        type: str
+        default: 5
+      ld-threshold:
+        help: "LD threshold"
+        type: float
+        default: 0.2
+      pca-count:
+        help: "Number of principal components"
+        type: int
+        default: 10
+      fst-method:
+        help: "FST method"
+        type: str
+        default: "hudson"
+      kinship-matrix:
+        help: "Kinship matrix type"
+        type: int
+        default: 1
+      linear-model:
+        help: "Linear model type"
+        type: int
+        default: 1
+      maf:
+        help: "MAF cutoff"
+        type: float
+        default: 0.05
+      min-log-pvalue:
+        help: "Minimum log10 p-values to keep"
+        type: float
+        default: 0.5
+      assembly-version:
+        help: "Assembly Version"
+        type: str
+        default:
+          str: "v"
+          suffix:
+            - function: jobRandomString
+      species:
+        help: "Species name"
+        type: str
+        default:
+          str: "Sp"
+          suffix:
+            - function: jobRandomString
+      work-dir:
+        help: "Assign the working directory for snakemake"
+        type: str
+        default:
+          str: "reSEQ_PopGen"
+          suffix:
+            - function: jobTimeStamp
+            - function: jobRandomString
+      snakemake-job-prefix:
+        help: "Assign the snakemake job prefix"
+        type: str
+        default:
+          str: "reSEQ_PopGen"
+          suffix:
+            - function: jobTimeStamp
+            - function: jobRandomString
+    paths:
+      reseq-filtered-vcf-dir:
+        help: "Directory to store filtered resequencing VCF files"
+        type: str
+        default: "reSEQ/VCFs/Filtered"
+      reseq-filtered-plink-dir:
+        help: "Directory to store filtered resequencing PLINK files"
+        type: str
+        default: "reSEQ/PLINK/Filtered"
+      reseq-pruned-plink-dir:
+        help: "Directory to store pruned resequencing PLINK files"
+        type: str
+        default: "reSEQ/PLINK/Pruned"
+      models-dir:
+        help: "Directory to store models"
+        type: str
+        default: "Models"
+      reseq_popgen_dir:
+        help: "Directory to store resequencing population genetics analyses"
+        type: str
+        default: "reSEQ/PopGen"
+setup:
+  reseq_vcf:
+    file-method:
+      input:
+        args:
+          - "work-dir"
+          - "reseq-vcf"
+          - "species"
+          - "assembly-version"
+          - "reseq-filtered-vcf-dir"
+      standardize:
+        method: "file-str"
+        args:
+          input_filename: "{reseq-vcf}"
+          standardized_filename: "{species}_{assembly-version}.filtered.vcf.gz"
+          out_dir: "{reseq-filtered-vcf-dir}"
+          work_dir: '{work-dir}'
+          gzipped: True
+          copy_method: '{reseq-copy-method}'
+  
+  model_input:
+    file-method:
+      input:
+        args:
+          - "work-dir"
+          - "model-file"
+          - "models-dir"
+      standardize:
+        method: "file-str"
+        args:
+          input_filename: "{model-file}"
+          standardized_filename: "{species}.model"
+          out_dir: "{models-dir}"
+          work_dir: '{work-dir}'
+          copy_method: '{reseq-copy-method}'
+          gzipped: False
+
+command-line:
+  cores: 20
+  use-singularity: True
+
+snakefiles:
+  - reseq_filtered_vcf_to_plink.smk
+  - reseq_calc_fst_plink.smk
+  - reseq_calc_pca_plink.smk
+  - reseq_ld_prune_plink.smk
+  - reseq_model_ind_files.smk
+  - reseq_gwas_gemma.smk
+

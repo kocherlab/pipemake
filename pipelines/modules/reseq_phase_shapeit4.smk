@@ -1,13 +1,13 @@
 rule all:
 	input:
-		os.path.join(config['paths']['reseq_phased_vcf_dir'], f"{config['species']}.vcf.gz")
+		os.path.join(config['paths']['reseq_phased_vcf_dir'], f"{config['species']}_{config['assembly_version']}.vcf.gz")
 
 rule reseq_header_bcftools:
 	input:
-		os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}.vcf.gz")
+		os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.vcf.gz")
 	output:
-		header=temp(os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}.header")),
-		chrom_log=temp(os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}.chrom.log"))
+		header=temp(os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.header")),
+		chrom_log=temp(os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.chrom.log"))
 	singularity:
 		"/Genomics/argo/users/aewebb/.local/images/kocherPOP.sif"
 	resources:
@@ -21,7 +21,7 @@ rule reseq_header_bcftools:
 
 checkpoint reseq_split_unphased_bcftools:
 	input:
-		os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}.vcf.gz")
+		os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.vcf.gz")
 	output:
 		temp(directory(os.path.join(config['paths']['reseq_filtered_vcf_dir'], 'SplitByChrom')))
 	params:
@@ -43,7 +43,7 @@ checkpoint reseq_split_unphased_bcftools:
 rule reseq_phase_chroms_shapeit4:
 	input:
 		vcf=os.path.join(config['paths']['reseq_filtered_vcf_dir'], 'SplitByChrom', '{chrom}.vcf.gz'),
-		chrom_log=os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}.chrom.log")
+		chrom_log=os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.chrom.log")
 	output:
 		temp(os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}.vcf.gz'))
 	singularity:
@@ -66,10 +66,10 @@ def aggregate_phased_reseq (wildcards):
 rule reseq_cat_phased_bcftools:
 	input:
 		vcfs=aggregate_phased_reseq,
-		header=os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}.header"),
-		chrom_log=os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}.chrom.log")
+		header=os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.header"),
+		chrom_log=os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.chrom.log")
 	output:
-		temp(os.path.join(config['paths']['reseq_phased_vcf_dir'], f"{config['species']}.shapeit_header.vcf.gz"))
+		temp(os.path.join(config['paths']['reseq_phased_vcf_dir'], f"{config['species']}_{config['assembly_version']}.shapeit_header.vcf.gz"))
 	params:
 		unphased_split_dir=os.path.join(config['paths']['reseq_filtered_vcf_dir'], 'SplitByChrom')
 	singularity:
@@ -89,10 +89,10 @@ rule reseq_cat_phased_bcftools:
 
 rule reseq_replace_header_bcftools:
 	input:
-		shapeit_vcf=os.path.join(config['paths']['reseq_phased_vcf_dir'], f"{config['species']}.shapeit_header.vcf.gz"),
-		header=os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}.header")
+		shapeit_vcf=os.path.join(config['paths']['reseq_phased_vcf_dir'], f"{config['species']}_{config['assembly_version']}.shapeit_header.vcf.gz"),
+		header=os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.header")
 	output:
-		os.path.join(config['paths']['reseq_phased_vcf_dir'], f"{config['species']}.vcf.gz")
+		os.path.join(config['paths']['reseq_phased_vcf_dir'], f"{config['species']}_{config['assembly_version']}.vcf.gz")
 	singularity:
 		"/Genomics/argo/users/aewebb/.local/images/kocherPOP.sif"
 	resources:

@@ -8,10 +8,12 @@ parser:
         type: str
         required: True
         action: confirmFile
-      species:
-        help: "Species name"
-        type: str
-        required: True
+      reseq-copy-method:
+        help: "Socifies if resequencing files should be copied or symbolically linked."
+        choices:
+          - 'symbolic_link'
+          - 'copy'
+        default: 'symbolic_link'
       maf:
         help: "Minor allele frequency"
         type: float
@@ -20,6 +22,20 @@ parser:
         help: "Number of bins for normalization"
         type: int
         default: 100
+      assembly-version:
+        help: "Assembly Version"
+        type: str
+        default:
+          str: "v"
+          suffix:
+            - function: jobRandomString
+      species:
+        help: "Species name"
+        type: str
+        default:
+          str: "Sp"
+          suffix:
+            - function: jobRandomString
       work-dir:
         help: "Assign the working directory for snakemake"
         type: str
@@ -57,14 +73,16 @@ setup:
           - "work-dir"
           - "reseq-vcf"
           - "species"
+          - "assembly-version"
           - "reseq-filtered-vcf-dir"
       standardize:
         method: "file-str"
         args:
           input_filename: "{reseq-vcf}"
-          standardized_filename: "{species}.vcf.gz"
+          standardized_filename: "{species}_{assembly-version}.vcf.gz"
           out_dir: "{reseq-filtered-vcf-dir}"
           work_dir: '{work-dir}'
+          copy_method: '{reseq-copy-method}'
           gzipped: True
   
 command-line:

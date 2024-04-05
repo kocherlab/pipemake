@@ -55,7 +55,7 @@ rule pop_vcf_bcftools:
 		"/Genomics/argo/users/aewebb/.local/images/kocherPOP.sif"
 	shell:
 		"""
-		bcftools view --samples-file {input.pop_file} {input.vcf_file} | bcftools view -i 'F_MISSING<{params.missing_cutoff}' --output-type z --output-file {output.vcf_file}
+		bcftools view --samples-file {input.pop_file} {input.vcf_file} | bcftools view -i 'F_MISSING<={params.missing_cutoff}' --output-type z --output-file {output.vcf_file}
 		bcftools index {output.vcf_file}
 		"""
 

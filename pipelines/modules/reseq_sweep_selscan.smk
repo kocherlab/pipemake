@@ -1,9 +1,9 @@
 rule all:
 	input:
-		os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', f"{config['species']}.ihs.out"),
-		os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', f"{config['species']}.ihs.out.log"),
-		os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', f"{config['species']}.ihs.norm"),
-		os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', f"{config['species']}.ihs.norm.log")
+		os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', f"{config['species']}_{config['assembly_version']}.ihs.out"),
+		os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', f"{config['species']}_{config['assembly_version']}.ihs.out.log"),
+		os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', f"{config['species']}_{config['assembly_version']}.ihs.norm"),
+		os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', f"{config['species']}_{config['assembly_version']}.ihs.norm.log")
 
 rule reseq_phased_map_plink:
 	input:
@@ -83,10 +83,10 @@ rule reseq_cat_ihs_bash:
 	input:
 		unpack(aggregate_ihs_reseq)
 	output:
-		scan_ihs=os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', f"{config['species']}.ihs.out"),
-		scan_log=os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', f"{config['species']}.ihs.out.log"),
-		norm_ihs=os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', f"{config['species']}.ihs.norm"),
-		norm_log=os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', f"{config['species']}.ihs.norm.log")
+		scan_ihs=os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', f"{config['species']}_{config['assembly_version']}.ihs.out"),
+		scan_log=os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', f"{config['species']}_{config['assembly_version']}.ihs.out.log"),
+		norm_ihs=os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', f"{config['species']}_{config['assembly_version']}.ihs.norm"),
+		norm_log=os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', f"{config['species']}_{config['assembly_version']}.ihs.norm.log")
 	resources:
 		mem_mb=2000
 	threads: 1
