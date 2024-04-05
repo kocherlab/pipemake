@@ -119,110 +119,110 @@ The following is an example of a **Pipeline** configuration file:
     pipeline: rnaseq-counts-star
       parser:
         help: Count RNAseq reads within a genome assembly using STAR and featureCounts
-        groups:
-          input_parser:
-            type: mutually_exclusive
+        arg-groups:
+          rnaseq-input:
+            group:
+              type: mutually_exclusive
+              required: True
             args:
-              required: True
-        args:
-          params:
-            rnaseq-wildcard:
-              help: "Wildcard statement to represent RNAseq FASTQs"
-              type: str
-              group: input_parser
-            rnaseq-table:
-              help: "Table with sample and FASTQs filenames"
-              type: str
-              group: input_parser
-              action: confirmFile
-            rnaseq-copy-method:
-              help: "Socifies if RNAseq FASTQs should be copied or symbolically linked."
-              choices:
-                - 'symbolic_link'
-                - 'copy'
-              default: 'symbolic_link'
-            rnaseq-standardized-wildcard:
-              help: "Standardized wildcard statement used to store RNAseq FASTQs"
-              type: str
-              default: 
-                str: "{sample}_{read}.fq.gz"
-            assembly-fasta:
-              help: "Assembly fasta"
-              type: str
-              required: True
-              action: confirmFile
-            assembly-gtf:
-              help: "Assembly GTF"
-              type: str
-              required: True
-              action: confirmFile
-            read-len:
-              help: "Read Length"
-              type: int
-              required: True
-            assembly-version:
-              help: "Assembly Version"
-              type: str
-              default:
-                str: "v"
-                suffix:
-                  - function: jobRandomString
-            species:
-              help: "Species name"
-              type: str
-              default:
-                str: "Sp"
-                suffix:
-                  - function: jobRandomString
-            work-dir:
-              help: "Assign the working directory for snakemake"
-              type: str
-              default:
-                str: "RNAseqCounts"
-                suffix:
-                  - function: jobTimeStamp
-                  - function: jobRandomString
-            snakemake-job-prefix:
-              help: "Assign the snakemake job prefix"
-              type: str
-              default:
-                str: "countSTAR"
-                suffix:
-                  - function: jobTimeStamp
-                  - function: jobRandomString
+              rnaseq-wildcard:
+                help: "Wildcard statement to represent RNAseq FASTQs"
+                type: str
+              rnaseq-table:
+                help: "Table with sample and FASTQs filenames"
+                type: str
+                action: confirmFile
+          basic:
+            args:
+              rnaseq-copy-method:
+                help: "Socifies if RNAseq FASTQs should be copied or symbolically linked."
+                choices:
+                  - 'symbolic_link'
+                  - 'copy'
+                default: 'symbolic_link'
+              rnaseq-standardized-wildcard:
+                help: "Standardized wildcard statement used to store RNAseq FASTQs"
+                type: str
+                default: 
+                  str: "{sample}_{read}.fq.gz"
+              assembly-fasta:
+                help: "Assembly fasta"
+                type: str
+                required: True
+                action: confirmFile
+              assembly-gtf:
+                help: "Assembly GTF"
+                type: str
+                required: True
+                action: confirmFile
+              read-len:
+                help: "Read Length"
+                type: int
+                required: True
+              assembly-version:
+                help: "Assembly Version"
+                type: str
+                default:
+                  str: "v"
+                  suffix:
+                    - function: jobRandomString
+              species:
+                help: "Species name"
+                type: str
+                default:
+                  str: "Sp"
+                  suffix:
+                    - function: jobRandomString
+              work-dir:
+                help: "Assign the working directory for snakemake"
+                type: str
+                default:
+                  str: "RNAseqCounts"
+                  suffix:
+                    - function: jobTimeStamp
+                    - function: jobRandomString
+              snakemake-job-prefix:
+                help: "Assign the snakemake job prefix"
+                type: str
+                default:
+                  str: "countSTAR"
+                  suffix:
+                    - function: jobTimeStamp
+                    - function: jobRandomString
           paths:
-            assembly-dir:
-              help: "Directory to store assembly"
-              type: str
-              default: "Assembly"
-            index-dir:
-              help: "Directory to store indices"
-              type: str
-              default: "Indices"
-            rnaseq-fastq-dir:
-              help: "Directory to store the FASTQs files"
-              type: str
-              default: "RNAseq/FASTQs"
-            rnaseq-splice-aligned-dir:
-              help: "Directory to store BAM files"
-              type: str
-              default: "RNAseq/SpliceJunctions/Aligned"
-            rnaseq-bam-dir:
-              help: "Directory to store BAM files"
-              type: str
-              default: "RNAseq/BAMs"
-            rnaseq-aligned-bam-dir:
-              help: "Directory to store sorted BAM files"
-              type: str
-              default: "RNAseq/BAMs/Aligned"
-            rnaseq-sorted-bam-dir:
-              help: "Directory to store sorted BAM files"
-              type: str
-              default: "RNAseq/BAMs/Sorted"
-            rnaseq-count-dir:
-              help: "Directory to store RNAseq counts"
-              type: str
-              default: "RNAseq/Counts" 
+            args:
+              assembly-dir:
+                help: "Directory to store assembly"
+                type: str
+                default: "Assembly"
+              index-dir:
+                help: "Directory to store indices"
+                type: str
+                default: "Indices"
+              rnaseq-fastq-dir:
+                help: "Directory to store the FASTQs files"
+                type: str
+                default: "RNAseq/FASTQs"
+              rnaseq-splice-aligned-dir:
+                help: "Directory to store BAM files"
+                type: str
+                default: "RNAseq/SpliceJunctions/Aligned"
+              rnaseq-bam-dir:
+                help: "Directory to store BAM files"
+                type: str
+                default: "RNAseq/BAMs"
+              rnaseq-aligned-bam-dir:
+                help: "Directory to store sorted BAM files"
+                type: str
+                default: "RNAseq/BAMs/Aligned"
+              rnaseq-sorted-bam-dir:
+                help: "Directory to store sorted BAM files"
+                type: str
+                default: "RNAseq/BAMs/Sorted"
+              rnaseq-count-dir:
+                help: "Directory to store RNAseq counts"
+                type: str
+                default: "RNAseq/Counts" 
       setup:
         rnaseq_input:
           wildcard-method:
@@ -239,7 +239,7 @@ The following is an example of a **Pipeline** configuration file:
                 standardized_filename: "{rnaseq-standardized-wildcard}"
                 out_dir: "{rnaseq-fastq-dir}"
                 work_dir: '{work-dir}'
-                copy_method: '{rnaseq_copy_method}'
+                copy_method: '{rnaseq-copy-method}'
                 gzipped: True
             samples:
               method: "wildcard-str"
@@ -261,7 +261,7 @@ The following is an example of a **Pipeline** configuration file:
                 standardized_filename: "{rnaseq-standardized-wildcard}"
                 out_dir: "{rnaseq-fastq-dir}"
                 work_dir: '{work-dir}'
-                copy_method: '{rnaseq_copy_method}'
+                copy_method: '{rnaseq-copy-method}'
                 gzipped: True
             samples:
               method: "table-file"
@@ -300,10 +300,6 @@ The following is an example of a **Pipeline** configuration file:
                 work_dir: '{work-dir}'
                 gzipped: False
       
-      command-line:
-        cores: 20
-        use-singularity: True
-      
       snakefiles:
         - rna_seq_2pass_star
         - rna_seq_sort
@@ -313,15 +309,27 @@ The following is an example of a **Pipeline** configuration file:
 Pipeline configuration guide
 ****************************
 
+A pipeline configuration file begins with the `pipeline` keyword, which is used to define the name of the pipeline. As this name is used to identify a pipeline within `pipemake`, it must be unique. The configuration file then consists of the following required sections: `parser`, `setup`, and `snakefiles`.
+
+.. code-block:: bash
+
+    pipeline: rnaseq-counts-star
+      parser:
+        ...
+      setup:
+        ...
+      snakefiles:
+        ...
+
 parser:
 #######
 
-The parser section is used to define the command-line arguments used to run the pipeline. The parser section is divided into the following sub-sections:
+The parser section is used to create the command-line interface for a pipeline. It is divided into the following sub-sections: `help` and `arg-groups`.
 
 help:
 *****
 
-The help sub-section is used to define the description of the pipeline, which is displayed when the `Pipemake` is run with the `--help` flag.
+The help sub-section is used to define the description of the pipeline, which is displayed when `Pipemake` is run with the `--help` flag.
 
 .. code-block:: bash
 
@@ -329,69 +337,226 @@ The help sub-section is used to define the description of the pipeline, which is
       parser:
         help: Count RNAseq reads within a genome assembly using STAR and featureCounts
 
-groups:
-*******
+arg-groups:
+***********
 
-The groups sub-section is used to define the command-line argument groups. 
+The `arg-groups` sub-section is used by `pipemake` to define command-line argument groups. The `basic` group is reserved by `pipemake`, arguments within this group will be automatically grouped within `required` or `optional` based on their `required` keyword. Users may place all arguments within the `basic` group or create additional groups as desired. Additional `arg-groups` may be defined as needed.
 
 .. code-block:: bash
 
     pipeline: rnaseq-counts-star
       parser:
-        groups:
-          input_parser:
-            type: mutually_exclusive
-            args:
+        help: Count RNAseq reads within a genome assembly using STAR and featureCounts
+        arg-groups:
+          rnaseq-input:
+            group:
+              type: mutually_exclusive
               required: True
+            args:
+              rnaseq-wildcard:
+                help: "Wildcard statement to represent RNAseq FASTQs"
+                type: str
+              rnaseq-table:
+                help: "Table with sample and FASTQs filenames"
+                type: str
+                action: confirmFile
+          basic:
+            args:
+              rnaseq-copy-method:
+                help: "Socifies if RNAseq FASTQs should be copied or symbolically linked."
+                choices:
+                  - 'symbolic_link'
+                  - 'copy'
+                default: 'symbolic_link'
+              rnaseq-standardized-wildcard:
+                help: "Standardized wildcard statement used to store RNAseq FASTQs"
+                type: str
+                default: 
+                  str: "{sample}_{read}.fq.gz"
+              assembly-version:
+                help: "Assembly Version"
+                type: str
+                default:
+                  str: "v"
+                  suffix:
+                    - function: jobRandomString
+          paths:
+            args:
+              assembly-dir:
+                help: "Directory to store assembly"
+                type: str
+                default: "Assembly"
 
+group:
+======
 
-The above example defines the `input_parser` group as a mutually exclusive group. This means that only one of the arguments within the group may be used at a time. The `required` argument is used to define if at least one of the arguments within the group must be used.
+By default, `arg-groups` are defined as `argparse` argument groups. However, by including the `group` keyword, it becomes possibile to alter this behavior. For example, the `group` keyword within the `rnaseq-input` argument group includes two keywords: 
+
+* `type`: Defines the type of argument group. Currently supported types are `argument_group` and `mutually_exclusive`.
+
+  * `argument_group`: Standard `argparse` argument group. Groups arguments together within the help message (default)
+  * `mutually_exclusive`: Only one of the arguments within this group may be used at a time
+
+* `required`: Where applicable, defines if the argument group is required.
+
+Argument groups may be used to organize related arguments within the pipeline help message, for example grouping all path arguments together in `paths`. Mutually exclusive groups are recommended when two or more arguments cannot be used together, such as when a pipeline may accept either a wildcard statement or a table of input files.
 
 args:
-*****
+=====
 
-The args sub-section is used to define the command-line arguments.
-
-.. code-block:: bash
-
-    pipeline: rnaseq-counts-star
-      parser:
-        args:
-          params:
-            rnaseq-table:
-              help: "Table with sample and FASTQs filenames"
-              type: str
-              group: input_parser
-              action: confirmFile
-            assembly-fasta:
-              help: "Assembly fasta"
-              type: str
-              required: True
-              action: confirmFile
-          paths:
-            assembly-dir:
-              help: "Directory to store assembly"
-              type: str
-              default: "Assembly"
-
-In the above example the arguments are divided into two groups: `params` and `paths`. The `params` group is a `pipemake` reserved term, these arguments will be automatically assigned as either `required` or `optional` based on their `required` keyword. Other terms, such as `paths` may be used by users to group related arguments together within the pipeline help message.
-
-The arguments have the following required keywords:
+Each `arg-groups` also includes a list of `args` that define the command-line arguments. Each argument must have the following keywords:
 
 * `help`: A description of the argument
 * `type`: The type of the argument
 
-And optional keywords:
+And the following optional keywords are also supported:
 
-* `group`: The name of the `group` the argument belongs to
-* `action`: An action to perform on the argument (see below for supported actions)
 * `required`: If the argument is required (default is False)
+* `action`: An action to perform on the argument (see below for supported actions)
 * `default`: The default value of the argument (see below for additional options)
 
 .. note::
 
-    Arguments are parsed using `argparse <https://docs.python.org/3/library/argparse.html>`_ and therefore support all of the same options as `argparse`.
+    Arguments are parsed using `argparse <https://docs.python.org/3/library/argparse.html>`_ and therefore support may be added to allow all of the same options as `argparse`.
 
-    
+action:
+-------
 
-In general,  are parsed using the `argparse` library. However, `pipemake` supports additional actions to perform on the arguments. The following actions are supported:
+At present, `pipemake` supports the following actions:
+
+* `confirmFile`: Require the given string to be a file. If the file does not exist, an error will be raised.
+* `confirmDir`: Require the given string to be a directory. If the directory does not exist, an error will be raised.
+
+.. note::
+
+    Additional actions may be added in the future, or updates to `pipemake` to allow for custom actions.
+
+default:
+--------
+
+The `default` keyword may be used to define the default value of an argument. In general, the default value may share the same type as the `type` keyword. However, it's also possible to define more complex default values.
+
+.. code-block:: bash
+
+    pipeline: rnaseq-counts-star
+      parser:
+        help: Count RNAseq reads within a genome assembly using STAR and featureCounts
+        arg-groups:
+          basic:
+            args:
+              assembly-version:
+                help: "Assembly Version"
+                type: str
+                default:
+                  str: "v"
+                  suffix:
+                    - function: jobRandomString
+
+In the above example, the `assembly-version` argument has a default value of `v` followed by a random string. This is achieved by using the `suffix` keyword. The `suffix` keyword allows for a list of values to be concatenated to the default value. These values may be either strings or one of the following functions: `jobRandomString` or `jobTimeStamp`.
+
+setup:
+######
+
+The `setup` section is used to define the steps needed to standardize the input files for the pipeline. Within the `setup` section, each sub-section is used to define a separate input file(s).
+
+.. code-block:: bash
+
+    pipeline: rnaseq-counts-star
+      setup:
+        rnaseq_input:
+          wildcard-method:
+            input:
+              args:
+                - "work-dir"
+                - "rnaseq-wildcard"
+                - "rnaseq-standardized-wildcard"
+                - "rnaseq-fastq-dir"
+            standardize:
+              method: "wildcard-str"
+              args:
+                wildcard_str: "{rnaseq-wildcard}"
+                standardized_filename: "{rnaseq-standardized-wildcard}"
+                out_dir: "{rnaseq-fastq-dir}"
+                work_dir: '{work-dir}'
+                copy_method: '{rnaseq-copy-method}'
+                gzipped: True
+            samples:
+              method: "wildcard-str"
+              args:
+                wildcard_str: "{rnaseq-wildcard}"
+                sample_wildcard: 'sample'
+          table-method:
+            input:
+              args:
+                - "work-dir"
+                - "rnaseq-table"
+                - "rnaseq-standardized-wildcard"
+                - "rnaseq-fastq-dir"
+            standardize:
+              method: "table-file"
+              args:
+                table_filename: "{rnaseq-table}"
+                standardized_filename: "{rnaseq-standardized-wildcard}"
+                out_dir: "{rnaseq-fastq-dir}"
+                work_dir: '{work-dir}'
+                copy_method: '{rnaseq-copy-method}'
+                gzipped: True
+            samples:
+              method: "table-file"
+              args:
+                table_filename: "{rnaseq-table}"
+
+In the above example, the `setup` section includes a sub-section called `rnaseq_input` to standardize RNAseq input files. `rnaseq_input` includes two methods to standardize input files: `wildcard-method` and `table-method`. 
+
+Standardization methods are defined by the following required keywords:
+
+* `input`: Keywords related to the input files to be standardized
+  
+  * `args`: Contains the command-line arguments needed to standardize the input file(s)
+
+* `standardize`: Keywords that define the standardized method
+  
+    * `method`: The method used to standardize the input files. Currently supported: `wildcard-str`, `table-file`, and `file-str`.
+
+      * `wildcard-str`: Standardize input file(s) using a wildcard statement
+      * `table-file`: Standardize input files within a table file
+      * `file-str`: Standardize a single file string
+
+    * `args`: The standardization arguments, which may include the following keywords:
+
+      * `wildcard_str`: The command-line argument of the wildcard statement (only usable with the `wildcard-str` method)
+      * `table_filename`: The table filename command-line argument (only usable with the `table-file` method)
+      * `input_filename`: The input filename command-line argument (only usable with the `file-str` method)
+      * `standardized_filename`: The standardized filename(s). This may be a string with or without a wildcard statements. Should result in a filename(s) specified in a `snakefile` rule
+      * `copy_method`: The method used to copy (`copy`) or symbolically link (`symbolic_link`) the input file(s)
+      * `gzipped`: If the input file(s) are gzipped (`True`, `False`) or keep the gzipped status of the input file(s) (`None`)
+      * `out_dir`: The output directory
+      * `work_dir`: The working directory
+
+Standardization methods may also include the following optional keyword:
+
+* `samples`: Keywords that define the samples (only usable with the `wildcard-str` and `table-file` methods)
+  
+    * `method`: The method used to define the samples. Currently supported: `wildcard-str` and `table-file`.
+
+      * `wildcard-str`: Define samples using a wildcard statement
+      * `table-file`: Define samples using a table file
+
+    * `args`: The sample arguments, which may include the following keywords:
+
+      * `wildcard_str`: The command-line argument of the wildcard statement (only usable with the `wildcard-str` method)
+      * `sample_wildcard`: The wildcard element used to define the samples (only usable with the `wildcard-str` method)
+      * `table_filename`: The table filename command-line argument. Samples are defined using the `sample` column (only usable with the `table-file` method)
+
+snakefiles:
+###########
+
+.. code-block:: bash
+
+    pipeline: rnaseq-counts-star
+      snakefiles:
+        - rna_seq_2pass_star
+        - rna_seq_sort
+        - rna_seq_feature_counts
+
+The `snakefiles` section is used to define the **Modules** used within the pipeline. **Modules** are defined by the name of the Snakemake file and must be included within the `snakefiles` list.
