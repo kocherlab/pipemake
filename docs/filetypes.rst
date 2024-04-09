@@ -120,20 +120,20 @@ The following is an example of a **Pipeline** configuration file:
       parser:
         help: Count RNAseq reads within a genome assembly using STAR and featureCounts
         arg-groups:
-          rnaseq-input:
-            group:
-              type: mutually_exclusive
-              required: True
+          basic:
+            mutually-exclusive-groups:
+              input-parser:
+                required: True
             args:
               rnaseq-wildcard:
                 help: "Wildcard statement to represent RNAseq FASTQs"
                 type: str
+                mutually-exclusive: 'input-parser'
               rnaseq-table:
                 help: "Table with sample and FASTQs filenames"
                 type: str
                 action: confirmFile
-          basic:
-            args:
+                mutually-exclusive: 'input-parser'
               rnaseq-copy-method:
                 help: "Socifies if RNAseq FASTQs should be copied or symbolically linked."
                 choices:
@@ -340,7 +340,7 @@ The help sub-section is used to define the description of the pipeline, which is
 arg-groups:
 ***********
 
-The `arg-groups` sub-section is used by `pipemake` to define command-line argument groups. The `basic` group is reserved by `pipemake`, arguments within this group will be automatically grouped within `required` or `optional` based on their `required` keyword. Users may place all arguments within the `basic` group or create additional groups as desired. Additional `arg-groups` may be defined as needed.
+The `arg-groups` sub-section is used by `pipemake` to define command-line argument groups. The `basic` group is reserved by `pipemake`, arguments within this group will be automatically grouped within `required` or `optional` based on their `required` keyword. Users may place all arguments within the `basic` group or create additional groups as desired. Additional `arg-groups` may be defined as needed to organize related arguments within the pipeline help message, for example grouping all path arguments together in `paths`.
 
 .. code-block:: bash
 
@@ -348,20 +348,20 @@ The `arg-groups` sub-section is used by `pipemake` to define command-line argume
       parser:
         help: Count RNAseq reads within a genome assembly using STAR and featureCounts
         arg-groups:
-          rnaseq-input:
-            group:
-              type: mutually_exclusive
-              required: True
+          basic:
+            mutually-exclusive-groups:
+              input-parser:
+                required: True
             args:
               rnaseq-wildcard:
                 help: "Wildcard statement to represent RNAseq FASTQs"
                 type: str
+                mutually-exclusive: input-parser
               rnaseq-table:
                 help: "Table with sample and FASTQs filenames"
                 type: str
                 action: confirmFile
-          basic:
-            args:
+                mutually-exclusive: input-parser
               rnaseq-copy-method:
                 help: "Socifies if RNAseq FASTQs should be copied or symbolically linked."
                 choices:
@@ -387,19 +387,35 @@ The `arg-groups` sub-section is used by `pipemake` to define command-line argume
                 type: str
                 default: "Assembly"
 
-group:
-======
+mutually-exclusive-groups:
+==========================
 
-By default, `arg-groups` are defined as `argparse` argument groups. However, by including the `group` keyword, it becomes possibile to alter this behavior. For example, the `group` keyword within the `rnaseq-input` argument group includes two keywords: 
+Each `arg-groups` may use the `mutually-exclusive-groups` keyword to define mutually exclusive arguments to ensure that only one of the arguments within a group may be used at a time. This is useful when a pipeline accepts different types of input, such as a wildcard statement or a table of input files. To create a `mutually-exclusive-group`, a user is only required to name the group.
 
-* `type`: Defines the type of argument group. Currently supported types are `argument_group` and `mutually_exclusive`.
+.. code-block:: bash
 
-  * `argument_group`: Standard `argparse` argument group. Groups arguments together within the help message (default)
-  * `mutually_exclusive`: Only one of the arguments within this group may be used at a time
+    pipeline: rnaseq-counts-star
+      parser:
+        help: Count RNAseq reads within a genome assembly using STAR and featureCounts
+        arg-groups:
+          basic:
+            mutually-exclusive-groups:
+              input-parser:
+                required: True
 
-* `required`: Where applicable, defines if the argument group is required.
+In this example, `pipemake` will create a single `mutually-exclusive-group` called `input-parser`. Currently, `mutually-exclusive-groups` supports the following keywords:
 
-Argument groups may be used to organize related arguments within the pipeline help message, for example grouping all path arguments together in `paths`. Mutually exclusive groups are recommended when two or more arguments cannot be used together, such as when a pipeline may accept either a wildcard statement or a table of input files.
+Optional keywords currently supported:
+
+* `required`: Defines if the `mutually-exclusive-group` is required (default is `False`)
+
+.. note::
+
+    Please note that if a `mutually-exclusive-group` is placed within the `basic` group the `required` keyword will be used to place the arguments within `required` or `optional`.
+
+.. attention::
+
+    At present, `pipemake` requires that the name of `mutually-exclusive-groups` to be unique among all `arg-groups`.
 
 args:
 =====
@@ -412,6 +428,8 @@ Each `arg-groups` also includes a list of `args` that define the command-line ar
 And the following optional keywords are also supported:
 
 * `required`: If the argument is required (default is False)
+* `choices`: A list of choices for the argument
+* `mutually-exclusive`: The `mutually-exclusive-group` the argument belongs to
 * `action`: An action to perform on the argument (see below for supported actions)
 * `default`: The default value of the argument (see below for additional options)
 
