@@ -66,6 +66,33 @@ def pipeline_parser (config_parser_pipelines):
 				setattr(args, self.dest, value)
 		return customAction
 
+	def createArgGroup (parser, group_args):
+		'''Create the argument group'''
+
+		# Set the groip argument, if not given
+		if 'group' not in group_args: group_args['group'] = {}
+
+		# Set the argument type, if not given
+		if 'type' not in group_args['group']: group_args['group']['type'] = 'argument_group'
+
+		# Set if the group is required, if not given
+		if 'required' not in group_args['group']: group_args['group']['required'] = False
+
+		# Set the group label, if not given
+		if 'label' not in group_args['group']: group_args['group']['label'] = pipeline_arg_group
+			
+		# Create the argument group
+		if group_args['group']['type'] == 'argument_group': 
+			return parser.add_argument_group(f"{pipeline_name} {group_args['group']['label']} arguments")
+
+		# Create the mutually exclusive group
+		elif group_args['group']['type'] == 'mutually_exclusive':
+			arg_group = parser.add_argument_group(f"{pipeline_name} {group_args['group']['label']} arguments")
+			return arg_group.add_mutually_exclusive_group(required = group_args['group']['required'])
+
+		# Report an error if the group type is not supported
+		else: raise Exception(f'Group type not supported: {group_args["type"]}')
+	
 	# Create the pipeline selection parser
 	pipeline_parser = MyParser(formatter_class = SubcommandHelpFormatter)
 	pipeline_parser._positionals.title = "Pipeline selection argument options (positional)"
@@ -79,88 +106,72 @@ def pipeline_parser (config_parser_pipelines):
 		# Create the subparser
 		pipeline_subparser = pipeline_subparsers.add_parser(pipeline_name, help = pipeline_params['help'], add_help = False)
 
-		# Add the argument categories: required, optional, and config-assigned
-		pipeline_required = pipeline_subparser.add_argument_group(f"{pipeline_name} required arguments")
-		pipeline_optional = pipeline_subparser.add_argument_group(f"{pipeline_name} optional arguments")
-		pipeline_arg_categories = {}
-
-		# Add argument groups, for special cases such as mutually exclusive arguments
 		pipeline_arg_groups = {}
 
-		# Create additional categories, if needed
-		for pipeline_arg_category in pipeline_params['args']:
+		# Add the required argument group
+		pipeline_arg_groups['required'] = pipeline_subparser.add_argument_group(f"{pipeline_name} required arguments")
 
-			# Skip the default subparser, as args are stored in required and optional
-			if pipeline_arg_category == 'default': continue
+		# Loop the pipeline groups
+		for pipeline_arg_group in pipeline_params['arg-groups']:
 
-			# Create the subparser if it doesn't exist
-			if pipeline_arg_category not in pipeline_arg_categories:
-				pipeline_arg_categories[pipeline_arg_category] = pipeline_subparser.add_argument_group(f"{pipeline_name} {pipeline_arg_category}")
+			# Create the argument group, if not the basic subparsers
+			if pipeline_arg_group != 'basic':
 
-		# Check for pipeline groups
-		if 'groups' in pipeline_params:
+				# Check if the group already exists, then raise an exception if it does
+				if pipeline_arg_group in pipeline_arg_groups: raise Exception(f'Cannot create group {pipeline_arg_group}. Group already exists.')
 
-			# Loop the pipeline groups
-			for pipeline_group, group_info in pipeline_params['groups'].items():
+				# Create the argument group
+				pipeline_arg_groups[pipeline_arg_group] = pipeline_subparser.add_argument_group(f"{pipeline_name} {pipeline_arg_group} arguments")
 
-				# Confirm a type has been specified
-				if 'type' not in group_info:
-					raise Exception(f'Cannot create group {pipeline_group}. No type given.')
+		# Add the optional argument group
+		pipeline_arg_groups['optional'] = pipeline_subparser.add_argument_group(f"{pipeline_name} optional arguments")
 
-				# Check if a category was specified, then assign the group to the category
-				if 'category' in group_info['args']:
-					if group_info['args']['category'] not in pipeline_arg_categories:
-						raise Exception(f'Cannot create group {pipeline_group}. Category {group_info["args"]["category"]} does not exist.')
-					group_parser = pipeline_arg_categories[group_info['args']['category']]
+		# Loop the pipeline mutually exclusive groups
+		for pipeline_arg_group, group_args in pipeline_params['arg-groups'].items():
+			if 'mutually-exclusive-groups' not in group_args: continue
 
-				# Assign to required if no category was specified and the group is required
-				elif 'required' in group_info['args']: group_parser = pipeline_required
+			# Loop the mutually exclusive groups
+			for me_group_name, me_group_args in group_args['mutually-exclusive-groups'].items():
 
-				# Assign to optional if no category was specified and the group is optional
-				else: group_parser = pipeline_optional
+				# Confirm the mutually exclusive group has not been created
+				if me_group_name in pipeline_arg_groups: raise Exception(f'Cannot create mutually exclusive group {me_group_name}. Group already exists.')
 
-				# Check if the group type is mutually exclusive, then add the group
-				if group_info['type'] == 'mutually_exclusive':
-					pipeline_arg_groups[pipeline_group] = group_parser.add_mutually_exclusive_group(**group_info['args'])
+				# Check if the group is required, if not given
+				if 'required' not in me_group_args: me_group_args['required'] = False
 
-				# Raise exception if group type is not supported
-				else: raise Exception(f'Group type not supported: {group_info["type"]}')
-
+				# Create the mutually exclusive group
+				if pipeline_arg_group == 'basic' and me_group_args['required']:
+					pipeline_arg_groups[me_group_name] = pipeline_arg_groups['required'].add_mutually_exclusive_group(required = me_group_args['required'])
+				elif pipeline_arg_group == 'basic': 
+					pipeline_arg_groups[me_group_name] = pipeline_arg_groups['optional'].add_mutually_exclusive_group(required = me_group_args['required'])
+				elif pipeline_arg_group != 'basic' and pipeline_arg_group in pipeline_arg_groups:
+					pipeline_arg_groups[me_group_name] = pipeline_arg_groups['optional'].add_mutually_exclusive_group(required = me_group_args['required'])
+				else: raise Exception(f'Unable to assign mutually exclusive group: {me_group_name}')
+		
 		# Loop the pipeline arguments
-		for pipeline_arg_category, pipeline_args in pipeline_params['args'].items():
-			for pipeline_arg, arg_params in pipeline_args.items():
-				
-				'''
-				1. Store the argument in the appropriate parser
-					a) If the argument is in a special group, add it to the group
-					b) If the argument is in a defined category, add it to the category
-					c) If the argument is required, add it to the required parser
-					d) Otherwise, add it to the optional parser
-				'''
-				if 'group' in arg_params:
-					argument_parser = pipeline_arg_groups[arg_params['group']]
-					del arg_params['group']
-				elif pipeline_arg_category != 'params': 
-					argument_parser = pipeline_arg_categories[pipeline_arg_category]
-				elif 'required' in arg_params: argument_parser = pipeline_required
-				else: argument_parser = pipeline_optional
-				
+		for pipeline_arg_group, group_args in pipeline_params['arg-groups'].items():
+
+			'''2. Add the arguments to the argument subparser'''
+
+			# Loop the arguments in the group
+			for pipeline_arg_name, arg_args in group_args['args'].items():
+
 				# Set the datatypes
-				if 'type' in arg_params: 
-					try: arg_params['type'] = locate(arg_params['type'])
-					except: raise Exception(f"Unable to locate type: {arg_params['type']}")
+				if 'type' in arg_args: 
+					try: arg_args['type'] = locate(arg_args['type'])
+					except: raise Exception(f"Unable to locate type: {arg_args['type']}")
 	
 				# Configure the action parameter, if specified
-				if 'action' in arg_params:
-					if arg_params['action'] == 'confirmDir': arg_params['action'] = confirmDir()
-					elif arg_params['action'] == 'confirmFile': arg_params['action'] = confirmFile()
+				if 'action' in arg_args:
+					if arg_args['action'] == 'confirmDir': arg_args['action'] = confirmDir()
+					elif arg_args['action'] == 'confirmFile': arg_args['action'] = confirmFile()
 
 				# Configure the default params, if specified
-				if 'default' in arg_params and isinstance(arg_params['default'], dict):
-					default_str = arg_params['default']['str']
-					if 'suffix' in arg_params['default']:
-						if isinstance(arg_params['default']['suffix'], str): arg_params['default']['suffix'] = [arg_params['default']['suffix']]
-						for suffix in arg_params['default']['suffix']:
+				if 'default' in arg_args and isinstance(arg_args['default'], dict):
+					default_str = arg_args['default']['str']
+					if 'suffix' in arg_args['default']:
+						if isinstance(arg_args['default']['suffix'], str): arg_args['default']['suffix'] = [arg_args['default']['suffix']]
+						for suffix in arg_args['default']['suffix']:
 
 							# Add underscores if needed
 							if default_str: default_str += '_'
@@ -180,17 +191,36 @@ def pipeline_parser (config_parser_pipelines):
 								elif suffix['function'] == 'jobRandomString':  default_str += jobRandomString()
 								else: raise Exception(f"Function not supported: {suffix['function']}")
 							
-					arg_params['default'] = default_str
+					arg_args['default'] = default_str
 
-				# Assign the argument to the parser
-				argument_parser.add_argument(f'--{pipeline_arg}', **arg_params)
+				# Assign the argument to a mutually exclusive group, if applicable
+				if 'mutually-exclusive' in arg_args:
+					me_group = arg_args['mutually-exclusive']
+					del arg_args['mutually-exclusive']
+					pipeline_arg_groups[me_group].add_argument(f'--{pipeline_arg_name}', **arg_args)
 
+				# Assign the argument to it respective group, if applicable
+				elif pipeline_arg_group != 'basic' and pipeline_arg_group in pipeline_arg_groups: 
+					pipeline_arg_groups[pipeline_arg_group].add_argument(f'--{pipeline_arg_name}', **arg_args)
+
+				# Assign the argument to the required group, if basic and required
+				elif pipeline_arg_group == 'basic' and 'required' in arg_args: 
+					pipeline_arg_groups['required'].add_argument(f'--{pipeline_arg_name}', **arg_args)
+
+				# Assign the argument to the optional group, if basic and not required
+				elif pipeline_arg_group == 'basic': 
+					pipeline_arg_groups['optional'].add_argument(f'--{pipeline_arg_name}', **arg_args)
+				
+				# Report an error if the group is not supported
+				else:
+					raise Exception(f'Argument group not supported: {pipeline_arg_group}')
+				
 		# Add the common optional arguments, but at the end of the list
-		pipeline_optional.add_argument('--scale-threads', help = 'Scale the threads for each task', type = float, default = 1.0)
-		pipeline_optional.add_argument('--scale-mem', help = 'Scale the memory (RAM) for each task', type = float, default = 1.0)
-		pipeline_optional.add_argument('--resource-yml', help = 'Create a seperate resource yaml', action = 'store_true')
-		pipeline_optional.add_argument('--singularity-dir', help = 'Assign different directory of singularity images', type = str, default = '/Genomics/argo/users/aewebb/.local/images/')
-		pipeline_optional.add_argument('-h', '--help', action = 'help', help = 'show this help message and exit')
+		pipeline_arg_groups['optional'].add_argument('--scale-threads', help = 'Scale the threads for each task', type = float, default = 1.0)
+		pipeline_arg_groups['optional'].add_argument('--scale-mem', help = 'Scale the memory (RAM) for each task', type = float, default = 1.0)
+		pipeline_arg_groups['optional'].add_argument('--resource-yml', help = 'Create a seperate resource yaml', action = 'store_true')
+		pipeline_arg_groups['optional'].add_argument('--singularity-dir', help = 'Assign different directory of singularity images', type = str, default = '/Genomics/argo/users/aewebb/.local/images/')
+		pipeline_arg_groups['optional'].add_argument('-h', '--help', action = 'help', help = 'show this help message and exit')
 
 	return vars(pipeline_parser.parse_args())
 
@@ -212,6 +242,9 @@ def main():
 
 	# Parse the aguments from the configs
 	pipeline_args = pipeline_parser(pipeline_config_args)
+
+	import sys
+	sys.exit()
 
 	# Update the pipeline args with the pipeline directory
 	pipeline_args['pipeline_storage_dir'] = pipeline_storage_dir
