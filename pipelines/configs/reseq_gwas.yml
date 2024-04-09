@@ -1,87 +1,89 @@
 pipeline: reseq-gwas
 parser:
   help: GWAS on resequencing data using GEMMA
-  args:
-    params:
-      reseq-wildcard:
-        help: "Wildcard statement to represent resequencing PLINK files"
-        type: str
-        required: True
-      reseq-copy-method:
-        help: "Socifies if resequencing files should be copied or symbolically linked."
-        choices:
-          - 'symbolic_link'
-          - 'copy'
-        default: 'symbolic_link'
-      model-file:
-        help: "Model filename"
-        type: str
-        required: True
-        action: confirmFile
-      categories:
-        help: "Category names"
-        type: str
-        nargs: '+'
-        required: True
-      kinship-matrix:
-        help: "Kinship matrix type"
-        type: int
-        default: 1
-      linear-model:
-        help: "Linear model type"
-        type: int
-        default: 1
-      maf:
-        help: "MAF cutoff"
-        type: float
-        default: 0.05
-      min-log-pvalue:
-        help: "Minimum log10 p-values to keep"
-        type: float
-        default: 0.5
-      assembly-version:
-        help: "Assembly Version"
-        type: str
-        default:
-          str: "v"
-          suffix:
-            - function: jobRandomString
-      species:
-        help: "Species name"
-        type: str
-        default:
-          str: "Sp"
-          suffix:
-            - function: jobRandomString
-      work-dir:
-        help: "Assign the working directory for snakemake"
-        type: str
-        default:
-          str: "reSEQ_GWAS"
-          suffix:
-            - function: jobTimeStamp
-            - function: jobRandomString
-      snakemake-job-prefix:
-        help: "Assign the snakemake job prefix"
-        type: str
-        default:
-          str: "reSEQ_GWAS"
-          suffix:
-            - function: jobTimeStamp
-            - function: jobRandomString
+  arg-groups:
+    basic:
+      args:
+        reseq-wildcard:
+          help: "Wildcard statement to represent resequencing PLINK files"
+          type: str
+          required: True
+        reseq-copy-method:
+          help: "Socifies if resequencing files should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        model-file:
+          help: "Model filename"
+          type: str
+          required: True
+          action: confirmFile
+        categories:
+          help: "Category names"
+          type: str
+          nargs: '+'
+          required: True
+        kinship-matrix:
+          help: "Kinship matrix type"
+          type: int
+          default: 1
+        linear-model:
+          help: "Linear model type"
+          type: int
+          default: 1
+        maf:
+          help: "MAF cutoff"
+          type: float
+          default: 0.05
+        min-log-pvalue:
+          help: "Minimum log10 p-values to keep"
+          type: float
+          default: 0.5
+        assembly-version:
+          help: "Assembly Version"
+          type: str
+          default:
+            str: "v"
+            suffix:
+              - function: jobRandomString
+        species:
+          help: "Species name"
+          type: str
+          default:
+            str: "Sp"
+            suffix:
+              - function: jobRandomString
+        work-dir:
+          help: "Assign the working directory for snakemake"
+          type: str
+          default:
+            str: "reSEQ_GWAS"
+            suffix:
+              - function: jobTimeStamp
+              - function: jobRandomString
+        snakemake-job-prefix:
+          help: "Assign the snakemake job prefix"
+          type: str
+          default:
+            str: "reSEQ_GWAS"
+            suffix:
+              - function: jobTimeStamp
+              - function: jobRandomString
     paths:
-      models-dir:
-        help: "Directory to store models"
-        type: str
-        default: "Models"
-      reseq-bed-dir:
-        help: "Directory to store resequencing PLINK BED files"
-        type: str
-        default: "reSEQ/BEDs"
-      reseq-gwas-dir:
-        help: "Directory to store the resequencing GWAS results"
-        type: str
-        default: "reSEQ/GWAS"
+      args:
+        models-dir:
+          help: "Directory to store models"
+          type: str
+          default: "Models"
+        reseq-bed-dir:
+          help: "Directory to store resequencing PLINK BED files"
+          type: str
+          default: "reSEQ/BEDs"
+        reseq-gwas-dir:
+          help: "Directory to store the resequencing GWAS results"
+          type: str
+          default: "reSEQ/GWAS"
 setup:
   reseq_input:
     wildcard-method:

@@ -1,76 +1,78 @@
 pipeline: filter-vcf
 parser:
   help: Filter resequencing VCF files using bcftools
-  args:
-    params:
-      reseq-vcf:
-        help: "Resequencing VCF file"
-        type: str
-        required: True
-        action: confirmFile
-      missing-cutoff:
-        help: "Missing data cutoff"
-        type: float
-        default: 0.25
-      maf-cutoff:
-        help: "MAF cutoff"
-        type: float
-        default: 0.05
-      qual-cutoff:
-        help: "Quality cutoff"
-        type: float
-        default: 30
-      min-alleles:
-        help: "Minimum allele count"
-        type: int
-        default: 2
-      max-alleles:
-        help: "Maximum allele count"
-        type: int
-        default: 2
-      species:
-        help: "Species name"
-        type: str
-        default:
-          str: "Sp"
-          suffix:
-            - function: jobRandomString
-      assembly-version:
-        help: "Assembly Version"
-        type: str
-        default:
-          str: "v"
-          suffix:
-            - function: jobRandomString
-      work-dir:
-        help: "Assign the working directory for snakemake"
-        type: str
-        default:
-          str: "FilterVCF"
-          suffix:
-            - function: jobTimeStamp
-            - function: jobRandomString
-      snakemake-job-prefix:
-        help: "Assign the snakemake job prefix"
-        type: str
-        default:
-          str: "FilterVCF"
-          suffix:
-            - function: jobTimeStamp
-            - function: jobRandomString
+  arg-groups:
+    basic:
+      args:
+        reseq-vcf:
+          help: "Resequencing VCF file"
+          type: str
+          required: True
+          action: confirmFile
+        missing-cutoff:
+          help: "Missing data cutoff"
+          type: float
+          default: 0.25
+        maf-cutoff:
+          help: "MAF cutoff"
+          type: float
+          default: 0.05
+        qual-cutoff:
+          help: "Quality cutoff"
+          type: float
+          default: 30
+        min-alleles:
+          help: "Minimum allele count"
+          type: int
+          default: 2
+        max-alleles:
+          help: "Maximum allele count"
+          type: int
+          default: 2
+        species:
+          help: "Species name"
+          type: str
+          default:
+            str: "Sp"
+            suffix:
+              - function: jobRandomString
+        assembly-version:
+          help: "Assembly Version"
+          type: str
+          default:
+            str: "v"
+            suffix:
+              - function: jobRandomString
+        work-dir:
+          help: "Assign the working directory for snakemake"
+          type: str
+          default:
+            str: "FilterVCF"
+            suffix:
+              - function: jobTimeStamp
+              - function: jobRandomString
+        snakemake-job-prefix:
+          help: "Assign the snakemake job prefix"
+          type: str
+          default:
+            str: "FilterVCF"
+            suffix:
+              - function: jobTimeStamp
+              - function: jobRandomString
     paths:
-      reseq-unfiltered-vcf-dir:
-        help: "Directory to store VCFs files"
-        type: str
-        default: "reSEQ/VCFs/Unfiltered"
-      reseq-filtered-vcf-dir:
-        help: "Directory to store VCFs files"
-        type: str
-        default: "reSEQ/VCFs/Filtered"
-      models-dir:
-        help: "Directory to store models"
-        type: str
-        default: "Models"
+      args:
+        reseq-unfiltered-vcf-dir:
+          help: "Directory to store VCFs files"
+          type: str
+          default: "reSEQ/VCFs/Unfiltered"
+        reseq-filtered-vcf-dir:
+          help: "Directory to store VCFs files"
+          type: str
+          default: "reSEQ/VCFs/Filtered"
+        models-dir:
+          help: "Directory to store models"
+          type: str
+          default: "Models"
 
 setup:
   reseq_vcf:

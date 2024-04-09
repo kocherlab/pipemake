@@ -1,94 +1,96 @@
 pipeline: annotate-braker3-with-bam
 parser:
   help: Annotate an assembly using BRAKER3 using a processed BAM file
-  args:
-    params:
-      rnaseq-bam:
-        help: "RNAseq BAM file"
-        type: str
-        required: True
-        action: confirmFile
-      assembly-fasta:
-        help: "Assembly file"
-        type: str
-        required: True
-        action: confirmFile
-      hints-fasta:
-        help: "Protein hints file"
-        type: str
-        required: True
-        action: confirmFile
-      busco-database:
-        help: "Name of BUSCO database"
-        type: str
-        required: True
-      assembly-version:
-        help: "Assembly Version"
-        type: str
-        default:
-          str: "v"
-          suffix:
-            - function: jobRandomString
-      annotation-version:
-        help: "Annotation Version"
-        type: str
-        default:
-          str: "v"
-          suffix:
-            - function: jobRandomString
-      species:
-        help: "Species name"
-        type: str
-        default:
-          str: "Sp"
-          suffix:
-            - function: jobRandomString
-      work-dir:
-        help: "Assign the working directory for snakemake"
-        type: str
-        default:
-          str: "Assembly"
-          suffix:
-            - function: jobTimeStamp
-            - function: jobRandomString
-      snakemake-job-prefix:
-        help: "Assign the snakemake job prefix"
-        type: str
-        default:
-          str: "AnnotateBraker3"
-          suffix:
-            - function: jobTimeStamp
-            - function: jobRandomString
+  arg-groups:
+    basic:
+      args:
+        rnaseq-bam:
+          help: "RNAseq BAM file"
+          type: str
+          required: True
+          action: confirmFile
+        assembly-fasta:
+          help: "Assembly file"
+          type: str
+          required: True
+          action: confirmFile
+        hints-fasta:
+          help: "Protein hints file"
+          type: str
+          required: True
+          action: confirmFile
+        busco-database:
+          help: "Name of BUSCO database"
+          type: str
+          required: True
+        assembly-version:
+          help: "Assembly Version"
+          type: str
+          default:
+            str: "v"
+            suffix:
+              - function: jobRandomString
+        annotation-version:
+          help: "Annotation Version"
+          type: str
+          default:
+            str: "v"
+            suffix:
+              - function: jobRandomString
+        species:
+          help: "Species name"
+          type: str
+          default:
+            str: "Sp"
+            suffix:
+              - function: jobRandomString
+        work-dir:
+          help: "Assign the working directory for snakemake"
+          type: str
+          default:
+            str: "Assembly"
+            suffix:
+              - function: jobTimeStamp
+              - function: jobRandomString
+        snakemake-job-prefix:
+          help: "Assign the snakemake job prefix"
+          type: str
+          default:
+            str: "AnnotateBraker3"
+            suffix:
+              - function: jobTimeStamp
+              - function: jobRandomString
     paths:
-      assembly-dir:
-        help: "Directory to store assembly"
-        type: str
-        default: "Assembly"
-      homology-dir:
-        help: "Directory to store hint"
-        type: str
-        default: "Homology"
-      index-dir:
-        help: "Directory to store indices"
-        type: str
-        default: "Indices"
-      downloads-dir:
-        help: "Directory to store downloads"
-        type: str
-        default: "Downloads"
-      rnaseq-bam-dir:
-        help: "Directory to store BAM files"
-        type: str
-        default: "RNAseq/BAMs"
-      annotations-dir:
-        help: "Directory to store annotations"
-        type: str
-        default: 
-          str: "Annotations"
-      repeatmodeler-dir:
-        help: "Directory to store RepeatModeler output"
-        type: str
-        default: "Assembly/RepeatModeler"
+      args:
+        assembly-dir:
+          help: "Directory to store assembly"
+          type: str
+          default: "Assembly"
+        homology-dir:
+          help: "Directory to store hint"
+          type: str
+          default: "Homology"
+        index-dir:
+          help: "Directory to store indices"
+          type: str
+          default: "Indices"
+        downloads-dir:
+          help: "Directory to store downloads"
+          type: str
+          default: "Downloads"
+        rnaseq-bam-dir:
+          help: "Directory to store BAM files"
+          type: str
+          default: "RNAseq/BAMs"
+        annotations-dir:
+          help: "Directory to store annotations"
+          type: str
+          default: 
+            str: "Annotations"
+        repeatmodeler-dir:
+          help: "Directory to store RepeatModeler output"
+          type: str
+          default: "Assembly/RepeatModeler"
 setup:
   rnaseq_input:
     file-method:

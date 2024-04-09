@@ -1,65 +1,65 @@
 pipeline: fastq-filter
 parser:
   help: Filter FASTQ files using fastp
-  groups:
-    input_parser:
-      type: mutually_exclusive
+  arg-groups:
+    basic:
+      mutually-exclusive-groups:
+        input-parser:
+          required: True
       args:
-        required: True
-  args:
-    params:
-      fastq-wildcard:
-        help: "Wildcard statement to represent FASTQs"
-        type: str
-        group: input_parser
-      fastq-table:
-        help: "Table with sample and FASTQs filenames"
-        type: str
-        group: input_parser
-        action: confirmFile
-      fastq-copy-method:
-        help: "Socifies if FASTQs should be copied or symbolically linked."
-        choices:
-          - 'symbolic_link'
-          - 'copy'
-        default: 'symbolic_link'
-      fastq-standardized-wildcard:
-        help: "Standardized wildcard statement used to store FASTQs"
-        type: str
-        default: 
-          str: "{sample}_{read}.fq.gz"
-      min-length:
-        help: "Minimum length of reads to keep"
-        type: int
-        default:
-          str: "50"
-      work-dir:
-        help: "Assign the working directory for snakemake"
-        type: str
-        default:
-          str: "RNAseqCounts"
-          suffix:
-            - function: jobTimeStamp
-            - function: jobRandomString
-      snakemake-job-prefix:
-        help: "Assign the snakemake job prefix"
-        type: str
-        default:
-          str: "countSTAR"
-          suffix:
-            - function: jobTimeStamp
-            - function: jobRandomString
+        fastq-wildcard:
+          help: "Wildcard statement to represent FASTQs"
+          type: str
+          mutually-exclusive: "input-parser"
+        fastq-table:
+          help: "Table with sample and FASTQs filenames"
+          type: str
+          action: confirmFile
+          mutually-exclusive: "input-parser"
+        fastq-copy-method:
+          help: "Socifies if FASTQs should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        fastq-standardized-wildcard:
+          help: "Standardized wildcard statement used to store FASTQs"
+          type: str
+          default: 
+            str: "{sample}_{read}.fq.gz"
+        min-length:
+          help: "Minimum length of reads to keep"
+          type: int
+          default:
+            str: "50"
+        work-dir:
+          help: "Assign the working directory for snakemake"
+          type: str
+          default:
+            str: "RNAseqCounts"
+            suffix:
+              - function: jobTimeStamp
+              - function: jobRandomString
+        snakemake-job-prefix:
+          help: "Assign the snakemake job prefix"
+          type: str
+          default:
+            str: "countSTAR"
+            suffix:
+              - function: jobTimeStamp
+              - function: jobRandomString
     paths:
-      unfiltered-fastq-dir:
-        help: "Directory to store unfiltered FASTQ files"
-        type: str
-        default: 
-          str: "FASTQ/Unfiltered"
-      filtered-fastq-dir:
-        help: "Directory to store filtered FASTQ files"
-        type: str
-        default: 
-          str: "FASTQ/Filtered"
+      args:
+        unfiltered-fastq-dir:
+          help: "Directory to store unfiltered FASTQ files"
+          type: str
+          default: 
+            str: "FASTQ/Unfiltered"
+        filtered-fastq-dir:
+          help: "Directory to store filtered FASTQ files"
+          type: str
+          default: 
+            str: "FASTQ/Filtered"
 setup:
   fastq_input:
     wildcard-method:
