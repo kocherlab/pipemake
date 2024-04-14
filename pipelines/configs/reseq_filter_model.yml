@@ -1,6 +1,6 @@
-pipeline: filter-pops-vcf
+pipeline: filter-model-vcf
 parser:
-  help: Filter populations in resequencing VCF files using bcftools
+  help: Filter a model in resequencing VCF files using bcftools
   arg-groups:
     basic:
       args:
@@ -122,5 +122,5 @@ command-line:
   use-singularity: True
 
 snakefiles:
-  - reseq_filter_w_pop_missing_data_bcftools.smk
+  - reseq_filter_w_model_bcftools.smk
   - reseq_model_ind_file.smk

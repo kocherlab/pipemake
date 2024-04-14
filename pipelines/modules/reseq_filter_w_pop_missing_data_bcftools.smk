@@ -4,7 +4,8 @@ rule all:
 
 rule filter_basic_vcf_bcftools:
 	input:
-		os.path.join(config['paths']['reseq_unfiltered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.vcf.gz")
+		vcf_file=os.path.join(config['paths']['reseq_unfiltered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.vcf.gz"),
+		ind_file=os.path.join(config['paths']['models_dir'], f"{config['species']}.{config['model_name']}.ind.txt")
 	output:
 		vcf_file=temp(os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.filtered.woMD.vcf.gz")),
 		idx_file=temp(os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.filtered.woMD.vcf.gz.csi"))
@@ -20,7 +21,7 @@ rule filter_basic_vcf_bcftools:
 		"/Genomics/argo/users/aewebb/.local/images/kocherPOP.sif"
 	shell:
 		"""
-		bcftools view --min-alleles {params.min_alleles} --max-alleles {params.max_alleles} --types snps --include 'MAF>={params.maf} && QUAL>={params.qual}' --output-type z --output-file {output.vcf_file} --threads {threads} {input}
+		bcftools view --samples-file {input.ind_file} {input.vcf_file} | bcftools view --min-alleles {params.min_alleles} --max-alleles {params.max_alleles} --types snps --include 'MAF>={params.maf} && QUAL>={params.qual}' --output-type z --output-file {output.vcf_file} --threads {threads}
 		bcftools index {output.vcf_file}
 		"""
 

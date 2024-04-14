@@ -3,7 +3,7 @@ rule all:
 		expand(os.path.join(config['paths']['models_dir'], f"{config['species']}.{{model}}.ind.txt"), model=config['models']),
 		expand(os.path.join(config['paths']['models_dir'], f"{config['species']}.{{model}}.ind.log"), model=config['models'])
 
-rule model_fst_ind_file:
+rule model_ind_file:
 	input:
 		os.path.join(config['paths']['models_dir'], f"{config['species']}.model")
 	output:
