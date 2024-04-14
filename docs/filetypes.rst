@@ -18,7 +18,7 @@ Snakemake files are used to define Pipemake **Modules**. In general, **Modules**
 
 By following these principles, Pipemake **Modules** may be easily used in multiple pipelines. For example, a basic snakemake file that aligns reads from a sample to a reference genome might have the following rules:
 
-.. code-block:: python
+.. code-block::
 
     rule index_reference:
         input:
@@ -44,7 +44,7 @@ By following these principles, Pipemake **Modules** may be easily used in multip
 
 To convert this into a Pipemake **Module** with configurable files, we would only need to modify the input and output files as follows:
 
-.. code-block:: python
+.. code-block::
 
     rule index_reference:
         input:
@@ -78,7 +78,7 @@ In this example, we have replaced the unique filenames with the following set of
 
 By consistently using these configurable term (or standardized filenames), it is possible to easily connect multiple **Modules** together to form pipelines. For example, the output of the `align_reads` rule may be used as the input for another **Module** to count reads:
 
-.. code-block:: python
+.. code-block::
 
     rule count_reads:
         input:
@@ -114,7 +114,7 @@ Pipemake uses YAML-formatted files to define **Pipelines**. These files are used
 
 The following is an example of a **Pipeline** configuration file:
 
-.. code-block:: bash
+.. code-block::
 
     pipeline: rnaseq-counts-star
       parser:
@@ -311,7 +311,7 @@ Pipeline configuration guide
 
 A pipeline configuration file begins with the `pipeline` keyword, which is used to define the name of the pipeline. As this name is used to identify a pipeline within `pipemake`, it must be unique. The configuration file then consists of the following required sections: `parser`, `setup`, and `snakefiles`.
 
-.. code-block:: bash
+.. code-block::
 
     pipeline: rnaseq-counts-star
       parser:
@@ -331,7 +331,7 @@ help:
 
 The help sub-section is used to define the description of the pipeline, which is displayed when `Pipemake` is run with the `--help` flag.
 
-.. code-block:: bash
+.. code-block::
 
     pipeline: rnaseq-counts-star
       parser:
@@ -342,7 +342,7 @@ arg-groups:
 
 The `arg-groups` sub-section is used by `pipemake` to define command-line argument groups. The `basic` group is reserved by `pipemake`, arguments within this group will be automatically grouped within `required` or `optional` based on their `required` keyword. Users may place all arguments within the `basic` group or create additional groups as desired. Additional `arg-groups` may be defined as needed to organize related arguments within the pipeline help message, for example grouping all path arguments together in `paths`.
 
-.. code-block:: bash
+.. code-block::
 
     pipeline: rnaseq-counts-star
       parser:
@@ -392,7 +392,7 @@ mutually-exclusive-groups:
 
 Each `arg-groups` may use the `mutually-exclusive-groups` keyword to define mutually exclusive arguments to ensure that only one of the arguments within a group may be used at a time. This is useful when a pipeline accepts different types of input, such as a wildcard statement or a table of input files. To create a `mutually-exclusive-group`, a user is only required to name the group.
 
-.. code-block:: bash
+.. code-block::
 
     pipeline: rnaseq-counts-star
       parser:
@@ -454,7 +454,7 @@ default:
 
 The `default` keyword may be used to define the default value of an argument. In general, the default value may share the same type as the `type` keyword. However, it's also possible to define more complex default values.
 
-.. code-block:: bash
+.. code-block::
 
     pipeline: rnaseq-counts-star
       parser:
@@ -477,7 +477,7 @@ setup:
 
 The `setup` section is used to define the steps needed to standardize the input files for the pipeline. Within the `setup` section, each sub-section is used to define a separate input file(s).
 
-.. code-block:: bash
+.. code-block::
 
     pipeline: rnaseq-counts-star
       setup:
@@ -569,7 +569,7 @@ Standardization methods may also include the following optional keyword:
 snakefiles:
 ###########
 
-.. code-block:: bash
+.. code-block::
 
     pipeline: rnaseq-counts-star
       snakefiles:
