@@ -1,6 +1,6 @@
-pipeline: calc-ihs-vcf
+pipeline: reseq-calc-nsl
 parser:
-  help: Calculate iHS from phased VCF using selscan
+  help: Calculate nSL using selscan
   arg-groups:
     basic:
       args:
@@ -41,7 +41,7 @@ parser:
           help: "Assign the working directory for snakemake"
           type: str
           default:
-            str: "Calc_iHS"
+            str: "Calc_nSL"
             suffix:
               - function: jobTimeStamp
               - function: jobRandomString
@@ -49,7 +49,7 @@ parser:
           help: "Assign the snakemake job prefix"
           type: str
           default:
-            str: "Calc_iHS"
+            str: "Calc_nSL"
             suffix:
               - function: jobTimeStamp
               - function: jobRandomString
@@ -93,4 +93,4 @@ command-line:
 
 snakefiles:
   - reseq_phase_shapeit4
-  - reseq_sweep_selscan
+  - reseq_calc_nsl_selscan

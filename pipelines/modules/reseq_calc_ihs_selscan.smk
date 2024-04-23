@@ -7,13 +7,13 @@ rule all:
 
 rule reseq_phased_map_plink:
 	input:
-		os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}.vcf.gz')
+		os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{sweep_chrom}.vcf.gz')
 	output:
-		temp(os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}.map')),
-		temp(os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}.ped')),
-		temp(os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}.log'))
+		temp(os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{sweep_chrom}.map')),
+		temp(os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{sweep_chrom}.ped')),
+		temp(os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{sweep_chrom}.log'))
 	params:
-		out_prefix=os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}')
+		out_prefix=os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{sweep_chrom}')
 	singularity:
 		"/Genomics/argo/users/aewebb/.local/images/plink.sif"
 	resources:
@@ -24,11 +24,11 @@ rule reseq_phased_map_plink:
 
 rule reseq_phased_ids_bcftools:
 	input:
-		os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}.vcf.gz')
+		os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{sweep_chrom}.vcf.gz')
 	output:
-		temp(os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}.id.vcf.gz'))
+		temp(os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{sweep_chrom}.id.vcf.gz'))
 	params:
-		out_prefix=os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}')
+		out_prefix=os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{sweep_chrom}')
 	singularity:
 		"/Genomics/argo/users/aewebb/.local/images/kocherPOP.sif"
 	resources:
@@ -39,13 +39,13 @@ rule reseq_phased_ids_bcftools:
 
 rule reseq_ihs_selscan:
 	input:
-		vcf=os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}.id.vcf.gz'),
-		map=os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}.map')
+		vcf=os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{sweep_chrom}.id.vcf.gz'),
+		map=os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{sweep_chrom}.map')
 	output:
-		temp(os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', '{chrom}.ihs.out')),
-		temp(os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', '{chrom}.ihs.log'))
+		temp(os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', '{sweep_chrom}.ihs.out')),
+		temp(os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', '{sweep_chrom}.ihs.log'))
 	params:
-		out_prefix=os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', '{chrom}'),
+		out_prefix=os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', '{sweep_chrom}'),
 		maf = config['maf']
 	singularity:
 		"/Genomics/argo/users/aewebb/.local/images/selscan.sif"
@@ -57,12 +57,12 @@ rule reseq_ihs_selscan:
 
 rule reseq_ihs_normalize_norm:
 	input:
-		os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', '{chrom}.ihs.out')
+		os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', '{sweep_chrom}.ihs.out')
 	output:
-		temp(os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', f"{{chrom}}.ihs.out.{config['bins']}bins.norm")),
-		temp(os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', f"{{chrom}}.ihs.out.{config['bins']}bins.log"))
+		temp(os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', f"{{sweep_chrom}}.ihs.out.{config['bins']}bins.norm")),
+		temp(os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', f"{{sweep_chrom}}.ihs.out.{config['bins']}bins.log"))
 	params:
-		out_prefix=os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', '{chrom}.ihs.out'),
+		out_prefix=os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', '{sweep_chrom}.ihs.out'),
 		bins = config['bins']
 	singularity:
 		"/Genomics/argo/users/aewebb/.local/images/selscan.sif"
@@ -74,10 +74,10 @@ rule reseq_ihs_normalize_norm:
 
 def aggregate_ihs_reseq (wildcards):
 	checkpoint_output = checkpoints.reseq_split_unphased_bcftools.get(**wildcards).output[0]
-	return {'scan_ihs': expand(os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', '{chrom}.ihs.out'), chrom = glob_wildcards(os.path.join(checkpoint_output, "{chrom}.vcf.gz")).chrom),
-			'scan_log': expand(os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', '{chrom}.ihs.log'), chrom = glob_wildcards(os.path.join(checkpoint_output, "{chrom}.vcf.gz")).chrom),
-			'norm_ihs': expand(os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', f"{{chrom}}.ihs.out.{config['bins']}bins.norm"), chrom = glob_wildcards(os.path.join(checkpoint_output, "{chrom}.vcf.gz")).chrom),
-			'norm_log': expand(os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', f"{{chrom}}.ihs.out.{config['bins']}bins.log"), chrom = glob_wildcards(os.path.join(checkpoint_output, "{chrom}.vcf.gz")).chrom)}
+	return {'scan_ihs': expand(os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', '{sweep_chrom}.ihs.out'), chrom = glob_wildcards(os.path.join(checkpoint_output, "{sweep_chrom}.vcf.gz")).chrom),
+			'scan_log': expand(os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', '{sweep_chrom}.ihs.log'), chrom = glob_wildcards(os.path.join(checkpoint_output, "{sweep_chrom}.vcf.gz")).chrom),
+			'norm_ihs': expand(os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', f"{{sweep_chrom}}.ihs.out.{config['bins']}bins.norm"), chrom = glob_wildcards(os.path.join(checkpoint_output, "{sweep_chrom}.vcf.gz")).chrom),
+			'norm_log': expand(os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', f"{{sweep_chrom}}.ihs.out.{config['bins']}bins.log"), chrom = glob_wildcards(os.path.join(checkpoint_output, "{sweep_chrom}.vcf.gz")).chrom)}
 
 rule reseq_cat_ihs_bash:
 	input:
