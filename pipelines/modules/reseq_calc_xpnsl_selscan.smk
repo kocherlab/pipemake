@@ -25,8 +25,8 @@ rule reseq_create_pop_xpnsl_vcf_bcftools:
 		vcf=os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}.xpnsl.vcf.gz'),
 		ref_inds=os.path.join(config['paths']['models_dir'], config['model_name'], f"{config['pop_name']}.pop")
 	output:
-		ref_vcf=os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}.xpnsl.vcf.gz'),
-		query_vcf=os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}.xpnsl.vcf.gz')
+		ref_vcf=os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}.xpnsl.ref.vcf.gz'),
+		query_vcf=os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}.xpnsl.query.vcf.gz')
 	singularity:
 		"/Genomics/argo/users/aewebb/.local/images/kocherPOP.sif"
 	resources:
@@ -40,8 +40,8 @@ rule reseq_create_pop_xpnsl_vcf_bcftools:
 
 rule reseq_xpnsl_selscan:
 	input:
-		ref_vcf=os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}.xpnsl.vcf.gz'),
-		query_vcf=os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}.xpnsl.vcf.gz')
+		ref_vcf=os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}.xpnsl.ref.vcf.gz'),
+		query_vcf=os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}.xpnsl.query.vcf.gz')
 	output:
 		temp(os.path.join(config['paths']['reseq_popgen_dir'], 'XPnSL', '{chrom}.xpnsl.out')),
 		temp(os.path.join(config['paths']['reseq_popgen_dir'], 'XPnSL', '{chrom}.xpnsl.log'))
