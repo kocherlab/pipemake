@@ -243,9 +243,6 @@ def main():
 	# Parse the aguments from the configs
 	pipeline_args = pipeline_parser(pipeline_config_args)
 
-	import sys
-	sys.exit()
-
 	# Update the pipeline args with the pipeline directory
 	pipeline_args['pipeline_storage_dir'] = pipeline_storage_dir
 

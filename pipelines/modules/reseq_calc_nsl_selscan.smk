@@ -1,9 +1,7 @@
 rule all:
 	input:
-		os.path.join(config['paths']['reseq_popgen_dir'], 'nSL', f"{config['species']}_{config['assembly_version']}.nsl.out"),
-		os.path.join(config['paths']['reseq_popgen_dir'], 'nSL', f"{config['species']}_{config['assembly_version']}.nsl.out.log"),
-		os.path.join(config['paths']['reseq_popgen_dir'], 'nSL', f"{config['species']}_{config['assembly_version']}.nsl.norm"),
-		os.path.join(config['paths']['reseq_popgen_dir'], 'nSL', f"{config['species']}_{config['assembly_version']}.nsl.norm.log")
+		os.path.join(config['paths']['reseq_popgen_dir'], 'nSL', f"{config['species']}_{config['assembly_version']}.nsl.manhattan.png"),
+		os.path.join(config['paths']['reseq_popgen_dir'], 'nSL', f"{config['species']}_{config['assembly_version']}.abs_nsl.manhattan.png")
 
 rule reseq_prep_nsl_vcf_bcftools:
 	input:
@@ -78,4 +76,23 @@ rule reseq_cat_nsl_bash:
 		cat {input.norm_nsl} > {output.norm_nsl}
 		cat {input.scan_log} > {output.scan_log}
 		cat {input.norm_log} > {output.norm_log}
+		"""
+
+rule plot_norm_nsl_pipemake:
+	input:
+		os.path.join(config['paths']['reseq_popgen_dir'], 'nSL', f"{config['species']}_{config['assembly_version']}.nsl.norm")
+	output:
+		os.path.join(config['paths']['reseq_popgen_dir'], 'nSL', f"{config['species']}_{config['assembly_version']}.nsl.manhattan.png"),
+		os.path.join(config['paths']['reseq_popgen_dir'], 'nSL', f"{config['species']}_{config['assembly_version']}.abs_nsl.manhattan.png")
+	params:
+		out_prefix=os.path.join(config['paths']['reseq_popgen_dir'], 'nSL', f"{config['species']}_{config['assembly_version}']}")
+	singularity:
+		"/Genomics/argo/users/aewebb/.local/images/pipemake_utils.sif"
+	resources:
+		mem_mb=2000
+	threads: 1
+	shell:
+		"""
+		manhattan-plot --input-file {input} --chrom-col-int 0 --pos-col-int 0 --stat-col-int 6 --plot-stat-text "Noramlized nSL" --chrom-sep '_' --out-prefix {params.out_prefix}.nsl
+		manhattan-plot --input-file {input} --chrom-col-int 0 --pos-col-int 0 --stat-col-int 6 --plot-stat-text "Noramlized nSL" --chrom-sep '_' --plot-abs --out-prefix {params.out_prefix}.abs_nsl
 		"""
