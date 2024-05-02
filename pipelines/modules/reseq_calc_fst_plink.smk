@@ -1,6 +1,6 @@
 rule all:
 	input:
-		expand(os.path.join(config['paths']['reseq_popgen_dir'], 'Fst', '{model}', f"{config['species']}_{config['assembly_version']}.filtered.fst.summary"), model=config['models'])
+		expand(os.path.join(config['paths']['reseq_popgen_dir'], f"{config['species']}.{{model}}.report"), model=config['models'])
 
 rule reseq_model_fst_phenotype_file:
 	input:
@@ -19,7 +19,7 @@ rule reseq_model_fst_phenotype_file:
 	shell:
 		"ped-phenotype-file --fam {input.fam_file} --model-file {input.model_file} --model-name {wildcards.model} --out-prefix {params.out_prefix} --out-format plink2 --pheno-header {wildcards.model}"
 
-rule reseq_model_calc_fst_plink:
+checkpoint reseq_model_calc_fst_plink:
 	input:
 		bed_file=os.path.join(config['paths']['reseq_filtered_plink_dir'], f"{config['species']}_{config['assembly_version']}.filtered.bed"),
 		bim_file=os.path.join(config['paths']['reseq_filtered_plink_dir'], f"{config['species']}_{config['assembly_version']}.filtered.bim"),
@@ -27,7 +27,7 @@ rule reseq_model_calc_fst_plink:
 		pheno_file=os.path.join(config['paths']['models_dir'], 'Fst', f"{config['species']}.{{model}}.pheno.txt"),
 		ind_file=os.path.join(config['paths']['models_dir'], f"{config['species']}.{{model}}.ind.txt")
 	output:
-		os.path.join(config['paths']['reseq_popgen_dir'], 'Fst', '{model}', f"{config['species']}_{config['assembly_version']}.filtered.fst.summary")
+		fst_dir=directory(os.path.join(config['paths']['reseq_popgen_dir'], 'Fst', '{model}'))
 	params:
 		bed_prefix=os.path.join(config['paths']['reseq_filtered_plink_dir'], f"{config['species']}_{config['assembly_version']}.filtered"),
 		fst_prefix=os.path.join(config['paths']['reseq_popgen_dir'], 'Fst', '{model}', f"{config['species']}_{config['assembly_version']}.filtered"),
@@ -38,4 +38,23 @@ rule reseq_model_calc_fst_plink:
 	singularity:
 		"/Genomics/argo/users/aewebb/.local/images/plink.sif"
 	shell:
-		"plink2 --bfile {params.bed_prefix} --pheno {input.pheno_file} --keep {input.ind_file} --fst {wildcards.model} report-variants method={params.fst_method} --allow-extra-chr --out {params.fst_prefix}"
+		"""
+		mkdir -p {output.fst_dir}
+		plink2 --bfile {params.bed_prefix} --pheno {input.pheno_file} --keep {input.ind_file} --fst {wildcards.model} report-variants method={params.fst_method} --allow-extra-chr --out {params.fst_prefix}
+		"""
+
+def get_fst_files (wildcards):
+	checkpoint_output = checkpoints.reseq_model_calc_fst_plink.get(**wildcards).output['fst_dir']
+	return expand(os.path.join(checkpoint_output, f"{config['species']}_{config['assembly_version']}.filtered.{{pair}}.fst.var"),
+				  pair = glob_wildcards(os.path.join(checkpoint_output, f"{config['species']}_{config['assembly_version']}.filtered.{{pair}}.fst.var")).pair)
+
+rule reseq_model_fst_tmp_report:
+	input:
+		get_fst_files
+	output:
+		temp(os.path.join(config['paths']['reseq_popgen_dir'], f"{config['species']}.{{model}}.report"))
+	resources:
+		mem_mb=2000
+	threads: 1
+	shell:
+		"echo {input} > {output}"

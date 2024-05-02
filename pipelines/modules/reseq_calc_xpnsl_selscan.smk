@@ -9,7 +9,7 @@ rule reseq_prep_xpnsl_vcf_bcftools:
 	input:
 		os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}.vcf.gz')
 	output:
-		temp(os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}.xpnsl.vcf.gz'))
+		os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}.xpnsl.vcf.gz')
 	params:
 		out_prefix=os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}')
 	singularity:
@@ -34,8 +34,9 @@ rule reseq_create_pop_xpnsl_vcf_bcftools:
 	threads: 1
 	shell:
 		"""
-		bcftools view -i 'F_MISSING=0.0' --samples-file {input.ref_inds} -O z -o {output.ref_vcf} {input}
-		bcftools view -i 'F_MISSING=0.0' --samples-file ^{input.ref_inds} -O z -o {output.query_vcf} {input}
+		bcftools index {input}
+		bcftools view --samples-file {input.ref_inds} -O z -o {output.ref_vcf} {input.vcf}
+		bcftools view --samples-file ^{input.ref_inds} -O z -o {output.query_vcf} {input.vcf}
 		"""
 
 rule reseq_xpnsl_selscan:
@@ -54,16 +55,16 @@ rule reseq_xpnsl_selscan:
 		mem_mb=24000
 	threads: 12
 	shell:
-		"selscan --xpnsl --ref-vcf {input.ref_vcf} --vcf {input.query_vcf} --maf {params.maf} --threads {threads} --out {params.out_prefix}"
+		"selscan --xpnsl --vcf-ref {input.ref_vcf} --vcf {input.query_vcf} --maf {params.maf} --threads {threads} --out {params.out_prefix}"
 
 rule reseq_normalize_xpnsl_norm:
 	input:
 		os.path.join(config['paths']['reseq_popgen_dir'], 'XPnSL', '{chrom}.xpnsl.out')
 	output:
-		temp(os.path.join(config['paths']['reseq_popgen_dir'], 'XPnSL', f"{{chrom}}.xpnsl.out.{config['bins']}bins.norm")),
-		temp(os.path.join(config['paths']['reseq_popgen_dir'], 'XPnSL', f"{{chrom}}.xpnsl.out.{config['bins']}bins.log"))
+		temp(os.path.join(config['paths']['reseq_popgen_dir'], 'XPnSL', f"{{chrom}}.xpnsl.out.norm")),
+		temp(os.path.join(config['paths']['reseq_popgen_dir'], 'XPnSL', f"{{chrom}}.xpnsl.norm.log"))
 	params:
-		out_prefix=os.path.join(config['paths']['reseq_popgen_dir'], 'XPnSL', '{chrom}.xpnsl.out'),
+		out_prefix=os.path.join(config['paths']['reseq_popgen_dir'], 'XPnSL', '{chrom}.xpnsl'),
 		bins = config['bins']
 	singularity:
 		"/Genomics/argo/users/aewebb/.local/images/selscan.sif"
@@ -71,18 +72,18 @@ rule reseq_normalize_xpnsl_norm:
 		mem_mb=2000
 	threads: 1
 	shell:
-		"norm --nsl --files {input} --bins {params.bins} 2> {params.out_prefix}.{params.bins}bins.log"
+		"norm --xpnsl --files {input} --bins {params.bins} 2> {params.out_prefix}.norm.log"
 
 def aggregate_xpnsl_reseq (wildcards):
 	checkpoint_output = checkpoints.reseq_split_unphased_bcftools.get(**wildcards).output[0]
 	return {'scan_xpnsl': expand(os.path.join(config['paths']['reseq_popgen_dir'], 'XPnSL', '{chrom}.xpnsl.out'), chrom = glob_wildcards(os.path.join(checkpoint_output, "{chrom}.vcf.gz")).chrom),
 			'scan_log': expand(os.path.join(config['paths']['reseq_popgen_dir'], 'XPnSL', '{chrom}.xpnsl.log'), chrom = glob_wildcards(os.path.join(checkpoint_output, "{chrom}.vcf.gz")).chrom),
-			'norm_xpnsl': expand(os.path.join(config['paths']['reseq_popgen_dir'], 'XPnSL', f"{{chrom}}.xpnsl.out.{config['bins']}bins.norm"), chrom = glob_wildcards(os.path.join(checkpoint_output, "{chrom}.vcf.gz")).chrom),
-			'norm_log': expand(os.path.join(config['paths']['reseq_popgen_dir'], 'XPnSL', f"{{chrom}}.xpnsl.out.{config['bins']}bins.log"), chrom = glob_wildcards(os.path.join(checkpoint_output, "{chrom}.vcf.gz")).chrom)}
+			'norm_xpnsl': expand(os.path.join(config['paths']['reseq_popgen_dir'], 'XPnSL', f"{{chrom}}.xpnsl.out.norm"), chrom = glob_wildcards(os.path.join(checkpoint_output, "{chrom}.vcf.gz")).chrom),
+			'norm_log': expand(os.path.join(config['paths']['reseq_popgen_dir'], 'XPnSL', f"{{chrom}}.xpnsl.norm.log"), chrom = glob_wildcards(os.path.join(checkpoint_output, "{chrom}.vcf.gz")).chrom)}
 
 rule reseq_cat_xpnsl_bash:
 	input:
-		unpack(aggregate_nsl_reseq)
+		unpack(aggregate_xpnsl_reseq)
 	output:
 		scan_xpnsl=os.path.join(config['paths']['reseq_popgen_dir'], 'XPnSL', f"{config['species']}_{config['assembly_version']}.xpnsl.out"),
 		scan_log=os.path.join(config['paths']['reseq_popgen_dir'], 'XPnSL', f"{config['species']}_{config['assembly_version']}.xpnsl.out.log"),

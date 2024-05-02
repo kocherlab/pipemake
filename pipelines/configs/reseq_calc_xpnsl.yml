@@ -1,6 +1,6 @@
-pipeline: reseq-popgen
+pipeline: reseq-calc-xpnsl
 parser:
-  help: Run basic PopGen analyses on resequencing data
+  help: Calculate XP-nSL using selscan
   arg-groups:
     basic:
       args:
@@ -20,47 +20,20 @@ parser:
           type: str
           required: True
           action: confirmFile
-        models:
-          help: "Category names"
+        model-name:
+          help: "Model name"
           type: str
-          nargs: '+'
-          required: True
-        ld-window-size:
-          help: "LD window size"
+        pop-name:
+          help: "Reference population name"
           type: str
-          default: 50
-        ld-window-step:
-          help: "LD window step"
-          type: str
-          default: 5
-        ld-threshold:
-          help: "LD threshold"
-          type: float
-          default: 0.2
-        pca-count:
-          help: "Number of principal components"
-          type: int
-          default: 10
-        fst-method:
-          help: "FST method"
-          type: str
-          default: "hudson"
-        kinship-matrix:
-          help: "Kinship matrix type"
-          type: int
-          default: 1
-        linear-model:
-          help: "Linear model type"
-          type: int
-          default: 1
         maf:
-          help: "MAF cutoff"
+          help: "Minor allele frequency"
           type: float
           default: 0.05
-        min-log-pvalue:
-          help: "Minimum log10 p-values to keep"
-          type: float
-          default: 0.5
+        bins:
+          help: "Number of bins for normalization"
+          type: int
+          default: 100
         assembly-version:
           help: "Assembly Version"
           type: str
@@ -79,7 +52,7 @@ parser:
           help: "Assign the working directory for snakemake"
           type: str
           default:
-            str: "reSEQ_PopGen"
+            str: "Calc_nSL"
             suffix:
               - function: jobTimeStamp
               - function: jobRandomString
@@ -87,32 +60,28 @@ parser:
           help: "Assign the snakemake job prefix"
           type: str
           default:
-            str: "reSEQ_PopGen"
+            str: "Calc_nSL"
             suffix:
               - function: jobTimeStamp
               - function: jobRandomString
     paths:
       args:
         reseq-filtered-vcf-dir:
-          help: "Directory to store filtered resequencing VCF files"
+          help: "Directory to store filtered VCFs files"
           type: str
-          default: "reSEQ/VCFs/Filtered"
-        reseq-filtered-plink-dir:
-          help: "Directory to store filtered resequencing PLINK files"
+          default: "reSEQ/VCFs/Unphased"
+        reseq-phased-vcf-dir:
+          help: "Directory to store phased VCFs files"
           type: str
-          default: "reSEQ/PLINK/Filtered"
-        reseq-pruned-plink-dir:
-          help: "Directory to store pruned resequencing PLINK files"
+          default: "reSEQ/VCFs/Phased"
+        reseq-popgen-dir:
+          help: "Directory to store resequencing population genetics analyses"
           type: str
-          default: "reSEQ/PLINK/Pruned"
+          default: "reSEQ/PopGen"
         models-dir:
           help: "Directory to store models"
           type: str
           default: "Models"
-        reseq_popgen_dir:
-          help: "Directory to store resequencing population genetics analyses"
-          type: str
-          default: "reSEQ/PopGen"
 setup:
   reseq_vcf:
     file-method:
@@ -127,12 +96,12 @@ setup:
         method: "file-str"
         args:
           input_filename: "{reseq-vcf}"
-          standardized_filename: "{species}_{assembly-version}.filtered.vcf.gz"
+          standardized_filename: "{species}_{assembly-version}.vcf.gz"
           out_dir: "{reseq-filtered-vcf-dir}"
           work_dir: '{work-dir}'
-          gzipped: True
           copy_method: '{reseq-copy-method}'
-  
+          gzipped: True
+
   model_input:
     file-method:
       input:
@@ -147,19 +116,13 @@ setup:
           standardized_filename: "{species}.model"
           out_dir: "{models-dir}"
           work_dir: '{work-dir}'
-          copy_method: '{reseq-copy-method}'
           gzipped: False
-
+  
 command-line:
   cores: 20
   use-singularity: True
 
 snakefiles:
-  - reseq_filtered_vcf_to_plink.smk
-  - reseq_calc_fst_plink.smk
-  - reseq_calc_zfst_pipemake.smk
-  - reseq_calc_pca_plink.smk
-  - reseq_ld_prune_plink.smk
-  - reseq_model_ind_files.smk
-  - reseq_gwas_gemma.smk
-
+  - reseq_phase_shapeit4.smk
+  - reseq_pop_ind_file.smk
+  - reseq_calc_xpnsl_selscan.smk

@@ -8,7 +8,7 @@ rule pop_ind_file:
 	output:
 		os.path.join(config['paths']['models_dir'], config['model_name'], f"{config['pop_name']}.pop")
 	params:
-		model_name=config['model_name']
+		model_name=config['model_name'],
 		out_dir=os.path.join(config['paths']['models_dir'], config['model_name'])
 	resources:
 		mem_mb=2000

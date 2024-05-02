@@ -85,7 +85,7 @@ rule plot_norm_nsl_pipemake:
 		os.path.join(config['paths']['reseq_popgen_dir'], 'nSL', f"{config['species']}_{config['assembly_version']}.nsl.manhattan.png"),
 		os.path.join(config['paths']['reseq_popgen_dir'], 'nSL', f"{config['species']}_{config['assembly_version']}.abs_nsl.manhattan.png")
 	params:
-		out_prefix=os.path.join(config['paths']['reseq_popgen_dir'], 'nSL', f"{config['species']}_{config['assembly_version}']}")
+		out_prefix=os.path.join(config['paths']['reseq_popgen_dir'], 'nSL', f"{config['species']}_{config['assembly_version']}")
 	singularity:
 		"/Genomics/argo/users/aewebb/.local/images/pipemake_utils.sif"
 	resources:
