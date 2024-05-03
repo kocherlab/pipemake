@@ -93,6 +93,6 @@ rule plot_norm_nsl_pipemake:
 	threads: 1
 	shell:
 		"""
-		manhattan-plot --input-file {input} --chrom-col-int 0 --pos-col-int 0 --stat-col-int 6 --plot-stat-text "Noramlized nSL" --chrom-sep '_' --out-prefix {params.out_prefix}.nsl
-		manhattan-plot --input-file {input} --chrom-col-int 0 --pos-col-int 0 --stat-col-int 6 --plot-stat-text "Noramlized nSL" --chrom-sep '_' --plot-abs --out-prefix {params.out_prefix}.abs_nsl
+		manhattan-plot --input-file {input} --chrom-col-int 0 --pos-col-int 0 --stat-col-int 6 --plot-stat-text "Noramlized nSL" --chrom-pos-sep '_' --out-prefix {params.out_prefix}.nsl
+		manhattan-plot --input-file {input} --chrom-col-int 0 --pos-col-int 0 --stat-col-int 6 --plot-stat-text "Noramlized nSL" --chrom-pos-sep '_' --plot-abs --out-prefix {params.out_prefix}.abs_nsl
 		"""
