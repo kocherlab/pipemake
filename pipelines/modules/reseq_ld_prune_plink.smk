@@ -23,7 +23,7 @@ rule reseq_indep_pairwise_plink:
 		mem_mb=8000
 	threads: 1
 	shell:
-		"plink2 --bfile {params.bed_prefix} --indep-pairwise {params.ld_window_size} {params.ld_window_step} {params.ld_threshold} --out {params.out_prefix} --allow-extra-chr --threads {threads}"
+		"plink2 --bfile {params.bed_prefix} --indep-pairwise {params.ld_window_size} {params.ld_window_step} {params.ld_threshold} --bad-ld --out {params.out_prefix} --allow-extra-chr --threads {threads}"
 	
 rule reseq_ld_prune_plink:
 	input:

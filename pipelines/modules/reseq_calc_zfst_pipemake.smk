@@ -10,6 +10,8 @@ rule reseq_model_calc_zfst_pipemake:
 	params:
 		out_prefix=os.path.join(config['paths']['reseq_popgen_dir'], 'ZFst', '{model}', f"{config['species']}_{config['assembly_version']}.filtered.{{pair}}.fst"),
 		fst_method=config['fst_method']
+	singularity:
+		"/Genomics/argo/users/aewebb/.local/images/pipemake_utils.sif"
 	resources:
 		mem_mb=2000
 	threads: 1
@@ -19,6 +21,21 @@ rule reseq_model_calc_zfst_pipemake:
 		fst_col=${{fst_method^^}}
 		z-normalize --input-file {input} --out-prefix {params.out_prefix} --normalize-col ${{fst_col}}_FST
 		"""
+
+rule plot_zfst_pipemake:
+	input:
+		os.path.join(config['paths']['reseq_popgen_dir'], 'ZFst', '{model}', f"{config['species']}_{config['assembly_version']}.filtered.{{pair}}.fst.tsv")
+	output:
+		os.path.join(config['paths']['reseq_popgen_dir'], 'ZFst', '{model}', f"{config['species']}_{config['assembly_version']}.filtered.{{pair}}.fst.manhattan.png")
+	params:
+		out_prefix=os.path.join(config['paths']['reseq_popgen_dir'], 'ZFst', '{model}', f"{config['species']}_{config['assembly_version']}.{{pair}}.fst")
+	singularity:
+		"/Genomics/argo/users/aewebb/.local/images/pipemake_utils.sif"
+	resources:
+		mem_mb=2000
+	threads: 1
+	shell:
+		"manhattan-plot --input-file {input} --chrom-col #CHROM --pos-col POS --stat-col 'Z(HUDSON_FST)' --out-prefix {params.out_prefix}"
 
 def get_zfst_files (wildcards):
 	checkpoint_output = checkpoints.reseq_model_calc_fst_plink.get(**wildcards).output['fst_dir']

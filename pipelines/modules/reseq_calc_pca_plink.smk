@@ -4,12 +4,32 @@ rule all:
 		expand(os.path.join(config['paths']['reseq_popgen_dir'], 'PCA', '{model}', f"{config['species']}_{config['assembly_version']}.pruned.pca.eigenval"), model=config['models']),
 		expand(os.path.join(config['paths']['reseq_popgen_dir'], 'PCA', '{model}', f"{config['species']}_{config['assembly_version']}.pruned.pca.pdf"), model=config['models'])
 
-rule reseq_model_calc_pca_plink:
+rule reseq_calc_freq_plink:
 	input:
 		bed_file=os.path.join(config['paths']['reseq_pruned_plink_dir'], f"{config['species']}_{config['assembly_version']}.pruned.bed"),
 		bim_file=os.path.join(config['paths']['reseq_pruned_plink_dir'], f"{config['species']}_{config['assembly_version']}.pruned.bim"),
 		fam_file=os.path.join(config['paths']['reseq_pruned_plink_dir'], f"{config['species']}_{config['assembly_version']}.pruned.fam"),
 		ind_file=os.path.join(config['paths']['models_dir'], f"{config['species']}.{{model}}.ind.txt")
+	output:
+		os.path.join(config['paths']['reseq_popgen_dir'], 'PCA', '{model}', f"{config['species']}_{config['assembly_version']}.pruned.afreq")
+	params:
+		bed_prefix=os.path.join(config['paths']['reseq_pruned_plink_dir'], f"{config['species']}_{config['assembly_version']}.pruned"),
+		pca_prefix=os.path.join(config['paths']['reseq_popgen_dir'], 'PCA', '{model}', f"{config['species']}_{config['assembly_version']}.pruned")
+	resources:
+		mem_mb=2000
+	threads: 1
+	singularity:
+		"/Genomics/argo/users/aewebb/.local/images/plink.sif"
+	shell:
+		"plink2 --bfile {params.bed_prefix} --keep {input.ind_file} --freq --allow-extra-chr --out {params.pca_prefix}"
+
+rule reseq_model_calc_pca_plink:
+	input:
+		bed_file=os.path.join(config['paths']['reseq_pruned_plink_dir'], f"{config['species']}_{config['assembly_version']}.pruned.bed"),
+		bim_file=os.path.join(config['paths']['reseq_pruned_plink_dir'], f"{config['species']}_{config['assembly_version']}.pruned.bim"),
+		fam_file=os.path.join(config['paths']['reseq_pruned_plink_dir'], f"{config['species']}_{config['assembly_version']}.pruned.fam"),
+		ind_file=os.path.join(config['paths']['models_dir'], f"{config['species']}.{{model}}.ind.txt"),
+		freq_file=os.path.join(config['paths']['reseq_popgen_dir'], 'PCA', '{model}', f"{config['species']}_{config['assembly_version']}.pruned.afreq")
 	output:
 		os.path.join(config['paths']['reseq_popgen_dir'], 'PCA', '{model}', f"{config['species']}_{config['assembly_version']}.pruned.pca.eigenvec"),
 		os.path.join(config['paths']['reseq_popgen_dir'], 'PCA', '{model}', f"{config['species']}_{config['assembly_version']}.pruned.pca.eigenval"),
@@ -24,7 +44,7 @@ rule reseq_model_calc_pca_plink:
 	singularity:
 		"/Genomics/argo/users/aewebb/.local/images/plink.sif"
 	shell:
-		"plink2 --bfile {params.bed_prefix} --keep {input.ind_file} --pca {params.pca_count} --allow-extra-chr --out {params.pca_prefix}"
+		"plink2 --bfile {params.bed_prefix} --keep {input.ind_file} --read-freq {input.freq_file} --pca {params.pca_count} --allow-extra-chr --out {params.pca_prefix}"
 
 rule reseq_model_plot_pca:
 	input:
