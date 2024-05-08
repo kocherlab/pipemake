@@ -1,0 +1,19 @@
+version: 2
+
+build:
+  os: ubuntu-22.04
+  tools:
+    python: "mambaforge-latest"
+
+formats: all
+
+conda:
+  environment: docs/environment.yml
+
+sphinx:
+  configuration: docs/conf.py
+
+python:
+  install:
+    - method: pip
+      path: .
