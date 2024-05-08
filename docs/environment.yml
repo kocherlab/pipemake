@@ -5,7 +5,7 @@ channels:
   - defaults
 dependencies:
   - python=3.10
-  - bioconda::snakemake>=8.4.12
+  - bioconda::snakemake
   - conda-forge::pip>=23.2.1
   - pip:
     - sphinx-copybutton
