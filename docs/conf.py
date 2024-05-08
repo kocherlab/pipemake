@@ -51,7 +51,6 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.coverage",
     "sphinx.ext.viewcode",
-    "sphinx.ext.napoleon",
     "sphinx_copybutton",
     "sphinxarg.ext",
 ]
@@ -75,8 +74,8 @@ master_doc = "index"
 exclude_patterns = ["_build", "build", "_templates", "Thumbs.db", ".DS_Store"]
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = "sphinx"
-pygments_dark_style = "monokai"
+#pygments_style = "sphinx"
+#pygments_dark_style = "monokai"
 
 
 # Autosummary linkcode resolution
@@ -129,28 +128,6 @@ html_theme_options = {
     ],
 }
 
-myst_number_code_blocks = ["python"]
-
-# https://myst-parser.readthedocs.io/en/latest/syntax/optional.html
-myst_enable_extensions = [
-    "amsmath",
-    "colon_fence",
-    "deflist",
-    "dollarmath",
-    # "fieldlist",
-    "html_admonition",
-    "html_image",
-    "linkify",
-    "replacements",
-    "smartquotes",
-    # "strikethrough",
-    "substitution",
-    "tasklist",
-]
-
-# https://myst-parser.readthedocs.io/en/latest/syntax/optional.html#auto-generated-header-anchors
-myst_heading_anchors = 3
-
 html_logo = "_static/logo.png"
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -167,30 +144,3 @@ html_static_path = ["_static"]
 # 'searchbox.html']``.
 #
 # html_sidebars = {}
-
-
-# Napoleon settings
-# https://www.sphinx-doc.org/en/master/usage/extensions/napoleon.html#configuration
-napoleon_google_docstring = True
-napoleon_numpy_docstring = False
-napoleon_include_init_with_doc = False
-napoleon_include_private_with_doc = False
-napoleon_include_special_with_doc = False
-# admonition is a warning box, but rubric is just another heading without affecting
-# sectioning of the doc (used when configs below are set to False).
-# https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html#directives
-# https://pradyunsg.me/furo/reference/admonitions/
-napoleon_use_admonition_for_examples = False
-napoleon_use_admonition_for_notes = True
-napoleon_use_admonition_for_references = False
-napoleon_use_ivar = False
-napoleon_use_param = True
-napoleon_use_rtype = True
-# Replace types with aliases with key: val pairs. Example:
-#   napoleon_type_aliases = {"np.ndarray": "array"}
-#   -> Replaces `np.ndarray` with `array`
-napoleon_type_aliases = {}
-napoleon_attr_annotations = True
-
-# https://myst-nb.readthedocs.io/en/latest/use/config-reference.html
-jupyter_execute_notebooks = "off"
