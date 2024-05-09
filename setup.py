@@ -26,6 +26,7 @@ setup(
     },
     license=pipemake.__license__,
     url=pipemake.__url__,
+    project_url=pipemake.__url__,
     description=pipemake.__summary__,
     long_description_content_type="text/x-rst",
     long_description=readme,
