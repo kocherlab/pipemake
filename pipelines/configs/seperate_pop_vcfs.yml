@@ -1,6 +1,6 @@
-pipeline: reseq-calc-xpnsl
+pipeline: seperate-pop-vcfs
 parser:
-  help: Calculate XP-nSL using selscan
+  help: Create separate VCF files for each population in a resequencing VCF file
   arg-groups:
     basic:
       args:
@@ -9,12 +9,6 @@ parser:
           type: str
           required: True
           action: confirmFile
-        reseq-copy-method:
-          help: "Socifies if resequencing files should be copied or symbolically linked."
-          choices:
-            - 'symbolic_link'
-            - 'copy'
-          default: 'symbolic_link'
         model-file:
           help: "Model filename"
           type: str
@@ -24,24 +18,6 @@ parser:
           help: "Model name"
           type: str
           required: True
-        pop-name:
-          help: "Reference population name"
-          type: str
-        maf:
-          help: "Minor allele frequency"
-          type: float
-          default: 0.05
-        bins:
-          help: "Number of bins for normalization"
-          type: int
-          default: 100
-        assembly-version:
-          help: "Assembly Version"
-          type: str
-          default:
-            str: "v"
-            suffix:
-              - function: jobRandomString
         species:
           help: "Species name"
           type: str
@@ -49,11 +25,18 @@ parser:
             str: "Sp"
             suffix:
               - function: jobRandomString
+        assembly-version:
+          help: "Assembly Version"
+          type: str
+          default:
+            str: "v"
+            suffix:
+              - function: jobRandomString
         work-dir:
           help: "Assign the working directory for snakemake"
           type: str
           default:
-            str: "Calc_nSL"
+            str: "FilterVCF"
             suffix:
               - function: jobTimeStamp
               - function: jobRandomString
@@ -61,28 +44,25 @@ parser:
           help: "Assign the snakemake job prefix"
           type: str
           default:
-            str: "Calc_nSL"
+            str: "FilterVCF"
             suffix:
               - function: jobTimeStamp
               - function: jobRandomString
     paths:
       args:
+        reseq-unfiltered-vcf-dir:
+          help: "Directory to store VCFs files"
+          type: str
+          default: "reSEQ/VCFs/Unfiltered"
         reseq-filtered-vcf-dir:
-          help: "Directory to store filtered VCFs files"
+          help: "Directory to store VCFs files"
           type: str
-          default: "reSEQ/VCFs/Unphased"
-        reseq-phased-vcf-dir:
-          help: "Directory to store phased VCFs files"
-          type: str
-          default: "reSEQ/VCFs/Phased"
-        reseq-popgen-dir:
-          help: "Directory to store resequencing population genetics analyses"
-          type: str
-          default: "reSEQ/PopGen"
+          default: "reSEQ/VCFs/Filtered"
         models-dir:
           help: "Directory to store models"
           type: str
           default: "Models"
+
 setup:
   reseq_vcf:
     file-method:
@@ -92,15 +72,14 @@ setup:
           - "reseq-vcf"
           - "species"
           - "assembly-version"
-          - "reseq-filtered-vcf-dir"
+          - "reseq-unfiltered-vcf-dir"
       standardize:
         method: "file-str"
         args:
           input_filename: "{reseq-vcf}"
           standardized_filename: "{species}_{assembly-version}.vcf.gz"
-          out_dir: "{reseq-filtered-vcf-dir}"
+          out_dir: "{reseq-unfiltered-vcf-dir}"
           work_dir: '{work-dir}'
-          copy_method: '{reseq-copy-method}'
           gzipped: True
 
   model_input:
@@ -124,6 +103,4 @@ command-line:
   use-singularity: True
 
 snakefiles:
-  - reseq_phase_shapeit4.smk
-  - reseq_pop_ind_file.smk
-  - reseq_calc_xpnsl_selscan.smk
+  - reseq_separate_pop_bcftools.smk

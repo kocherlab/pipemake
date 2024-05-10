@@ -17,6 +17,7 @@ parser:
         model-name:
           help: "Model name"
           type: str
+          required: True
         missing-cutoff:
           help: "Missing data cutoff"
           type: float
