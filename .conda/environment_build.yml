@@ -4,4 +4,5 @@ dependencies:
   - python=3.11
   - conda-forge:numpy=1.26.4
   - conda-forge:boa
+  - conda-forge::conda-inject
   - anaconda:anaconda-client
