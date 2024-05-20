@@ -1,1 +1,6 @@
+name: pipemake
 
+dependencies:
+  - python=3.12
+  - anaconda:conda-build
+  - anaconda:anaconda-client
