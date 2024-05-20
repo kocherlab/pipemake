@@ -2,7 +2,7 @@ name: pipemake
 
 dependencies:
   - python=3.12
-  - conda-forge::numpy=1.25.2
+  - conda-forge::numpy=1.26
   - anaconda:conda-build
   - anaconda:anaconda-client
   - pip
