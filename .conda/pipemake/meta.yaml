@@ -8,7 +8,7 @@ package:
 about:
   home: {{ data.get('url') }}
   license: {{ data.get('license') }}
-  summary: {{ data.get('description') }}
+  summary: "Pipemake: A pipeline creation tool using Snakemake"
 
 build:
   number: 0
