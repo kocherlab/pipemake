@@ -1,13 +1,10 @@
 import os
-import sys
 import gzip
 import shutil
 import logging
-import hashlib
 
 import pandas as pd
 
-from collections import defaultdict
 from snakemake.io import get_wildcard_names
 
 def checkIfGzipped (filename):
@@ -50,7 +47,7 @@ class SeqFileIO ():
 		arg_dict = {}
 		
 		# Assign potential args
-		if self.link_path:arg_dict['bind'] = self.link_path
+		if self.link_path: arg_dict['bind'] = self.link_path
 		
 		return arg_dict
 

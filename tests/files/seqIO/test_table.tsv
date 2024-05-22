@@ -1,0 +1,2 @@
+sample	read:R1	read:R2
+test1	tests/files/seqIO/test1_R1.fq.gz	tests/files/seqIO/test1_R2.fq.gz	
