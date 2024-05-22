@@ -1,4 +1,4 @@
-pipeline_dir=%CONDA_PREFIX%/share/pipelines
+set pipeline_dir=%CONDA_PREFIX%/share/pipelines
 mkdir %pipeline_dir%
 xcopy pipelines %pipeline_dir% /E
 
