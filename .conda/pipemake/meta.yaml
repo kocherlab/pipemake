@@ -22,12 +22,10 @@ requirements:
   host:
     - pip
     - python >=3.11
-    - conda-forge:numpy=1.26.4
 
   run:
     - pip
     - python >=3.11
-    - conda-forge:numpy=1.26.4
     - bioconda::snakemake >=8.11.3
     - pytest
 
