@@ -20,7 +20,7 @@ jobs:
           miniconda-version: "latest"
           activate-environment: pipemake
           environment-file: .conda/environment_build.yml
-          python-version: 3.9
+          python-version: 3.11
           channels: conda-forge,bioconda
           allow-softlinks: true
           channel-priority: flexible
