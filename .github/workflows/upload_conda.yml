@@ -15,17 +15,15 @@ jobs:
         os: ["ubuntu-latest", "windows-latest"]
     steps:
       - uses: actions/checkout@v2
-      - uses: conda-incubator/setup-miniconda@v2
+      - uses: conda-incubator/setup-miniconda@v3
         with:
           miniconda-version: "latest"
+          mamba-version: "*"
           activate-environment: pipemake
           environment-file: .conda/environment_build.yml
           python-version: 3.9
           channels: conda-forge,bioconda
-          allow-softlinks: true
-          channel-priority: flexible
-          show-channel-urls: true
-          use-only-tar-bz2: true
+          channel-priority: true
       - name: Build Ubuntu
         if: matrix.os == 'ubuntu-latest'
         shell: bash -l {0}
