@@ -1,6 +1,6 @@
-set pipeline_dir=%CONDA_PREFIX%/share/pipelines
+set pipeline_dir=%CONDA_PREFIX%\share\pipelines
 mkdir %pipeline_dir%
-xcopy pipelines %pipeline_dir% /E
+xcopy pipelines %pipeline_dir% /E /I
 
 mkdir %CONDA_PREFIX%\etc\conda\activate.d
 echo set KPDIR=%pipeline_dir% > %PREFIX%\etc\conda\activate.d\%PKG_NAME%_activate.sh
