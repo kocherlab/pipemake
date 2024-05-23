@@ -102,7 +102,7 @@ class SeqTableIO ():
 		# Confirm wildcards were assigned
 		if not isinstance(table_dataframe, pd.DataFrame): 
 			raise Exception(f'Table must be stored as a pandas DataFrame: {table_dataframe}')
-
+		
 		# Assign the basic arguments
 		self._table_dataframe = table_dataframe
 		self._sample_column = sample_column
@@ -139,8 +139,7 @@ class SeqTableIO ():
 	
 	@classmethod
 	def fromFilenameStr (cls, table_filename, sep = '\t', **kwargs):
-
-		return cls(table_dataframe = pd.read_csv(table_filename, sep = sep, dtype = str).fillna(''), **kwargs)
+		return cls(table_dataframe = pd.read_csv(table_filename, sep = sep, index_col = False, dtype = str).fillna(''), **kwargs)
 
 	def standardizedFiles (self, standardized_wildcard, **kwargs):
 
