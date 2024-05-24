@@ -11,7 +11,7 @@ rule download_compleasm_library:
 		busco_db=config['busco_database'],
 		downloads_dir=os.path.join(config['paths']['downloads_dir'], 'compleasm')
 	singularity:
-		"/Genomics/argo/users/aewebb/.local/images/compleasm.sif"
+		"/Genomics/kocherlab/lab/Pipelines/imagescompleasm.sif"
 	resources:
 		mem_mb=2000
 	threads: 1

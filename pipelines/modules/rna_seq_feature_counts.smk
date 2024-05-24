@@ -13,7 +13,7 @@ rule feature_counts_pair_end:
 	output:
 		os.path.join(config['paths']['rnaseq_count_dir'], "featureCounts", "{sample}.featurecounts.txt")
 	singularity:
-		"/Genomics/argo/users/aewebb/.local/images/kocherSEQ.sif"
+		"/Genomics/kocherlab/lab/Pipelines/imageskocherSEQ.sif"
 	resources:
 		mem_mb=4000
 	threads: 4
@@ -28,7 +28,7 @@ rule feature_counts_single_end:
 	output:
 		os.path.join(config['paths']['rnaseq_count_dir'], "featureCounts", "{sample}.featurecounts.txt")
 	singularity:
-		"/Genomics/argo/users/aewebb/.local/images/kocherSEQ.sif"
+		"/Genomics/kocherlab/lab/Pipelines/imageskocherSEQ.sif"
 	resources:
 		mem_mb=4000
 	threads: 4
@@ -43,7 +43,7 @@ rule feature_counts_report:
 	params:
 		count_dir=os.path.join(config['paths']['rnaseq_count_dir'], "featureCounts")
 	singularity:
-		"/Genomics/argo/users/aewebb/.local/images/BioPython.sif"
+		"/Genomics/kocherlab/lab/Pipelines/imagesBioPython.sif"
 	resources:
 		mem_mb=2000
 	threads: 1

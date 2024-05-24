@@ -19,7 +19,7 @@ rule hisat2_build:
 	params:
 		index_prefix=os.path.join(config['paths']['index_dir'], 'hisat2', 'hisat2_index')
 	singularity:
-		"/Genomics/argo/users/aewebb/.local/images/kocherSEQ.sif"
+		"/Genomics/kocherlab/lab/Pipelines/imageskocherSEQ.sif"
 	resources:
 		mem_mb=16000
 	threads: 4
@@ -35,7 +35,7 @@ rule hisat2_single_end:
 	params:
 		index_prefix=os.path.join(config['paths']['index_dir'], 'hisat2', 'hisat2_index')
 	singularity:
-		"/Genomics/argo/users/aewebb/.local/images/kocherSEQ.sif"
+		"/Genomics/kocherlab/lab/Pipelines/imageskocherSEQ.sif"
 	resources:
 		mem_mb=16000
 	threads: 4
@@ -52,7 +52,7 @@ rule hisat2_pair_end:
 	params:
 		index_prefix=os.path.join(config['paths']['index_dir'], 'hisat2', 'hisat2_index')
 	singularity:
-		"/Genomics/argo/users/aewebb/.local/images/kocherSEQ.sif"
+		"/Genomics/kocherlab/lab/Pipelines/imageskocherSEQ.sif"
 	resources:
 		mem_mb=16000
 	threads: 4

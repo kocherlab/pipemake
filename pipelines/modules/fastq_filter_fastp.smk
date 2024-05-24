@@ -15,7 +15,7 @@ rule fastp_single_end:
 		sample_prefix=os.path.join(config['paths']['filtered_fastq_dir'], "{sample}"),
 		min_length=config['min_length']
 	singularity:
-		"/Genomics/argo/users/aewebb/.local/images/kocherSEQ.sif"
+		"/Genomics/kocherlab/lab/Pipelines/imageskocherSEQ.sif"
 	resources:
 		mem_mb=16000
 	threads: 4
@@ -35,7 +35,7 @@ rule fastp_pair_end:
 		sample_prefix=os.path.join(config['paths']['filtered_fastq_dir'], "{sample}"),
 		min_length=config['min_length']
 	singularity:
-		"/Genomics/argo/users/aewebb/.local/images/kocherSEQ.sif"
+		"/Genomics/kocherlab/lab/Pipelines/imageskocherSEQ.sif"
 	resources:
 		mem_mb=16000
 	threads: 4

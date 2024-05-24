@@ -219,7 +219,7 @@ def pipeline_parser (config_parser_pipelines):
 		pipeline_arg_groups['optional'].add_argument('--scale-threads', help = 'Scale the threads for each task', type = float, default = 1.0)
 		pipeline_arg_groups['optional'].add_argument('--scale-mem', help = 'Scale the memory (RAM) for each task', type = float, default = 1.0)
 		pipeline_arg_groups['optional'].add_argument('--resource-yml', help = 'Create a seperate resource yaml', action = 'store_true')
-		pipeline_arg_groups['optional'].add_argument('--singularity-dir', help = 'Assign different directory of singularity images', type = str, default = '/Genomics/argo/users/aewebb/.local/images/')
+		pipeline_arg_groups['optional'].add_argument('--singularity-dir', help = 'Assign different directory of singularity images', type = str, default = '/Genomics/kocherlab/lab/Pipelines/images')
 		pipeline_arg_groups['optional'].add_argument('-h', '--help', action = 'help', help = 'show this help message and exit')
 
 	return vars(pipeline_parser.parse_args())

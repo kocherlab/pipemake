@@ -9,7 +9,7 @@ rule reseq_header_bcftools:
 		header=temp(os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.header")),
 		chrom_log=temp(os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.chrom.log"))
 	singularity:
-		"/Genomics/argo/users/aewebb/.local/images/kocherPOP.sif"
+		"/Genomics/kocherlab/lab/Pipelines/imageskocherPOP.sif"
 	resources:
 		mem_mb=2000
 	threads: 1
@@ -29,7 +29,7 @@ checkpoint reseq_split_unphased_bcftools:
 		out_prefix=os.path.join(config['paths']['reseq_filtered_vcf_dir'], 'SplitByChrom', '')
 		
 	singularity:
-		"/Genomics/argo/users/aewebb/.local/images/kocherPOP.sif"
+		"/Genomics/kocherlab/lab/Pipelines/imageskocherPOP.sif"
 	resources:
 		mem_mb=2000
 	threads: 1
@@ -47,7 +47,7 @@ rule reseq_phase_chroms_shapeit4:
 	output:
 		temp(os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}.vcf.gz'))
 	singularity:
-		"/Genomics/argo/users/aewebb/.local/images/kocherPOP.sif"
+		"/Genomics/kocherlab/lab/Pipelines/imageskocherPOP.sif"
 	resources:
 		mem_mb=24000
 	threads: 12
@@ -73,7 +73,7 @@ rule reseq_cat_phased_bcftools:
 	params:
 		unphased_split_dir=os.path.join(config['paths']['reseq_filtered_vcf_dir'], 'SplitByChrom')
 	singularity:
-		"/Genomics/argo/users/aewebb/.local/images/kocherPOP.sif"
+		"/Genomics/kocherlab/lab/Pipelines/imageskocherPOP.sif"
 	resources:
 		mem_mb=8000
 	threads: 4
@@ -94,7 +94,7 @@ rule reseq_replace_header_bcftools:
 	output:
 		os.path.join(config['paths']['reseq_phased_vcf_dir'], f"{config['species']}_{config['assembly_version']}.vcf.gz")
 	singularity:
-		"/Genomics/argo/users/aewebb/.local/images/kocherPOP.sif"
+		"/Genomics/kocherlab/lab/Pipelines/imageskocherPOP.sif"
 	resources:
 		mem_mb=2000
 	threads: 1

@@ -19,7 +19,7 @@ rule gemma_model_bed:
 		mem_mb=8000
 	threads: 1
 	singularity:
-		"/Genomics/argo/users/aewebb/.local/images/plink.sif"
+		"/Genomics/kocherlab/lab/Pipelines/imagesplink.sif"
 	shell:
 		"plink2 --bfile {params.bed_prefix} --keep {input.ind_file} --allow-extra-chr --make-bed --out {params.out_prefix}"
 
@@ -36,7 +36,7 @@ rule gemma_model_phenotype_file:
 		mem_mb=2000
 	threads: 1
 	singularity:
-		"/Genomics/argo/users/aewebb/.local/images/pipemake_utils.sif"
+		"/Genomics/kocherlab/lab/Pipelines/imagespipemake_utils.sif"
 	shell:
 		"ped-phenotype-file --fam {input.fam_file} --model-file {input.model_file} --model-name {wildcards.model} --numeric --out-prefix {params.out_prefix}"
 
@@ -58,7 +58,7 @@ rule run_gemma_gk:
 		mem_mb=8000
 	threads: 1
 	singularity:
-		"/Genomics/argo/users/aewebb/.local/images/gemma.sif"
+		"/Genomics/kocherlab/lab/Pipelines/imagesgemma.sif"
 	shell:
 		"gemma -bfile {params.bed_prefix} -p {input.pheno_file} -gk {params.kinship_matrix} -outdir {params.out_dir} -o {params.out_prefix}"
 
@@ -82,7 +82,7 @@ rule run_gemma_lmm:
 		mem_mb=8000
 	threads: 1
 	singularity:
-		"/Genomics/argo/users/aewebb/.local/images/gemma.sif"
+		"/Genomics/kocherlab/lab/Pipelines/imagesgemma.sif"
 	shell:
 		"gemma -p {input.pheno_file} -bfile {params.bed_prefix} -lmm {params.linear_model} -k {input.gk_file} -maf {params.maf} -outdir {params.out_dir} -o {params.out_prefix}"
 
@@ -99,6 +99,6 @@ rule filter_gemma:
 		mem_mb=2000
 	threads: 1
 	singularity:
-		"/Genomics/argo/users/aewebb/.local/images/pipemake_utils.sif"
+		"/Genomics/kocherlab/lab/Pipelines/imagespipemake_utils.sif"
 	shell:
 		"filter-gemma --gemma-file {input} --min-log-pvalue {params.min_log_pvalue} --out-prefix {params.out_prefix}"

@@ -15,7 +15,7 @@ rule reseq_phased_map_plink:
 	params:
 		out_prefix=os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{sweep_chrom}')
 	singularity:
-		"/Genomics/argo/users/aewebb/.local/images/plink.sif"
+		"/Genomics/kocherlab/lab/Pipelines/imagesplink.sif"
 	resources:
 		mem_mb=2000
 	threads: 1
@@ -30,7 +30,7 @@ rule reseq_phased_ids_bcftools:
 	params:
 		out_prefix=os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{sweep_chrom}')
 	singularity:
-		"/Genomics/argo/users/aewebb/.local/images/kocherPOP.sif"
+		"/Genomics/kocherlab/lab/Pipelines/imageskocherPOP.sif"
 	resources:
 		mem_mb=2000
 	threads: 1
@@ -48,7 +48,7 @@ rule reseq_ihs_selscan:
 		out_prefix=os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', '{sweep_chrom}'),
 		maf = config['maf']
 	singularity:
-		"/Genomics/argo/users/aewebb/.local/images/selscan.sif"
+		"/Genomics/kocherlab/lab/Pipelines/imagesselscan.sif"
 	resources:
 		mem_mb=24000
 	threads: 12
@@ -65,7 +65,7 @@ rule reseq_ihs_normalize_norm:
 		out_prefix=os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', '{sweep_chrom}.ihs.out'),
 		bins = config['bins']
 	singularity:
-		"/Genomics/argo/users/aewebb/.local/images/selscan.sif"
+		"/Genomics/kocherlab/lab/Pipelines/imagesselscan.sif"
 	resources:
 		mem_mb=2000
 	threads: 1

@@ -12,7 +12,7 @@ rule annotate_3prime_utrs_peaks2utr:
 		mem_mb=120000
 	threads: 10
 	singularity:
-		"/Genomics/argo/users/aewebb/.local/images/peaks2utr.sif"
+		"/Genomics/kocherlab/lab/Pipelines/imagespeaks2utr.sif"
 	shell:
 		"peaks2utr {input.base_gff} {input.merged_bam} -o {output} -p {threads}"
 

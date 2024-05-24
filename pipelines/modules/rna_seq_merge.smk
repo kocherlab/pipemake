@@ -8,7 +8,7 @@ rule merge_bam:
 	output:
 		os.path.join(config['paths']['rnaseq_bam_dir'], f"{config['species']}_{config['assembly_version']}.bam")
 	singularity:
-		"/Genomics/argo/users/aewebb/.local/images/kocherSEQ.sif"
+		"/Genomics/kocherlab/lab/Pipelines/imageskocherSEQ.sif"
 	resources:
 		mem_mb=16000
 	threads: 4

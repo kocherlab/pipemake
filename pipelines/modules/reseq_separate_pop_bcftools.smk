@@ -13,7 +13,7 @@ checkpoint pop_ind_file:
 		mem_mb=2000
 	threads: 1
 	singularity:
-		"/Genomics/argo/users/aewebb/.local/images/pipemake_utils.sif"
+		"/Genomics/kocherlab/lab/Pipelines/imagespipemake_utils.sif"
 	shell:
 		"model-pop-files --model-file {input} --model-name {params.model_name} --out-dir {output}"
 
@@ -27,7 +27,7 @@ rule pop_vcf_bcftools:
 		mem_mb=8000
 	threads: 1
 	singularity:
-		"/Genomics/argo/users/aewebb/.local/images/kocherPOP.sif"
+		"/Genomics/kocherlab/lab/Pipelines/imageskocherPOP.sif"
 	shell:
 		"bcftools view --samples-file {input.pop_file} --output-type z --output-file {output} {input.vcf_file}"
 
