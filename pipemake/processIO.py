@@ -5,7 +5,7 @@ class ProcessIO ():
 	def __init__ (self, processIO, standardize_func = None, **kwargs):
 		self.processIO = processIO
 		self.standardize_call = getattr(self.processIO, standardize_func)
-		self.samples = []
+		#self.samples = []
 
 	@classmethod
 	def fromWildcardStr (cls, wildcard_str = '', **kwargs):
@@ -27,7 +27,6 @@ class ProcessIO ():
 
 	def returnPaths (self, **kwargs):
 		return self.processIO.returnPaths(**kwargs)
-
 
 def standardizeInput (method = '', args = {}):
 	

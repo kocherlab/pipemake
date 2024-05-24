@@ -94,7 +94,3 @@ def test_WildcardIO_returnPaths (wildcard_str, sample_wildcard, copy_method):
     test_wildcard = WildcardIO.fromStr(wildcard_str, sample_wildcard = sample_wildcard)
     if copy_method == 'copy': assert test_wildcard.returnPaths(copy_method) == []
     else: assert test_wildcard.returnPaths(copy_method) == [os.path.abspath(os.path.dirname(wildcard_str))]
-
-    
-
-

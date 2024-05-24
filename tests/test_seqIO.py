@@ -174,4 +174,3 @@ def test_SeqTableIO_returnPaths (filename, copy_method):
 def test_SeqTableIO_returnSamples (filename):
     test_seqtable = SeqTableIO.fromFilenameStr(filename)
     assert test_seqtable.returnSamples() == ['test1', 'test2']
-
