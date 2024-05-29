@@ -17,9 +17,22 @@ class SnakePipelineIO ():
 		if snakemake_job_prefix.endswith('.smk'): self.smkp_filename = snakemake_job_prefix
 		else: self.smkp_filename = f'{snakemake_job_prefix}.smk'
 
+		# Check if the overwrite is a bool or None
+		if not isinstance(overwrite, bool): raise Exception (f'Invalid overwrite type: {overwrite}')
+
 		# Confirm the file exists
 		if os.path.isfile(self.smkp_filename) and not overwrite:
 			raise IOError (f'SnakePipeline file already exists: {self.smkp_filename}. Please rename the SnakePipeline file or overwrite')
+
+		# Confirm the resource yml is bool or None
+		if not isinstance(resource_yml, (bool, type(None))): raise Exception (f'Invalid resource yml type: {resource_yml}')
+
+		# Confirm the scale threads and mem are integers
+		if not isinstance(scale_threads, int): raise Exception (f'Invalid scale threads type: {scale_threads}')
+		if not isinstance(scale_mem, int): raise Exception (f'Invalid scale mem type: {scale_mem}')
+
+		# Confirm the indent style
+		if indent_style not in [' ', '\t']: raise Exception (f'Specified indent style not supported: {indent_style}')
 	
 		# Assign the basic arguments
 		self._pipe_file = open(self.smkp_filename, 'w')
@@ -29,9 +42,9 @@ class SnakePipelineIO ():
 		self._mem_types = ['mem_b', 'mem_kb', 'mem_mb', 'mem_gb', 'mem_tb', 'mem_pb', 'mem_kib', 'mem_mib', 'mem_gib', 'mem_tib', 'mem_pib']
 		self._indent_style = indent_style
 
-		# Assign the module storage directory
+		# Assign the module storage directory, and confirm it exists
 		self._module_storage_dir = os.path.join(pipeline_storage_dir, 'modules')
-		if not os.path.exists(self._module_storage_dir): os.makedirs(self._module_storage_dir)
+		if not os.path.exists(self._module_storage_dir): raise IOError (f'Unable to open: {self._module_storage_dir}. Please confirm the directory exists.')
 
 		# Assign the module config directory
 		self._module_job_dir = os.path.join(pipeline_job_dir, 'modules')
@@ -340,7 +353,7 @@ class SnakeFileIO ():
 				if rule.in_output: smk_file.write(f'\n{rule}')
 
 			# Write the final newline
-			smk_file.write('\n')
+			#smk_file.write('\n')
 
 	@classmethod
 	def open (cls, *args, **kwargs):
@@ -374,6 +387,8 @@ class SnakeRuleIO ():
 	def _parseRule (self, rule_list):
 
 		def processAttribute (rule_attribute, rule_line):
+
+			print(self.rule_name, rule_attribute, rule_line)
 
 			# Assign the rule attribute
 			processed_attribute = SnakeAttributeIO.process(self.rule_name, rule_attribute, rule_line, indent_style = self._indent_style)
