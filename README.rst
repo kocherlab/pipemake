@@ -33,7 +33,7 @@
 
 .. |LICENSE| image::
    https://anaconda.org/kocherlab/pipemake/badges/license.svg
-   :target: https://github.com/kocherlab/pipemake/blob/main/LICENSE.md
+   :target: https://github.com/kocherlab/pipemake/blob/main/LICENSE
 
 ********
 Pipemake
@@ -66,4 +66,4 @@ Issues
 License
 =======
 
-Pipemake is licensed under the MIT license. See the `LICENSE <https://github.com/kocherlab/pipemake/blob/main/LICENSE.md>`_ file for details.
+Pipemake is licensed under the MIT license. See the `LICENSE <https://github.com/kocherlab/pipemake/blob/main/LICENSE>`_ file for details.
