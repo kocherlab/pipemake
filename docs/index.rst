@@ -1,4 +1,4 @@
-|Stable version| |Latest version| |Documentation| |github ci| |Coverage| |conda| |Conda Upload| |PyPI Upload| |LICENSE|
+|Stable version| |Documentation| |github ci| |Coverage| |conda| |Conda Upload| |PyPI Upload| |LICENSE|
 
 .. |Stable version| image:: https://img.shields.io/github/v/release/kocherlab/pipemake?label=stable
    :target: https://github.com/kocherlab/pipemake/releases/
@@ -33,7 +33,7 @@
 
 .. |LICENSE| image::
    https://anaconda.org/kocherlab/pipemake/badges/license.svg
-   :target: https://github.com/kocherlab/pipemake/blob/main/LICENSE.md
+   :target: https://github.com/kocherlab/pipemake/blob/main/LICENSE
 
 ********
 Pipemake
@@ -82,4 +82,4 @@ Contributors
 License
 =======
 
-Pipemake is licensed under the MIT license. See the `LICENSE <https://github.com/kocherlab/pipemake/blob/main/LICENSE.md>`_ file for details.
+Pipemake is licensed under the MIT license. See the `LICENSE <https://github.com/kocherlab/pipemake/blob/main/LICENSE>`_ file for details.
