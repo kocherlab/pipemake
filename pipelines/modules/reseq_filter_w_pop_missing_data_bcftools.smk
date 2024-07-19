@@ -18,7 +18,7 @@ rule filter_basic_vcf_bcftools:
 		mem_mb=16000
 	threads: 4
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/imageskocherPOP.sif"
+		"/Genomics/kocherlab/lab/Pipelines/images/kocherPOP.sif"
 	shell:
 		"""
 		bcftools view --samples-file {input.ind_file} {input.vcf_file} | bcftools view --min-alleles {params.min_alleles} --max-alleles {params.max_alleles} --types snps --include 'MAF>={params.maf} && QUAL>={params.qual}' --output-type z --output-file {output.vcf_file} --threads {threads}
@@ -36,7 +36,7 @@ checkpoint pop_ind_file:
 		mem_mb=2000
 	threads: 1
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/imagespipemake_utils.sif"
+		"/Genomics/kocherlab/lab/Pipelines/images/pipemake_utils.sif"
 	shell:
 		"model-pop-files --model-file {input} --model-name {params.model_name} --out-dir {output}"
 
@@ -53,7 +53,7 @@ rule pop_vcf_bcftools:
 		mem_mb=8000
 	threads: 1
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/imageskocherPOP.sif"
+		"/Genomics/kocherlab/lab/Pipelines/images/kocherPOP.sif"
 	shell:
 		"""
 		bcftools view --samples-file {input.pop_file} {input.vcf_file} | bcftools view -i 'F_MISSING<={params.missing_cutoff}' --output-type z --output-file {output.vcf_file}
@@ -76,7 +76,7 @@ rule isec_pop_vcfs_bcftools:
 		mem_mb=16000
 	threads: 4
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/imageskocherPOP.sif"
+		"/Genomics/kocherlab/lab/Pipelines/images/kocherPOP.sif"
 	shell:
 		"bcftools isec {input.vcf_file} -n={params.pop_count} | cut -f1,2 > {output}"
 
@@ -91,6 +91,6 @@ rule filter_pops_missing_data_vcf_bcftools:
 		mem_mb=8000
 	threads: 4
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/imageskocherPOP.sif"
+		"/Genomics/kocherlab/lab/Pipelines/images/kocherPOP.sif"
 	shell:
 		"bcftools view -R {input.sites_file} --output-type z --output-file {output} --threads {threads} {input.vcf_file}"

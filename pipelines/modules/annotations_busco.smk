@@ -12,7 +12,7 @@ rule annotations_compleasm:
 		output_dir=os.path.join(config['paths']['annotations_dir'], 'BUSCO'),
 		busco_db=config['busco_database']
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/imagesbusco.sif"
+		"/Genomics/kocherlab/lab/Pipelines/images/busco.sif"
 	resources:
 		mem_mb=12000
 	threads: 12

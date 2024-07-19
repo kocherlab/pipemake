@@ -13,7 +13,7 @@ rule repeat_modeler_r1:
 		wd_dir=os.path.join(config['paths']['repeatmodeler_dir'], 'R1', 'WorkingDirectory')
 	threads: 20
 	singularity: 
-		"/Genomics/kocherlab/lab/Pipelines/imagesdfam-tetools-latest.sif"
+		"/Genomics/kocherlab/lab/Pipelines/images/dfam-tetools-latest.sif"
 	shell:
 		r"""
 		mkdir {params.db_dir} &&
@@ -38,7 +38,7 @@ rule repeat_masker_r1:
 		mask_dir=os.path.join(config['paths']['repeatmodeler_dir'], 'R1', 'MaskedAssembly')
 	threads: 20
 	singularity: 
-		"/Genomics/kocherlab/lab/Pipelines/imagesdfam-tetools-latest.sif"
+		"/Genomics/kocherlab/lab/Pipelines/images/dfam-tetools-latest.sif"
 	shell:
 		"RepeatMasker -par {threads} -dir {params.mask_dir} -lib {input.families} {input.assembly}"
 
@@ -56,7 +56,7 @@ rule repeat_modeler_r2:
 
 	threads: 20
 	singularity: 
-		"/Genomics/kocherlab/lab/Pipelines/imagesdfam-tetools-latest.sif"
+		"/Genomics/kocherlab/lab/Pipelines/images/dfam-tetools-latest.sif"
 	shell:
 		r"""
 		mkdir {params.db_dir} &&
@@ -81,7 +81,7 @@ rule repeat_masker_r2:
 		mask_dir=os.path.join(config['paths']['repeatmodeler_dir'], 'R2', 'MaskedAssembly')
 	threads: 20
 	singularity: 
-		"/Genomics/kocherlab/lab/Pipelines/imagesdfam-tetools-latest.sif"
+		"/Genomics/kocherlab/lab/Pipelines/images/dfam-tetools-latest.sif"
 	shell:
 		"RepeatMasker -par {threads} -dir {params.mask_dir} -lib {input.families} {input.assembly}"
 
@@ -92,6 +92,6 @@ rule softmask_r2:
 	output:
 		os.path.join(config['paths']['assembly_dir'], f"{config['species']}_{config['assembly_version']}.fa.masked")
 	singularity: 
-		"/Genomics/kocherlab/lab/Pipelines/imagesBioPython.sif"
+		"/Genomics/kocherlab/lab/Pipelines/images/BioPython.sif"
 	shell:
 		"softmask.py {input.assembly} {input.masked_assembly} {output}"

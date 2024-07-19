@@ -1,4 +1,4 @@
-ruleorder: star_pair_end > star_single_end
+ruleorder: star_pair_end_rnaseq > star_single_end_rnaseq
 
 rule all:
 	input:

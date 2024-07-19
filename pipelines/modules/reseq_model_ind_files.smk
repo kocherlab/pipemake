@@ -15,6 +15,6 @@ rule model_ind_file:
 		mem_mb=2000
 	threads: 1
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/imagespipemake_utils.sif"
+		"/Genomics/kocherlab/lab/Pipelines/images/pipemake_utils.sif"
 	shell:
 		"model-inds --model-file {input} --model-name {wildcards.model} --out-prefix {params.out_prefix}"

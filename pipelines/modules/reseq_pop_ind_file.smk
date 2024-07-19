@@ -14,6 +14,6 @@ rule pop_ind_file:
 		mem_mb=2000
 	threads: 1
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/imagespipemake_utils.sif"
+		"/Genomics/kocherlab/lab/Pipelines/images/pipemake_utils.sif"
 	shell:
 		"model-pop-files --model-file {input} --model-name {params.model_name} --out-dir {params.out_dir}"

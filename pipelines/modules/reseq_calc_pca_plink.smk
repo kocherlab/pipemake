@@ -19,7 +19,7 @@ rule reseq_calc_freq_plink:
 		mem_mb=2000
 	threads: 1
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/imagesplink.sif"
+		"/Genomics/kocherlab/lab/Pipelines/images/plink.sif"
 	shell:
 		"plink2 --bfile {params.bed_prefix} --keep {input.ind_file} --freq --allow-extra-chr --out {params.pca_prefix}"
 
@@ -42,7 +42,7 @@ rule reseq_model_calc_pca_plink:
 		mem_mb=2000
 	threads: 1
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/imagesplink.sif"
+		"/Genomics/kocherlab/lab/Pipelines/images/plink.sif"
 	shell:
 		"plink2 --bfile {params.bed_prefix} --keep {input.ind_file} --read-freq {input.freq_file} --pca {params.pca_count} --allow-extra-chr --out {params.pca_prefix}"
 
@@ -60,6 +60,6 @@ rule reseq_model_plot_pca:
 		mem_mb=2000
 	threads: 1
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/imagespipemake_utils.sif"
+		"/Genomics/kocherlab/lab/Pipelines/images/pipemake_utils.sif"
 	shell:
 		"plot-pca --pca-dir {params.pca_dir} --model-file {input.model_file} --model-name {wildcards.model} --out-prefix {params.out_prefix}"

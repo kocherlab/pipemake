@@ -13,7 +13,7 @@ rule reseq_prep_xpnsl_vcf_bcftools:
 	params:
 		out_prefix=os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}')
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/imageskocherPOP.sif"
+		"/Genomics/kocherlab/lab/Pipelines/images/kocherPOP.sif"
 	resources:
 		mem_mb=2000
 	threads: 1
@@ -28,7 +28,7 @@ rule reseq_create_pop_xpnsl_vcf_bcftools:
 		ref_vcf=os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}.xpnsl.ref.vcf.gz'),
 		query_vcf=os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}.xpnsl.query.vcf.gz')
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/imageskocherPOP.sif"
+		"/Genomics/kocherlab/lab/Pipelines/images/kocherPOP.sif"
 	resources:
 		mem_mb=2000
 	threads: 1
@@ -50,7 +50,7 @@ rule reseq_xpnsl_selscan:
 		out_prefix=os.path.join(config['paths']['reseq_popgen_dir'], 'XPnSL', '{chrom}'),
 		maf = config['maf']
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/imagesselscan.sif"
+		"/Genomics/kocherlab/lab/Pipelines/images/selscan.sif"
 	resources:
 		mem_mb=24000
 	threads: 12
@@ -67,7 +67,7 @@ rule reseq_normalize_xpnsl_norm:
 		out_prefix=os.path.join(config['paths']['reseq_popgen_dir'], 'XPnSL', '{chrom}.xpnsl'),
 		bins = config['bins']
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/imagesselscan.sif"
+		"/Genomics/kocherlab/lab/Pipelines/images/selscan.sif"
 	resources:
 		mem_mb=2000
 	threads: 1

@@ -18,7 +18,7 @@ rule reseq_indep_pairwise_plink:
 		ld_window_step={config['ld_window_step']},
 		ld_threshold={config['ld_threshold']}
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/imagesplink.sif"
+		"/Genomics/kocherlab/lab/Pipelines/images/plink.sif"
 	resources:
 		mem_mb=8000
 	threads: 1
@@ -39,7 +39,7 @@ rule reseq_ld_prune_plink:
 		input_prefix=os.path.join(config['paths']['reseq_filtered_plink_dir'], f"{config['species']}_{config['assembly_version']}.filtered"),
 		output_prefix=os.path.join(config['paths']['reseq_pruned_plink_dir'], f"{config['species']}_{config['assembly_version']}.pruned")
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/imagesplink.sif"
+		"/Genomics/kocherlab/lab/Pipelines/images/plink.sif"
 	resources:
 		mem_mb=2000
 	threads: 1

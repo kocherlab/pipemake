@@ -13,7 +13,7 @@ rule assembly_compleasm:
 		download_dir=os.path.join(config['paths']['downloads_dir'], 'compleasm'),
 		busco_db=config['busco_database']
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/imagescompleasm.sif"
+		"/Genomics/kocherlab/lab/Pipelines/images/compleasm.sif"
 	resources:
 		mem_mb=12000
 	threads: 12

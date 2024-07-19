@@ -15,7 +15,7 @@ rule annotate_braker3:
 		annotations_dir=os.path.join(config['paths']['annotations_dir'], 'BRAKER3'),
 		augustus_config="/Genomics/argo/users/aewebb/.augustus"
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/imagesbraker3.sif"
+		"/Genomics/kocherlab/lab/Pipelines/images/braker3.sif"
 	resources:
 		mem_mb=32000
 	threads: 20
@@ -37,7 +37,7 @@ rule process_braker3:
 		assembly_version=config['assembly_version'],
 		annotation_version=config['annotation_version']
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/imageskocherSEQ.sif"
+		"/Genomics/kocherlab/lab/Pipelines/images/kocherSEQ.sif"
 	resources:
 		mem_mb=2000
 	threads: 1

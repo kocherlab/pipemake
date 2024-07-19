@@ -15,6 +15,6 @@ rule convert_flitered_vcf_to_plink:
 		mem_mb=2000
 	threads: 1
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/imagesplink.sif"
+		"/Genomics/kocherlab/lab/Pipelines/images/plink.sif"
 	shell:
 		"plink2 --vcf {input} --make-bed --out {params.out_prefix} --allow-extra-chr --set-missing-var-ids @:# --threads {threads}"
