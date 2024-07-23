@@ -1,18 +1,19 @@
 import os
 import re
-import sys
 import copy
 import yaml
 import logging
 
 from collections import defaultdict
 
+from pipemake.singularityIO import Singularity
+
 class SnakePipelineIO (): 
-	def __init__ (self, snakemake_job_prefix = '', pipeline_storage_dir  = '', pipeline_job_dir = '', work_dir = '', resource_yml = None, scale_threads = 0, scale_mem = 0, indent_style = '\t', overwrite = True, **kwargs):
+	def __init__ (self, snakemake_job_prefix = '', pipeline_storage_dir  = '', pipeline_job_dir = '', work_dir = '', singularity_dir = '', resource_yml = None, scale_threads = 0, scale_mem = 0, indent_style = '\t', overwrite = True, **kwargs):
 
 		# Assign the basic arguments
 		self._snakemake_job_prefix = snakemake_job_prefix
-
+		
 		# Assign the snakemake pipeline filename
 		if snakemake_job_prefix.endswith('.smk'): self.smkp_filename = snakemake_job_prefix
 		else: self.smkp_filename = f'{snakemake_job_prefix}.smk'
@@ -28,8 +29,8 @@ class SnakePipelineIO ():
 		if not isinstance(resource_yml, (bool, type(None))): raise Exception (f'Invalid resource yml type: {resource_yml}')
 
 		# Confirm the scale threads and mem are integers
-		if not isinstance(scale_threads, int): raise Exception (f'Invalid scale threads type: {scale_threads}')
-		if not isinstance(scale_mem, int): raise Exception (f'Invalid scale mem type: {scale_mem}')
+		if not isinstance(scale_threads, float): raise Exception (f'Invalid scale threads type: {scale_threads}')
+		if not isinstance(scale_mem, float): raise Exception (f'Invalid scale mem type: {scale_mem}')
 
 		# Confirm the indent style
 		if indent_style not in [' ', '\t']: raise Exception (f'Specified indent style not supported: {indent_style}')
@@ -58,7 +59,8 @@ class SnakePipelineIO ():
 		self._output_list = []
 		self._config_params = set()
 		self._resource_params = defaultdict(lambda: defaultdict(int))
-		#self._container_params = defaultdict(list, {'urls': [], 'paths': []})
+		self._singularity_dir = singularity_dir
+		self._pipeline_singularity_dict = {}
 
 	def __enter__ (self):
 		return self
@@ -83,7 +85,7 @@ class SnakePipelineIO ():
 			raise IOError (f'Unable to open: {storage_module_path}. Please confirm the file exists.')		
 
 		# Open and process the stored module file
-		smk_module = SnakeFileIO.open(storage_module_path)
+		smk_module = SnakeFileIO.open(storage_module_path, singularity_dir = self._singularity_dir)
 
 		# Loops the file rules in test
 		for rule in smk_module._file_rules:
@@ -107,7 +109,21 @@ class SnakePipelineIO ():
 		# Add the module filename to the list
 		self._module_filenames.append(module_filename)
 
-		logging.info(f"Module added to pipeline: {module_filename}")	
+		logging.info(f"Module added to pipeline: {module_filename}")
+
+
+		# Store the singularity containers from the module
+		for singularity_path, singularity_container in smk_module._file_singularity_dict.items():
+			if singularity_path not in self._pipeline_singularity_dict:
+				self._pipeline_singularity_dict[singularity_path] = singularity_container
+
+	def buildSingularityContainers (self):
+		
+		# Loop the singularity containers
+		for singularity_container in self._pipeline_singularity_dict.values():
+
+			# Download the singularity container
+			singularity_container.download()
 
 	def writeConfig (self, pipeline_args):
 
@@ -220,7 +236,7 @@ class SnakePipelineIO ():
 		yml_file.close()
 
 class SnakeFileIO ():
-	def __init__ (self, smk_filename, **kwargs):
+	def __init__ (self, smk_filename, singularity_dir = '', **kwargs):
 
 		# Confirm the file exists
 		if not os.path.isfile(smk_filename):
@@ -228,6 +244,7 @@ class SnakeFileIO ():
 
 		# Assign the basic arguments
 		self.filename = smk_filename
+		self._singularity_dir = singularity_dir
 		self._indent_style = None
 		self._output_rule = 'all'
 		self._exclude_rules = [self._output_rule]
@@ -239,6 +256,15 @@ class SnakeFileIO ():
 
 		# Parse the snakefile
 		self._parseFile()
+	
+	@property
+	def _file_singularity_dict (self):
+		file_singularity_dict = {}
+		for rule in self._file_rules:
+			for singularity_path, singularity_container in rule._rule_singularity_dict.items():
+				if singularity_path not in file_singularity_dict:
+					file_singularity_dict[singularity_path] = singularity_container
+		return file_singularity_dict
 
 	def _assignIndent (self):
 		
@@ -325,7 +351,7 @@ class SnakeFileIO ():
 
 					# Check if a previous rule block was found
 					if rule_block:
-						self._file_rules.append(SnakeRuleIO.read(rule_block, indent_style = self._indent_style, output_rule = self._output_rule))
+						self._file_rules.append(SnakeRuleIO.read(rule_block, singularity_dir = self._singularity_dir, indent_style = self._indent_style, output_rule = self._output_rule))
 						rule_block = ''
 				
 				# Add the line to the rule block
@@ -336,7 +362,7 @@ class SnakeFileIO ():
 
 			# Parse the final rule block
 			if rule_block: 
-				self._file_rules.append(SnakeRuleIO.read(rule_block, indent_style = self._indent_style, output_rule = self._output_rule))
+				self._file_rules.append(SnakeRuleIO.read(rule_block, singularity_dir = self._singularity_dir, indent_style = self._indent_style, output_rule = self._output_rule))
 
 	def write (self, filename):
 
@@ -350,24 +376,23 @@ class SnakeFileIO ():
 			for rule in self._file_rules:
 
 				# Write the rule, if included in the output
-				if rule.in_output: smk_file.write(f'\n{rule}')
-
-			# Write the final newline
-			#smk_file.write('\n')
+				if rule.in_output: 
+					smk_file.write(f'\n{rule}')
 
 	@classmethod
 	def open (cls, *args, **kwargs):
 		return cls(*args, **kwargs)
 
 class SnakeRuleIO ():
-	def __init__ (self, rule_list, indent_style = None, output_rule = '', **kwargs):
+	def __init__ (self, rule_list, singularity_dir = '', indent_style = None, output_rule = '', **kwargs):
 
 		# Assign the rule argument to populate
 		self.rule_name = rule_list[0].split()[1][: -1]
 		self.in_output = False if self.rule_name == output_rule else True
+		self._singularity_dir = singularity_dir
 		self._indent_style = indent_style
 		self._rule_config_params = set()
-		self._rule_singularity_line = ''
+		self._rule_singularity_dict = {}
 		self._rule_resource_params = defaultdict(int)
 		self._rule_text = rule_list[0] + '\n'
 		self._rule_output_list = []
@@ -388,18 +413,25 @@ class SnakeRuleIO ():
 
 		def processAttribute (rule_attribute, rule_line):
 
-			print(self.rule_name, rule_attribute, rule_line)
-
 			# Assign the rule attribute
 			processed_attribute = SnakeAttributeIO.process(self.rule_name, rule_attribute, rule_line, indent_style = self._indent_style)
 
-			# Update the SnakeFile, if a resource
-			if processed_attribute.is_resource: rule_line = processed_attribute.updateSnakeFile()
+			# Update the SnakeFile, if a resource or container
+			if processed_attribute.is_resource: rule_line = processed_attribute.updateSnakeResource()
+			elif processed_attribute.is_container: 
+				
+				# Parse the singularity attribute
+				snake_container = processed_attribute.parseSnakeContainer(self._singularity_dir)
+
+				# Update the container line
+				rule_line = snake_container.updateContainer(rule_line)
+
+				# Store the singularity container
+				self._rule_singularity_dict[snake_container.returnPath()] = snake_container
 
 			# Update the rule params
 			if processed_attribute.is_resource: self._rule_resource_params.update(processed_attribute.updateParams())
-			elif processed_attribute.is_container: self._rule_singularity_line = processed_attribute.updateParams()
-			else: self._rule_config_params.update(processed_attribute.updateParams())
+			elif not processed_attribute.is_container: self._rule_config_params.update(processed_attribute.updateParams())
 
 			# Check if the rule is output, confirm the attribute is input, and update the rule output
 			if not self.in_output and rule_attribute == 'input':
@@ -436,7 +468,8 @@ class SnakeRuleIO ():
 				rule_line = processAttribute(split_attribute[0], rule_line)
 
 			# Check if the line is a atrribute value line and if so, process the attribute
-			elif attribute_level == 2: rule_line = processAttribute(rule_attribute, rule_line)
+			elif attribute_level == 2: 
+				rule_line = processAttribute(rule_attribute, rule_line)
 
 			# Raise an error if the attribute level is not 1 or 2
 			else: raise Exception (f'Attribute level error: {rule_line}')
@@ -469,7 +502,6 @@ class SnakeAttributeIO ():
 		
 		# Process the attribute
 		if self.is_resource: self._parseResource()
-		elif self.is_container: pass
 		else: self._parseConfig()
 
 	@classmethod
@@ -580,11 +612,11 @@ class SnakeAttributeIO ():
 			# Add the config assignment to the set
 			self._config_assignment_set.add(tuple(config_list))
 
-	def updateSnakeFile (self):
+	def updateSnakeResource (self):
 
 		# Check if the attribute is not a resource
-		if not self.is_resource: self._original_text
-
+		if not self.is_resource: raise Exception (f'Attribute assignment error. Not a resource: {self.is_resource} {self._original_text}')
+		
 		# Loop the resource assignments
 		for resource_original_text, resource_assignment in self._resource_replacment_dict.items():
 
@@ -593,6 +625,26 @@ class SnakeAttributeIO ():
 
 		return self._original_text
 
+	def parseSnakeContainer (self, singularity_dir):
+
+		# Check if the attribute is not a container
+		if not self.is_container: raise Exception (f'Attribute assignment error. Not a container: {self.is_container} {self._original_text}')
+
+		# Check if the attribute is a multiline text
+		if self._multiline_text: raise Exception (f'Container assignment error. Cannot be multiline text: {self._original_text}')
+
+		# Assign the container text
+		container_url = self._original_text.strip().split('"')[1]
+
+		# Create a singularity container from the URL
+		return Singularity.fromURL(container_url, singularity_dir)
+
+	def updateSnakeContainer (self):
+		pass
+		
+
+		
+	
 	def updateParams (self):
 
 		# Check if the attribute is a container

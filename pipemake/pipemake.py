@@ -273,6 +273,9 @@ def main():
 	for smkm_filename in pipeline_snakefiles[pipeline_args['pipeline']]:
 		snakemake_pipeline.addModule(smkm_filename)
 
+	# Build the singularity containers
+	snakemake_pipeline.buildSingularityContainers()
+
 	# Create the snakemake config file
 	snakemake_pipeline.writeConfig(pipeline_args)
 

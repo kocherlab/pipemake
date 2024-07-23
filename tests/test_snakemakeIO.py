@@ -19,12 +19,13 @@ from pipemake.snakemakeIO import *
 )
 def test_SnakePipelineIO_w_error (job_prefix, pipeline_storage_dir, resource_yml, scale_threads, scale_mem, indent_style, overwrite):
     test_dir = tempfile.mkdtemp()
+    singularity_dir = tempfile.mkdtemp()
 
     snakemake_job_prefix = os.path.join(test_dir, job_prefix)
 
     # Test if the function raises an error
     with pytest.raises(Exception):
-        SnakePipelineIO.open(snakemake_job_prefix = snakemake_job_prefix, pipeline_storage_dir  = pipeline_storage_dir, pipeline_job_dir = test_dir, resource_yml = resource_yml, scale_threads = scale_threads, scale_mem = scale_mem, indent_style = indent_style, overwrite = overwrite)
+        SnakePipelineIO.open(snakemake_job_prefix = snakemake_job_prefix, pipeline_storage_dir  = pipeline_storage_dir, pipeline_job_dir = test_dir, resource_yml = resource_yml, scale_threads = scale_threads, scale_mem = scale_mem, singularity_dir = singularity_dir, indent_style = indent_style, overwrite = overwrite)
 
 @pytest.mark.parametrize(
     'job_prefix, pipeline_storage_dir, resource_yml, scale_threads, scale_mem, indent_style, overwrite',
@@ -34,11 +35,12 @@ def test_SnakePipelineIO_w_error (job_prefix, pipeline_storage_dir, resource_yml
 )
 def test_SnakePipelineIO_wo_error (job_prefix, pipeline_storage_dir, resource_yml, scale_threads, scale_mem, indent_style, overwrite):
     test_dir = tempfile.mkdtemp()
+    singularity_dir = tempfile.mkdtemp()
 
     snakemake_job_prefix = os.path.join(test_dir, job_prefix)
     
     # Create a test pipeline
-    test_pipeline = SnakePipelineIO.open(snakemake_job_prefix = snakemake_job_prefix, work_dir = test_dir, pipeline_storage_dir  = pipeline_storage_dir, pipeline_job_dir = test_dir, resource_yml = resource_yml, scale_threads = scale_threads, scale_mem = scale_mem, indent_style = indent_style, overwrite = overwrite)
+    test_pipeline = SnakePipelineIO.open(snakemake_job_prefix = snakemake_job_prefix, work_dir = test_dir, pipeline_storage_dir  = pipeline_storage_dir, pipeline_job_dir = test_dir, resource_yml = resource_yml, scale_threads = scale_threads, scale_mem = scale_mem, singularity_dir = singularity_dir, indent_style = indent_style, overwrite = overwrite)
 
     # Add a module to the pipeline
     test_pipeline.addModule('fastq_filter_fastp.smk')
@@ -110,20 +112,31 @@ def test_SnakeFileIO_w_error (smk_filename):
     ]
 )
 def test_SnakeFileIO_wo_error (smk_filename):
+
+    # Create a test directory
     test_dir = tempfile.mkdtemp()
 
     # Create a test module
-    test_module = SnakeFileIO.open(smk_filename = smk_filename)
+    test_module = SnakeFileIO.open(smk_filename = smk_filename, singularity_dir = test_dir)
 
     # Create a out filename
-    out_filename = os.path.join(test_dir, 'fastq_filter_fastp.smk')
+    out_filename = os.path.join(test_dir, 'test_fastq_filter_fastp.smk')
+    cmp_filename = os.path.join(test_dir, 'cmp_fastq_filter_fastp.smk')
     
     # Generate the module file and confirm it exists
     test_module.write(out_filename)
     assert os.path.exists(out_filename)
 
+    with open(cmp_filename, 'w') as cmp_file:
+        with open('tests/files/snakemakeIO/test_fastq_filter_fastp.smk', 'r') as test_file:
+            for test_line in test_file:
+                if 'URL' in test_line: 
+                    cmp_file.write(test_line.format(URL = test_dir))
+                else: 
+                    cmp_file.write(test_line)
+                    
     # Check if the module was created correctly
-    assert filecmp.cmp(out_filename, 'tests/files/snakemakeIO/test_fastq_filter_fastp.smk')
+    assert filecmp.cmp(out_filename, cmp_filename)
 
 @pytest.mark.parametrize(
     'rule_filename',
@@ -133,6 +146,9 @@ def test_SnakeFileIO_wo_error (smk_filename):
 )
 def test_SnakeRuleIO_wo_error (rule_filename):
 
+    # Create a test directory
+    test_dir = tempfile.mkdtemp()
+
     # Create a test rule
     rule_str = ''
 
@@ -141,7 +157,7 @@ def test_SnakeRuleIO_wo_error (rule_filename):
         for rule_line in rule_file: rule_str += rule_line
 
     # Test if the function raises an error
-    test_rule = SnakeRuleIO.read(rule_str = rule_str, indent_style = '\t')
+    test_rule = SnakeRuleIO.read(rule_str = rule_str, singularity_dir = test_dir, indent_style = '\t')
 
     # Create a test rule
     test_str = ''
@@ -149,7 +165,8 @@ def test_SnakeRuleIO_wo_error (rule_filename):
     # Read the rule and store it as a string
     with open('tests/files/snakemakeIO/test_fastp_pair_end.smk', 'r') as test_file:
         for test_line in test_file:
-            test_str += test_line
+            if 'URL' in test_line: test_str += test_line.format(URL = test_dir)
+            else: test_str += test_line
         test_str += '\n'
 
     # Check if the rule was created correctly
@@ -165,7 +182,7 @@ def test_SnakeRuleIO_wo_error (rule_filename):
         ('fastp_pair_end', 'resources', '\t\tmem_mb=16000')
     ]
 )
-def test_SnakeAttributeIO_wo_error (rule_name, attribute_type, attribute_text):
+def test_SnakeAttributeIO (rule_name, attribute_type, attribute_text):
 
     # Assign the attribute
     test_attribute = SnakeAttributeIO.process(rule_name = rule_name, attribute_type = attribute_type, attribute_text = attribute_text, indent_style = '\t')
@@ -175,10 +192,6 @@ def test_SnakeAttributeIO_wo_error (rule_name, attribute_type, attribute_text):
 
     # Check if the attributes were created correctly
     if attribute_type == 'params':
-        assert test_attribute.updateSnakeFile() == attribute_text
+        with pytest.raises(Exception): test_attribute.updateSnakeResource()
     elif attribute_type == 'resources':
-        assert test_attribute.updateSnakeFile() == f"\t\tmem_mb=config['{attribute_type}']['{rule_name}']['{attribute_text_arg}']"
-
-    
-
-
+        assert test_attribute.updateSnakeResource() == f"\t\tmem_mb=config['{attribute_type}']['{rule_name}']['{attribute_text_arg}']"
