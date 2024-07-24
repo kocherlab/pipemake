@@ -27,6 +27,7 @@ requirements:
     - pip
     - python >=3.11
     - bioconda::snakemake >=8.11.3
+    - conda-forge::singularity >=3.8.7
     - pytest
 
 test:
