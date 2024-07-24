@@ -1,5 +1,0 @@
-name: pipemake
-
-dependencies:
-  - python=3.9
-  - conda-forge::singularity=3.8.7
