@@ -15,7 +15,7 @@ rule reseq_phased_map_plink:
 	params:
 		out_prefix=os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{sweep_chrom}')
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/images/plink.sif"
+		"docker://aewebb/plink2:20240418"
 	resources:
 		mem_mb=2000
 	threads: 1
@@ -30,7 +30,7 @@ rule reseq_phased_ids_bcftools:
 	params:
 		out_prefix=os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{sweep_chrom}')
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/images/kocherPOP.sif"
+		"docker://aewebb/bcftools:v1.20"
 	resources:
 		mem_mb=2000
 	threads: 1
@@ -48,7 +48,7 @@ rule reseq_ihs_selscan:
 		out_prefix=os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', '{sweep_chrom}'),
 		maf = config['maf']
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/images/selscan.sif"
+		"docker://aewebb/selscan:v2.0.3"
 	resources:
 		mem_mb=24000
 	threads: 12
@@ -65,7 +65,7 @@ rule reseq_ihs_normalize_norm:
 		out_prefix=os.path.join(config['paths']['reseq_popgen_dir'], 'ihs', '{sweep_chrom}.ihs.out'),
 		bins = config['bins']
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/images/selscan.sif"
+		"docker://aewebb/selscan:v2.0.3"
 	resources:
 		mem_mb=2000
 	threads: 1

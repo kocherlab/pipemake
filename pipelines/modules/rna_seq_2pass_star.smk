@@ -15,7 +15,7 @@ rule star_genome_generate_rnaseq:
 		index_dir=directory(os.path.join(config['paths']['index_dir'], "STAR")),
 		read_len=config['read_len']
 	singularity:
-		"docker://quay.io/biocontainers/star:2.7.8a--0"
+		"docker://aewebb/star:v2.7.11b"
 	resources:
 		mem_mb=32000
 	threads: 12
@@ -37,7 +37,7 @@ rule star_single_end_p1:
 		index_dir=os.path.join(config['paths']['index_dir'], "STAR"),
 		sj_prefix=os.path.join(config['paths']['rnaseq_splice_aligned_dir'], "{sample}.")
 	singularity:
-		"docker://quay.io/biocontainers/star:2.7.8a--0"
+		"docker://aewebb/star:v2.7.11b"
 	resources:
 		mem_mb=16000
 	threads: 4
@@ -56,7 +56,7 @@ rule star_pair_end_p1:
 		index_dir=os.path.join(config['paths']['index_dir'], "STAR"),
 		sj_prefix=os.path.join(config['paths']['rnaseq_splice_aligned_dir'], "{sample}.")
 	singularity:
-		"docker://quay.io/biocontainers/star:2.7.8a--0"
+		"docker://aewebb/star:v2.7.11b"
 	resources:
 		mem_mb=16000
 	threads: 4
@@ -86,7 +86,7 @@ rule star_single_end_p2:
 		index_dir=os.path.join(config['paths']['index_dir'], "STAR"),
 		bam_prefix=os.path.join(config['paths']['rnaseq_aligned_bam_dir'], "{sample}.")
 	singularity:
-		"docker://quay.io/biocontainers/star:2.7.8a--0"
+		"docker://aewebb/star:v2.7.11b"
 	resources:
 		mem_mb=16000
 	threads: 4
@@ -109,7 +109,7 @@ rule star_pair_end_p2:
 		index_dir=os.path.join(config['paths']['index_dir'], "STAR"),
 		bam_prefix=os.path.join(config['paths']['rnaseq_aligned_bam_dir'], "{sample}.")
 	singularity:
-		"docker://quay.io/biocontainers/star:2.7.8a--0"
+		"docker://aewebb/star:v2.7.11b"
 	resources:
 		mem_mb=16000
 	threads: 4

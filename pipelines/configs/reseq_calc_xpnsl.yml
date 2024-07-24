@@ -27,6 +27,7 @@ parser:
         pop-name:
           help: "Reference population name"
           type: str
+          required: True
         maf:
           help: "Minor allele frequency"
           type: float

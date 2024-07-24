@@ -109,13 +109,12 @@ class SnakePipelineIO ():
 		# Add the module filename to the list
 		self._module_filenames.append(module_filename)
 
-		logging.info(f"Module added to pipeline: {module_filename}")
-
-
 		# Store the singularity containers from the module
 		for singularity_path, singularity_container in smk_module._file_singularity_dict.items():
 			if singularity_path not in self._pipeline_singularity_dict:
 				self._pipeline_singularity_dict[singularity_path] = singularity_container
+
+		logging.info(f"Module added to pipeline: {module_filename}")
 
 	def buildSingularityContainers (self):
 		
@@ -414,24 +413,16 @@ class SnakeRuleIO ():
 		def processAttribute (rule_attribute, rule_line):
 
 			# Assign the rule attribute
-			processed_attribute = SnakeAttributeIO.process(self.rule_name, rule_attribute, rule_line, indent_style = self._indent_style)
+			processed_attribute = SnakeAttributeIO.process(self.rule_name, rule_attribute, rule_line, singularity_dir = self._singularity_dir, indent_style = self._indent_style)
 
 			# Update the SnakeFile, if a resource or container
 			if processed_attribute.is_resource: rule_line = processed_attribute.updateSnakeResource()
-			elif processed_attribute.is_container: 
-				
-				# Parse the singularity attribute
-				snake_container = processed_attribute.parseSnakeContainer(self._singularity_dir)
-
-				# Update the container line
-				rule_line = snake_container.updateContainer(rule_line)
-
-				# Store the singularity container
-				self._rule_singularity_dict[snake_container.returnPath()] = snake_container
+			elif processed_attribute.is_container: rule_line = processed_attribute.updateSnakeContainer()
 
 			# Update the rule params
 			if processed_attribute.is_resource: self._rule_resource_params.update(processed_attribute.updateParams())
-			elif not processed_attribute.is_container: self._rule_config_params.update(processed_attribute.updateParams())
+			elif processed_attribute.is_container: self._rule_singularity_dict.update(processed_attribute.updateParams())
+			else: self._rule_config_params.update(processed_attribute.updateParams())
 
 			# Check if the rule is output, confirm the attribute is input, and update the rule output
 			if not self.in_output and rule_attribute == 'input':
@@ -482,11 +473,12 @@ class SnakeRuleIO ():
 		return cls(rule_str.splitlines(), *args, **kwargs)
 	
 class SnakeAttributeIO ():
-	def __init__ (self, rule_name, attribute_type, attribute_text, indent_style = None, resource_attributes = ['threads', 'resources'], **kwargs):
+	def __init__ (self, rule_name, attribute_type, attribute_text, singularity_dir = '', indent_style = None, resource_attributes = ['threads', 'resources'], **kwargs):
 
 		# Assign the required attributes
 		self._rule_name = rule_name
 		self._type = attribute_type
+		self._singularity_dir = singularity_dir
 		self._indent_style = indent_style
 		self._original_text = attribute_text
 		self._multiline_text = True if attribute_text.endswith(',') else False
@@ -494,6 +486,7 @@ class SnakeAttributeIO ():
 		self.is_resource = True if attribute_type in self._resource_attributes else False
 		self.is_container = True if attribute_type == 'singularity' else False
 		self._resource_assignment_type = ':'
+		self._container = None
 
 		# Assign the config attributes
 		self._resource_assignment_dict = defaultdict(int)
@@ -501,7 +494,8 @@ class SnakeAttributeIO ():
 		self._config_assignment_set = set()
 		
 		# Process the attribute
-		if self.is_resource: self._parseResource()
+		if self.is_container: self._parseContainer()
+		elif self.is_resource: self._parseResource()
 		else: self._parseConfig()
 
 	@classmethod
@@ -612,6 +606,20 @@ class SnakeAttributeIO ():
 			# Add the config assignment to the set
 			self._config_assignment_set.add(tuple(config_list))
 
+	def _parseContainer (self):
+
+		# Check if the attribute is not a container
+		if not self.is_container: raise Exception (f'Attribute assignment error. Not a container: {self.is_container} {self._original_text}')
+
+		# Check if the attribute is a multiline text
+		if self._multiline_text: raise Exception (f'Container assignment error. Cannot be multiline text: {self._original_text}')
+
+		# Assign the container text
+		container_url = self._original_text.strip().split('"')[1]
+		
+		# Store the container
+		self._container = Singularity.fromURL(container_url, self._singularity_dir)
+	
 	def updateSnakeResource (self):
 
 		# Check if the attribute is not a resource
@@ -624,37 +632,19 @@ class SnakeAttributeIO ():
 			self._original_text = self._original_text.replace(resource_original_text, resource_assignment)
 
 		return self._original_text
-
-	def parseSnakeContainer (self, singularity_dir):
+	
+	def updateSnakeContainer (self):
 
 		# Check if the attribute is not a container
 		if not self.is_container: raise Exception (f'Attribute assignment error. Not a container: {self.is_container} {self._original_text}')
 
-		# Check if the attribute is a multiline text
-		if self._multiline_text: raise Exception (f'Container assignment error. Cannot be multiline text: {self._original_text}')
+		# Return the container path
+		return self._container.updateContainer(self._original_text)
 
-		# Assign the container text
-		container_url = self._original_text.strip().split('"')[1]
-
-		# Create a singularity container from the URL
-		return Singularity.fromURL(container_url, singularity_dir)
-
-	def updateSnakeContainer (self):
-		pass
-		
-
-		
-	
 	def updateParams (self):
 
-		# Check if the attribute is a container
-		if self.is_container:
-
-			# Check if the attribute is a multiline text
-			if self._multiline_text: raise Exception (f'Container assignment error. Cannot be multiline text: {self._original_text}')
-			
-			# Return the container line
-			return self._original_text.strip()
+		# Check if the attribute is a container, return the container dict
+		if self.is_container: return {self._container.returnPath(): self._container}
 
 		# Check if the attribute is a resource, return the resource assignment dict
 		elif self.is_resource: return self._resource_assignment_dict

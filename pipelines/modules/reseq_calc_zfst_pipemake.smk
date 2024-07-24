@@ -11,7 +11,7 @@ rule reseq_model_calc_zfst_pipemake:
 		out_prefix=os.path.join(config['paths']['reseq_popgen_dir'], 'ZFst', '{model}', f"{config['species']}_{config['assembly_version']}.filtered.{{pair}}.fst"),
 		fst_method=config['fst_method']
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/images/pipemake_utils.sif"
+		"docker://aewebb/pipemake_utils:v0.1.27"
 	resources:
 		mem_mb=2000
 	threads: 1
@@ -30,7 +30,7 @@ rule plot_zfst_pipemake:
 	params:
 		out_prefix=os.path.join(config['paths']['reseq_popgen_dir'], 'ZFst', '{model}', f"{config['species']}_{config['assembly_version']}.{{pair}}.fst")
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/images/pipemake_utils.sif"
+		"docker://aewebb/pipemake_utils:v0.1.27"
 	resources:
 		mem_mb=2000
 	threads: 1

@@ -9,7 +9,7 @@ rule reseq_header_bcftools:
 		header=temp(os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.header")),
 		chrom_log=temp(os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.chrom.log"))
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/images/kocherPOP.sif"
+		"docker://aewebb/bcftools:v1.20"
 	resources:
 		mem_mb=2000
 	threads: 1
@@ -29,7 +29,7 @@ checkpoint reseq_split_unphased_bcftools:
 		out_prefix=os.path.join(config['paths']['reseq_filtered_vcf_dir'], 'SplitByChrom', '')
 		
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/images/kocherPOP.sif"
+		"docker://aewebb/bcftools:v1.20"
 	resources:
 		mem_mb=2000
 	threads: 1
@@ -40,14 +40,28 @@ checkpoint reseq_split_unphased_bcftools:
 		bcftools index -s {input} | cut -f 1 | while read chrom; do bcftools view --regions $chrom -O z -o {params.out_prefix}${{chrom}}.vcf.gz {input}; done
 		"""
 
+rule reseq_index_unphased_bcftools:
+	input:
+		os.path.join(config['paths']['reseq_filtered_vcf_dir'], 'SplitByChrom', '{chrom}.vcf.gz')
+	output:
+		os.path.join(config['paths']['reseq_filtered_vcf_dir'], 'SplitByChrom', '{chrom}.vcf.gz.csi')
+	singularity:
+		"docker://aewebb/bcftools:v1.20"
+	resources:
+		mem_mb=24000
+	threads: 12
+	shell:
+		"bcftools index -f {input.vcf}"
+
 rule reseq_phase_chroms_shapeit4:
 	input:
 		vcf=os.path.join(config['paths']['reseq_filtered_vcf_dir'], 'SplitByChrom', '{chrom}.vcf.gz'),
+		index=os.path.join(config['paths']['reseq_filtered_vcf_dir'], 'SplitByChrom', '{chrom}.vcf.gz.csi'),
 		chrom_log=os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.chrom.log")
 	output:
 		temp(os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}.vcf.gz'))
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/images/kocherPOP.sif"
+		"docker://aewebb/shapeit4:v4.2.2"
 	resources:
 		mem_mb=24000
 	threads: 12
@@ -55,7 +69,6 @@ rule reseq_phase_chroms_shapeit4:
 		"""
 		date=$(date +'%a %b %H:%M:%S %Y')
 		echo "##shapeit4_phaseCommand=--input {input.vcf} --region {wildcards.chrom} --output {output} --thread {threads};  Date=$date" >> {input.chrom_log}
-		bcftools index -f {input.vcf}
 		shapeit4 --input {input.vcf} --region {wildcards.chrom} --output {output} --thread {threads}
 		"""
 
@@ -73,7 +86,7 @@ rule reseq_cat_phased_bcftools:
 	params:
 		unphased_split_dir=os.path.join(config['paths']['reseq_filtered_vcf_dir'], 'SplitByChrom')
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/images/kocherPOP.sif"
+		"docker://aewebb/bcftools:v1.20"
 	resources:
 		mem_mb=8000
 	threads: 4
@@ -94,7 +107,7 @@ rule reseq_replace_header_bcftools:
 	output:
 		os.path.join(config['paths']['reseq_phased_vcf_dir'], f"{config['species']}_{config['assembly_version']}.vcf.gz")
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/images/kocherPOP.sif"
+		"docker://aewebb/bcftools:v1.20"
 	resources:
 		mem_mb=2000
 	threads: 1

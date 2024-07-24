@@ -15,7 +15,7 @@ rule repeat_modeler_r1:
 		mem_mb=40000
 	threads: 20
 	singularity: 
-		"/Genomics/kocherlab/lab/Pipelines/images/dfam-tetools-latest.sif"
+		"docker://dfam/tetools:v1.88.5"
 	shell:
 		r"""
 		mkdir -p {params.db_dir}
@@ -42,7 +42,7 @@ rule repeat_masker_r1:
 		mem_mb=24000
 	threads: 12
 	singularity: 
-		"/Genomics/kocherlab/lab/Pipelines/images/dfam-tetools-latest.sif"
+		"docker://dfam/tetools:v1.88.5"
 	shell:
 		"RepeatMasker -par {threads} -dir {params.mask_dir} -lib {input.families} {input.assembly}"
 
@@ -53,7 +53,7 @@ rule softmask_r1:
 	output:
 		os.path.join(config['paths']['assembly_dir'], f"{config['species']}_{config['assembly_version']}.fa.masked")
 	singularity: 
-		"/Genomics/kocherlab/lab/Pipelines/images/BioPython.sif"
+		"docker://aewebb/pipemake_utils:v0.1.27"
 	resources:
 		mem_mb=2000
 	threads: 1

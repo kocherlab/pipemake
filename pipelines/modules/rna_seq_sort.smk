@@ -8,7 +8,7 @@ rule sort_bam_rnaseq:
 	output:
 		os.path.join(config['paths']['rnaseq_sorted_bam_dir'], "{sample}.sortedByCoord.bam")
 	singularity:
-		"docker://biocontainers/samtools:v1.3_cv3"
+		"docker://aewebb/samtools:v1.20"
 	resources:
 		mem_mb=8000
 	threads: 4

@@ -15,7 +15,7 @@ rule reseq_model_fst_phenotype_file:
 		mem_mb=2000
 	threads: 1
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/images/pipemake_utils.sif"
+		"docker://aewebb/pipemake_utils:v0.1.27"
 	shell:
 		"ped-phenotype-file --fam {input.fam_file} --model-file {input.model_file} --model-name {wildcards.model} --out-prefix {params.out_prefix} --out-format plink2 --pheno-header {wildcards.model}"
 
@@ -36,7 +36,7 @@ checkpoint reseq_model_calc_fst_plink:
 		mem_mb=2000
 	threads: 1
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/images/plink.sif"
+		"docker://aewebb/plink2:20240418"
 	shell:
 		"""
 		mkdir -p {output.fst_dir}

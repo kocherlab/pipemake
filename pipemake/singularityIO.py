@@ -40,6 +40,9 @@ class Singularity:
 			logging.info(f"Image already exists at: {self._image_filename}")
 			print(f"Image already exists at: {self._image_filename}")
 			return self._image_filename
+		
+		# Check if the singularity path exists
+		if self._singularity_path and not os.path.isdir(self._singularity_path): os.makedirs(self._singularity_path)
 
 		logging.info(f"Downloading image: {self._url}")
 		print(f"Downloading image: {self._url}")

@@ -8,7 +8,7 @@ rule sort_bam:
 	output:
 		os.path.join(config['paths']['atac_seq_sorted_bam_dir'], "{sample}.sortedByCoord.bam")
 	singularity:
-		"docker://biocontainers/samtools:v1.3_cv3"
+		"docker://aewebb/samtools:v1.20"
 	resources:
 		mem_mb=16000
 	threads: 4

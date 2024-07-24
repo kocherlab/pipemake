@@ -13,7 +13,7 @@ rule feature_counts_pair_end:
 	output:
 		os.path.join(config['paths']['rnaseq_count_dir'], "featureCounts", "{sample}.featurecounts.txt")
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/images/kocherSEQ.sif"
+		"docker://aewebb/subread:v2.0.1"
 	resources:
 		mem_mb=4000
 	threads: 4
@@ -28,7 +28,7 @@ rule feature_counts_single_end:
 	output:
 		os.path.join(config['paths']['rnaseq_count_dir'], "featureCounts", "{sample}.featurecounts.txt")
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/images/kocherSEQ.sif"
+		"docker://aewebb/subread:v2.0.1"
 	resources:
 		mem_mb=4000
 	threads: 4
@@ -43,9 +43,9 @@ rule feature_counts_report:
 	params:
 		count_dir=os.path.join(config['paths']['rnaseq_count_dir'], "featureCounts")
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/images/BioPython.sif"
+		"docker://aewebb/pipemake_utils:v0.1.27"
 	resources:
 		mem_mb=2000
 	threads: 1
 	shell:
-		"featureCounts_report.py {params.count_dir} {output}"
+		"featureCounts-report {params.count_dir} {output}"

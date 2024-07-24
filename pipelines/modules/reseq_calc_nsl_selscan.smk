@@ -11,7 +11,7 @@ rule reseq_prep_nsl_vcf_bcftools:
 	params:
 		out_prefix=os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}')
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/images/kocherPOP.sif"
+		"docker://aewebb/bcftools:v1.20"
 	resources:
 		mem_mb=2000
 	threads: 1
@@ -28,7 +28,7 @@ rule reseq_nsl_selscan:
 		out_prefix=os.path.join(config['paths']['reseq_popgen_dir'], 'nSL', '{chrom}'),
 		maf = config['maf']
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/images/selscan.sif"
+		"docker://aewebb/selscan:v2.0.3"
 	resources:
 		mem_mb=24000
 	threads: 12
@@ -45,7 +45,7 @@ rule reseq_normalize_nsl_norm:
 		out_prefix=os.path.join(config['paths']['reseq_popgen_dir'], 'nSL', '{chrom}.nsl.out'),
 		bins = config['bins']
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/images/selscan.sif"
+		"docker://aewebb/selscan:v2.0.3"
 	resources:
 		mem_mb=2000
 	threads: 1
@@ -87,7 +87,7 @@ rule plot_norm_nsl_pipemake:
 	params:
 		out_prefix=os.path.join(config['paths']['reseq_popgen_dir'], 'nSL', f"{config['species']}_{config['assembly_version']}")
 	singularity:
-		"/Genomics/kocherlab/lab/Pipelines/images/pipemake_utils.sif"
+		"docker://aewebb/pipemake_utils:v0.1.27"
 	resources:
 		mem_mb=2000
 	threads: 1
