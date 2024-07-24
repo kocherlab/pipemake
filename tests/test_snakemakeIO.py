@@ -30,7 +30,7 @@ def test_SnakePipelineIO_w_error (job_prefix, pipeline_storage_dir, resource_yml
 @pytest.mark.parametrize(
     'job_prefix, pipeline_storage_dir, resource_yml, scale_threads, scale_mem, indent_style, overwrite',
     [
-        ('test', 'tests/files/snakemakeIO', None, 1, 1, '\t', True)
+        ('test', 'tests/files/snakemakeIO', None, 1.0, 1.0, '\t', True)
     ]
 )
 def test_SnakePipelineIO_wo_error (job_prefix, pipeline_storage_dir, resource_yml, scale_threads, scale_mem, indent_style, overwrite):
