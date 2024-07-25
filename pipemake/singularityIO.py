@@ -31,10 +31,11 @@ class Singularity:
 		# Set the image path if the singularity path is provided
 		if self._singularity_path: image_filename = os.path.join(self._singularity_path, image_filename)
 
+		# Set the image filename
 		self._image_filename = image_filename
 
 	def download (self):
-
+		
 		# Check if the image already exists
 		if os.path.isfile(self._image_filename):
 			logging.info(f"Image already exists at: {self._image_filename}")

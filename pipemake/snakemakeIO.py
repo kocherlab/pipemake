@@ -2,6 +2,7 @@ import os
 import re
 import copy
 import yaml
+import shutil
 import logging
 
 from collections import defaultdict
@@ -13,7 +14,7 @@ class SnakePipelineIO ():
 
 		# Assign the basic arguments
 		self._snakemake_job_prefix = snakemake_job_prefix
-		
+				
 		# Assign the snakemake pipeline filename
 		if snakemake_job_prefix.endswith('.smk'): self.smkp_filename = snakemake_job_prefix
 		else: self.smkp_filename = f'{snakemake_job_prefix}.smk'
@@ -50,6 +51,10 @@ class SnakePipelineIO ():
 		# Assign the module config directory
 		self._module_job_dir = os.path.join(pipeline_job_dir, 'modules')
 		if not os.path.exists(self._module_job_dir): os.makedirs(self._module_job_dir)
+
+		# Assign the backup directory
+		self._backup_dir = os.path.join(pipeline_job_dir, 'backups')
+		if not os.path.exists(self._backup_dir): os.makedirs(self._backup_dir)
 
 		# Assign the work directory
 		self._work_dir = work_dir
@@ -186,6 +191,7 @@ class SnakePipelineIO ():
 
 		self._createYml(yml_config_dict, f"{self._snakemake_job_prefix}.yml")
 
+
 	def writePipeline (self):
 
 		# Assign the config file(s) and working directory
@@ -209,6 +215,13 @@ class SnakePipelineIO ():
 	
 	def close(self):
 		self._pipe_file.close()
+	
+		shutil.copy(f"{self._snakemake_job_prefix}.smk", os.path.join(self._backup_dir, f"{self._snakemake_job_prefix}.smk.bkp"))
+		shutil.copy(f"{self._snakemake_job_prefix}.yml", os.path.join(self._backup_dir, f"{self._snakemake_job_prefix}.yml.bkp"))
+		if os.path.isfile(f"{self._snakemake_job_prefix}.resources.yml"): 
+			shutil.copy(f"{self._snakemake_job_prefix}.resources.yml", os.path.join(self._backup_dir, f"{self._snakemake_job_prefix}.resources.yml.bkp"))
+
+		logging.info(f"Pipeline backups created successfully")
 	
 	@staticmethod
 	def _scaler (value, scaler, value_type = float, output_type = int, **kwargs):
@@ -635,6 +648,9 @@ class SnakeAttributeIO ():
 	
 	def updateSnakeContainer (self):
 
+		# Skip updating if the singularity dir is not provided
+		if not self._singularity_dir: return self._original_text
+
 		# Check if the attribute is not a container
 		if not self.is_container: raise Exception (f'Attribute assignment error. Not a container: {self.is_container} {self._original_text}')
 
@@ -644,7 +660,9 @@ class SnakeAttributeIO ():
 	def updateParams (self):
 
 		# Check if the attribute is a container, return the container dict
-		if self.is_container: return {self._container.returnPath(): self._container}
+		if self.is_container: 
+			if not self._singularity_dir: return {}
+			else: return {self._container.returnPath(): self._container}
 
 		# Check if the attribute is a resource, return the resource assignment dict
 		elif self.is_resource: return self._resource_assignment_dict

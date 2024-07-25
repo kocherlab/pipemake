@@ -2,15 +2,12 @@
 
 import os
 import sys
-import yaml
 import random
 import string
-import logging
 import argparse
 import datetime
 
 from pydoc import locate
-from collections import defaultdict
 
 from pipemake.logger import *
 from pipemake.config import *
@@ -65,33 +62,6 @@ def pipeline_parser (config_parser_pipelines):
 					raise IOError(f'Unable to find file: {value}')
 				setattr(args, self.dest, value)
 		return customAction
-
-	def createArgGroup (parser, group_args):
-		'''Create the argument group'''
-
-		# Set the groip argument, if not given
-		if 'group' not in group_args: group_args['group'] = {}
-
-		# Set the argument type, if not given
-		if 'type' not in group_args['group']: group_args['group']['type'] = 'argument_group'
-
-		# Set if the group is required, if not given
-		if 'required' not in group_args['group']: group_args['group']['required'] = False
-
-		# Set the group label, if not given
-		if 'label' not in group_args['group']: group_args['group']['label'] = pipeline_arg_group
-			
-		# Create the argument group
-		if group_args['group']['type'] == 'argument_group': 
-			return parser.add_argument_group(f"{pipeline_name} {group_args['group']['label']} arguments")
-
-		# Create the mutually exclusive group
-		elif group_args['group']['type'] == 'mutually_exclusive':
-			arg_group = parser.add_argument_group(f"{pipeline_name} {group_args['group']['label']} arguments")
-			return arg_group.add_mutually_exclusive_group(required = group_args['group']['required'])
-
-		# Report an error if the group type is not supported
-		else: raise Exception(f'Group type not supported: {group_args["type"]}')
 	
 	# Create the pipeline selection parser
 	pipeline_parser = MyParser(formatter_class = SubcommandHelpFormatter)
@@ -219,7 +189,7 @@ def pipeline_parser (config_parser_pipelines):
 		pipeline_arg_groups['optional'].add_argument('--scale-threads', help = 'Scale the threads for each task', type = float, default = 1.0)
 		pipeline_arg_groups['optional'].add_argument('--scale-mem', help = 'Scale the memory (RAM) for each task', type = float, default = 1.0)
 		pipeline_arg_groups['optional'].add_argument('--resource-yml', help = 'Create a seperate resource yaml', action = 'store_true')
-		pipeline_arg_groups['optional'].add_argument('--singularity-dir', help = 'Assign different directory of singularity images', type = str, default = '/Genomics/kocherlab/lab/Pipelines/images')
+		pipeline_arg_groups['optional'].add_argument('--singularity-dir', help = 'Assign different directory of singularity images', type = str)
 		pipeline_arg_groups['optional'].add_argument('-h', '--help', action = 'help', help = 'show this help message and exit')
 
 	return vars(pipeline_parser.parse_args())
@@ -231,7 +201,7 @@ time_stamp = None
 def main():
 
 	# Assign the pipeline directory
-	if os.environ.get('KPDIR'): pipeline_storage_dir = os.environ.get('KPDIR')
+	if os.environ.get('PM_SNAKEMAKE_DIR'): pipeline_storage_dir = os.environ.get('PM_SNAKEMAKE_DIR')
 	else: pipeline_storage_dir = 'pipelines'
 
 	# Confirm the pipeline directory exists
@@ -243,6 +213,9 @@ def main():
 	# Parse the aguments from the configs
 	pipeline_args = pipeline_parser(pipeline_config_args)
 
+	# Assign the pipeline directory to an environment variable, if found
+	if os.environ.get('PM_SINGULARITY_DIR') and not pipeline_args['singularity_dir']: pipeline_args['singularity_dir'] = os.environ.get('PM_SINGULARITY_DIR')
+	
 	# Update the pipeline args with the pipeline directory
 	pipeline_args['pipeline_storage_dir'] = pipeline_storage_dir
 
@@ -253,7 +226,7 @@ def main():
 	if not os.path.exists(pipeline_args['work_dir']): os.makedirs(pipeline_args['work_dir'])
 
 	# Create the pipeline job directory
-	pipeline_args['pipeline_job_dir'] = os.path.join(pipeline_args['work_dir'], f'.pipeline')
+	pipeline_args['pipeline_job_dir'] = os.path.join(pipeline_args['work_dir'], f'pipemake')
 	if not os.path.exists(pipeline_args['pipeline_job_dir']): os.makedirs(pipeline_args['pipeline_job_dir'])
 
 	# Start logger and log the arguments
