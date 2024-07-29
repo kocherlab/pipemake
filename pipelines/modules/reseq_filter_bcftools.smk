@@ -1,12 +1,12 @@
 rule all:
 	input:
-		os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.filtered.vcf.gz")
+		os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.filtered.vcf.gz")
 
 rule filter_basic_vcf_bcftools:
 	input:
-		os.path.join(config['paths']['reseq_unfiltered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.vcf.gz")
+		os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_unfiltered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.vcf.gz")
 	output:
-		os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.filtered.vcf.gz")
+		os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.filtered.vcf.gz")
 	params:
 		min_alleles = config['min_alleles'],
 		max_alleles = config['max_alleles'],

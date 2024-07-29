@@ -1,13 +1,13 @@
 rule all:
 	input:
-		os.path.join(config['paths']['reseq_phased_vcf_dir'], f"{config['species']}_{config['assembly_version']}.vcf.gz")
+		os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_phased_vcf_dir'], f"{config['species']}_{config['assembly_version']}.vcf.gz")
 
 rule reseq_header_bcftools:
 	input:
-		os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.vcf.gz")
+		os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.vcf.gz")
 	output:
-		header=temp(os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.header")),
-		chrom_log=temp(os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.chrom.log"))
+		header=temp(os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.header")),
+		chrom_log=temp(os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.chrom.log"))
 	singularity:
 		"docker://aewebb/bcftools:v1.20"
 	resources:
@@ -21,12 +21,12 @@ rule reseq_header_bcftools:
 
 checkpoint reseq_split_unphased_bcftools:
 	input:
-		os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.vcf.gz")
+		os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.vcf.gz")
 	output:
-		temp(directory(os.path.join(config['paths']['reseq_filtered_vcf_dir'], 'SplitByChrom')))
+		temp(directory(os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_filtered_vcf_dir'], 'SplitByChrom')))
 	params:
-		out_dir=os.path.join(config['paths']['reseq_filtered_vcf_dir'], 'SplitByChrom'),
-		out_prefix=os.path.join(config['paths']['reseq_filtered_vcf_dir'], 'SplitByChrom', '')
+		out_dir=os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_filtered_vcf_dir'], 'SplitByChrom'),
+		out_prefix=os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_filtered_vcf_dir'], 'SplitByChrom', '')
 		
 	singularity:
 		"docker://aewebb/bcftools:v1.20"
@@ -42,9 +42,9 @@ checkpoint reseq_split_unphased_bcftools:
 
 rule reseq_index_unphased_bcftools:
 	input:
-		os.path.join(config['paths']['reseq_filtered_vcf_dir'], 'SplitByChrom', '{chrom}.vcf.gz')
+		os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_filtered_vcf_dir'], 'SplitByChrom', '{chrom}.vcf.gz')
 	output:
-		os.path.join(config['paths']['reseq_filtered_vcf_dir'], 'SplitByChrom', '{chrom}.vcf.gz.csi')
+		os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_filtered_vcf_dir'], 'SplitByChrom', '{chrom}.vcf.gz.csi')
 	singularity:
 		"docker://aewebb/bcftools:v1.20"
 	resources:
@@ -55,11 +55,11 @@ rule reseq_index_unphased_bcftools:
 
 rule reseq_phase_chroms_shapeit4:
 	input:
-		vcf=os.path.join(config['paths']['reseq_filtered_vcf_dir'], 'SplitByChrom', '{chrom}.vcf.gz'),
-		index=os.path.join(config['paths']['reseq_filtered_vcf_dir'], 'SplitByChrom', '{chrom}.vcf.gz.csi'),
-		chrom_log=os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.chrom.log")
+		vcf=os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_filtered_vcf_dir'], 'SplitByChrom', '{chrom}.vcf.gz'),
+		index=os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_filtered_vcf_dir'], 'SplitByChrom', '{chrom}.vcf.gz.csi'),
+		chrom_log=os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.chrom.log")
 	output:
-		temp(os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}.vcf.gz'))
+		temp(os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}.vcf.gz'))
 	singularity:
 		"docker://aewebb/shapeit4:v4.2.2"
 	resources:
@@ -74,17 +74,17 @@ rule reseq_phase_chroms_shapeit4:
 
 def aggregate_phased_reseq (wildcards):
 	checkpoint_output = checkpoints.reseq_split_unphased_bcftools.get(**wildcards).output[0]
-	return expand(os.path.join(config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}.vcf.gz'), chrom = glob_wildcards(os.path.join(checkpoint_output, "{chrom}.vcf.gz")).chrom)
+	return expand(os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_phased_vcf_dir'], 'SplitByChrom', '{chrom}.vcf.gz'), chrom = glob_wildcards(os.path.join(config['paths']['workflow_prefix'], checkpoint_output, "{chrom}.vcf.gz")).chrom)
 
 rule reseq_cat_phased_bcftools:
 	input:
 		vcfs=aggregate_phased_reseq,
-		header=os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.header"),
-		chrom_log=os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.chrom.log")
+		header=os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.header"),
+		chrom_log=os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.chrom.log")
 	output:
-		temp(os.path.join(config['paths']['reseq_phased_vcf_dir'], f"{config['species']}_{config['assembly_version']}.shapeit_header.vcf.gz"))
+		temp(os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_phased_vcf_dir'], f"{config['species']}_{config['assembly_version']}.shapeit_header.vcf.gz"))
 	params:
-		unphased_split_dir=os.path.join(config['paths']['reseq_filtered_vcf_dir'], 'SplitByChrom')
+		unphased_split_dir=os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_filtered_vcf_dir'], 'SplitByChrom')
 	singularity:
 		"docker://aewebb/bcftools:v1.20"
 	resources:
@@ -102,10 +102,10 @@ rule reseq_cat_phased_bcftools:
 
 rule reseq_replace_header_bcftools:
 	input:
-		shapeit_vcf=os.path.join(config['paths']['reseq_phased_vcf_dir'], f"{config['species']}_{config['assembly_version']}.shapeit_header.vcf.gz"),
-		header=os.path.join(config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.header")
+		shapeit_vcf=os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_phased_vcf_dir'], f"{config['species']}_{config['assembly_version']}.shapeit_header.vcf.gz"),
+		header=os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_filtered_vcf_dir'], f"{config['species']}_{config['assembly_version']}.header")
 	output:
-		os.path.join(config['paths']['reseq_phased_vcf_dir'], f"{config['species']}_{config['assembly_version']}.vcf.gz")
+		os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_phased_vcf_dir'], f"{config['species']}_{config['assembly_version']}.vcf.gz")
 	singularity:
 		"docker://aewebb/bcftools:v1.20"
 	resources:

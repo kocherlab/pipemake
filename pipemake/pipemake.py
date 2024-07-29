@@ -186,6 +186,8 @@ def pipeline_parser (config_parser_pipelines):
 					raise Exception(f'Argument group not supported: {pipeline_arg_group}')
 				
 		# Add the common optional arguments, but at the end of the list
+		pipeline_arg_groups['optional'].add_argument('--workflow-prefix', help = 'Assign the workflow prefix', type = str, default = f'Workflow_{jobTimeStamp()}_{jobRandomString()}')
+		pipeline_arg_groups['optional'].add_argument('--work-dir', help = 'Assign the working directory for snakemake. If not provided, the current directory will be used.', type = str)
 		pipeline_arg_groups['optional'].add_argument('--scale-threads', help = 'Scale the threads for each task', type = float, default = 1.0)
 		pipeline_arg_groups['optional'].add_argument('--scale-mem', help = 'Scale the memory (RAM) for each task', type = float, default = 1.0)
 		pipeline_arg_groups['optional'].add_argument('--resource-yml', help = 'Create a seperate resource yaml', action = 'store_true')
@@ -222,11 +224,14 @@ def main():
 	# Check that a pipeline was assigned
 	if not pipeline_args['pipeline']: raise Exception(f'No pipeline specified')
 
-	# Create the working directory
-	if not os.path.exists(pipeline_args['work_dir']): os.makedirs(pipeline_args['work_dir'])
+	# Assign the pipeline job directory
+	pipeline_args['pipeline_job_dir'] = os.path.join(pipeline_args['workflow_prefix'], f'pipemake')
+
+	# Check if the pipeline job directory should be updated
+	if pipeline_args['work_dir']: #and not os.path.exists(pipeline_args['work_dir']): os.makedirs(pipeline_args['work_dir'])
+		pipeline_args['pipeline_job_dir'] = os.path.join(pipeline_args['work_dir'], pipeline_args['pipeline_job_dir'])
 
 	# Create the pipeline job directory
-	pipeline_args['pipeline_job_dir'] = os.path.join(pipeline_args['work_dir'], f'pipemake')
 	if not os.path.exists(pipeline_args['pipeline_job_dir']): os.makedirs(pipeline_args['pipeline_job_dir'])
 
 	# Start logger and log the arguments

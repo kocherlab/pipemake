@@ -55,13 +55,16 @@ class SeqFileIO ():
 	def create (cls, *args, **kwargs):
 		return cls(*args, **kwargs)
 
-	def standardize (self, standardized_filename, out_dir = '', work_dir = '', gzipped = None, copy_method = 'symbolic_link', **kwargs):
+	def standardize (self, standardized_filename, out_dir = '', workflow_prefix = '', work_dir = '', gzipped = None, copy_method = 'symbolic_link', **kwargs):
+
+		print(standardized_filename, out_dir, workflow_prefix, work_dir, gzipped, copy_method)
 
 		# Assign the destination filename
 		dest_filename = standardized_filename
 
 		# Create path as needed
 		if out_dir: dest_filename = os.path.join(out_dir, dest_filename)
+		if workflow_prefix: dest_filename = os.path.join(workflow_prefix, dest_filename)
 		if work_dir: dest_filename = os.path.join(work_dir, dest_filename)
 
 		# Create the output directory, if needed

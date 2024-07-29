@@ -1,13 +1,13 @@
 rule all:
 	input:
-		os.path.join(config['paths']['annotations_dir'], f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}.{config['utr_version']}.gff3")
+		os.path.join(config['paths']['workflow_prefix'], config['paths']['annotations_dir'], f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}.{config['utr_version']}.gff3")
 
 rule annotate_3prime_utrs_peaks2utr:
 	input:
-		merged_bam=os.path.join(config['paths']['rnaseq_bam_dir'], f"{config['species']}_{config['assembly_version']}.bam"),
-		base_gff=os.path.join(config['paths']['annotations_dir'], f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}.gff3")
+		merged_bam=os.path.join(config['paths']['workflow_prefix'], config['paths']['rnaseq_bam_dir'], f"{config['species']}_{config['assembly_version']}.bam"),
+		base_gff=os.path.join(config['paths']['workflow_prefix'], config['paths']['annotations_dir'], f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}.gff3")
 	output:
-		os.path.join(config['paths']['annotations_dir'], 'peaks2utr', f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}.{config['utr_version']}.gff3")
+		os.path.join(config['paths']['workflow_prefix'], config['paths']['annotations_dir'], 'peaks2utr', f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}.{config['utr_version']}.gff3")
 	resources:
 		mem_mb=120000
 	threads: 10
@@ -18,9 +18,9 @@ rule annotate_3prime_utrs_peaks2utr:
 
 rule process_peaks2utr_utrs:
 	input:
-		os.path.join(config['paths']['annotations_dir'], 'peaks2utr', f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}.{config['utr_version']}.gff3")
+		os.path.join(config['paths']['workflow_prefix'], config['paths']['annotations_dir'], 'peaks2utr', f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}.{config['utr_version']}.gff3")
 	output:
-		os.path.join(config['paths']['annotations_dir'], f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}.{config['utr_version']}.gff3")
+		os.path.join(config['paths']['workflow_prefix'], config['paths']['annotations_dir'], f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}.{config['utr_version']}.gff3")
 	resources:
 		mem_mb=2000
 	threads: 1

@@ -10,14 +10,14 @@ from collections import defaultdict
 from pipemake.singularityIO import Singularity
 
 class SnakePipelineIO (): 
-	def __init__ (self, snakemake_job_prefix = '', pipeline_storage_dir  = '', pipeline_job_dir = '', work_dir = '', singularity_dir = '', resource_yml = None, scale_threads = 0, scale_mem = 0, indent_style = '\t', overwrite = True, **kwargs):
+	def __init__ (self, workflow_prefix = '', pipeline_storage_dir  = '', pipeline_job_dir = '', work_dir = '', singularity_dir = '', resource_yml = None, scale_threads = 0, scale_mem = 0, indent_style = '\t', overwrite = True, **kwargs):
 
 		# Assign the basic arguments
-		self._snakemake_job_prefix = snakemake_job_prefix
+		self._workflow_prefix = workflow_prefix
 				
 		# Assign the snakemake pipeline filename
-		if snakemake_job_prefix.endswith('.smk'): self.smkp_filename = snakemake_job_prefix
-		else: self.smkp_filename = f'{snakemake_job_prefix}.smk'
+		if workflow_prefix.endswith('.smk'): self.smkp_filename = workflow_prefix
+		else: self.smkp_filename = f'{workflow_prefix}.smk'
 
 		# Check if the overwrite is a bool or None
 		if not isinstance(overwrite, bool): raise Exception (f'Invalid overwrite type: {overwrite}')
@@ -55,7 +55,7 @@ class SnakePipelineIO ():
 		# Assign the backup directory
 		self._backup_dir = os.path.join(pipeline_job_dir, 'backups')
 		if not os.path.exists(self._backup_dir): os.makedirs(self._backup_dir)
-
+		
 		# Assign the work directory
 		self._work_dir = work_dir
 		
@@ -135,12 +135,17 @@ class SnakePipelineIO ():
 		pipeline_args_unused = set(pipeline_args.keys())
 		
 		# Create yml dicts
-		yml_config_dict = {'workdir': self._work_dir}
+		yml_config_dict = {}
 		yml_resource_dict = {'resources': {}}
+
+		# Check if the workdir is in the pipeline args
+		if self._work_dir: yml_config_dict['workdir'] = self._work_dir
 
 		# Create a list of config params to sort by length
 		config_params_list = list(self._config_params)
 		config_params_list.sort(key = lambda t: len(t))
+
+		print(pipeline_args)
 		
 		# Populate the config yml dict with the pipeline args
 		for config_param in config_params_list:
@@ -187,17 +192,17 @@ class SnakePipelineIO ():
 
 		# Check if the resource yml should be a separate file
 		if not self._resource_yml: yml_config_dict.update(yml_resource_dict)
-		else: self._createYml(yml_resource_dict, f"{self._snakemake_job_prefix}.resources.yml")
+		else: self._createYml(yml_resource_dict, f"{self._workflow_prefix}.resources.yml")
 
-		self._createYml(yml_config_dict, f"{self._snakemake_job_prefix}.yml")
+		self._createYml(yml_config_dict, f"{self._workflow_prefix}.yml")
 
 
 	def writePipeline (self):
 
 		# Assign the config file(s) and working directory
-		self._pipe_file.write(f"configfile: '{self._snakemake_job_prefix}.yml'\n")
-		if self._resource_yml: self._pipe_file.write(f"configfile: '{self._snakemake_job_prefix}.resources.yml'\n")
-		self._pipe_file.write("\nworkdir: config['workdir']\n\n")
+		self._pipe_file.write(f"configfile: '{self._workflow_prefix}.yml'\n")
+		if self._resource_yml: self._pipe_file.write(f"configfile: '{self._workflow_prefix}.resources.yml'\n")
+		if self._work_dir: self._pipe_file.write("\nworkdir: config['workdir']\n\n")
 
 		# Create the rule all block
 		self._pipe_file.write('rule all:\n')
@@ -216,10 +221,10 @@ class SnakePipelineIO ():
 	def close(self):
 		self._pipe_file.close()
 	
-		shutil.copy(f"{self._snakemake_job_prefix}.smk", os.path.join(self._backup_dir, f"{self._snakemake_job_prefix}.smk.bkp"))
-		shutil.copy(f"{self._snakemake_job_prefix}.yml", os.path.join(self._backup_dir, f"{self._snakemake_job_prefix}.yml.bkp"))
-		if os.path.isfile(f"{self._snakemake_job_prefix}.resources.yml"): 
-			shutil.copy(f"{self._snakemake_job_prefix}.resources.yml", os.path.join(self._backup_dir, f"{self._snakemake_job_prefix}.resources.yml.bkp"))
+		shutil.copy(f"{self._workflow_prefix}.smk", os.path.join(self._backup_dir, f"{self._workflow_prefix}.smk.bkp"))
+		shutil.copy(f"{self._workflow_prefix}.yml", os.path.join(self._backup_dir, f"{self._workflow_prefix}.yml.bkp"))
+		if os.path.isfile(f"{self._workflow_prefix}.resources.yml"): 
+			shutil.copy(f"{self._workflow_prefix}.resources.yml", os.path.join(self._backup_dir, f"{self._workflow_prefix}.resources.yml.bkp"))
 
 		logging.info(f"Pipeline backups created successfully")
 	

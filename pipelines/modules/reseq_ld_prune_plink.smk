@@ -1,19 +1,19 @@
 rule all:
 	input:
-		os.path.join(config['paths']['reseq_pruned_plink_dir'], f"{config['species']}_{config['assembly_version']}.pruned.bed"),
-		os.path.join(config['paths']['reseq_pruned_plink_dir'], f"{config['species']}_{config['assembly_version']}.pruned.bim"),
-		os.path.join(config['paths']['reseq_pruned_plink_dir'], f"{config['species']}_{config['assembly_version']}.pruned.fam")
+		os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_pruned_plink_dir'], f"{config['species']}_{config['assembly_version']}.pruned.bed"),
+		os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_pruned_plink_dir'], f"{config['species']}_{config['assembly_version']}.pruned.bim"),
+		os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_pruned_plink_dir'], f"{config['species']}_{config['assembly_version']}.pruned.fam")
 
 rule reseq_indep_pairwise_plink:
 	input:
-		os.path.join(config['paths']['reseq_filtered_plink_dir'], f"{config['species']}_{config['assembly_version']}.filtered.bed"),
-		os.path.join(config['paths']['reseq_filtered_plink_dir'], f"{config['species']}_{config['assembly_version']}.filtered.bim"),
-		os.path.join(config['paths']['reseq_filtered_plink_dir'], f"{config['species']}_{config['assembly_version']}.filtered.fam")
+		os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_filtered_plink_dir'], f"{config['species']}_{config['assembly_version']}.filtered.bed"),
+		os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_filtered_plink_dir'], f"{config['species']}_{config['assembly_version']}.filtered.bim"),
+		os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_filtered_plink_dir'], f"{config['species']}_{config['assembly_version']}.filtered.fam")
 	output:
-		os.path.join(config['paths']['reseq_pruned_plink_dir'], f"{config['species']}_{config['assembly_version']}.prune.in")
+		os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_pruned_plink_dir'], f"{config['species']}_{config['assembly_version']}.prune.in")
 	params:
-		bed_prefix=os.path.join(config['paths']['reseq_filtered_plink_dir'], f"{config['species']}_{config['assembly_version']}.filtered"),
-		out_prefix=os.path.join(config['paths']['reseq_pruned_plink_dir'], f"{config['species']}_{config['assembly_version']}"),
+		bed_prefix=os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_filtered_plink_dir'], f"{config['species']}_{config['assembly_version']}.filtered"),
+		out_prefix=os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_pruned_plink_dir'], f"{config['species']}_{config['assembly_version']}"),
 		ld_window_size={config['ld_window_size']},
 		ld_window_step={config['ld_window_step']},
 		ld_threshold={config['ld_threshold']}
@@ -27,17 +27,17 @@ rule reseq_indep_pairwise_plink:
 	
 rule reseq_ld_prune_plink:
 	input:
-		bed=os.path.join(config['paths']['reseq_filtered_plink_dir'], f"{config['species']}_{config['assembly_version']}.filtered.bed"),
-		bim=os.path.join(config['paths']['reseq_filtered_plink_dir'], f"{config['species']}_{config['assembly_version']}.filtered.bim"),
-		fam=os.path.join(config['paths']['reseq_filtered_plink_dir'], f"{config['species']}_{config['assembly_version']}.filtered.fam"),
-		prune_in=os.path.join(config['paths']['reseq_pruned_plink_dir'], f"{config['species']}_{config['assembly_version']}.prune.in")
+		bed=os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_filtered_plink_dir'], f"{config['species']}_{config['assembly_version']}.filtered.bed"),
+		bim=os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_filtered_plink_dir'], f"{config['species']}_{config['assembly_version']}.filtered.bim"),
+		fam=os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_filtered_plink_dir'], f"{config['species']}_{config['assembly_version']}.filtered.fam"),
+		prune_in=os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_pruned_plink_dir'], f"{config['species']}_{config['assembly_version']}.prune.in")
 	output:
-		os.path.join(config['paths']['reseq_pruned_plink_dir'], f"{config['species']}_{config['assembly_version']}.pruned.bed"),
-		os.path.join(config['paths']['reseq_pruned_plink_dir'], f"{config['species']}_{config['assembly_version']}.pruned.bim"),
-		os.path.join(config['paths']['reseq_pruned_plink_dir'], f"{config['species']}_{config['assembly_version']}.pruned.fam")
+		os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_pruned_plink_dir'], f"{config['species']}_{config['assembly_version']}.pruned.bed"),
+		os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_pruned_plink_dir'], f"{config['species']}_{config['assembly_version']}.pruned.bim"),
+		os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_pruned_plink_dir'], f"{config['species']}_{config['assembly_version']}.pruned.fam")
 	params:
-		input_prefix=os.path.join(config['paths']['reseq_filtered_plink_dir'], f"{config['species']}_{config['assembly_version']}.filtered"),
-		output_prefix=os.path.join(config['paths']['reseq_pruned_plink_dir'], f"{config['species']}_{config['assembly_version']}.pruned")
+		input_prefix=os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_filtered_plink_dir'], f"{config['species']}_{config['assembly_version']}.filtered"),
+		output_prefix=os.path.join(config['paths']['workflow_prefix'], config['paths']['reseq_pruned_plink_dir'], f"{config['species']}_{config['assembly_version']}.pruned")
 	singularity:
 		"docker://aewebb/plink2:20240418"
 	resources:

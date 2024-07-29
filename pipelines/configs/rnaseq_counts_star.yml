@@ -55,22 +55,6 @@ parser:
             str: "Sp"
             suffix:
               - function: jobRandomString
-        work-dir:
-          help: "Assign the working directory for snakemake"
-          type: str
-          default:
-            str: "RNAseqCounts"
-            suffix:
-              - function: jobTimeStamp
-              - function: jobRandomString
-        snakemake-job-prefix:
-          help: "Assign the snakemake job prefix"
-          type: str
-          default:
-            str: "countSTAR"
-            suffix:
-              - function: jobTimeStamp
-              - function: jobRandomString
     paths:
       args:
         assembly-dir:

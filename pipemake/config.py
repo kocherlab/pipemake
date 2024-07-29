@@ -5,7 +5,7 @@ import yaml
 from collections import defaultdict
 
 from pipemake.processIO import standardizeInput, returnSamples, returnPaths
-from pipemake.snakemakeIO import SnakePipelineIO
+#from pipemake.snakemakeIO import SnakePipelineIO
 
 def loadPipelineConfigs (directory):
 
@@ -66,6 +66,10 @@ def processPipelineSetup (pipeline_setup, pipeline_args):
 
 				# Create a dict of the standardize args
 				std_args = copy.deepcopy(method_args['standardize'])
+
+				# Check if the work_dir is specified
+				if 'work_dir' in pipeline_args and pipeline_args['work_dir']:
+					std_args['args']['work_dir'] = pipeline_args['work_dir']
 
 				# Update the arguments
 				for std_arg, arg_params in std_args['args'].items():

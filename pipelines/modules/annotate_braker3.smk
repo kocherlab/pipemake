@@ -1,18 +1,18 @@
 rule all:
 	input:
-		os.path.join(config['paths']['annotations_dir'], f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.gff3")
+		os.path.join(config['paths']['workflow_prefix'], config['paths']['annotations_dir'], f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.gff3")
 
 rule annotate_braker3:
 	input:
-		masked_assembly=os.path.join(config['paths']['assembly_dir'], f"{config['species']}_{config['assembly_version']}.fa.masked"),
-		merged_bam=os.path.join(config['paths']['rnaseq_bam_dir'], f"{config['species']}_{config['assembly_version']}.bam"),
-		protein_hints=os.path.join(config['paths']['homology_dir'], 'ProteinHints.fa')
+		masked_assembly=os.path.join(config['paths']['workflow_prefix'], config['paths']['assembly_dir'], f"{config['species']}_{config['assembly_version']}.fa.masked"),
+		merged_bam=os.path.join(config['paths']['workflow_prefix'], config['paths']['rnaseq_bam_dir'], f"{config['species']}_{config['assembly_version']}.bam"),
+		protein_hints=os.path.join(config['paths']['workflow_prefix'], config['paths']['homology_dir'], 'ProteinHints.fa')
 	output:
-		os.path.join(config['paths']['annotations_dir'], 'BRAKER3', 'braker.gff3'),
-		os.path.join(config['paths']['annotations_dir'], 'BRAKER3', 'braker.codingseq'),
-		os.path.join(config['paths']['annotations_dir'], 'BRAKER3', 'braker.aa')
+		os.path.join(config['paths']['workflow_prefix'], config['paths']['annotations_dir'], 'BRAKER3', 'braker.gff3'),
+		os.path.join(config['paths']['workflow_prefix'], config['paths']['annotations_dir'], 'BRAKER3', 'braker.codingseq'),
+		os.path.join(config['paths']['workflow_prefix'], config['paths']['annotations_dir'], 'BRAKER3', 'braker.aa')
 	params:
-		annotations_dir=os.path.join(config['paths']['annotations_dir'], 'BRAKER3'),
+		annotations_dir=os.path.join(config['paths']['workflow_prefix'], config['paths']['annotations_dir'], 'BRAKER3'),
 		augustus_config="/Genomics/argo/users/aewebb/.augustus"
 	singularity:
 		"docker://teambraker/braker3:v3.0.7.5"
@@ -24,13 +24,13 @@ rule annotate_braker3:
 
 rule process_braker3:
 	input:
-		braker3_gff=os.path.join(config['paths']['annotations_dir'], 'BRAKER3', 'braker.gff3'),
-		braker3_cds=os.path.join(config['paths']['annotations_dir'], 'BRAKER3', 'braker.codingseq'),
-		braker3_aa=os.path.join(config['paths']['annotations_dir'], 'BRAKER3', 'braker.aa')
+		braker3_gff=os.path.join(config['paths']['workflow_prefix'], config['paths']['annotations_dir'], 'BRAKER3', 'braker.gff3'),
+		braker3_cds=os.path.join(config['paths']['workflow_prefix'], config['paths']['annotations_dir'], 'BRAKER3', 'braker.codingseq'),
+		braker3_aa=os.path.join(config['paths']['workflow_prefix'], config['paths']['annotations_dir'], 'BRAKER3', 'braker.aa')
 	output:
-		os.path.join(config['paths']['annotations_dir'], f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.gff3"),
-		os.path.join(config['paths']['annotations_dir'], f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_trans.fa"),
-		os.path.join(config['paths']['annotations_dir'], f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_pep.fa")
+		os.path.join(config['paths']['workflow_prefix'], config['paths']['annotations_dir'], f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.gff3"),
+		os.path.join(config['paths']['workflow_prefix'], config['paths']['annotations_dir'], f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_trans.fa"),
+		os.path.join(config['paths']['workflow_prefix'], config['paths']['annotations_dir'], f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_pep.fa")
 	params:
 		out_dir=config['paths']['annotations_dir'],
 		species=config['species'],
