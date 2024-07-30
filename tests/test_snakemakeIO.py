@@ -50,7 +50,7 @@ def test_SnakePipelineIO_wo_error (job_prefix, pipeline_storage_dir, resource_ym
     filtered_fastq_dir = os.path.join(test_dir, 'fastq_filtered')
 
     # Write the pipeline config
-    test_pipeline.writeConfig({'min_length': 100, 'samples': ['sample1', 'sample2'], 'threads': 4, 'mem': 16, 'unfiltered_fastq_dir' : unfiltered_fastq_dir, 'filtered_fastq_dir' : filtered_fastq_dir})
+    test_pipeline.writeConfig({'min_length': 100, 'samples': ['sample1', 'sample2'], 'threads': 4, 'mem': 16, 'unfiltered_fastq_dir' : unfiltered_fastq_dir, 'filtered_fastq_dir' : filtered_fastq_dir, 'workflow_prefix': snakemake_job_prefix})
 
     # Write the pipeline
     test_pipeline.writePipeline()
@@ -68,7 +68,7 @@ def test_SnakePipelineIO_wo_error (job_prefix, pipeline_storage_dir, resource_ym
     # Check if a string is within the file
     with open(os.path.join(test_dir, 'test.smk'), 'r') as f:
         test_pipeline_content = f.read()
-        assert "expand(os.path.join(config['paths']['filtered_fastq_dir'], '{sample}.json'), sample=config['samples'])" in test_pipeline_content
+        assert "expand(os.path.join(config['paths']['workflow_prefix'], config['paths']['filtered_fastq_dir'], '{sample}.json'), sample=config['samples'])" in test_pipeline_content
         assert f'include: "{test_module_path}"' in test_pipeline_content
 
     # Check if the config file was written
@@ -174,11 +174,15 @@ def test_SnakeRuleIO_wo_error (rule_filename):
             else: test_str += test_line
         test_str += '\n'
 
+    print(test_rule._rule_text)
+
+    print(test_str)
+
     # Check if the rule was created correctly
     assert test_rule._rule_text == test_str
     assert test_rule.rule_name == 'fastp_pair_end'
     assert test_rule._rule_resource_params == {'threads': 4, 'mem_mb': 16000}
-    assert test_rule._rule_config_params == {('paths', 'unfiltered_fastq_dir'), ('paths', 'filtered_fastq_dir'), ('min_length',)}
+    assert test_rule._rule_config_params == {('paths', 'workflow_prefix'), ('paths', 'unfiltered_fastq_dir'), ('paths', 'filtered_fastq_dir'), ('min_length',)}
 
 @pytest.mark.parametrize(
     'rule_name, attribute_type, attribute_text',

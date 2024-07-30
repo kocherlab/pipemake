@@ -32,22 +32,6 @@ parser:
           type: int
           default:
             str: "50"
-        work-dir:
-          help: "Assign the working directory for snakemake"
-          type: str
-          default:
-            str: "RNAseqCounts"
-            suffix:
-              - function: jobTimeStamp
-              - function: jobRandomString
-        snakemake-job-prefix:
-          help: "Assign the snakemake job prefix"
-          type: str
-          default:
-            str: "countSTAR"
-            suffix:
-              - function: jobTimeStamp
-              - function: jobRandomString
     paths:
       args:
         unfiltered-fastq-dir:
@@ -65,7 +49,7 @@ setup:
     wildcard-method:
       input:
         args:
-          - "work-dir"
+          - "workflow_prefix"
           - "fastq-wildcard"
           - "fastq-standardized-wildcard"
           - "unfiltered-fastq-dir"
@@ -75,7 +59,7 @@ setup:
           wildcard_str: "{fastq-wildcard}"
           standardized_filename: "{fastq-standardized-wildcard}"
           out_dir: "{unfiltered-fastq-dir}"
-          work_dir: '{work-dir}'
+          workflow_prefix: "{workflow_prefix}"
           copy_method: '{fastq_copy_method}'
           gzipped: True
       samples:

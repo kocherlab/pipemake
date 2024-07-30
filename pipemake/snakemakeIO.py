@@ -220,11 +220,15 @@ class SnakePipelineIO ():
 	
 	def close(self):
 		self._pipe_file.close()
-	
-		shutil.copy(f"{self._workflow_prefix}.smk", os.path.join(self._backup_dir, f"{self._workflow_prefix}.smk.bkp"))
-		shutil.copy(f"{self._workflow_prefix}.yml", os.path.join(self._backup_dir, f"{self._workflow_prefix}.yml.bkp"))
+
+		# Assign the basename of the workflow prefix
+		workflow_basename = os.path.basename(self._workflow_prefix)
+
+		# Create backups of the pipeline files
+		shutil.copy(f"{self._workflow_prefix}.smk", os.path.join(self._backup_dir, f"{workflow_basename}.smk.bkp"))
+		shutil.copy(f"{self._workflow_prefix}.yml", os.path.join(self._backup_dir, f"{workflow_basename}.yml.bkp"))
 		if os.path.isfile(f"{self._workflow_prefix}.resources.yml"): 
-			shutil.copy(f"{self._workflow_prefix}.resources.yml", os.path.join(self._backup_dir, f"{self._workflow_prefix}.resources.yml.bkp"))
+			shutil.copy(f"{self._workflow_prefix}.resources.yml", os.path.join(self._backup_dir, f"{workflow_basename}.resources.yml.bkp"))
 
 		logging.info(f"Pipeline backups created successfully")
 	

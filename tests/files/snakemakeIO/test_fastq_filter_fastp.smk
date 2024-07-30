@@ -2,13 +2,13 @@ ruleorder: fastp_pair_end > fastp_single_end
 
 rule fastp_single_end:
 	input:
-		r1_reads=os.path.join(config['paths']['unfiltered_fastq_dir'], "{sample}_R1.fq.gz")
+		r1_reads=os.path.join(config['paths']['workflow_prefix'], config['paths']['unfiltered_fastq_dir'], "{sample}_R1.fq.gz")
 	output:
-		r1_reads=os.path.join(config['paths']['filtered_fastq_dir'], "{sample}_R1.fq.gz"),
-		json=os.path.join(config['paths']['filtered_fastq_dir'], "{sample}.json"),
-		html=os.path.join(config['paths']['filtered_fastq_dir'], "{sample}.html")
+		r1_reads=os.path.join(config['paths']['workflow_prefix'], config['paths']['filtered_fastq_dir'], "{sample}_R1.fq.gz"),
+		json=os.path.join(config['paths']['workflow_prefix'], config['paths']['filtered_fastq_dir'], "{sample}.json"),
+		html=os.path.join(config['paths']['workflow_prefix'], config['paths']['filtered_fastq_dir'], "{sample}.html")
 	params:
-		sample_prefix=os.path.join(config['paths']['filtered_fastq_dir'], "{sample}"),
+		sample_prefix=os.path.join(config['paths']['workflow_prefix'], config['paths']['filtered_fastq_dir'], "{sample}"),
 		min_length=config['min_length']
 	singularity:
 		"{URL}/pipemake_utils.v0.1.27.sif"
@@ -20,15 +20,15 @@ rule fastp_single_end:
 
 rule fastp_pair_end:
 	input:
-		r1_reads=os.path.join(config['paths']['unfiltered_fastq_dir'], "{sample}_R1.fq.gz"),
-		r2_reads=os.path.join(config['paths']['unfiltered_fastq_dir'], "{sample}_R2.fq.gz")
+		r1_reads=os.path.join(config['paths']['workflow_prefix'], config['paths']['unfiltered_fastq_dir'], "{sample}_R1.fq.gz"),
+		r2_reads=os.path.join(config['paths']['workflow_prefix'], config['paths']['unfiltered_fastq_dir'], "{sample}_R2.fq.gz")
 	output:
-		r1_reads=os.path.join(config['paths']['filtered_fastq_dir'], "{sample}_R1.fq.gz"),
-		r2_reads=os.path.join(config['paths']['filtered_fastq_dir'], "{sample}_R2.fq.gz"),
-		json=os.path.join(config['paths']['filtered_fastq_dir'], "{sample}.json"),
-		html=os.path.join(config['paths']['filtered_fastq_dir'], "{sample}.html")
+		r1_reads=os.path.join(config['paths']['workflow_prefix'], config['paths']['filtered_fastq_dir'], "{sample}_R1.fq.gz"),
+		r2_reads=os.path.join(config['paths']['workflow_prefix'], config['paths']['filtered_fastq_dir'], "{sample}_R2.fq.gz"),
+		json=os.path.join(config['paths']['workflow_prefix'], config['paths']['filtered_fastq_dir'], "{sample}.json"),
+		html=os.path.join(config['paths']['workflow_prefix'], config['paths']['filtered_fastq_dir'], "{sample}.html")
 	params:
-		sample_prefix=os.path.join(config['paths']['filtered_fastq_dir'], "{sample}"),
+		sample_prefix=os.path.join(config['paths']['workflow_prefix'], config['paths']['filtered_fastq_dir'], "{sample}"),
 		min_length=config['min_length']
 	singularity:
 		"{URL}/pipemake_utils.v0.1.27.sif"
