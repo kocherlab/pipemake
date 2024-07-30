@@ -40,7 +40,7 @@ def test_SnakePipelineIO_wo_error (job_prefix, pipeline_storage_dir, resource_ym
     snakemake_job_prefix = os.path.join(test_dir, job_prefix)
     
     # Create a test pipeline
-    test_pipeline = SnakePipelineIO.open(snakemake_job_prefix = snakemake_job_prefix, work_dir = test_dir, pipeline_storage_dir  = pipeline_storage_dir, pipeline_job_dir = test_dir, resource_yml = resource_yml, scale_threads = scale_threads, scale_mem = scale_mem, singularity_dir = singularity_dir, indent_style = indent_style, overwrite = overwrite)
+    test_pipeline = SnakePipelineIO.open(snakemake_job_prefix = snakemake_job_prefix, workflow_prefix = snakemake_job_prefix, pipeline_storage_dir  = pipeline_storage_dir, pipeline_job_dir = test_dir, resource_yml = resource_yml, scale_threads = scale_threads, scale_mem = scale_mem, singularity_dir = singularity_dir, indent_style = indent_style, overwrite = overwrite)
 
     # Add a module to the pipeline
     test_pipeline.addModule('fastq_filter_fastp.smk')
@@ -65,7 +65,6 @@ def test_SnakePipelineIO_wo_error (job_prefix, pipeline_storage_dir, resource_ym
     # Check if a string is within the file
     with open(os.path.join(test_dir, 'test.smk'), 'r') as f:
         test_pipeline_content = f.read()
-        assert "workdir: config['workdir']" in test_pipeline_content
         assert "expand(os.path.join(config['paths']['filtered_fastq_dir'], '{sample}.json'), sample=config['samples'])" in test_pipeline_content
         assert f'include: "{test_module_path}"' in test_pipeline_content
 
