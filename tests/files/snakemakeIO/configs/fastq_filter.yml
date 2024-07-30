@@ -44,6 +44,9 @@ parser:
           type: str
           default: 
             str: "FASTQ/Filtered"
+            suffix:
+              - function: jobTimeStamp
+              - function: jobRandomString
 setup:
   fastq_input:
     wildcard-method:

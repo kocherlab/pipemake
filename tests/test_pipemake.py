@@ -95,3 +95,24 @@ def test_pipemake_main_table_w_error (table_str):
     with unittest.mock.patch('sys.argv', test_cmd):
         with pytest.raises(Exception):
             main()
+
+
+def test_pipemake_main_table_w_error ():
+    
+    os.environ['PM_SNAKEMAKE_DIR'] = 'tests/files/snakemakeIO'
+
+    # Assign the command line arguments
+    test_cmd1 = ['']
+    test_cmd2 = ['', 'fastq-filter']
+
+    # Run pipemake with the test command
+    with unittest.mock.patch('sys.argv', test_cmd1):
+        with pytest.raises(SystemExit) as excinfo:
+            main()
+            excinfo.value.code == 2
+        
+    # Run pipemake with the test command
+    with unittest.mock.patch('sys.argv', test_cmd2):
+        with pytest.raises(SystemExit) as excinfo:
+            main()
+            excinfo.value.code == 2
