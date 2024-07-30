@@ -55,6 +55,9 @@ def test_SnakePipelineIO_wo_error (job_prefix, pipeline_storage_dir, resource_ym
     # Write the pipeline
     test_pipeline.writePipeline()
 
+    # Build the singularity containers
+    test_pipeline.buildSingularityContainers()
+
     test_pipeline.close()
 
     # Check if the pipeline was written
@@ -70,6 +73,9 @@ def test_SnakePipelineIO_wo_error (job_prefix, pipeline_storage_dir, resource_ym
 
     # Check if the config file was written
     assert os.path.exists(os.path.join(test_dir, 'test.yml'))
+
+    # Check if the singularity containers were built
+    assert os.path.isfile(os.path.join(singularity_dir, 'pipemake_utils.v0.1.27.sif'))
 
     # Read the config yaml
     with open(os.path.join(test_dir, 'test.yml'), 'r') as yaml_file:
