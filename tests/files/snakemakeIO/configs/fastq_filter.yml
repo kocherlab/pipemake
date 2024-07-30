@@ -71,7 +71,7 @@ setup:
     table-method:
       input:
         args:
-          - "work-dir"
+          - "workflow_prefix"
           - "fastq-table"
           - "fastq-standardized-wildcard"
           - "unfiltered-fastq-dir"
@@ -81,7 +81,7 @@ setup:
           table_filename: "{fastq-table}"
           standardized_filename: "{fastq-standardized-wildcard}"
           out_dir: "{unfiltered-fastq-dir}"
-          work_dir: '{work-dir}'
+          workflow_prefix: "{workflow_prefix}"
           copy_method: '{fastq_copy_method}'
           gzipped: True
       samples:
