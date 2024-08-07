@@ -38,7 +38,6 @@ setup:
     file-method:
       input:
         args:
-          - "work-dir"
           - "assembly-fasta"
           - "assembly-dir"
       standardize:
@@ -47,7 +46,6 @@ setup:
           input_filename: "{assembly-fasta}"
           standardized_filename: "{species}_{assembly_version}.fa"
           out_dir: "{assembly-dir}"
-          work_dir: '{work-dir}'
           gzipped: False
 
 command-line:

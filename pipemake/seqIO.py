@@ -57,8 +57,6 @@ class SeqFileIO ():
 
 	def standardize (self, standardized_filename, out_dir = '', workflow_prefix = '', work_dir = '', gzipped = None, copy_method = 'symbolic_link', **kwargs):
 
-		print(standardized_filename, out_dir, workflow_prefix, work_dir, gzipped, copy_method)
-
 		# Assign the destination filename
 		dest_filename = standardized_filename
 

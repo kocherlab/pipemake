@@ -80,7 +80,6 @@ setup:
     file-method:
       input:
         args:
-          - "work-dir"
           - "rnaseq-bam"
           - "rnaseq-bam-dir"
       standardize:
@@ -89,7 +88,6 @@ setup:
           input_filename: "{rnaseq-bam}"
           standardized_filename: "{species}_{assembly_version}.bam"
           out_dir: "{rnaseq-bam-dir}"
-          work_dir: '{work-dir}'
           copy_method: 'symbolic_link'
           gzipped: True
 
@@ -97,7 +95,6 @@ setup:
     file-method:
       input:
         args:
-          - "work-dir"
           - "assembly-fasta"
           - "assembly-dir"
       standardize:
@@ -106,14 +103,12 @@ setup:
           input_filename: "{assembly-fasta}"
           standardized_filename: "{species}_{assembly_version}.fa"
           out_dir: "{assembly-dir}"
-          work_dir: '{work-dir}'
           gzipped: False
 
   hints_input:
     file-method:
       input:
         args:
-          - "work-dir"
           - "hints-fasta"
           - "homology-dir"
       standardize:
@@ -122,7 +117,6 @@ setup:
           input_filename: "{hints-fasta}"
           standardized_filename: "ProteinHints.fa"
           out_dir: "{homology-dir}"
-          work_dir: '{work-dir}'
           gzipped: False
 
 command-line:

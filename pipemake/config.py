@@ -43,15 +43,18 @@ def loadPipelineConfigs (directory):
 
 def processPipelineSetup (pipeline_setup, pipeline_args):
 
+	# Confirm the workflow prefix is specified
+	if 'workflow_prefix' not in pipeline_args: raise Exception(f'Workflow prefix not found among pipeline arguments')
+
 	# Create list to store setup args
 	process_dict = {}
 
 	for setup_name, setup_methods in pipeline_setup.items():
 		for method_args in setup_methods.values():
 			
-			# Assign the arg groups
+			# Assign the input args
 			input_args = method_args['input']
-			
+						
 			# Check for missing arguments
 			for input_arg in input_args['args']:
 				if input_arg.replace('-', '_') not in pipeline_args: raise Exception(f'Setup argument {input_arg} not found among pipeline argument')
@@ -66,6 +69,9 @@ def processPipelineSetup (pipeline_setup, pipeline_args):
 
 				# Create a dict of the standardize args
 				std_args = copy.deepcopy(method_args['standardize'])
+				
+				# Add the workflow prefix to the args
+				std_args['args']['workflow_prefix'] = pipeline_args['workflow_prefix']
 
 				# Check if the work_dir is specified
 				if 'work_dir' in pipeline_args and pipeline_args['work_dir']:

@@ -58,7 +58,6 @@ setup:
     file-method:
       input:
         args:
-          - "work-dir"
           - "rnaseq-bam"
           - "rnaseq-bam-dir"
       standardize:
@@ -67,7 +66,6 @@ setup:
           input_filename: "{rnaseq-bam}"
           standardized_filename: "{species}_{assembly-version}.bam"
           out_dir: "{rnaseq-bam-dir}"
-          work_dir: '{work-dir}'
           copy_method: 'symbolic_link'
           gzipped: True
 
@@ -75,7 +73,6 @@ setup:
     file-method:
       input:
         args:
-          - "work-dir"
           - "annotations-gff"
           - "annotations-dir"
       standardize:
@@ -84,7 +81,6 @@ setup:
           input_filename: "{annotations-gff}"
           standardized_filename: "{species}_{assembly-version}.{annotation-version}.gff3"
           out_dir: "{annotations-dir}"
-          work_dir: '{work-dir}'
           gzipped: False
 
 command-line:

@@ -73,7 +73,6 @@ setup:
     wildcard-method:
       input:
         args:
-          - "work-dir"
           - "reseq-wildcard"
           - "reseq-bed-dir"
       standardize:
@@ -82,14 +81,12 @@ setup:
           wildcard_str: "{reseq-wildcard}"
           standardized_filename: "{species}_{assembly_version}.{{ext}}"
           out_dir: "{reseq-bed-dir}"
-          work_dir: '{work-dir}'
           copy_method: '{reseq-copy-method}'
   
   model_input:
     file-method:
       input:
         args:
-          - "work-dir"
           - "model-file"
           - "models-dir"
       standardize:
@@ -98,7 +95,6 @@ setup:
           input_filename: "{model-file}"
           standardized_filename: "{species}.model"
           out_dir: "{models-dir}"
-          work_dir: '{work-dir}'
           copy_method: '{reseq-copy-method}'
           gzipped: False
 

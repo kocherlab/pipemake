@@ -111,7 +111,6 @@ setup:
     wildcard-method:
       input:
         args:
-          - "work-dir"
           - "rnaseq-wildcard"
           - "rnaseq-standardized-wildcard"
           - "rnaseq-fastq-dir"
@@ -121,7 +120,6 @@ setup:
           wildcard_str: "{rnaseq-wildcard}"
           standardized_filename: "{rnaseq-standardized-wildcard}"
           out_dir: "{rnaseq-fastq-dir}"
-          work_dir: '{work-dir}'
           copy_method: '{rnaseq_copy_method}'
           gzipped: True
       samples:
@@ -133,7 +131,6 @@ setup:
     table-method:
       input:
         args:
-          - "work-dir"
           - "rnaseq-table"
           - "rnaseq-standardized-wildcard"
           - "rnaseq-fastq-dir"
@@ -143,7 +140,6 @@ setup:
           table_filename: "{rnaseq-table}"
           standardized_filename: "{rnaseq-standardized-wildcard}"
           out_dir: "{rnaseq-fastq-dir}"
-          work_dir: '{work-dir}'
           copy_method: '{rnaseq_copy_method}'
           gzipped: True
       samples:
@@ -154,7 +150,6 @@ setup:
     file-method:
       input:
         args:
-          - "work-dir"
           - "assembly-fasta"
           - "assembly-dir"
       standardize:
@@ -163,14 +158,12 @@ setup:
           input_filename: "{assembly-fasta}"
           standardized_filename: "{species}_{assembly_version}.fa"
           out_dir: "{assembly-dir}"
-          work_dir: '{work-dir}'
           gzipped: False
 
   hints_input:
     file-method:
       input:
         args:
-          - "work-dir"
           - "hints-fasta"
           - "homology-dir"
       standardize:
@@ -179,7 +172,6 @@ setup:
           input_filename: "{hints-fasta}"
           standardized_filename: "ProteinHints.fa"
           out_dir: "{homology-dir}"
-          work_dir: '{work-dir}'
           gzipped: False
 
 command-line:

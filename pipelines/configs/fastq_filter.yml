@@ -49,7 +49,6 @@ setup:
     wildcard-method:
       input:
         args:
-          - "workflow-prefix"
           - "fastq-wildcard"
           - "fastq-standardized-wildcard"
           - "unfiltered-fastq-dir"
@@ -59,7 +58,6 @@ setup:
           wildcard_str: "{fastq-wildcard}"
           standardized_filename: "{fastq-standardized-wildcard}"
           out_dir: "{unfiltered-fastq-dir}"
-          workflow_prefix: "{workflow-prefix}"
           copy_method: '{fastq_copy_method}'
           gzipped: True
       samples:
@@ -71,7 +69,6 @@ setup:
     table-method:
       input:
         args:
-          - "workflow-prefix"
           - "fastq-table"
           - "fastq-standardized-wildcard"
           - "unfiltered-fastq-dir"
@@ -81,7 +78,6 @@ setup:
           table_filename: "{fastq-table}"
           standardized_filename: "{fastq-standardized-wildcard}"
           out_dir: "{unfiltered-fastq-dir}"
-          workflow_prefix: "{workflow-prefix}"
           copy_method: '{fastq_copy_method}'
           gzipped: True
       samples:

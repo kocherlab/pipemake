@@ -41,10 +41,6 @@ class WildcardIO ():
 
 	def standardizedFiles (self, standardized_wildcard, **kwargs):
 
-		print(f'wildcard_dict: {self.wildcard_dict}')
-
-		print(kwargs)
-
 		# Create list of the wildcard name and values
 		wildcard_names, wildcard_values = zip(*self.wildcard_dict.items())
 		

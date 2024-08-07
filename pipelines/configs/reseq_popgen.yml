@@ -102,7 +102,6 @@ setup:
     file-method:
       input:
         args:
-          - "work-dir"
           - "reseq-vcf"
           - "species"
           - "assembly-version"
@@ -113,7 +112,6 @@ setup:
           input_filename: "{reseq-vcf}"
           standardized_filename: "{species}_{assembly-version}.filtered.vcf.gz"
           out_dir: "{reseq-filtered-vcf-dir}"
-          work_dir: '{work-dir}'
           gzipped: True
           copy_method: '{reseq-copy-method}'
   
@@ -121,7 +119,6 @@ setup:
     file-method:
       input:
         args:
-          - "work-dir"
           - "model-file"
           - "models-dir"
       standardize:
@@ -130,7 +127,6 @@ setup:
           input_filename: "{model-file}"
           standardized_filename: "{species}.model"
           out_dir: "{models-dir}"
-          work_dir: '{work-dir}'
           copy_method: '{reseq-copy-method}'
           gzipped: False
 

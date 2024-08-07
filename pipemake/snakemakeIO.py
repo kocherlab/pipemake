@@ -144,8 +144,6 @@ class SnakePipelineIO ():
 		# Create a list of config params to sort by length
 		config_params_list = list(self._config_params)
 		config_params_list.sort(key = lambda t: len(t))
-
-		print(pipeline_args)
 		
 		# Populate the config yml dict with the pipeline args
 		for config_param in config_params_list:
