@@ -3,6 +3,7 @@ import tempfile
 import unittest
 
 import pytest
+import unittest.mock
 
 from pipemake.pipemake import main
 
