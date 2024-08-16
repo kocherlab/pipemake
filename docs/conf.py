@@ -15,7 +15,7 @@
 import os
 import sys
 
-#import docs.utils
+import docs
 import pipemake
 
 sys.path.insert(0, os.path.abspath(".."))
@@ -74,8 +74,8 @@ master_doc = "index"
 exclude_patterns = ["_build", "build", "_templates", "Thumbs.db", ".DS_Store"]
 
 # The name of the Pygments (syntax highlighting) style to use.
-#pygments_style = "sphinx"
-#pygments_dark_style = "monokai"
+# pygments_style = "sphinx"
+# pygments_dark_style = "monokai"
 
 
 # Autosummary linkcode resolution
