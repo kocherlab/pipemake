@@ -1,3 +1,5 @@
+import sys
+
 # Basic Information
 __name__ = "pipemake"
 __version__ = "0.9.1"
