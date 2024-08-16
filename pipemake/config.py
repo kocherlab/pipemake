@@ -1,146 +1,173 @@
-import os
 import copy
-import yaml
-
+import os
 from collections import defaultdict
 
-from pipemake.processIO import standardizeInput, returnSamples, returnPaths
-#from pipemake.snakemakeIO import SnakePipelineIO
+import yaml
 
-def loadPipelineConfigs (directory):
+from pipemake.processIO import returnPaths, returnSamples, standardizeInput
 
-	# Create dicts to store the relevant yaml data
-	pipeline_config_args = {}
-	pipeline_setup = {}
-	pipeline_cmd_line = {}
-	pipeline_snakefiles = defaultdict(list)
-	
-	# Check the config directory exists
-	config_dir = os.path.join(directory, 'configs')
-	if not os.path.isdir(config_dir): raise Exception(f'Unable to find pipeline directory: {config_dir}')
+# from pipemake.snakemakeIO import SnakePipelineIO
 
-	# Loop the configs
-	for config_filename in os.listdir(config_dir):
-		config_file = os.path.join(config_dir, config_filename)
 
-		# Confirm the path is a file
-		if not os.path.isfile(config_file): continue
+def loadPipelineConfigs(directory):
+    # Create dicts to store the relevant yaml data
+    pipeline_config_args = {}
+    pipeline_setup = {}
+    pipeline_cmd_line = {}
+    pipeline_snakefiles = defaultdict(list)
 
-		with open(config_file, "r") as config_stream:
-			try: config_yaml = yaml.safe_load(config_stream)
-			except: raise Exception('Error opening YAML')
+    # Check the config directory exists
+    config_dir = os.path.join(directory, "configs")
+    if not os.path.isdir(config_dir):
+        raise Exception(f"Unable to find pipeline directory: {config_dir}")
 
-			# Check pipeline_names for repeats, and if found report error
-			if config_yaml['pipeline'] in pipeline_config_args:
-				raise Exception(f"Pipeline {config_yaml['pipeline']} has already been assigned. Please check pipeline configs")
+    # Loop the configs
+    for config_filename in os.listdir(config_dir):
+        config_file = os.path.join(config_dir, config_filename)
 
-			pipeline_config_args[config_yaml['pipeline']] = config_yaml['parser']
-			pipeline_setup[config_yaml['pipeline']] = config_yaml['setup']
-			pipeline_cmd_line[config_yaml['pipeline']] = config_yaml['command-line']
-			pipeline_snakefiles[config_yaml['pipeline']] = config_yaml['snakefiles']
-		
-	return pipeline_config_args, pipeline_setup, pipeline_cmd_line, pipeline_snakefiles
+        # Confirm the path is a file
+        if not os.path.isfile(config_file):
+            continue
 
-def processPipelineSetup (pipeline_setup, pipeline_args):
+        with open(config_file, "r") as config_stream:
+            try:
+                config_yaml = yaml.safe_load(config_stream)
+            except Exception as e:
+                raise Exception(f"Error opening YAML: {e}")
 
-	# Confirm the workflow prefix is specified
-	if 'workflow_prefix' not in pipeline_args: raise Exception(f'Workflow prefix not found among pipeline arguments')
+            # Check pipeline_names for repeats, and if found report error
+            if config_yaml["pipeline"] in pipeline_config_args:
+                raise Exception(
+                    f"Pipeline {config_yaml['pipeline']} has already been assigned. Please check pipeline configs"
+                )
 
-	# Create list to store setup args
-	process_dict = {}
+            pipeline_config_args[config_yaml["pipeline"]] = config_yaml["parser"]
+            pipeline_setup[config_yaml["pipeline"]] = config_yaml["setup"]
+            pipeline_cmd_line[config_yaml["pipeline"]] = config_yaml["command-line"]
+            pipeline_snakefiles[config_yaml["pipeline"]] = config_yaml["snakefiles"]
 
-	for setup_name, setup_methods in pipeline_setup.items():
-		for method_args in setup_methods.values():
-			
-			# Assign the input args
-			input_args = method_args['input']
-						
-			# Check for missing arguments
-			for input_arg in input_args['args']:
-				if input_arg.replace('-', '_') not in pipeline_args: raise Exception(f'Setup argument {input_arg} not found among pipeline argument')
+    return pipeline_config_args, pipeline_setup, pipeline_cmd_line, pipeline_snakefiles
 
-			# Confirm expected args were specified
-			method_missing_args = [_a for _a in input_args['args'] if not pipeline_args[_a.replace('-', '_')]]
 
-			# Skip if missing arguments
-			if method_missing_args: continue
+def processPipelineSetup(pipeline_setup, pipeline_args):
+    # Confirm the workflow prefix is specified
+    if "workflow_prefix" not in pipeline_args:
+        raise Exception("Workflow prefix not found among pipeline arguments")
 
-			if 'standardize' in method_args:
+    # Create list to store setup args
+    process_dict = {}
 
-				# Create a dict of the standardize args
-				std_args = copy.deepcopy(method_args['standardize'])
-				
-				# Add the workflow prefix to the args
-				std_args['args']['workflow_prefix'] = pipeline_args['workflow_prefix']
+    for setup_name, setup_methods in pipeline_setup.items():
+        for method_args in setup_methods.values():
+            # Assign the input args
+            input_args = method_args["input"]
 
-				# Check if the work_dir is specified
-				if 'work_dir' in pipeline_args and pipeline_args['work_dir']:
-					std_args['args']['work_dir'] = pipeline_args['work_dir']
+            # Check for missing arguments
+            for input_arg in input_args["args"]:
+                if input_arg.replace("-", "_") not in pipeline_args:
+                    raise Exception(
+                        f"Setup argument {input_arg} not found among pipeline argument"
+                    )
 
-				# Update the arguments
-				for std_arg, arg_params in std_args['args'].items():
-					if not isinstance(arg_params, str): continue
-					std_args['args'][std_arg] = arg_params.replace('-', '_').format(**pipeline_args)
+            # Confirm expected args were specified
+            method_missing_args = [
+                _a
+                for _a in input_args["args"]
+                if not pipeline_args[_a.replace("-", "_")]
+            ]
 
-				# Standardize the input
-				standardizeInput(**std_args)
+            # Skip if missing arguments
+            if method_missing_args:
+                continue
 
-				# Assign the method paths
-				method_paths = returnPaths(**std_args)
+            if "standardize" in method_args:
+                # Create a dict of the standardize args
+                std_args = copy.deepcopy(method_args["standardize"])
 
-				# Check for method paths
-				if len(method_paths) > 0: 
-					
-					# Check if the args have already been created
-					if 'singularity-args' not in process_dict:
-						process_dict['singularity-args'] = defaultdict(list)
+                # Add the workflow prefix to the args
+                std_args["args"]["workflow_prefix"] = pipeline_args["workflow_prefix"]
 
-					# Return any paths that need to be accounted for
-					process_dict['singularity-args']['bind'].extend(method_paths)
+                # Check if the work_dir is specified
+                if "work_dir" in pipeline_args and pipeline_args["work_dir"]:
+                    std_args["args"]["work_dir"] = pipeline_args["work_dir"]
 
-			if 'samples' in method_args:
+                # Update the arguments
+                for std_arg, arg_params in std_args["args"].items():
+                    if not isinstance(arg_params, str):
+                        continue
+                    std_args["args"][std_arg] = arg_params.replace("-", "_").format(
+                        **pipeline_args
+                    )
 
-				# Create a dict of the standardize args
-				samples_args = copy.deepcopy(method_args['samples'])
+                # Standardize the input
+                standardizeInput(**std_args)
 
-				# Update the arguments
-				for samples_arg, arg_params in samples_args['args'].items():
-					if not isinstance(arg_params, str): continue
-					samples_args['args'][samples_arg] = arg_params.replace('-', '_').format(**pipeline_args)
+                # Assign the method paths
+                method_paths = returnPaths(**std_args)
 
-				# Assign the samples from the method
-				method_samples = returnSamples(**samples_args)
+                # Check for method paths
+                if len(method_paths) > 0:
+                    # Check if the args have already been created
+                    if "singularity-args" not in process_dict:
+                        process_dict["singularity-args"] = defaultdict(list)
 
-				# Confirm the samples are not already assigned
-				if method_samples and 'samples' in process_dict: raise Exception(f'Samples already assigned')
+                    # Return any paths that need to be accounted for
+                    process_dict["singularity-args"]["bind"].extend(method_paths)
 
-				# Standardize the input
-				process_dict['samples'] = method_samples
+            if "samples" in method_args:
+                # Create a dict of the standardize args
+                samples_args = copy.deepcopy(method_args["samples"])
 
-	return process_dict
+                # Update the arguments
+                for samples_arg, arg_params in samples_args["args"].items():
+                    if not isinstance(arg_params, str):
+                        continue
+                    samples_args["args"][samples_arg] = arg_params.replace(
+                        "-", "_"
+                    ).format(**pipeline_args)
 
-def processPipelineCmdLine (pipeline_cmd_line, pipeline_args):
+                # Assign the samples from the method
+                method_samples = returnSamples(**samples_args)
 
-	# Create list to store the command line arguments
-	cmd_line_list = ['snakemake']
+                # Confirm the samples are not already assigned
+                if method_samples and "samples" in process_dict:
+                    raise Exception("Samples already assigned")
 
-	# Process the command line
-	for cmd_arg, cmd_value in pipeline_cmd_line.items():
+                # Standardize the input
+                process_dict["samples"] = method_samples
 
-		# Add the basic args
-		if isinstance(cmd_value, bool): cmd_line_list.append(f'--{cmd_arg}')
-		else: cmd_line_list.extend([f'--{cmd_arg}', cmd_value])
-		
-		# Check if using singularity
-		if cmd_arg == 'use-singularity' and cmd_value and 'singularity-args' in pipeline_args:
+    return process_dict
 
-			# Assign the singularity args
-			singularity_args_list = []
-			for singularity_arg, singularity_value in pipeline_args['singularity-args'].items():
-				singularity_args_list.append(f'--{singularity_arg} ' + ','.join(singularity_value))
 
-			# Add the singularity args
-			singularity_args_str = ','.join(singularity_args_list)
-			cmd_line_list.extend(['--singularity-args', f'"{singularity_args_str}"'])
+def processPipelineCmdLine(pipeline_cmd_line, pipeline_args):
+    # Create list to store the command line arguments
+    cmd_line_list = ["snakemake"]
 
-	return ' '.join(map(str,cmd_line_list))
+    # Process the command line
+    for cmd_arg, cmd_value in pipeline_cmd_line.items():
+        # Add the basic args
+        if isinstance(cmd_value, bool):
+            cmd_line_list.append(f"--{cmd_arg}")
+        else:
+            cmd_line_list.extend([f"--{cmd_arg}", cmd_value])
+
+        # Check if using singularity
+        if (
+            cmd_arg == "use-singularity"
+            and cmd_value
+            and "singularity-args" in pipeline_args
+        ):
+            # Assign the singularity args
+            singularity_args_list = []
+            for singularity_arg, singularity_value in pipeline_args[
+                "singularity-args"
+            ].items():
+                singularity_args_list.append(
+                    f"--{singularity_arg} " + ",".join(singularity_value)
+                )
+
+            # Add the singularity args
+            singularity_args_str = ",".join(singularity_args_list)
+            cmd_line_list.extend(["--singularity-args", f'"{singularity_args_str}"'])
+
+    return " ".join(map(str, cmd_line_list))
