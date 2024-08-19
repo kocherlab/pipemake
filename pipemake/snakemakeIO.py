@@ -135,10 +135,25 @@ class SnakePipelineIO:
             storage_module_path, singularity_dir=self._singularity_dir
         )
 
+        # Loop the rules to assign the output
+        for rule in smk_module._file_rules:
+            # Skip the rule if not the output rule
+            if rule.rule_name != "all":
+                continue
+
+            # Check if the rule has output
+            if rule._rule_output_list:
+                # Save the output list from the rule
+                for rule_output in rule._rule_output_list:
+                    self._output_list.append(
+                        _convert_indent(
+                            rule_output, rule._indent_style, self._indent_style
+                        )
+                    )
+
         # Loops the file rules in test
         for rule in smk_module._file_rules:
-            # Save the config params and output list from the rule
-            self._output_list.extend(rule._rule_output_list)
+            # Save the config params from the rule
             self._config_params.update(rule._rule_config_params)
 
             # Scale and save the resource params
@@ -269,11 +284,8 @@ class SnakePipelineIO:
         self._pipe_file.write(f"{self._indent_style}input:\n")
 
         # Add the rule all input
-        indented_input = [
-            f"{self._indent_style}{self._indent_style}{_output}"
-            for _output in self._output_list
-        ]
-        self._pipe_file.write(",\n".join(indented_input) + "\n\n")
+        indented_input = "\n".join(_output for _output in self._output_list)
+        self._pipe_file.write(indented_input + "\n\n")
 
         # Create the input block of modules
         for module_filename in self._module_filenames:
@@ -318,7 +330,8 @@ class SnakePipelineIO:
         try:
             value = value_type(value)
         except:
-            raise Exception(f"Unable to convert value to type: {value}")
+            logging.exception(f"Unable to convert value to type: {value}")
+            raise
 
         # Scale and return the input
         return output_type(value * scaler)
@@ -504,7 +517,7 @@ class SnakeFileIO:
             for rule in self._file_rules:
                 # Write the rule, if included in the output
                 if rule.in_output:
-                    smk_file.write(f"\n{rule}")
+                    smk_file.write(f"\n\n{rule}")
 
     @classmethod
     def open(cls, *args, **kwargs):
@@ -565,12 +578,7 @@ class SnakeRuleIO:
 
             # Check if the rule is output, confirm the attribute is input, and update the rule output
             if not self.in_output and rule_attribute == "input":
-                output_line = (
-                    rule_line.strip()[:-1]
-                    if rule_line.strip().endswith(",")
-                    else rule_line.strip()
-                )
-                self._rule_output_list.append(output_line)
+                self._rule_output_list.append(rule_line.rstrip())
 
             return rule_line
 
@@ -605,12 +613,8 @@ class SnakeRuleIO:
                 rule_line = processAttribute(split_attribute[0], rule_line)
 
             # Check if the line is a atrribute value line and if so, process the attribute
-            elif attribute_level == 2:
+            elif attribute_level >= 2:
                 rule_line = processAttribute(rule_attribute, rule_line)
-
-            # Raise an error if the attribute level is not 1 or 2
-            else:
-                raise Exception(f"Attribute level error: {rule_line}")
 
             # Update the rule text
             self._rule_text += rule_line + "\n"
@@ -728,7 +732,7 @@ class SnakeAttributeIO:
             # Add the resource assignment to the dict
             self._resource_assignment_dict[resource_name] = int(working_text)
             self._resource_replacment_dict[working_text] = (
-                f"config['resources']['{self._rule_name}']['{resource_name}']"
+                f'config["resources"]["{self._rule_name}"]["{resource_name}"]'
             )
 
         # Check for a complex resource assignment
@@ -771,7 +775,7 @@ class SnakeAttributeIO:
                 # Add the resource assignment to the dict
                 self._resource_assignment_dict[resource_name] = int(resource_value)
                 self._resource_replacment_dict[resource_str + resource_value_str] = (
-                    f"config['resources']['{self._rule_name}']['{resource_name}']"
+                    f'config["resources"]["{self._rule_name}"]["{resource_name}"]'
                 )
 
     def _parseConfig(self):
@@ -881,3 +885,10 @@ def _attributeLevel(attribute_list):
         if not attribute_item:
             continue
         return attribute_level
+
+
+def _convert_indent(source_str, source_indent_style, target_indent_style):
+    # Get the count of the source indent style
+    indent_count = source_str.count(source_indent_style)
+    # Return the converted indent style
+    return f"{indent_count*target_indent_style}{source_str.strip()}"

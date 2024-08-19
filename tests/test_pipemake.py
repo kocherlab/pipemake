@@ -1,10 +1,10 @@
 import os
 import pytest
 import tempfile
-import unittest
+import unittest.mock
 
 
-from pipemake.pipemake import *
+from pipemake.pipemake import main
 
 
 @pytest.mark.parametrize(
@@ -127,7 +127,7 @@ def test_pipemake_main_table_w_error(table_str):
             main()
 
 
-def test_pipemake_main_table_w_error():
+def test_pipemake_main_help_wo_error():
     os.environ["PM_SNAKEMAKE_DIR"] = "tests/files/snakemakeIO"
 
     # Assign the command line arguments

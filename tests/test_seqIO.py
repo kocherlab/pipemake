@@ -1,8 +1,9 @@
 import pytest
+import os
 import tempfile
 import itertools
 
-from pipemake.seqIO import *
+from pipemake.seqIO import checkIfGzipped, SeqFileIO, SeqTableIO
 
 
 @pytest.mark.parametrize(

@@ -3,7 +3,7 @@ import pytest
 import tempfile
 import itertools
 
-from pipemake.processIO import *
+from pipemake.processIO import ProcessIO, standardizeInput, returnPaths, returnSamples
 
 
 @pytest.mark.parametrize(
@@ -87,7 +87,9 @@ def test_processIO_fromFileStr_wo_error(file_str):
         ("tests/files/seqIO/test1_R2.fq", "test1_R2.test.fq.gz"),
     ],
 )
-def test_processIO_fromFileStr_standardizeInput(file_str, standardized_filename):
+def test_processIO_fromFileStr_standardizeInput_wo_error(
+    file_str, standardized_filename
+):
     test_dir = tempfile.mkdtemp()
     standardizeInput(
         method="file-str",
@@ -107,7 +109,9 @@ def test_processIO_fromFileStr_standardizeInput(file_str, standardized_filename)
         ("tests/files/seqIO/test1_R2.fq", "test1_R2.test.fq.gz"),
     ],
 )
-def test_processIO_fromFileStr_standardizeInput(file_str, standardized_filename):
+def test_processIO_fromFileStr_standardizeInput_w_error(
+    file_str, standardized_filename
+):
     assert returnPaths(
         method="file-str",
         args={

@@ -1,9 +1,15 @@
 import pytest
+import os
 import tempfile
 import yaml
 import filecmp
 
-from pipemake.snakemakeIO import *
+from pipemake.snakemakeIO import (
+    SnakePipelineIO,
+    SnakeFileIO,
+    SnakeRuleIO,
+    SnakeAttributeIO,
+)
 
 
 @pytest.mark.parametrize(
@@ -91,8 +97,6 @@ def test_SnakePipelineIO_wo_error(
         {
             "min_length": 100,
             "samples": ["sample1", "sample2"],
-            "threads": 4,
-            "mem": 16,
             "unfiltered_fastq_dir": unfiltered_fastq_dir,
             "filtered_fastq_dir": filtered_fastq_dir,
             "workflow_prefix": snakemake_job_prefix,
@@ -118,7 +122,7 @@ def test_SnakePipelineIO_wo_error(
     with open(os.path.join(test_dir, "test.smk"), "r") as f:
         test_pipeline_content = f.read()
         assert (
-            "expand(os.path.join(config['paths']['workflow_prefix'], config['paths']['filtered_fastq_dir'], '{sample}.json'), sample=config['samples'])"
+            'rule all:\n\tinput:\n\t\texpand(\n\t\t\tos.path.join(\n\t\t\t\tconfig["paths"]["workflow_prefix"],\n\t\t\t\tconfig["paths"]["filtered_fastq_dir"],\n\t\t\t\t"{sample}.json",\n\t\t\t),\n\t\t\tsample=config["samples"],\n\t\t),'
             in test_pipeline_content
         )
         assert f'include: "{test_module_path}"' in test_pipeline_content
@@ -184,8 +188,8 @@ def test_SnakeFileIO_wo_error(smk_filename):
             "tests/files/snakemakeIO/test_fastq_filter_fastp.smk", "r"
         ) as test_file:
             for test_line in test_file:
-                if "URL" in test_line:
-                    cmp_file.write(test_line.format(URL=test_dir))
+                if "PATH" in test_line:
+                    cmp_file.write(test_line.format(PATH=os.path.abspath(test_dir)))
                 else:
                     cmp_file.write(test_line)
 
@@ -197,40 +201,19 @@ def test_SnakeFileIO_wo_error(smk_filename):
     "rule_filename", [("tests/files/snakemakeIO/rules/fastp_pair_end.smk")]
 )
 def test_SnakeRuleIO_wo_error(rule_filename):
-    # Create a test directory
-    test_dir = tempfile.mkdtemp()
-
-    # Create a test rule
-    rule_str = ""
-
     # Read the rule and store it as a string
-    with open(rule_filename, "r") as rule_file:
-        for rule_line in rule_file:
-            rule_str += rule_line
+    with open(rule_filename, "r") as test_file:
+        test_str = test_file.read()
 
     # Test if the function raises an error
-    test_rule = SnakeRuleIO.read(
-        rule_str=rule_str, singularity_dir=test_dir, indent_style="\t"
-    )
-
-    # Create a test rule
-    test_str = ""
+    test_rule = SnakeRuleIO.read(rule_str=test_str, indent_style="    ")
 
     # Read the rule and store it as a string
-    with open("tests/files/snakemakeIO/test_fastp_pair_end.smk", "r") as test_file:
-        for test_line in test_file:
-            if "URL" in test_line:
-                test_str += test_line.format(URL=test_dir)
-            else:
-                test_str += test_line
-        test_str += "\n"
-
-    print(test_rule._rule_text)
-
-    print(test_str)
+    with open("tests/files/snakemakeIO/test_fastp_pair_end.smk", "r") as cmp_file:
+        cmp_str = cmp_file.read()
 
     # Check if the rule was created correctly
-    assert test_rule._rule_text == test_str
+    assert test_rule._rule_text == cmp_str
     assert test_rule.rule_name == "fastp_pair_end"
     assert test_rule._rule_resource_params == {"threads": 4, "mem_mb": 16000}
     assert test_rule._rule_config_params == {
@@ -267,5 +250,5 @@ def test_SnakeAttributeIO(rule_name, attribute_type, attribute_text):
     elif attribute_type == "resources":
         assert (
             test_attribute.updateSnakeResource()
-            == f"\t\tmem_mb=config['{attribute_type}']['{rule_name}']['{attribute_text_arg}']"
+            == f'\t\tmem_mb=config["{attribute_type}"]["{rule_name}"]["{attribute_text_arg}"]'
         )

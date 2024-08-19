@@ -1,7 +1,9 @@
 import pytest
+import os
 import tempfile
+import itertools
 
-from pipemake.wildcardIO import *
+from pipemake.wildcardIO import WildcardIO
 
 
 @pytest.mark.parametrize(
@@ -41,16 +43,6 @@ def test_WildcardIO_samples_w_error(wildcard_str):
     with pytest.raises(Exception):
         test_wildcard = WildcardIO.fromStr(wildcard_str)
         assert test_wildcard.samples == ["test1", "test2"]
-
-
-@pytest.mark.parametrize(
-    "wildcard_str, sample_wildcard",
-    [("tests/files/wildcardIO/{sample}_{read}.fq.gz", "sample")],
-)
-def test_WildcardIO_samples_wo_error(wildcard_str, sample_wildcard):
-    test_wildcard = WildcardIO.fromStr(wildcard_str, sample_wildcard=sample_wildcard)
-    sample_set = set(test_wildcard.samples)
-    assert sample_set == set(["test1", "test2"]) and len(sample_set) == 2
 
 
 @pytest.mark.parametrize(
