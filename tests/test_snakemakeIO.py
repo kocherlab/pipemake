@@ -124,7 +124,7 @@ def test_SnakePipelineIO_wo_error(
     # Check the contents of the script file
     with open(os.path.join(test_dir, "scripts", "test.py"), "r") as f:
         test_script_content = f.read()
-        assert "print('Script Found')" in test_script_content
+        assert 'print("Script Found")' in test_script_content
 
     test_module_path = os.path.join(
         test_pipeline._module_job_dir, "fastq_filter_fastp.smk"
