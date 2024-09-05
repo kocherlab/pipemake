@@ -47,9 +47,10 @@ Pipemake is a lightweight, flexible, and easy-to-use tool for creating and manag
    :hidden:
    :caption: Pipemake Documentation
 
-   installation
-   filetypes
-   contact
+   pages/installation
+   pages/pipelines
+   pages/filetypes
+   pages/contact
 
 ================
 Getting Pipemake
