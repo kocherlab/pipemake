@@ -15,7 +15,7 @@
 import os
 import sys
 
-import docs
+import docs.utils
 import pipemake
 
 sys.path.insert(0, os.path.abspath(".."))
