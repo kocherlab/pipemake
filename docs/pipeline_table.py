@@ -2,7 +2,7 @@ import os
 import yaml
 
 # Assign the pipelines table filename
-pipeline_table_dir = os.path.join("docs", "assets")
+pipeline_table_dir = os.path.join("docs", "_static")
 
 # Create the pipelines table directory if it does not exist
 if not os.path.exists(pipeline_table_dir):
