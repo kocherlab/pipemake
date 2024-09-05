@@ -2,7 +2,7 @@ import os
 import yaml
 
 # Assign the pipelines table filename
-pipeline_table_filename = os.path.join("assets", "pipelines.csv")
+pipeline_table_filename = os.path.join("docs", "assets", "pipelines.csv")
 
 # Open the pipelines table file
 with open(pipeline_table_filename, "w") as table_file:
@@ -10,7 +10,7 @@ with open(pipeline_table_filename, "w") as table_file:
     table_file.write("Pipeline,Description\n")
 
     # Assign the pipeline directory
-    pipeline_dir = os.path.join("..", "pipelines", "configs")
+    pipeline_dir = os.path.join("pipelines", "configs")
 
     # Loop the pipeline files in the pipeline directory
     for pipeline_filename in os.listdir(pipeline_dir):

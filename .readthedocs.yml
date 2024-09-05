@@ -6,7 +6,7 @@ build:
     python: "mambaforge-latest"
   jobs:
     pre_build:
-      - python pipeline_table.py
+      - python docs/pipeline_table.py
 
 formats: all
 
