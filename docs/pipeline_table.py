@@ -38,8 +38,8 @@ with open(pipeline_table_filename, "w") as table_file:
             f'{pipeline_data["pipeline"]},{pipeline_data["parser"]["help"]}\n'
         )
 
-    # Report the pipeline file that was parsed
-    print(f"Pipeline file parsed: {pipeline_path}")
+        # Report the pipeline file that was parsed
+        print(f"Pipeline file parsed: {pipeline_path}")
 
 # Report the pipelines table file that was created
 print(f"Pipelines table created: {pipeline_table_filename}")
