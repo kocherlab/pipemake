@@ -1,6 +1,5 @@
 import os
 import yaml
-import logging
 
 # Assign the pipelines table filename
 pipeline_table_dir = os.path.join("docs", "assets")
@@ -39,8 +38,8 @@ with open(pipeline_table_filename, "w") as table_file:
             f'{pipeline_data["pipeline"]},{pipeline_data["parser"]["help"]}\n'
         )
 
-    # Log the pipeline file that was parsed
-    logging.info(f"Pipeline file parsed: {pipeline_path}")
+    # Report the pipeline file that was parsed
+    print(f"Pipeline file parsed: {pipeline_path}")
 
-# Log the pipelines table file that was created
-logging.info(f"Pipelines table created: {pipeline_table_filename}")
+# Report the pipelines table file that was created
+print(f"Pipelines table created: {pipeline_table_filename}")

@@ -1,0 +1,16 @@
+Pipeline,Description
+annotate-braker3,Annotate an assembly using BRAKER3
+unmapped-fastqs-star,Create unmapped FASTQs using STAR
+filter-vcf,Filter resequencing VCF files using bcftools
+reseq-calc-xpnsl,Calculate XP-nSL using selscan
+rnaseq-counts-star,Count RNAseq reads within a genome assembly using STAR and featureCounts
+annotate-braker3-with-bam,Annotate an assembly using BRAKER3 using a processed BAM file
+reseq-popgen,Run basic PopGen analyses on resequencing data
+filter-pops-vcf,Filter populations in resequencing VCF files using bcftools
+reseq-calc-nsl,Calculate nSL using selscan
+mask-assembly,Annotate an assembly using BRAKER3
+reseq-gwas,GWAS on resequencing data using GEMMA
+seperate-pop-vcfs,Create separate VCF files for each population in a resequencing VCF file
+fastq-filter,Filter FASTQ files using fastp
+annotate-utrs-peaks2utr,Annotate an 3prime-UTRs using peaks2utr using a merged BAM file
+filter-model-vcf,Filter a model in resequencing VCF files using bcftools
