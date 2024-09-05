@@ -2,7 +2,14 @@ import os
 import yaml
 
 # Assign the pipelines table filename
-pipeline_table_filename = os.path.join("docs", "assets", "pipelines.csv")
+pipeline_table_dir = os.path.join("docs", "assets")
+
+# Create the pipelines table directory if it does not exist
+if not os.path.exists(pipeline_table_dir):
+    os.makedirs(pipeline_table_dir)
+
+# Assign the pipelines table filename
+pipeline_table_filename = os.path.join(pipeline_table_dir, "pipelines.csv")
 
 # Open the pipelines table file
 with open(pipeline_table_filename, "w") as table_file:
