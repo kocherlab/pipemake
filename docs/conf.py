@@ -15,7 +15,7 @@
 import os
 import sys
 
-# import docs.utils
+import docs
 import pipemake
 
 sys.path.insert(0, os.path.abspath(".."))
@@ -127,6 +127,9 @@ html_theme_options = {
         ("GitHub", "https://github.com/kocherlab/naps"),
     ],
 }
+
+html_context = {"default_mode": "light"}
+
 
 html_logo = "_static/logo.png"
 
