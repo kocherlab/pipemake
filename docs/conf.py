@@ -33,8 +33,6 @@ release = pipemake.__version__
 
 html_title = f"Pipemake ({release})"
 html_short_title = "Pipemake"
-# html_favicon = "_static/favicon.ico"
-# html_baseurl = "/develop/"
 
 # -- General configuration ---------------------------------------------------
 
@@ -65,7 +63,7 @@ templates_path = ["_templates"]
 source_suffix = ".rst"
 
 # The master toctree document.
-master_doc = "index"
+master_doc = "_source/index"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
