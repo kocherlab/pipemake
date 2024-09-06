@@ -1,4 +1,5 @@
 .. only:: html
+    
     |Stable version| |Documentation| |github ci| |Coverage| |conda| |Conda Upload| |PyPI Upload| |LICENSE|
 
     .. |Stable version| image:: https://img.shields.io/github/v/release/kocherlab/pipemake?label=stable
@@ -49,10 +50,10 @@ Pipemake is a lightweight, flexible, and easy-to-use tool for creating and manag
     :hidden:
     :caption: Pipemake Documentation
 
-    _pages/installation
-    _pages/pipelines
-    _pages/filetypes
-    _pages/contact
+    installation
+    pipelines
+    filetypes
+    contact
 
 ================
 Getting Pipemake
