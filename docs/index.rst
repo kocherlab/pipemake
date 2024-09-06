@@ -52,6 +52,7 @@ Pipemake is a lightweight, flexible, and easy-to-use tool for creating and manag
 
     installation
     pipelines
+    usage
     filetypes
     contact
 
