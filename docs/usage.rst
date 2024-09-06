@@ -27,7 +27,7 @@ For example, to view the arguments for the `fastq-filter` pipeline, you would us
 
 This would display the following information:
 
-.. code-block:: bash
+.. code-block::
 
     error: one of the arguments --fastq-wildcard --fastq-table is required
 
@@ -76,11 +76,13 @@ This would display the following information:
     -h, --help            show this help message and exit
 
 You may notice that the arguments are divided into three categories: required, paths, and optional.
+
 * **required** is the category that holds arguments required by the pipeline to operate
 * **paths** is a pipeline-defined category that hold path-defining arguments for convenience. Other pipeline-defined categories may exist depending on the pipeline.
 * **optional** is the category that holds optional arguments that modify the pipeline's behavior.
 
 For the `fastq-filter` pipeline to operate, the user must provided either the `--fastq-wildcard` or `--fastq-table` argument.
+
 * `--fastq-wildcard` is used to specify a wildcard statement that represents the FASTQ files
 * `--fastq-table` is used to specify a table with sample and FASTQ filenames
 
