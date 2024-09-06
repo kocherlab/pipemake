@@ -4,13 +4,6 @@
 Usage
 #####
 
-The following sections provide a brief overview of how to use pipemake.
-
-***********
-Basic Usage
-***********
-
-
 Calling pipemake without any arguments or with the help flags will display the currently available pipelines (see :ref:`pipelines`):
 
 .. code-block:: bash
@@ -78,7 +71,7 @@ This would display the following information:
 You may notice that the arguments are divided into three categories: required, paths, and optional.
 
 * **required** is the category that holds arguments required by the pipeline to operate
-* **paths** is a pipeline-defined category that hold path-defining arguments for convenience. Other pipeline-defined categories may exist depending on the pipeline.
+* **paths** is a pipeline-defined category that holds path-defining arguments for convenience. Other pipeline-defined categories may exist depending on the pipeline.
 * **optional** is the category that holds optional arguments that modify the pipeline's behavior.
 
 For the `fastq-filter` pipeline to operate, the user must provided either the `--fastq-wildcard` or `--fastq-table` argument.
