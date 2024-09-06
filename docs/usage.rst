@@ -27,7 +27,7 @@ For example, to view the arguments for the `fastq-filter` pipeline, you would us
 
 This would display the following information:
 
-.. code-block::
+.. code-block:: text
 
     error: one of the arguments --fastq-wildcard --fastq-table is required
 
