@@ -87,6 +87,7 @@ def test_SnakePipelineIO_wo_error(
 
     # Add a module to the pipeline
     test_pipeline.addModule("fastq_filter_fastp.smk")
+    test_pipeline.addModule("test_script.smk")
 
     # Create the output directories
     unfiltered_fastq_dir = os.path.join(test_dir, "fastq")
@@ -113,6 +114,17 @@ def test_SnakePipelineIO_wo_error(
 
     # Check if the pipeline was written
     assert os.path.exists(os.path.join(test_dir, "test.smk"))
+
+    # Check if the module was written
+    assert os.path.exists(os.path.join(test_dir, "modules", "fastq_filter_fastp.smk"))
+
+    # Check if the script was written
+    assert os.path.exists(os.path.join(test_dir, "scripts", "test.py"))
+
+    # Check the contents of the script file
+    with open(os.path.join(test_dir, "scripts", "test.py"), "r") as f:
+        test_script_content = f.read()
+        assert 'print("Script Found")' in test_script_content
 
     test_module_path = os.path.join(
         test_pipeline._module_job_dir, "fastq_filter_fastp.smk"
@@ -222,6 +234,20 @@ def test_SnakeRuleIO_wo_error(rule_filename):
         ("paths", "filtered_fastq_dir"),
         ("min_length",),
     }
+
+
+@pytest.mark.parametrize(
+    "rule_filename", [("tests/files/snakemakeIO/rules/test_script.smk")]
+)
+def test_SnakeRuleIO_w_script(rule_filename):
+    # Read the rule and store it as a string
+    with open(rule_filename, "r") as test_file:
+        test_str = test_file.read()
+
+    # Test if the function raises an error
+    test_rule = SnakeRuleIO.read(rule_str=test_str, indent_style="    ")
+
+    assert test_rule._rule_script_files == ["test.py"]
 
 
 @pytest.mark.parametrize(

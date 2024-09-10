@@ -1,55 +1,60 @@
-|Stable version| |Documentation| |github ci| |Coverage| |conda| |Conda Upload| |PyPI Upload| |LICENSE|
+.. only:: html
+    
+    |Stable version| |Documentation| |github ci| |Coverage| |conda| |Conda Upload| |PyPI Upload| |LICENSE|
 
-.. |Stable version| image:: https://img.shields.io/github/v/release/kocherlab/pipemake?label=stable
-   :target: https://github.com/kocherlab/pipemake/releases/
-   :alt: Stable version
+    .. |Stable version| image:: https://img.shields.io/github/v/release/kocherlab/pipemake?label=stable
+        :target: https://github.com/kocherlab/pipemake/releases/
+        :alt: Stable version
 
-.. |Documentation| image::
-   https://readthedocs.org/projects/pipemake/badge/?version=latest
-   :target: https://pipemake.readthedocs.io/en/latest/?badge=latest
-   :alt: Documentation Status
+    .. |Documentation| image::
+        https://readthedocs.org/projects/pipemake/badge/?version=latest
+        :target: https://pipemake.readthedocs.io/en/latest/?badge=latest
+        :alt: Documentation Status
 
-.. |github ci| image::
-   https://github.com/kocherlab/pipemake/actions/workflows/ci.yml/badge.svg?branch=main
-   :target: https://github.com/kocherlab/pipemake/actions/workflows/ci.yml
-   :alt: Continuous integration status
+    .. |github ci| image::
+        https://github.com/kocherlab/pipemake/actions/workflows/ci.yml/badge.svg?branch=main
+        :target: https://github.com/kocherlab/pipemake/actions/workflows/ci.yml
+        :alt: Continuous integration status
 
-.. |Coverage| image::
-   https://codecov.io/gh/kocherlab/pipemake/branch/main/graph/badge.svg
-   :target: https://codecov.io/gh/kocherlab/pipemake
-   :alt: Coverage
+    .. |Coverage| image::
+        https://codecov.io/gh/kocherlab/pipemake/branch/main/graph/badge.svg
+        :target: https://codecov.io/gh/kocherlab/pipemake
+        :alt: Coverage
 
-.. |conda| image::
-   https://anaconda.org/kocherlab/pipemake/badges/version.svg
-   :target: https://anaconda.org/kocherlab/pipemake
+    .. |conda| image::
+        https://anaconda.org/kocherlab/pipemake/badges/version.svg
+        :target: https://anaconda.org/kocherlab/pipemake
 
-.. |Conda Upload| image::
-   https://github.com/kocherlab/pipemake/actions/workflows/upload_conda.yml/badge.svg
-   :target: https://github.com/kocherlab/pipemake/actions/workflows/upload_conda.yml
+    .. |Conda Upload| image::
+        https://github.com/kocherlab/pipemake/actions/workflows/upload_conda.yml/badge.svg
+        :target: https://github.com/kocherlab/pipemake/actions/workflows/upload_conda.yml
 
-.. |PyPI Upload| image::
-   https://github.com/kocherlab/pipemake/actions/workflows/python-publish.yml/badge.svg
-   :target: https://github.com/kocherlab/pipemake/actions/workflows/python-publish.yml
+    .. |PyPI Upload| image::
+        https://github.com/kocherlab/pipemake/actions/workflows/python-publish.yml/badge.svg
+        :target: https://github.com/kocherlab/pipemake/actions/workflows/python-publish.yml
 
-.. |LICENSE| image::
-   https://anaconda.org/kocherlab/pipemake/badges/license.svg
-   :target: https://github.com/kocherlab/pipemake/blob/main/LICENSE
+    .. |LICENSE| image::
+        https://anaconda.org/kocherlab/pipemake/badges/license.svg
+        :target: https://github.com/kocherlab/pipemake/blob/main/LICENSE
 
 ********
 Pipemake
 ********
-Pipemake is a lightweight, flexible, and easy-to-use tool for creating and managing `Snakemake <https://snakemake.readthedocs.i/>`_ pipelines. It was designed with two primary goals: 
+Pipemake is a lightweight, flexible, and easy-to-use tool for creating and managing `Snakemake <https://snakemake.readthedocs.i/>`_ pipelines. It was designed with three primary goals: 
 
-1. Provide a collection of pre-built and easy to modify bioinformatic pipelines with an enphasis on genomics and social behavior analysis
-2. Provide a user-friendly interface for creating and managing pipelines with minimal programming experience
+1. Offer a collection of curated, customizable genomic analysis pipelines for researchers seeking to rapidly integrate Snakemake-based workflows into their research.
+2. Optimize computational efficiency and reproducibility by fully operating in the Snakemake ecosystem.
+3. Streamline development by creating a flexible platform with swappable pipelines that easily reuse previously written Snakemake code.
 
 .. toctree::
-   :hidden:
-   :caption: Pipemake Documentation
+    :hidden:
+    :caption: Pipemake Documentation
 
-   installation
-   filetypes
-   contact
+    installation
+    pipelines
+    usage
+    filetypes
+    contact
 
 ================
 Getting Pipemake
@@ -75,8 +80,10 @@ Issues
 Contributors
 ============
 
-* **Andrew Webb**, Department of Ecology and Evolutionary Biology and Lewis-Sigler Institute for Integrative Genomics, Princeton University
-* **Sarah Kocher**, Department of Ecology and Evolutionary Biology and Lewis-Sigler Institute for Integrative Genomics, Princeton University
+* **Andrew Webb**, Department of Ecology and Evolutionary Biology, Lewis-Sigler Institute for Integrative Genomics, Princeton University, Howard Hughes Medical Institute, Chevy Chase, MD, USA
+* **Scott Wolf**, Research Computing, Princeton University, Princeton, NJ, USA
+* **Ian M Traniello**, Department of Ecology and Evolutionary Biology and Lewis-Sigler Institute for Integrative Genomics, Princeton University
+* **Sarah Kocher**, Department of Ecology and Evolutionary Biology, Lewis-Sigler Institute for Integrative Genomics, Princeton University, Howard Hughes Medical Institute, Chevy Chase, MD, USA
 
 =======
 License

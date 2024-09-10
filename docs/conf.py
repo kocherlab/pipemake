@@ -15,7 +15,6 @@
 import os
 import sys
 
-# import docs.utils
 import pipemake
 
 sys.path.insert(0, os.path.abspath(".."))
@@ -34,8 +33,6 @@ release = pipemake.__version__
 
 html_title = f"Pipemake ({release})"
 html_short_title = "Pipemake"
-# html_favicon = "_static/favicon.ico"
-# html_baseurl = "/develop/"
 
 # -- General configuration ---------------------------------------------------
 
@@ -78,29 +75,6 @@ exclude_patterns = ["_build", "build", "_templates", "Thumbs.db", ".DS_Store"]
 # pygments_dark_style = "monokai"
 
 
-# Autosummary linkcode resolution
-# https://www.sphinx-doc.org/en/master/usage/extensions/linkcode.html
-def linkcode_resolve(domain, info):
-    """Resolve GitHub URLs for linkcode extension."""
-
-    if domain != "py":
-        return None
-
-    if not info["module"]:
-        return None
-
-    try:
-        filename = docs.utils.resolve(info["module"], info["fullname"])
-        if filename is None:
-            return None
-        return f"https://github.com/kocherlab/naps/blob/{release}/{filename}"
-    except Exception as e:
-        print(info)
-        raise e
-
-
-autosummary_generate = True
-
 # Enable automatic role inference as a Python object for autodoc.
 # This automatically converts object references to their appropriate role,
 # making it much easier (and more legible) to insert references in docstrings.
@@ -127,6 +101,9 @@ html_theme_options = {
         ("GitHub", "https://github.com/kocherlab/naps"),
     ],
 }
+
+html_context = {"default_mode": "light"}
+
 
 html_logo = "_static/logo.png"
 

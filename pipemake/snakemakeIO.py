@@ -5,6 +5,7 @@ import yaml
 import shutil
 import logging
 
+from pathlib import Path
 from collections import defaultdict
 
 from pipemake.singularityIO import Singularity
@@ -85,10 +86,22 @@ class SnakePipelineIO:
                 f"Unable to open: {self._module_storage_dir}. Please confirm the directory exists."
             )
 
+        # Assign the script storage directory, and confirm it exists
+        self._script_storage_dir = os.path.join(pipeline_storage_dir, "scripts")
+        if not os.path.exists(self._script_storage_dir):
+            raise IOError(
+                f"Unable to open: {self._script_storage_dir}. Please confirm the directory exists."
+            )
+
         # Assign the module config directory
         self._module_job_dir = os.path.join(pipeline_job_dir, "modules")
         if not os.path.exists(self._module_job_dir):
             os.makedirs(self._module_job_dir)
+
+        # Assign the script config directory
+        self._script_job_dir = os.path.join(pipeline_job_dir, "scripts")
+        if not os.path.exists(self._script_job_dir):
+            os.makedirs(self._script_job_dir)
 
         # Assign the backup directory
         self._backup_dir = os.path.join(pipeline_job_dir, "backups")
@@ -186,6 +199,13 @@ class SnakePipelineIO:
                 self._pipeline_singularity_dict[singularity_path] = (
                     singularity_container
                 )
+
+        for script_file in smk_module._file_script_files:
+            shutil.copy(
+                os.path.join(self._script_storage_dir, script_file),
+                os.path.join(self._script_job_dir, script_file),
+            )
+            logging.info(f"Script added to pipeline: {script_file}")
 
         logging.info(f"Module added to pipeline: {module_filename}")
 
@@ -382,6 +402,14 @@ class SnakeFileIO:
                     file_singularity_dict[singularity_path] = singularity_container
         return file_singularity_dict
 
+    @property
+    def _file_script_files(self):
+        file_script_files = []
+        for rule in self._file_rules:
+            for script_file in rule._rule_script_files:
+                file_script_files.append(script_file)
+        return file_script_files
+
     def _assignIndent(self):
         # Bool to store if within a rule
         in_rule_block = False
@@ -535,6 +563,7 @@ class SnakeRuleIO:
         self._indent_style = indent_style
         self._rule_config_params = set()
         self._rule_singularity_dict = {}
+        self._rule_script_files = []
         self._rule_resource_params = defaultdict(int)
         self._rule_text = rule_list[0] + "\n"
         self._rule_output_list = []
@@ -567,12 +596,16 @@ class SnakeRuleIO:
                 rule_line = processed_attribute.updateSnakeResource()
             elif processed_attribute.is_container:
                 rule_line = processed_attribute.updateSnakeContainer()
+            elif processed_attribute.is_script:
+                rule_line = processed_attribute.updateScript()
 
             # Update the rule params
             if processed_attribute.is_resource:
                 self._rule_resource_params.update(processed_attribute.updateParams())
             elif processed_attribute.is_container:
                 self._rule_singularity_dict.update(processed_attribute.updateParams())
+            elif processed_attribute.is_script:
+                self._rule_script_files.append(processed_attribute.updateParams())
             else:
                 self._rule_config_params.update(processed_attribute.updateParams())
 
@@ -647,8 +680,12 @@ class SnakeAttributeIO:
             True if attribute_type in self._resource_attributes else False
         )
         self.is_container = True if attribute_type == "singularity" else False
+        self.is_script = True if attribute_type == "script" else False
         self._resource_assignment_type = ":"
         self._container = None
+        self._path = None
+
+        print(attribute_type, attribute_text)
 
         # Assign the config attributes
         self._resource_assignment_dict = defaultdict(int)
@@ -660,6 +697,8 @@ class SnakeAttributeIO:
             self._parseContainer()
         elif self.is_resource:
             self._parseResource()
+        elif self.is_script:
+            self._parseScript()
         else:
             self._parseConfig()
 
@@ -830,6 +869,16 @@ class SnakeAttributeIO:
         # Store the container
         self._container = Singularity.fromURL(container_url, self._singularity_dir)
 
+    def _parseScript(self):
+        # Check if the attribute is not a script
+        if not self.is_script:
+            raise Exception(
+                f"Attribute assignment error. Not a script: {self.is_container} {self._original_text}"
+            )
+
+        # Assign the script text
+        self._path = Path(self._original_text.strip().split('"')[1])
+
     def updateSnakeResource(self):
         # Check if the attribute is not a resource
         if not self.is_resource:
@@ -863,6 +912,19 @@ class SnakeAttributeIO:
         # Return the container path
         return self._container.updateContainer(self._original_text)
 
+    def updateScript(self, script_dir="scripts"):
+        # Check if the attribute is not a script
+        if not self.is_script:
+            raise Exception(
+                f"Attribute assignment error. Not a script: {self.is_script} {self._original_text}"
+            )
+
+        # Assign the script path
+        script_path = os.path.join("..", script_dir, self._path.name)
+
+        # Return the container path
+        return self._original_text.split('"')[0] + f'"{script_path}"'
+
     def updateParams(self):
         # Check if the attribute is a container, return the container dict
         if self.is_container:
@@ -874,6 +936,10 @@ class SnakeAttributeIO:
         # Check if the attribute is a resource, return the resource assignment dict
         elif self.is_resource:
             return self._resource_assignment_dict
+
+        # Check if the attribute is a script, return the script name
+        elif self.is_script:
+            return self._path.name
 
         # If not a resource or container, return the config assignment set
         else:

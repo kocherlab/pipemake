@@ -1,4 +1,4 @@
-name: pipesnake
+name: pipemake-docs
 channels:
   - bioconda
   - conda-forge
