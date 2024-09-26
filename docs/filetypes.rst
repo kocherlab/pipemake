@@ -13,7 +13,8 @@ Snakemake files (Modules)
 Snakemake files are used to define Pipemake **Modules**. In general, **Modules** follow the same structure and nomenclature as typical Snakemake files. However, Pipemake **Modules** are focused on being reusable. This is achieved by following a few key principles:
 
 * Limiting a **Module** to a collection of rules used to perform a particular task (align reads, call variants, annotate a genome, etc.)
-* Consistent input and output usage, which may be either hard-coded or generated from a set of configurable terms
+* Consistent input and output usage
+* All paths begin with the configurable term `workflow_prefix` (e.g., `os.path.join(config['paths']['workflow_prefix'], 'Data')`)
 * Using singularity containers to ensure a consistent software environment
 
 By following these principles, Pipemake **Modules** may be easily used in multiple pipelines. For example, a basic snakemake file that aligns reads from a sample to a reference genome might have the following rules:
@@ -48,9 +49,9 @@ To convert this into a Pipemake **Module** with configurable files, we would onl
 
     rule index_reference:
         input:
-            os.path.join(config['paths']['assembly_dir'], f"{config['species']}_{config['assembly_version']}.fa")
+            os.path.join(config['paths']['workflow_prefix'], config['paths']['assembly_dir'], f"{config['species']}_{config['assembly_version']}.fa")
         output:
-            os.path.join(config['paths']['assembly_dir'], f"{config['species']}_{config['assembly_version']}.fa.bwt")
+            os.path.join(config['paths']['workflow_prefix'], config['paths']['assembly_dir'], f"{config['species']}_{config['assembly_version']}.fa.bwt")
         singularity:
 		    "docker://quay.io/biocontainers/bwa:0.7.8"
         shell:
@@ -58,11 +59,11 @@ To convert this into a Pipemake **Module** with configurable files, we would onl
 
     rule align_reads:
         input:
-            reads=os.path.join(config['paths']['rnaseq_fastq_dir'], "{sample}_R1.fq.gz"),
-            ref=os.path.join(config['paths']['assembly_dir'], f"{config['species']}_{config['assembly_version']}.fa"),
-            index=os.path.join(config['paths']['assembly_dir'], f"{config['species']}_{config['assembly_version']}.fa.bwt")
+            reads=os.path.join(config['paths']['workflow_prefix'], config['paths']['rnaseq_fastq_dir'], "{sample}_R1.fq.gz"),
+            ref=os.path.join(config['paths']['workflow_prefix'], config['paths']['assembly_dir'], f"{config['species']}_{config['assembly_version']}.fa"),
+            index=os.path.join(config['paths']['workflow_prefix'], config['paths']['assembly_dir'], f"{config['species']}_{config['assembly_version']}.fa.bwt")
         output:
-            os.path.join(config['paths']['rnaseq_aligned_bam_dir'], "{sample}.bam")
+            os.path.join(config['paths']['workflow_prefix'], config['paths']['rnaseq_aligned_bam_dir'], "{sample}.bam")
         singularity:
 		    "docker://quay.io/biocontainers/bwa:0.7.8"
         shell:
@@ -72,6 +73,7 @@ In this example, we have replaced the unique filenames with the following set of
 
 * `config['species']`
 * `config['assembly_version']`
+* `config['paths']['workflow_prefix']`
 * `config['paths']['assembly_dir']`
 * `config['paths']['rnaseq_fastq_dir']`
 * `config['paths']['rnaseq_aligned_bam_dir']`
@@ -82,10 +84,10 @@ By consistently using these configurable term (or standardized filenames), it is
 
     rule count_reads:
         input:
-            bam=os.path.join(config['paths']['rnaseq_aligned_bam_dir'], "{sample}.bam"),
-            gtf=os.path.join(config['paths']['annotation_dir'], f"{config['species']}_{config['annotation_version']}.gtf")
+            bam=os.path.join(config['paths']['workflow_prefix'], config['paths']['rnaseq_aligned_bam_dir'], "{sample}.bam"),
+            gtf=os.path.join(config['paths']['workflow_prefix'], config['paths']['annotation_dir'], f"{config['species']}_{config['annotation_version']}.gtf")
         output:
-            os.path.join(config['paths']['rnaseq_count_dir'], "{sample}.counts")
+            os.path.join(config['paths']['workflow_prefix'], config['paths']['rnaseq_count_dir'], "{sample}.counts")
         singularity:
             "docker://quay.io/biocontainers/subread:1.6.4--py36pl5.22.0_0"
         shell:
@@ -95,11 +97,11 @@ In the above example, the `count_reads` rule uses BAM files stored within the `c
 
 .. note::
 
-    Pipemake is designed to detect configurable terms and will ensure the terms are properly assigned in the configuration file. Configurable terms may also be grouped together in the configuration file. For example, the filepath terms `config['paths']['assembly_dir']`, `config['paths']['rnaseq_fastq_dir']`, and `config['paths']['rnaseq_aligned_bam_dir']` will be stored together within `config['paths']`. Grouping related terms together allows for a more organized configuration file, but is not required.
+    Pipemake is designed to detect configurable terms and will ensure the terms are properly assigned in the configuration file. Configurable terms may also be grouped together in the configuration file. For example, the filepath terms `config['paths']['workflow_prefix']`, `config['paths']['assembly_dir']`, `config['paths']['rnaseq_fastq_dir']`, and `config['paths']['rnaseq_aligned_bam_dir']` will be stored together within `config['paths']`. Grouping related terms together allows for a more organized configuration file, but is not required.
 
 .. attention::
 
-    While the usage of configurable terms is not required, it is highly recommended.
+    While the usage of configurable terms beyond `config['paths']['workflow_prefix']` is not required, it is highly recommended.
 
 ****************************
 Pipeline configuration files
@@ -173,22 +175,6 @@ The following is an example of a **Pipeline** configuration file:
                   str: "Sp"
                   suffix:
                     - function: jobRandomString
-              work-dir:
-                help: "Assign the working directory for snakemake"
-                type: str
-                default:
-                  str: "RNAseqCounts"
-                  suffix:
-                    - function: jobTimeStamp
-                    - function: jobRandomString
-              snakemake-job-prefix:
-                help: "Assign the snakemake job prefix"
-                type: str
-                default:
-                  str: "countSTAR"
-                  suffix:
-                    - function: jobTimeStamp
-                    - function: jobRandomString
           paths:
             args:
               assembly-dir:
@@ -228,7 +214,7 @@ The following is an example of a **Pipeline** configuration file:
           wildcard-method:
             input:
               args:
-                - "work-dir"
+                - "workflow-prefix"
                 - "rnaseq-wildcard"
                 - "rnaseq-standardized-wildcard"
                 - "rnaseq-fastq-dir"
@@ -238,7 +224,7 @@ The following is an example of a **Pipeline** configuration file:
                 wildcard_str: "{rnaseq-wildcard}"
                 standardized_filename: "{rnaseq-standardized-wildcard}"
                 out_dir: "{rnaseq-fastq-dir}"
-                work_dir: '{work-dir}'
+                workflow_prefix: '{workflow-prefix}'
                 copy_method: '{rnaseq-copy-method}'
                 gzipped: True
             samples:
@@ -250,7 +236,7 @@ The following is an example of a **Pipeline** configuration file:
           table-method:
             input:
               args:
-                - "work-dir"
+                - "workflow-prefix"
                 - "rnaseq-table"
                 - "rnaseq-standardized-wildcard"
                 - "rnaseq-fastq-dir"
@@ -260,7 +246,7 @@ The following is an example of a **Pipeline** configuration file:
                 table_filename: "{rnaseq-table}"
                 standardized_filename: "{rnaseq-standardized-wildcard}"
                 out_dir: "{rnaseq-fastq-dir}"
-                work_dir: '{work-dir}'
+                workflow_prefix: '{workflow-prefix}'
                 copy_method: '{rnaseq-copy-method}'
                 gzipped: True
             samples:
@@ -272,7 +258,7 @@ The following is an example of a **Pipeline** configuration file:
           file-method:
             input:
               args:
-                - "work-dir"
+                - "workflow-prefix"
                 - "assembly-fasta"
                 - "assembly-dir"
             standardize:
@@ -281,14 +267,14 @@ The following is an example of a **Pipeline** configuration file:
                 input_filename: "{assembly-fasta}"
                 standardized_filename: "{species}_{assembly_version}.fa"
                 out_dir: "{assembly-dir}"
-                work_dir: '{work-dir}'
+                workflow_prefix: '{workflow-prefix}'
                 gzipped: False
         
         gtf_input:
           file-method:
             input:
               args:
-                - "work-dir"
+                - "workflow-prefix"
                 - "assembly-gtf"
                 - "assembly-dir"
             standardize:
@@ -297,7 +283,7 @@ The following is an example of a **Pipeline** configuration file:
                 input_filename: "{assembly-gtf}"
                 standardized_filename: "{species}_{assembly_version}.gtf"
                 out_dir: "{assembly-dir}"
-                work_dir: '{work-dir}'
+                workflow_prefix: '{workflow-prefix}'
                 gzipped: False
       
       snakefiles:
@@ -485,7 +471,7 @@ The `setup` section is used to define the steps needed to standardize the input 
           wildcard-method:
             input:
               args:
-                - "work-dir"
+                - "workflow-prefix"
                 - "rnaseq-wildcard"
                 - "rnaseq-standardized-wildcard"
                 - "rnaseq-fastq-dir"
@@ -495,7 +481,7 @@ The `setup` section is used to define the steps needed to standardize the input 
                 wildcard_str: "{rnaseq-wildcard}"
                 standardized_filename: "{rnaseq-standardized-wildcard}"
                 out_dir: "{rnaseq-fastq-dir}"
-                work_dir: '{work-dir}'
+                workflow_prefix: '{workflow-prefix}'
                 copy_method: '{rnaseq-copy-method}'
                 gzipped: True
             samples:
@@ -506,7 +492,7 @@ The `setup` section is used to define the steps needed to standardize the input 
           table-method:
             input:
               args:
-                - "work-dir"
+                - "workflow-prefix"
                 - "rnaseq-table"
                 - "rnaseq-standardized-wildcard"
                 - "rnaseq-fastq-dir"
@@ -516,7 +502,7 @@ The `setup` section is used to define the steps needed to standardize the input 
                 table_filename: "{rnaseq-table}"
                 standardized_filename: "{rnaseq-standardized-wildcard}"
                 out_dir: "{rnaseq-fastq-dir}"
-                work_dir: '{work-dir}'
+                workflow_prefix: '{workflow-prefix}'
                 copy_method: '{rnaseq-copy-method}'
                 gzipped: True
             samples:
@@ -549,7 +535,7 @@ Standardization methods are defined by the following required keywords:
       * `copy_method`: The method used to copy (`copy`) or symbolically link (`symbolic_link`) the input file(s)
       * `gzipped`: If the input file(s) are gzipped (`True`, `False`) or keep the gzipped status of the input file(s) (`None`)
       * `out_dir`: The output directory
-      * `work_dir`: The working directory
+      * `workflow_prefix`: The workflow prefix (i.e. the name of the workflow directory and prefix of the workflow files)
 
 Standardization methods may also include the following optional keyword:
 

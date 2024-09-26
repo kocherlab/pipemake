@@ -1,0 +1,12 @@
+dist
+*.pyc
+*.egg-info
+
+# VSCode files
+.vscode/
+
+# OS generated files
+.DS_Store
+
+# Sphinx documentation
+docs/_build/
