@@ -19,8 +19,8 @@ class Singularity:
 
         # Set the singularity attributes
         self._url = url
-        self._singularity_path = singularity_path
         self._image_filename = ""
+        self._singularity_path = singularity_path
 
         # If the url is provided, process it
         if self._url:
@@ -38,7 +38,7 @@ class Singularity:
             image_filename = os.path.join(self._singularity_path, image_filename)
 
         # Set the image filename
-        self._image_filename = image_filename
+        self._image_filename = os.path.abspath(image_filename)
 
     def download(self):
         # Check if the image already exists
@@ -79,7 +79,7 @@ class Singularity:
         return self._image_filename
 
     def updateContainer(self, str):
-        return str.replace(self._url, os.path.abspath(self._image_filename))
+        return str.replace(self._url, self._image_filename)
 
     @classmethod
     def fromURL(cls, url, singularity_path=""):

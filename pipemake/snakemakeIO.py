@@ -215,6 +215,25 @@ class SnakePipelineIO:
             # Download the singularity container
             singularity_container.download()
 
+    def buildSingularityURLTable(self):
+        # Create file in the backup directory
+        url_table_file = open(
+            os.path.join(self._backup_dir, "singularity_urls.tsv"), "w"
+        )
+
+        # Write the header
+        url_table_file.write("Singularity Path\tURL\n")
+
+        # Loop the singularity containers
+        for singularity_container in self._pipeline_singularity_dict.values():
+            # Write the singularity path and URL
+            url_table_file.write(
+                f"{singularity_container._image_filename}\t{singularity_container._url}\n"
+            )
+
+        # Close the file
+        url_table_file.close()
+
     def writeConfig(self, pipeline_args):
         # Create a list of pipeline args to make sure they are all used
         pipeline_args_unused = set(pipeline_args.keys())
@@ -317,6 +336,10 @@ class SnakePipelineIO:
 
     def close(self):
         self._pipe_file.close()
+
+        # Create the singularity url table, if necessary
+        if self._pipeline_singularity_dict:
+            self.buildSingularityURLTable()
 
         # Assign the basename of the workflow prefix
         workflow_basename = os.path.basename(self._workflow_prefix)
@@ -684,8 +707,6 @@ class SnakeAttributeIO:
         self._resource_assignment_type = ":"
         self._container = None
         self._path = None
-
-        print(attribute_type, attribute_text)
 
         # Assign the config attributes
         self._resource_assignment_dict = defaultdict(int)
