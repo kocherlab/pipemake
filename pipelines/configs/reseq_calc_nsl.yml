@@ -1,4 +1,5 @@
 pipeline: reseq-calc-nsl
+version: 1.0
 parser:
   help: Calculate nSL using selscan
   arg-groups:

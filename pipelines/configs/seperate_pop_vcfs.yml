@@ -1,4 +1,5 @@
 pipeline: seperate-pop-vcfs
+version: 1.0
 parser:
   help: Create separate VCF files for each population in a resequencing VCF file
   arg-groups:

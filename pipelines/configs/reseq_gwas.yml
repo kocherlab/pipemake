@@ -1,4 +1,5 @@
 pipeline: reseq-gwas
+version: 1.0
 parser:
   help: GWAS on resequencing data using GEMMA
   arg-groups:

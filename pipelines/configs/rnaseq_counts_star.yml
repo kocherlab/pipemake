@@ -1,4 +1,5 @@
 pipeline: rnaseq-counts-star
+version: 1.0
 parser:
   help: Count RNAseq reads within a genome assembly using STAR and featureCounts
   arg-groups:

@@ -1,4 +1,5 @@
 pipeline: annotate-utrs-peaks2utr
+version: 1.0
 parser:
   help: Annotate an 3prime-UTRs using peaks2utr using a merged BAM file
   arg-groups:

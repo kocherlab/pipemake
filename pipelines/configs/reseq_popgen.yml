@@ -1,4 +1,5 @@
 pipeline: reseq-popgen
+version: 1.0
 parser:
   help: Run basic PopGen analyses on resequencing data
   arg-groups:

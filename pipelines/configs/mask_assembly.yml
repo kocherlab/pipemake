@@ -1,4 +1,5 @@
 pipeline: mask-assembly
+version: 1.0
 parser:
   help: Annotate an assembly using BRAKER3
   arg-groups:

@@ -1,4 +1,5 @@
 pipeline: annotate-braker3-with-bam
+version: 1.0
 parser:
   help: Annotate an assembly using BRAKER3 using a processed BAM file
   arg-groups:

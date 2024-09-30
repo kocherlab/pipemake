@@ -1,4 +1,5 @@
 pipeline: filter-pops-vcf
+version: 1.0
 parser:
   help: Filter populations in resequencing VCF files using bcftools
   arg-groups:

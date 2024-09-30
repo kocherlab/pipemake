@@ -1,4 +1,5 @@
 pipeline: filter-vcf
+version: 1.0
 parser:
   help: Filter resequencing VCF files using bcftools
   arg-groups:

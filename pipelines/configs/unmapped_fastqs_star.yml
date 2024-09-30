@@ -1,4 +1,5 @@
 pipeline: unmapped-fastqs-star
+version: 1.0
 parser:
   help: Create unmapped FASTQs using STAR
   arg-groups:
