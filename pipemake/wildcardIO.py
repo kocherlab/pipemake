@@ -17,9 +17,21 @@ class WildcardIO:
         self.wildcard_dict = wildcard_dict
 
         # Check if the wildcard dict is empty
-        for wildcard_name, wildcard_values in self.wildcard_dict.items():
-            if not wildcard_values:
-                raise Exception(f"Unable to find wildcard values for: {wildcard_name}")
+        missing_wildcards = [
+            _w_name for _w_name, _w_value in self.wildcard_dict.items() if not _w_value
+        ]
+        if missing_wildcards:
+            # Report that all wildcards are missing, likely due to incorrect filenames
+            if len(missing_wildcards) == len(self.wildcard_dict):
+                raise Exception(
+                    "Unable to assign by wildcards. Please confirm the filenames are correct."
+                )
+
+            # Report the missing wildcards, not sure if this is possible
+            else:
+                raise Exception(
+                    f"Unable to find wildcard values for: {', '.join(missing_wildcards)}"
+                )
 
         if not sample_wildcard:
             self.samples = []
@@ -51,6 +63,20 @@ class WildcardIO:
             dict(zip(wildcard_names, v)) for v in itertools.product(*wildcard_values)
         ]:
             sample_filename = self.wildcard_str.format(**sample_wildcard_dict)
+
+            # Check if any standardized wildcards are missing
+            missing_wildcards = [
+                _w
+                for _w in glob_wildcards(standardized_wildcard)._fields
+                if _w not in sample_wildcard_dict
+            ]
+
+            # Confirm the wildcards provided are in the sample wildcard dict
+            if missing_wildcards:
+                raise Exception(
+                    f"Unable to assign [{', '.join(missing_wildcards)}] in {standardized_wildcard}. Please confirm the same wildcards are used in the sample and standardized filenames."
+                )
+
             standardized_filename = standardized_wildcard.format(**sample_wildcard_dict)
 
             # Standardize the file

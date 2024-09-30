@@ -1,4 +1,5 @@
 pipeline: fastq-filter
+version: 1.0
 parser:
   help: Filter FASTQ files using fastp
   arg-groups:

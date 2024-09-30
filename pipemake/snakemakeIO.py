@@ -100,8 +100,6 @@ class SnakePipelineIO:
 
         # Assign the script config directory
         self._script_job_dir = os.path.join(pipeline_job_dir, "scripts")
-        if not os.path.exists(self._script_job_dir):
-            os.makedirs(self._script_job_dir)
 
         # Assign the backup directory
         self._backup_dir = os.path.join(pipeline_job_dir, "backups")
@@ -147,6 +145,12 @@ class SnakePipelineIO:
         smk_module = SnakeFileIO.open(
             storage_module_path, singularity_dir=self._singularity_dir
         )
+
+        # Check if the module has script files
+        if len(smk_module._file_script_files) > 0:
+            # Create the script job directory
+            if not os.path.exists(self._script_job_dir):
+                os.makedirs(self._script_job_dir)
 
         # Loop the rules to assign the output
         for rule in smk_module._file_rules:

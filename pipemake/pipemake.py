@@ -4,14 +4,15 @@ import os
 import sys
 import random
 import string
+import logging
 import argparse
 import datetime
 
 from pydoc import locate
 
-from pipemake.logger import *
-from pipemake.config import *
+from pipemake.logger import startLogger, logArgDict
 from pipemake.snakemakeIO import SnakePipelineIO
+from pipemake.pipelineIO import ConfigPipelinesIO
 
 
 def jobRandomString(num_chars=4):
@@ -36,7 +37,7 @@ def jobTimeStamp():
     return time_stamp
 
 
-def pipeline_parser(config_parser_pipelines):
+def pipeline_parser(config_pipelines):
     # Change default behavior on error
     class MyParser(argparse.ArgumentParser):
         def error(self, message):
@@ -86,10 +87,15 @@ def pipeline_parser(config_parser_pipelines):
     pipeline_subparsers = pipeline_parser.add_subparsers(dest="pipeline", required=True)
 
     # Assign the arguments for each pipeline
-    for pipeline_name, pipeline_params in config_parser_pipelines.items():
+    for pipeline_name, pipeline_config in config_pipelines.items():
+        # Assign the pipeline parser
+        pipeline_parser_dict = pipeline_config.parser_dict
+
         # Create the subparser
         pipeline_subparser = pipeline_subparsers.add_parser(
-            pipeline_name, help=pipeline_params["help"], add_help=False
+            pipeline_name,
+            help=pipeline_parser_dict["help"] + f" (v{pipeline_config.version})",
+            add_help=False,
         )
 
         pipeline_arg_groups = {}
@@ -100,7 +106,7 @@ def pipeline_parser(config_parser_pipelines):
         )
 
         # Loop the pipeline groups
-        for pipeline_arg_group in pipeline_params["arg-groups"]:
+        for pipeline_arg_group in pipeline_parser_dict["arg-groups"]:
             # Create the argument group, if not the basic subparsers
             if pipeline_arg_group != "basic":
                 # Check if the group already exists, then raise an exception if it does
@@ -122,7 +128,9 @@ def pipeline_parser(config_parser_pipelines):
         )
 
         # Loop the pipeline mutually exclusive groups
-        for pipeline_arg_group, group_args in pipeline_params["arg-groups"].items():
+        for pipeline_arg_group, group_args in pipeline_parser_dict[
+            "arg-groups"
+        ].items():
             if "mutually-exclusive-groups" not in group_args:
                 continue
 
@@ -162,7 +170,9 @@ def pipeline_parser(config_parser_pipelines):
                     )
 
         # Loop the pipeline arguments
-        for pipeline_arg_group, group_args in pipeline_params["arg-groups"].items():
+        for pipeline_arg_group, group_args in pipeline_parser_dict[
+            "arg-groups"
+        ].items():
             """2. Add the arguments to the argument subparser"""
 
             # Loop the arguments in the group
@@ -172,7 +182,8 @@ def pipeline_parser(config_parser_pipelines):
                     try:
                         arg_args["type"] = locate(arg_args["type"])
                     except:
-                        raise Exception(f"Unable to locate type: {arg_args['type']}")
+                        logging.exception(f"Unable to locate type: {arg_args['type']}")
+                        raise
 
                 # Configure the action parameter, if specified
                 if "action" in arg_args:
@@ -313,13 +324,11 @@ def main():
     if not os.path.isdir(pipeline_storage_dir):
         raise Exception(f"Unable to find pipeline directory: {pipeline_storage_dir}")
 
-    # Loads the configs
-    pipeline_config_args, pipeline_setup, pipeline_cmd_line, pipeline_snakefiles = (
-        loadPipelineConfigs(pipeline_storage_dir)
-    )
+    # Load the pipeline configs
+    pipeline_configs = ConfigPipelinesIO.fromDirectory(pipeline_storage_dir)
 
     # Parse the aguments from the configs
-    pipeline_args = pipeline_parser(pipeline_config_args)
+    pipeline_args = pipeline_parser(pipeline_configs)
 
     # Assign the pipeline directory to an environment variable, if found
     if os.environ.get("PM_SINGULARITY_DIR") and not pipeline_args["singularity_dir"]:
@@ -353,20 +362,20 @@ def main():
     startLogger(os.path.join(pipeline_args["pipeline_job_dir"], "pipeline.log"))
     logArgDict(pipeline_args, omit=["pipeline_job_dir"])
 
-    # Process the pipeline setup
-    setup_arg_dict = processPipelineSetup(
-        pipeline_setup[pipeline_args["pipeline"]], pipeline_args
-    )
+    # Assign the pipeline config
+    pipline_config = pipeline_configs[pipeline_args["pipeline"]]
 
-    # Update the pipeline args if the setup created new args
-    if setup_arg_dict:
-        pipeline_args.update(setup_arg_dict)
+    # Process the pipeline setup
+    pipline_config.setupPipeline(pipeline_args)
+
+    # Add the samples to the pipeline args
+    pipeline_args["samples"] = pipline_config.samples
 
     # Create the snakemake pipeline
     snakemake_pipeline = SnakePipelineIO.open(**pipeline_args)
 
     # Add the snakemake modules to the pipeline
-    for smkm_filename in pipeline_snakefiles[pipeline_args["pipeline"]]:
+    for smkm_filename in pipline_config.snakefiles:
         snakemake_pipeline.addModule(smkm_filename)
 
     # Build the singularity containers
@@ -381,12 +390,8 @@ def main():
     # Close the snakemake pipeline
     snakemake_pipeline.close()
 
-    # Create the command line
-    print(
-        processPipelineCmdLine(
-            pipeline_cmd_line[pipeline_args["pipeline"]], pipeline_args
-        )
-    )
+    # Print the singularity help message
+    pipline_config.HelpMessage(pipeline_args)
 
 
 if __name__ == "__main__":
