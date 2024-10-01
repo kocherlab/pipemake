@@ -391,7 +391,7 @@ def main():
     snakemake_pipeline.close()
 
     # Print the singularity help message
-    pipline_config.HelpMessage(pipeline_args)
+    pipline_config.helpMessage(pipeline_args)
 
 
 if __name__ == "__main__":

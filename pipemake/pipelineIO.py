@@ -97,7 +97,7 @@ class ConfigPipelineIO:
             config_dict = yaml.safe_load(config_file)
         return cls(config_dict)
 
-    def HelpMessage(self, pipeline_args):
+    def helpMessage(self, pipeline_args):
         print(
             "If running the pipeline using singularity containers, please use the following command:"
         )
