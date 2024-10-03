@@ -137,7 +137,7 @@ def test_processIO_fromTableFile_w_error(table_file):
     ["tests/files/seqIO/test_table.tsv"],
 )
 def test_processIO_fromTableFile_wo_error(table_file):
-    ProcessIO.fromTableFile(table_file)
+    ProcessIO.fromTableFile(table_file, sample_column="sample")
 
 
 @pytest.mark.parametrize(
@@ -154,6 +154,7 @@ def test_processIO_fromTableFile_standardizeInput(table_file, standardized_wildc
             "table_filename": table_file,
             "standardized_filename": standardized_wildcard,
             "out_dir": test_dir,
+            "sample_column": "sample",
         },
     )
 
@@ -169,12 +170,13 @@ def test_processIO_fromTableFile_standardizeInput(table_file, standardized_wildc
     ],
 )
 def test_processIO_fromTableFile(table_file):
-    assert returnPaths(method="table-file", args={"table_filename": table_file}) == [
-        os.path.dirname(table_file)
-    ]
+    assert returnPaths(
+        method="table-file",
+        args={"table_filename": table_file, "sample_column": "sample"},
+    ) == [os.path.dirname(table_file)]
     assert set(
         returnSamples(
             method="table-file",
-            args={"table_filename": table_file, "sample_wildcard": "sample"},
+            args={"table_filename": table_file, "sample_column": "sample"},
         )
     ) == set(["test1", "test2"])

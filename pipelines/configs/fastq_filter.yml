@@ -80,11 +80,13 @@ setup:
           standardized_filename: "{fastq-standardized-wildcard}"
           out_dir: "{unfiltered-fastq-dir}"
           copy_method: '{fastq_copy_method}'
+          sample_wildcard: 'sample'
           gzipped: True
       samples:
         method: "table-file"
         args:
           table_filename: "{fastq-table}"
+          sample_wildcard: 'sample'
 
 command-line:
   cores: 20

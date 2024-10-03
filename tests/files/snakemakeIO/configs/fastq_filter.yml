@@ -87,11 +87,13 @@ setup:
           out_dir: "{unfiltered-fastq-dir}"
           workflow_prefix: "{workflow_prefix}"
           copy_method: '{fastq_copy_method}'
+          sample_column: 'sample'
           gzipped: True
       samples:
         method: "table-file"
         args:
           table_filename: "{fastq-table}"
+          sample_column: 'sample'
 
 command-line:
   cores: 20

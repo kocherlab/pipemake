@@ -162,7 +162,7 @@ def test_SeqTableIO_no_table_error(filename):
     ["tests/files/seqIO/test_table.tsv"],
 )
 def test_SeqTableIO_fromFilenameStr(filename):
-    test_seqtable = SeqTableIO.fromFilenameStr(filename)
+    test_seqtable = SeqTableIO.fromFilenameStr(filename, sample_column="sample")
     assert test_seqtable.samples == ["test1", "test2"]
     assert test_seqtable._sample_column == "sample"
     assert test_seqtable._file_columns == {"read"}
@@ -178,7 +178,7 @@ def test_SeqTableIO_fromFilenameStr(filename):
 )
 def test_SeqTableIO_standardizedFiles(filename, copy_method):
     test_dir = tempfile.mkdtemp()
-    test_seqtable = SeqTableIO.fromFilenameStr(filename)
+    test_seqtable = SeqTableIO.fromFilenameStr(filename, sample_column="sample")
     test_seqtable.standardizedFiles(
         "{sample}_{read}.test.fq.gz", out_dir=test_dir, copy_method=copy_method
     )
@@ -201,7 +201,7 @@ def test_SeqTableIO_standardizedFiles(filename, copy_method):
     ],
 )
 def test_SeqTableIO_returnPaths(filename, copy_method):
-    test_seqtable = SeqTableIO.fromFilenameStr(filename)
+    test_seqtable = SeqTableIO.fromFilenameStr(filename, sample_column="sample")
     if copy_method == "copy":
         assert test_seqtable.returnPaths(copy_method) == []
     else:
@@ -213,5 +213,5 @@ def test_SeqTableIO_returnPaths(filename, copy_method):
     ["tests/files/seqIO/test_table.tsv"],
 )
 def test_SeqTableIO_returnSamples(filename):
-    test_seqtable = SeqTableIO.fromFilenameStr(filename)
+    test_seqtable = SeqTableIO.fromFilenameStr(filename, sample_column="sample")
     assert test_seqtable.returnSamples() == ["test1", "test2"]

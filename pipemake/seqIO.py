@@ -130,7 +130,7 @@ class SeqFileIO:
 
 
 class SeqTableIO:
-    def __init__(self, table_dataframe, sample_column="sample", **kwargs):
+    def __init__(self, table_dataframe, sample_column="", **kwargs):
         # Confirm wildcards were assigned
         if not isinstance(table_dataframe, pd.DataFrame):
             raise Exception(

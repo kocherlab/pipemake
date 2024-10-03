@@ -142,11 +142,13 @@ setup:
           standardized_filename: "{rnaseq-standardized-wildcard}"
           out_dir: "{rnaseq-fastq-dir}"
           copy_method: '{rnaseq_copy_method}'
+          sample_wildcard: 'sample'
           gzipped: True
       samples:
         method: "table-file"
         args:
           table_filename: "{rnaseq-table}"
+          sample_wildcard: 'sample'
   assembly_input:
     file-method:
       input:
