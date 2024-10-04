@@ -152,9 +152,12 @@ class SeqTableIO:
         for col in self._table_dataframe.columns:
             if col == self._sample_column:
                 self.samples = list(self._table_dataframe[self._sample_column])
+            elif "filename" in col:
+                self._file_columns.add(col)
             elif ":" in col:
                 wildcard_col, _ = col.split(":")
                 self._file_columns.add(wildcard_col)
+                self._table_columns.add(wildcard_col)
             else:
                 self._table_columns.add(col)
 
@@ -166,7 +169,7 @@ class SeqTableIO:
             raise Exception("Files may exist within a single column")
 
         # Create a set of all the columns
-        self._table_columns = self._table_columns.union(self._file_columns)
+        # self._table_columns = self._table_columns.union(self._file_columns)
 
     @property
     def _file_column(self):
@@ -224,14 +227,17 @@ class SeqTableIO:
                         f"Unable to locate file. Column: {file_col}. Filename: {sample_filename}"
                     )
 
-                # Create the wilcard dict for the sample
-                file_wildcard_dict = dict([file_col.split(":")])
-                file_wildcard_dict.update(str_wildcards)
+                # Check if the file column is a wildcard
+                if ":" in file_col:
+                    # Create the wilcard dict for the sample
+                    file_wildcard_dict = dict([file_col.split(":")])
+                    str_wildcards.update(file_wildcard_dict)
+                    # file_wildcard_dict.update(str_wildcards)
+
+                # print(str_wildcards)
 
                 # Create the standardized filename
-                standardized_filename = standardized_wildcard.format(
-                    **file_wildcard_dict
-                )
+                standardized_filename = standardized_wildcard.format(**str_wildcards)
 
                 # Standardize the file
                 sample_file = SeqFileIO.create(sample_filename)

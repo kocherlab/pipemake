@@ -170,6 +170,32 @@ def test_SeqTableIO_fromFilenameStr(filename):
 
 
 @pytest.mark.parametrize(
+    "filename",
+    ["tests/files/seqIO/fasta_table.tsv"],
+)
+def test_SeqTableIO_unique_column(filename):
+    test_dir = tempfile.mkdtemp()
+    test_seqtable = SeqTableIO.fromFilenameStr(filename, sample_column="genome")
+    assert test_seqtable.samples == ["genome1", "genome2"]
+    assert test_seqtable._sample_column == "genome"
+    assert test_seqtable._file_columns == {"filename"}
+    assert test_seqtable._table_columns == {"genome"}
+
+    test_seqtable.standardizedFiles(
+        "{genome}.fa", out_dir=test_dir, copy_method="symbolic_link"
+    )
+    assert os.path.islink(os.path.join(test_dir, "genome1.fa"))
+    assert os.path.islink(os.path.join(test_dir, "genome2.fa"))
+
+    for genome in ["genome1", "genome2"]:
+        with open(os.path.join(test_dir, f"{genome}.fa")) as genome_file:
+            assert (
+                genome_file.read()
+                == f">{genome.capitalize()}.1\nATCG\n>{genome.capitalize()}.2\nATCG"
+            )
+
+
+@pytest.mark.parametrize(
     "filename, copy_method",
     [
         ("tests/files/seqIO/test_table.tsv", "symbolic_link"),
