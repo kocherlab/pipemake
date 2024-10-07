@@ -196,6 +196,18 @@ def test_SeqTableIO_unique_column(filename):
 
 
 @pytest.mark.parametrize(
+    "filename",
+    ["tests/files/seqIO/id_table.tsv"],
+)
+def test_SeqTableIO_no_file_column(filename):
+    test_seqtable = SeqTableIO.fromFilenameStr(filename, sample_column="SRA")
+    assert test_seqtable.samples == ["SRR000001", "SRR000002", "SRR000003", "SRR000004"]
+    assert test_seqtable._sample_column == "SRA"
+    assert test_seqtable._file_columns == set()
+    assert test_seqtable._table_columns == {"SRA"}
+
+
+@pytest.mark.parametrize(
     "filename, copy_method",
     [
         ("tests/files/seqIO/test_table.tsv", "symbolic_link"),

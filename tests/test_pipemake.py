@@ -48,6 +48,7 @@ def test_pipemake_main_wildcard_wo_error(wildcard_str):
     )
     assert os.path.isdir(f"{workflow_prefix}/pipemake/backups")
     assert os.path.isfile(f"{workflow_prefix}/pipemake/modules/fastq_filter_fastp.smk")
+    assert not os.path.isfile(f"{workflow_prefix}/pipemake/modules/test_script.smk")
     assert os.path.isdir(f"{workflow_prefix}/pipemake/modules")
     assert os.path.isdir(f"{workflow_prefix}/FASTQ/Unfiltered")
 
@@ -93,6 +94,7 @@ def test_pipemake_main_table_wo_error(table_str):
     )
     assert os.path.isdir(f"{workflow_prefix}/pipemake/backups")
     assert os.path.isfile(f"{workflow_prefix}/pipemake/modules/fastq_filter_fastp.smk")
+    assert os.path.isfile(f"{workflow_prefix}/pipemake/modules/test_script.smk")
     assert os.path.isdir(f"{workflow_prefix}/pipemake/modules")
     assert os.path.isdir(f"{workflow_prefix}/FASTQ/Unfiltered")
 

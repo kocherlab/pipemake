@@ -76,7 +76,7 @@ class ConfigPipelineIO:
             raise Exception("No snakefiles provided in the configuration file")
 
         # Set the pipeline snakefiles
-        self.snakefiles = config_dict["snakefiles"]
+        self._snakefiles = set(config_dict["snakefiles"])
         config_dict.pop("snakefiles")
 
         # Record unused configuration parameters
@@ -86,6 +86,10 @@ class ConfigPipelineIO:
         # Assign the other configuration arguments
         self._singularity_bindings = set()
         self.samples = []
+
+    @property
+    def snakefiles(self):
+        return list(self._snakefiles)
 
     @property
     def singularity_bindings(self):
@@ -209,3 +213,7 @@ class ConfigPipelineIO:
 
                     # Store the samples
                     self.samples = method_samples
+
+                if "snakefiles" in method_args:
+                    # Add method snakefiles to the pipeline
+                    self._snakefiles.update(method_args["snakefiles"])

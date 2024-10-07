@@ -94,6 +94,8 @@ setup:
         args:
           table_filename: "{fastq-table}"
           sample_column: 'sample'
+      snakefiles:
+        - test_script
 
 command-line:
   cores: 20

@@ -131,7 +131,7 @@ class SeqFileIO:
 
 class SeqTableIO:
     def __init__(self, table_dataframe, sample_column="", **kwargs):
-        # Confirm wildcards were assigned
+        # Confirm the table is a pandas DataFrame
         if not isinstance(table_dataframe, pd.DataFrame):
             raise Exception(
                 f"Table must be stored as a pandas DataFrame: {table_dataframe}"
@@ -187,6 +187,10 @@ class SeqTableIO:
         )
 
     def standardizedFiles(self, standardized_wildcard, **kwargs):
+        # Skip if nn file columns
+        if not list(self._file_columns):
+            return
+
         # Assign the standardized wildcard names
         standardized_wildcard_names = get_wildcard_names(standardized_wildcard)
 
@@ -233,8 +237,6 @@ class SeqTableIO:
                     file_wildcard_dict = dict([file_col.split(":")])
                     str_wildcards.update(file_wildcard_dict)
                     # file_wildcard_dict.update(str_wildcards)
-
-                # print(str_wildcards)
 
                 # Create the standardized filename
                 standardized_filename = standardized_wildcard.format(**str_wildcards)
