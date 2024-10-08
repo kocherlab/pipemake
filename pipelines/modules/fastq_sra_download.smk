@@ -19,6 +19,8 @@ checkpoint fastq_sra_download:
                 "{SRA_ID}_DIR",
             )
         ),
+    resources:
+        mem_mb=8000,
     threads: 1
     shell:
         "fastq-dump {wildcards.SRA_ID} -O {output} --split-3 --skip-technical --gzip"
@@ -38,6 +40,8 @@ rule fastq_sra_process_reads:
             config["paths"]["sra_processed"],
             "{SRA_ID}_R{read}.fq.gz",
         ),
+    resources:
+        mem_mb=1000,
     threads: 1
     shell:
         """
@@ -81,6 +85,8 @@ rule fastq_sra_check_processed:
             config["paths"]["sra_processing"],
             "{SRA_ID}_DIR",
         ),
+    resources:
+        mem_mb=1000,
     threads: 1
     run:
         import shutil
