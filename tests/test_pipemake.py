@@ -10,7 +10,7 @@ from pipemake.pipemake import main
 @pytest.mark.parametrize(
     "wildcard_str",
     [
-        "tests/files/wildcardIO/{sample}_{read}.fq.gz",
+        "tests/files/wildcardIO/{samples}_{reads}.fq.gz",
     ],
 )
 def test_pipemake_main_wildcard_wo_error(wildcard_str):
@@ -97,6 +97,10 @@ def test_pipemake_main_table_wo_error(table_str):
     assert os.path.isfile(f"{workflow_prefix}/pipemake/modules/test_script.smk")
     assert os.path.isdir(f"{workflow_prefix}/pipemake/modules")
     assert os.path.isdir(f"{workflow_prefix}/FASTQ/Unfiltered")
+
+    with open(f"{workflow_prefix}.yml") as f:
+        for line in f:
+            print(line)
 
 
 @pytest.mark.parametrize(

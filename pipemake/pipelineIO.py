@@ -85,7 +85,7 @@ class ConfigPipelineIO:
 
         # Assign the other configuration arguments
         self._singularity_bindings = set()
-        self.samples = []
+        self.samples = {}
 
     @property
     def snakefiles(self):

@@ -7,7 +7,7 @@ from snakemake.io import glob_wildcards
 
 
 class WildcardIO:
-    def __init__(self, wildcard_str, wildcard_dict, sample_wildcard="", **kwargs):
+    def __init__(self, wildcard_str, wildcard_dict, sample_wildcards=[], **kwargs):
         # Confirm wildcards were assigned
         if not list(wildcard_dict):
             raise Exception(f"Unable to find wildcards within: {wildcard_str}")
@@ -33,10 +33,12 @@ class WildcardIO:
                     f"Unable to find wildcard values for: {', '.join(missing_wildcards)}"
                 )
 
-        if not sample_wildcard:
-            self.samples = []
+        if not sample_wildcards:
+            self.samples = {}
         else:
-            self.samples = self.wildcard_dict[sample_wildcard]
+            print(sample_wildcards)
+            print(sample_wildcards)
+            self.samples = {_col: wildcard_dict[_col] for _col in sample_wildcards}
 
     @classmethod
     def fromStr(cls, wildcard_str, **kwargs):

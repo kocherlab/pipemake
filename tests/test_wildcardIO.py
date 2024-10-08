@@ -46,13 +46,16 @@ def test_WildcardIO_samples_w_error(wildcard_str):
 
 
 @pytest.mark.parametrize(
-    "wildcard_str, sample_wildcard",
-    [("tests/files/wildcardIO/{sample}_{read}.fq.gz", "sample")],
+    "wildcard_str, sample_wildcards",
+    [("tests/files/wildcardIO/{sample}_{read}.fq.gz", ["sample", "read"])],
 )
-def test_WildcardIO_samples_wo_error(wildcard_str, sample_wildcard):
-    test_wildcard = WildcardIO.fromStr(wildcard_str, sample_wildcard=sample_wildcard)
-    sample_set = set(test_wildcard.samples)
-    assert sample_set == set(["test1", "test2"]) and len(sample_set) == 2
+def test_WildcardIO_samples_wo_error(wildcard_str, sample_wildcards):
+    test_wildcard = WildcardIO.fromStr(wildcard_str, sample_wildcards=sample_wildcards)
+    samples_dict = test_wildcard.samples
+    assert "sample" in samples_dict
+    assert set(samples_dict["sample"]) == set(["test1", "test2"])
+    assert "read" in samples_dict
+    assert set(samples_dict["read"]) == set(["R1", "R2"])
 
 
 @pytest.mark.parametrize(

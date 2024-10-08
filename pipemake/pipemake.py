@@ -369,7 +369,8 @@ def main():
     pipline_config.setupPipeline(pipeline_args)
 
     # Add the samples to the pipeline args
-    pipeline_args["samples"] = pipline_config.samples
+    # pipeline_args["samples"] = pipline_config.samples
+    pipeline_args.update(pipline_config.samples)
 
     # Create the snakemake pipeline
     snakemake_pipeline = SnakePipelineIO.open(**pipeline_args)

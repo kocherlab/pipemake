@@ -162,11 +162,14 @@ def test_SeqTableIO_no_table_error(filename):
     ["tests/files/seqIO/test_table.tsv"],
 )
 def test_SeqTableIO_fromFilenameStr(filename):
-    test_seqtable = SeqTableIO.fromFilenameStr(filename, sample_column="sample")
-    assert test_seqtable.samples == ["test1", "test2"]
-    assert test_seqtable._sample_column == "sample"
-    assert test_seqtable._file_columns == {"read"}
-    assert test_seqtable._table_columns == {"sample", "read"}
+    test_seqtable = SeqTableIO.fromFilenameStr(filename, sample_column="samples")
+    assert "samples" in test_seqtable.samples
+    assert set(test_seqtable.samples["samples"]) == set(["test1", "test2"])
+    assert "reads" in test_seqtable.samples
+    assert set(test_seqtable.samples["reads"]) == set(["R1", "R2"])
+    assert test_seqtable._sample_column == "samples"
+    assert test_seqtable._file_columns == {"reads"}
+    assert test_seqtable._table_columns == {"samples", "reads"}
 
 
 @pytest.mark.parametrize(
@@ -175,14 +178,15 @@ def test_SeqTableIO_fromFilenameStr(filename):
 )
 def test_SeqTableIO_unique_column(filename):
     test_dir = tempfile.mkdtemp()
-    test_seqtable = SeqTableIO.fromFilenameStr(filename, sample_column="genome")
-    assert test_seqtable.samples == ["genome1", "genome2"]
-    assert test_seqtable._sample_column == "genome"
+    test_seqtable = SeqTableIO.fromFilenameStr(filename, sample_column="genomes")
+    assert "genomes" in test_seqtable.samples
+    assert set(test_seqtable.samples["genomes"]) == set(["genome1", "genome2"])
+    assert test_seqtable._sample_column == "genomes"
     assert test_seqtable._file_columns == {"filename"}
-    assert test_seqtable._table_columns == {"genome"}
+    assert test_seqtable._table_columns == {"genomes"}
 
     test_seqtable.standardizedFiles(
-        "{genome}.fa", out_dir=test_dir, copy_method="symbolic_link"
+        "{genomes}.fa", out_dir=test_dir, copy_method="symbolic_link"
     )
     assert os.path.islink(os.path.join(test_dir, "genome1.fa"))
     assert os.path.islink(os.path.join(test_dir, "genome2.fa"))
@@ -201,7 +205,10 @@ def test_SeqTableIO_unique_column(filename):
 )
 def test_SeqTableIO_no_file_column(filename):
     test_seqtable = SeqTableIO.fromFilenameStr(filename, sample_column="SRA")
-    assert test_seqtable.samples == ["SRR000001", "SRR000002", "SRR000003", "SRR000004"]
+    assert "SRA" in test_seqtable.samples
+    assert set(test_seqtable.samples["SRA"]) == set(
+        ["SRR000001", "SRR000002", "SRR000003", "SRR000004"]
+    )
     assert test_seqtable._sample_column == "SRA"
     assert test_seqtable._file_columns == set()
     assert test_seqtable._table_columns == {"SRA"}
@@ -216,13 +223,13 @@ def test_SeqTableIO_no_file_column(filename):
 )
 def test_SeqTableIO_standardizedFiles(filename, copy_method):
     test_dir = tempfile.mkdtemp()
-    test_seqtable = SeqTableIO.fromFilenameStr(filename, sample_column="sample")
+    test_seqtable = SeqTableIO.fromFilenameStr(filename, sample_column="samples")
     test_seqtable.standardizedFiles(
-        "{sample}_{read}.test.fq.gz", out_dir=test_dir, copy_method=copy_method
+        "{samples}_{reads}.test.fq.gz", out_dir=test_dir, copy_method=copy_method
     )
 
-    for sample, read in list(itertools.product(["test1", "test2"], ["R1", "R2"])):
-        standardized_filename = f"{sample}_{read}.test.fq.gz"
+    for samples, reads in list(itertools.product(["test1", "test2"], ["R1", "R2"])):
+        standardized_filename = f"{samples}_{reads}.test.fq.gz"
         if copy_method == "symbolic_link":
             assert os.path.islink(os.path.join(test_dir, standardized_filename))
         elif copy_method == "copy":
@@ -239,7 +246,7 @@ def test_SeqTableIO_standardizedFiles(filename, copy_method):
     ],
 )
 def test_SeqTableIO_returnPaths(filename, copy_method):
-    test_seqtable = SeqTableIO.fromFilenameStr(filename, sample_column="sample")
+    test_seqtable = SeqTableIO.fromFilenameStr(filename, sample_column="samples")
     if copy_method == "copy":
         assert test_seqtable.returnPaths(copy_method) == []
     else:
@@ -251,5 +258,5 @@ def test_SeqTableIO_returnPaths(filename, copy_method):
     ["tests/files/seqIO/test_table.tsv"],
 )
 def test_SeqTableIO_returnSamples(filename):
-    test_seqtable = SeqTableIO.fromFilenameStr(filename, sample_column="sample")
-    assert test_seqtable.returnSamples() == ["test1", "test2"]
+    test_seqtable = SeqTableIO.fromFilenameStr(filename, sample_column="samples")
+    assert test_seqtable.returnSamples()["samples"] == ["test1", "test2"]

@@ -9,7 +9,7 @@ from pipemake.processIO import ProcessIO, standardizeInput, returnPaths, returnS
 @pytest.mark.parametrize(
     "wildcard_str",
     [
-        "tests/files/wildcardIO/{sample}_{read}.fq",
+        "tests/files/wildcardIO/{samples}_{reads}.fq",
     ],
 )
 def test_processIO_fromWildcardStr_w_error(wildcard_str):
@@ -19,7 +19,7 @@ def test_processIO_fromWildcardStr_w_error(wildcard_str):
 
 @pytest.mark.parametrize(
     "wildcard_str",
-    ["tests/files/wildcardIO/{sample}_{read}.fq.gz"],
+    ["tests/files/wildcardIO/{samples}_{reads}.fq.gz"],
 )
 def test_processIO_fromWildcardStr_wo_error(wildcard_str):
     ProcessIO.fromWildcardStr(wildcard_str)
@@ -27,7 +27,12 @@ def test_processIO_fromWildcardStr_wo_error(wildcard_str):
 
 @pytest.mark.parametrize(
     "wildcard_str, standardized_wildcard",
-    [("tests/files/wildcardIO/{sample}_{read}.fq.gz", "{sample}_{read}.test.fq.gz")],
+    [
+        (
+            "tests/files/wildcardIO/{samples}_{reads}.fq.gz",
+            "{samples}_{reads}.test.fq.gz",
+        )
+    ],
 )
 def test_processIO_fromWildcardStr_standardizeInput(
     wildcard_str, standardized_wildcard
@@ -49,18 +54,19 @@ def test_processIO_fromWildcardStr_standardizeInput(
 
 @pytest.mark.parametrize(
     "wildcard_str",
-    [("tests/files/wildcardIO/{sample}_{read}.fq.gz")],
+    [("tests/files/wildcardIO/{samples}_{reads}.fq.gz")],
 )
 def test_processIO_fromWildcardStr(wildcard_str):
     assert returnPaths(method="wildcard-str", args={"wildcard_str": wildcard_str}) == [
         os.path.abspath(os.path.dirname(wildcard_str))
     ]
-    assert set(
-        returnSamples(
-            method="wildcard-str",
-            args={"wildcard_str": wildcard_str, "sample_wildcard": "sample"},
-        )
-    ) == set(["test1", "test2"])
+
+    samples_dict = returnSamples(
+        method="wildcard-str",
+        args={"wildcard_str": wildcard_str, "sample_wildcards": ["samples"]},
+    )
+    assert "samples" in samples_dict
+    assert set(samples_dict["samples"]) == set(["test1", "test2"])
 
 
 @pytest.mark.parametrize(
@@ -137,13 +143,13 @@ def test_processIO_fromTableFile_w_error(table_file):
     ["tests/files/seqIO/test_table.tsv"],
 )
 def test_processIO_fromTableFile_wo_error(table_file):
-    ProcessIO.fromTableFile(table_file, sample_column="sample")
+    ProcessIO.fromTableFile(table_file, sample_column="samples")
 
 
 @pytest.mark.parametrize(
     "table_file, standardized_wildcard",
     [
-        ("tests/files/seqIO/test_table.tsv", "{sample}_{read}.test.fq.gz"),
+        ("tests/files/seqIO/test_table.tsv", "{samples}_{reads}.test.fq.gz"),
     ],
 )
 def test_processIO_fromTableFile_standardizeInput(table_file, standardized_wildcard):
@@ -154,7 +160,7 @@ def test_processIO_fromTableFile_standardizeInput(table_file, standardized_wildc
             "table_filename": table_file,
             "standardized_filename": standardized_wildcard,
             "out_dir": test_dir,
-            "sample_column": "sample",
+            "sample_column": "samples",
         },
     )
 
@@ -172,11 +178,13 @@ def test_processIO_fromTableFile_standardizeInput(table_file, standardized_wildc
 def test_processIO_fromTableFile(table_file):
     assert returnPaths(
         method="table-file",
-        args={"table_filename": table_file, "sample_column": "sample"},
+        args={"table_filename": table_file, "sample_column": "samples"},
     ) == [os.path.dirname(table_file)]
-    assert set(
-        returnSamples(
-            method="table-file",
-            args={"table_filename": table_file, "sample_column": "sample"},
-        )
-    ) == set(["test1", "test2"])
+    samples_dict = returnSamples(
+        method="table-file",
+        args={"table_filename": table_file, "sample_column": "samples"},
+    )
+    assert "samples" in samples_dict
+    assert set(samples_dict["samples"]) == set(["test1", "test2"])
+    assert "reads" in samples_dict
+    assert set(samples_dict["reads"]) == set(["R1", "R2"])

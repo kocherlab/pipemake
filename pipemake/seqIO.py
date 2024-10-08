@@ -5,6 +5,8 @@ import logging
 
 import pandas as pd
 
+from collections import defaultdict
+
 from snakemake.io import get_wildcard_names
 
 
@@ -141,9 +143,10 @@ class SeqTableIO:
         self._table_dataframe = table_dataframe
         self._sample_column = sample_column
         self._file_columns = set()
-        self._table_columns = set([sample_column])
+        self._table_columns = set([self._sample_column])
+        self.samples = defaultdict(list)
 
-        if sample_column not in self._table_dataframe.columns:
+        if self._sample_column not in self._table_dataframe.columns:
             raise Exception(
                 f"Unable to assign sample column ({self._sample_column}) in DataFrame columns: {self._table_dataframe.columns}"
             )
@@ -151,19 +154,21 @@ class SeqTableIO:
         # Assign arguments from the columns of the dataframe
         for col in self._table_dataframe.columns:
             if col == self._sample_column:
-                self.samples = list(self._table_dataframe[self._sample_column])
+                self.samples[col] = list(self._table_dataframe[self._sample_column])
             elif "filename" in col:
                 self._file_columns.add(col)
             elif ":" in col:
-                wildcard_col, _ = col.split(":")
-                self._file_columns.add(wildcard_col)
-                self._table_columns.add(wildcard_col)
+                wildcard_item, sample_item = col.split(":")
+                self.samples[wildcard_item].append(sample_item)
+                self._file_columns.add(wildcard_item)
+                self._table_columns.add(wildcard_item)
             else:
                 self._table_columns.add(col)
 
         # Check the samples are unique
-        if len(self.samples) != len(list(set(self.samples))):
-            raise Exception("Sample names are not unique")
+        for sample_list in self.samples.values():
+            if len(sample_list) != len(list(set(sample_list))):
+                raise Exception("Sample names are not unique")
 
         if len(self._file_columns) > 1:
             raise Exception("Files may exist within a single column")
