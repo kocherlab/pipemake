@@ -27,7 +27,7 @@ parser:
           help: "Standardized wildcard statement used to store RNAseq FASTQs"
           type: str
           default: 
-            str: "{sample}_{read}.fq.gz"
+            str: "{samples}_{reads}.fq.gz"
         assembly-fasta:
           help: "Assembly fasta"
           type: str
@@ -103,7 +103,8 @@ setup:
         method: "wildcard-str"
         args:
           wildcard_str: "{rnaseq-wildcard}"
-          sample_wildcard: 'sample'
+          sample_wildcards: 
+            - 'samples'
 
     table-method:
       input:
@@ -118,13 +119,15 @@ setup:
           standardized_filename: "{rnaseq-standardized-wildcard}"
           out_dir: "{rnaseq-fastq-dir}"
           copy_method: '{rnaseq_copy_method}'
-          sample_wildcard: 'sample'
+          sample_wildcards:
+            - 'samples'
           gzipped: True
       samples:
         method: "table-file"
         args:
           table_filename: "{rnaseq-table}"
-          sample_wildcard: 'sample'
+          sample_wildcards:
+            - 'samples'
   
   assembly_input:
     file-method:
@@ -153,10 +156,6 @@ setup:
           standardized_filename: "{species}_{assembly_version}.gtf"
           out_dir: "{assembly-dir}"
           gzipped: False
-
-command-line:
-  cores: 20
-  use-singularity: True
 
 snakefiles:
   - rna_seq_star_multimap_fastqs

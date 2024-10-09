@@ -15,7 +15,7 @@ checkpoint fastq_sra_download:
         directory(
             os.path.join(
                 config["paths"]["workflow_prefix"],
-                config["paths"]["sra_processing"],
+                config["paths"]["sra_download"],
                 "{SRA_ID}_DIR",
             )
         ),
@@ -30,7 +30,7 @@ rule fastq_sra_process_reads:
     input:
         os.path.join(
             config["paths"]["workflow_prefix"],
-            config["paths"]["sra_processing"],
+            config["paths"]["sra_download"],
             "{SRA_ID}_DIR",
             "{SRA_ID}_{read}.fastq.gz",
         ),
@@ -82,7 +82,7 @@ rule fastq_sra_check_processed:
     params:
         sra_dir=os.path.join(
             config["paths"]["workflow_prefix"],
-            config["paths"]["sra_processing"],
+            config["paths"]["sra_download"],
             "{SRA_ID}_DIR",
         ),
     resources:

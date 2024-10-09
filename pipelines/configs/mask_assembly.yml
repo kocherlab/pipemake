@@ -49,9 +49,5 @@ setup:
           out_dir: "{assembly-dir}"
           gzipped: False
 
-command-line:
-  cores: 20
-  use-singularity: True
-
 snakefiles:
   - repeatmasking

@@ -76,9 +76,5 @@ setup:
           out_dir: "{reseq-unfiltered-vcf-dir}"
           gzipped: True
 
-command-line:
-  cores: 20
-  use-singularity: True
-
 snakefiles:
   - reseq_filter_bcftools.smk

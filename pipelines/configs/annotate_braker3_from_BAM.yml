@@ -120,10 +120,6 @@ setup:
           out_dir: "{homology-dir}"
           gzipped: False
 
-command-line:
-  cores: 20
-  use-singularity: True
-
 snakefiles:
   - repeatmasking
   - annotate_braker3

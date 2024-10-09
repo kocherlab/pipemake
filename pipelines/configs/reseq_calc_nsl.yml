@@ -69,10 +69,6 @@ setup:
           out_dir: "{reseq-filtered-vcf-dir}"
           copy_method: '{reseq-copy-method}'
           gzipped: True
-  
-command-line:
-  cores: 20
-  use-singularity: True
 
 snakefiles:
   - reseq_phase_shapeit4

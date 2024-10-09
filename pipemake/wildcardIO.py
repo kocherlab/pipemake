@@ -36,8 +36,6 @@ class WildcardIO:
         if not sample_wildcards:
             self.samples = {}
         else:
-            print(sample_wildcards)
-            print(sample_wildcards)
             self.samples = {_col: wildcard_dict[_col] for _col in sample_wildcards}
 
     @classmethod

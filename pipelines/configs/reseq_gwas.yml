@@ -99,10 +99,6 @@ setup:
           copy_method: '{reseq-copy-method}'
           gzipped: False
 
-command-line:
-  cores: 20
-  use-singularity: True
-
 snakefiles:
   - reseq_model_ind_files.smk
   - reseq_gwas_gemma.smk

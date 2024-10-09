@@ -100,10 +100,6 @@ setup:
           standardized_filename: "{species}.model"
           out_dir: "{models-dir}"
           gzipped: False
-  
-command-line:
-  cores: 20
-  use-singularity: True
 
 snakefiles:
   - reseq_phase_shapeit4.smk
