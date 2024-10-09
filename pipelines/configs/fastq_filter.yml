@@ -81,15 +81,13 @@ setup:
           standardized_filename: "{fastq-standardized-wildcard}"
           out_dir: "{unfiltered-fastq-dir}"
           copy_method: '{fastq_copy_method}'
-          sample_wildcards: 
-            - 'samples'
+          sample_column: 'samples'
           gzipped: True
       samples:
         method: "table-file"
         args:
           table_filename: "{fastq-table}"
-          sample_wildcards: 
-            - 'samples'
+          sample_column: 'samples'
 
 snakefiles:
   - fastq_filter_fastp
