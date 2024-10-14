@@ -120,13 +120,11 @@ def get_fst_files(wildcards):
     ]
     return expand(
         os.path.join(
-            config["paths"]["workflow_prefix"],
             checkpoint_output,
             f"{config['species']}_{config['assembly_version']}.filtered.{{pair}}.fst.var",
         ),
         pair=glob_wildcards(
             os.path.join(
-                config["paths"]["workflow_prefix"],
                 checkpoint_output,
                 f"{config['species']}_{config['assembly_version']}.filtered.{{pair}}.fst.var",
             )

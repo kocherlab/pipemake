@@ -212,7 +212,6 @@ def aggregate_ihs_reseq(wildcards):
             ),
             chrom=glob_wildcards(
                 os.path.join(
-                    config["paths"]["workflow_prefix"],
                     checkpoint_output,
                     "{sweep_chrom}.vcf.gz",
                 )
@@ -227,7 +226,6 @@ def aggregate_ihs_reseq(wildcards):
             ),
             chrom=glob_wildcards(
                 os.path.join(
-                    config["paths"]["workflow_prefix"],
                     checkpoint_output,
                     "{sweep_chrom}.vcf.gz",
                 )
@@ -242,7 +240,6 @@ def aggregate_ihs_reseq(wildcards):
             ),
             chrom=glob_wildcards(
                 os.path.join(
-                    config["paths"]["workflow_prefix"],
                     checkpoint_output,
                     "{sweep_chrom}.vcf.gz",
                 )
@@ -257,7 +254,6 @@ def aggregate_ihs_reseq(wildcards):
             ),
             chrom=glob_wildcards(
                 os.path.join(
-                    config["paths"]["workflow_prefix"],
                     checkpoint_output,
                     "{sweep_chrom}.vcf.gz",
                 )

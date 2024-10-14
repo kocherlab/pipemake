@@ -75,7 +75,8 @@ def aggregate_pop_reseq(wildcards):
         ),
         model_pop=glob_wildcards(
             os.path.join(
-                config["paths"]["workflow_prefix"], checkpoint_output, "{model_pop}.pop"
+                checkpoint_output,
+                "{model_pop}.pop",
             )
         ).model_pop,
     )

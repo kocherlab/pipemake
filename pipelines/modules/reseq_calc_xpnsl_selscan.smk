@@ -201,7 +201,6 @@ def aggregate_xpnsl_reseq(wildcards):
             ),
             chrom=glob_wildcards(
                 os.path.join(
-                    config["paths"]["workflow_prefix"],
                     checkpoint_output,
                     "{chrom}.vcf.gz",
                 )
@@ -216,7 +215,6 @@ def aggregate_xpnsl_reseq(wildcards):
             ),
             chrom=glob_wildcards(
                 os.path.join(
-                    config["paths"]["workflow_prefix"],
                     checkpoint_output,
                     "{chrom}.vcf.gz",
                 )
@@ -231,7 +229,6 @@ def aggregate_xpnsl_reseq(wildcards):
             ),
             chrom=glob_wildcards(
                 os.path.join(
-                    config["paths"]["workflow_prefix"],
                     checkpoint_output,
                     "{chrom}.vcf.gz",
                 )
@@ -246,7 +243,6 @@ def aggregate_xpnsl_reseq(wildcards):
             ),
             chrom=glob_wildcards(
                 os.path.join(
-                    config["paths"]["workflow_prefix"],
                     checkpoint_output,
                     "{chrom}.vcf.gz",
                 )

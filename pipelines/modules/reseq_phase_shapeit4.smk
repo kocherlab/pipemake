@@ -161,7 +161,8 @@ def aggregate_phased_reseq(wildcards):
         ),
         chrom=glob_wildcards(
             os.path.join(
-                config["paths"]["workflow_prefix"], checkpoint_output, "{chrom}.vcf.gz"
+                checkpoint_output,
+                "{chrom}.vcf.gz",
             )
         ).chrom,
     )

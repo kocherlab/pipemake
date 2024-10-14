@@ -99,7 +99,6 @@ def get_zfst_files(wildcards):
         model=checkpoint_output.split(os.sep)[-1],
         pair=glob_wildcards(
             os.path.join(
-                config["paths"]["workflow_prefix"],
                 checkpoint_output,
                 f"{config['species']}_{config['assembly_version']}.filtered.{{pair}}.fst.var",
             )
