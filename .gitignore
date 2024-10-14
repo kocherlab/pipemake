@@ -3,6 +3,10 @@ build
 *.pyc
 *.egg-info
 
+# pycache
+pipemake/__pycache__/
+tests/__pycache__/
+
 # VSCode files
 .vscode/
 
