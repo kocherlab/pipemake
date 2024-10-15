@@ -1,0 +1,3 @@
+genomes	filename
+genome1	tests/files/fileIO/genome1.fa
+genome2	tests/files/fileIO/genome2.fa

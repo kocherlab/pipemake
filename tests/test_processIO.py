@@ -71,7 +71,7 @@ def test_processIO_fromWildcardStr(wildcard_str):
 
 @pytest.mark.parametrize(
     "file_str",
-    ["tests/files/seqIO/test2_R1.fq", "tests/files/seqIO/test2_R2.fq"],
+    ["tests/files/fileIO/test2_R1.fq", "tests/files/fileIO/test2_R2.fq"],
 )
 def test_processIO_fromFileStr_w_error(file_str):
     with pytest.raises(IOError):
@@ -80,7 +80,7 @@ def test_processIO_fromFileStr_w_error(file_str):
 
 @pytest.mark.parametrize(
     "file_str",
-    ["tests/files/seqIO/test1_R1.fq", "tests/files/seqIO/test1_R2.fq"],
+    ["tests/files/fileIO/test1_R1.fq", "tests/files/fileIO/test1_R2.fq"],
 )
 def test_processIO_fromFileStr_wo_error(file_str):
     ProcessIO.fromFileStr(file_str)
@@ -89,8 +89,8 @@ def test_processIO_fromFileStr_wo_error(file_str):
 @pytest.mark.parametrize(
     "file_str, standardized_filename",
     [
-        ("tests/files/seqIO/test1_R1.fq", "test1_R1.test.fq.gz"),
-        ("tests/files/seqIO/test1_R2.fq", "test1_R2.test.fq.gz"),
+        ("tests/files/fileIO/test1_R1.fq", "test1_R1.test.fq.gz"),
+        ("tests/files/fileIO/test1_R2.fq", "test1_R2.test.fq.gz"),
     ],
 )
 def test_processIO_fromFileStr_standardizeInput_wo_error(
@@ -111,8 +111,8 @@ def test_processIO_fromFileStr_standardizeInput_wo_error(
 @pytest.mark.parametrize(
     "file_str, standardized_filename",
     [
-        ("tests/files/seqIO/test1_R1.fq", "test1_R1.test.fq.gz"),
-        ("tests/files/seqIO/test1_R2.fq", "test1_R2.test.fq.gz"),
+        ("tests/files/fileIO/test1_R1.fq", "test1_R1.test.fq.gz"),
+        ("tests/files/fileIO/test1_R2.fq", "test1_R2.test.fq.gz"),
     ],
 )
 def test_processIO_fromFileStr_standardizeInput_w_error(
@@ -131,7 +131,7 @@ def test_processIO_fromFileStr_standardizeInput_w_error(
 
 @pytest.mark.parametrize(
     "table_file",
-    ["tests/files/seqIO/test_table2.tsv"],
+    ["tests/files/fileIO/test_table2.tsv"],
 )
 def test_processIO_fromTableFile_w_error(table_file):
     with pytest.raises(IOError):
@@ -140,7 +140,7 @@ def test_processIO_fromTableFile_w_error(table_file):
 
 @pytest.mark.parametrize(
     "table_file",
-    ["tests/files/seqIO/test_table.tsv"],
+    ["tests/files/fileIO/test_table.tsv"],
 )
 def test_processIO_fromTableFile_wo_error(table_file):
     ProcessIO.fromTableFile(table_file, sample_column="samples")
@@ -149,7 +149,7 @@ def test_processIO_fromTableFile_wo_error(table_file):
 @pytest.mark.parametrize(
     "table_file, standardized_wildcard",
     [
-        ("tests/files/seqIO/test_table.tsv", "{samples}_{reads}.test.fq.gz"),
+        ("tests/files/fileIO/test_table.tsv", "{samples}_{reads}.test.fq.gz"),
     ],
 )
 def test_processIO_fromTableFile_standardizeInput(table_file, standardized_wildcard):
@@ -172,7 +172,7 @@ def test_processIO_fromTableFile_standardizeInput(table_file, standardized_wildc
 @pytest.mark.parametrize(
     "table_file",
     [
-        ("tests/files/seqIO/test_table.tsv"),
+        ("tests/files/fileIO/test_table.tsv"),
     ],
 )
 def test_processIO_fromTableFile(table_file):

@@ -1,4 +1,4 @@
-from pipemake.seqIO import SeqFileIO, SeqTableIO
+from pipemake.fileIO import FileIO, TableIO
 from pipemake.wildcardIO import WildcardIO
 
 
@@ -17,14 +17,14 @@ class ProcessIO:
     @classmethod
     def fromTableFile(cls, table_filename="", **kwargs):
         return cls(
-            SeqTableIO.fromFilenameStr(table_filename, **kwargs),
+            TableIO.fromFilenameStr(table_filename, **kwargs),
             standardize_func="standardizedFiles",
         )
 
     @classmethod
     def fromFileStr(cls, input_filename="", **kwargs):
         return cls(
-            SeqFileIO.create(input_filename, **kwargs), standardize_func="standardize"
+            FileIO.create(input_filename, **kwargs), standardize_func="standardize"
         )
 
     def standardize(self, standardized_filename="", **kwargs):
@@ -72,9 +72,7 @@ def returnSamples(method="", args={}):
         return_samples_call = ProcessIO.fromWildcardStr(**args)
     elif method == "table-file":
         return_samples_call = ProcessIO.fromTableFile(**args)
-    elif method == "file-str":
-        raise Exception("Not implemented")
     else:
-        raise Exception(f"No standardization method given for: {method}")
+        raise Exception(f"No sample method given for: {method}")
 
     return return_samples_call.returnSamples()

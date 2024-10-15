@@ -1,7 +1,7 @@
 import os
 import itertools
 
-from pipemake.seqIO import SeqFileIO
+from pipemake.fileIO import FileIO
 
 from snakemake.io import glob_wildcards
 
@@ -80,7 +80,7 @@ class WildcardIO:
             standardized_filename = standardized_wildcard.format(**sample_wildcard_dict)
 
             # Standardize the file
-            sample_file = SeqFileIO.create(sample_filename)
+            sample_file = FileIO.create(sample_filename)
             sample_file.standardize(standardized_filename, **kwargs)
 
     def returnPaths(self, copy_method="symbolic_link", **kwargs):

@@ -56,7 +56,7 @@ def test_pipemake_main_wildcard_wo_error(wildcard_str):
 @pytest.mark.parametrize(
     "table_str",
     [
-        "tests/files/seqIO/test_table.tsv",
+        "tests/files/fileIO/test_table.tsv",
     ],
 )
 def test_pipemake_main_table_wo_error(table_str):
@@ -106,7 +106,7 @@ def test_pipemake_main_table_wo_error(table_str):
 @pytest.mark.parametrize(
     "table_str",
     [
-        "tests/files/seqIO/test_table2.tsv",
+        "tests/files/fileIO/test_table2.tsv",
     ],
 )
 def test_pipemake_main_table_w_error(table_str):

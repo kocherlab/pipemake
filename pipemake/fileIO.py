@@ -24,7 +24,7 @@ def checkIfGzipped(filename):
     return False
 
 
-class SeqFileIO:
+class FileIO:
     def __init__(self, seq_filename, **kwargs):
         # Confirm the file exists
         if not os.path.isfile(seq_filename):
@@ -131,7 +131,7 @@ class SeqFileIO:
             raise Exception(f"Unsupported copy method: {copy_method}")
 
 
-class SeqTableIO:
+class TableIO:
     def __init__(self, table_dataframe, sample_column="", **kwargs):
         # Confirm the table is a pandas DataFrame
         if not isinstance(table_dataframe, pd.DataFrame):
@@ -247,7 +247,7 @@ class SeqTableIO:
                 standardized_filename = standardized_wildcard.format(**str_wildcards)
 
                 # Standardize the file
-                sample_file = SeqFileIO.create(sample_filename)
+                sample_file = FileIO.create(sample_filename)
                 sample_file.standardize(standardized_filename, **kwargs)
 
     def returnPaths(self, copy_method="symbolic_link", **kwargs):

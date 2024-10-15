@@ -1,3 +1,0 @@
-samples	reads:R1	reads:R2
-test1	tests/files/seqIO/test1_R1.fq.gz	tests/files/seqIO/test1_R2.fq.gz	
-test2	tests/files/seqIO/test2_R1.fq.gz	tests/files/seqIO/test2_R2.fq.gz
