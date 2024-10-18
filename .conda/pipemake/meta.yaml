@@ -21,11 +21,11 @@ source:
 requirements:
   host:
     - pip
-    - python >=3.11
+    - python >=3.9
 
   run:
     - pip
-    - python >=3.11
+    - python >=3.9
     - bioconda::snakemake >=8.11.3
     - pytest
 
