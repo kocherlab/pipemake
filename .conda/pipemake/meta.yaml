@@ -21,15 +21,14 @@ source:
 requirements:
   host:
     - pip
-    - python >=3.11
-
+    - python >=3.8
+    - conda-forge/label/python_rc::_python_rc
+    - conda-forge::immutables
   run:
     - pip
-    - python >=3.11
-    - conda-forge::python_abi=3.13
-    - conda-forge::immutables
+    - python >=3.8
+    - conda-forge::python_abi
     - bioconda::snakemake >=8.11.3
-    - pytest
 
 test:
   imports:
