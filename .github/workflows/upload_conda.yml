@@ -22,7 +22,7 @@ jobs:
           activate-environment: pipemake
           environment-file: .conda/environment_build.yml
           python-version: 3.9
-          channels: conda-forge,bioconda
+          channels: conda-forge,bioconda,conda-forge/label/python_rc
           channel-priority: true
       - name: Build Ubuntu
         if: matrix.os == 'ubuntu-latest'
