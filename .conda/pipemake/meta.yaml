@@ -21,11 +21,12 @@ source:
 requirements:
   host:
     - pip
-    - python >=3.9
+    - python >=3.11
+    - conda-forge::python_abi=3.13
 
   run:
     - pip
-    - python >=3.9
+    - python >=3.11
     - bioconda::snakemake >=8.11.3
     - pytest
 
