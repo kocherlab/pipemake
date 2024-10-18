@@ -92,7 +92,7 @@ If you wanted to perform the `fastq-filter` pipeline on these files, you could u
 
 .. code-block:: bash
 
-    pipemake fastq-filter --fastq-wildcard {samples}_{reads}.fq.gz ---workflow-prefix "FilterTest"
+    pipemake fastq-filter --fastq-wildcard {samples}_{reads}.fq.gz ---workflow-prefix FilterTest
 
 This would generate a snakemake workflow called **FilterTest** that includes the snakemake file **FilterTest.smk**, the configuaration file **FilterTest.yaml**, and the workflow directory **FilterTest**.
 
