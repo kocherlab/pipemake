@@ -22,7 +22,6 @@ requirements:
   host:
     - pip
     - python >=3.11
-    - conda-forge::python_abi
 
   run:
     - pip
