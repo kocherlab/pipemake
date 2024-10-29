@@ -38,6 +38,87 @@ parser:
           type: str
           required: True
           action: confirmDir
+        tag-node-name:
+          help: "Name of the ArUco tag node"
+          type: str
+          required: True
+    sleap-parms:
+      args:
+        tracking-batch-size:
+          help: "Batch size for tracking"
+          type: int
+          default: 4
+        tracking-tracker:
+          help: "Tracker to use for tracking"
+          type: str
+          default: "simplemaxtracks"
+        tracking-max-tracking:
+          help: "If true then the tracker will cap the max number of tracks. (default: False)"
+          action: store_true
+        tracking-max-tracks:
+          help: "Maximum number of tracks to keep"
+          type: int
+    naps-parms:
+      args:
+        start-frame:
+          help: "Start frame for tracking"
+          type: int
+          required: True
+        end-frame:
+          help: "End frame for tracking"
+          type: int
+          required: True
+        aruco-marker-set:
+          help: "Aruco marker set"
+          type: str
+          required: True
+          choices:
+            - 'DICT_4X4_50'
+            - 'DICT_4X4_100'
+            - 'DICT_4X4_250'
+            - 'DICT_4X4_1000'
+            - 'DICT_5X5_50'
+            - 'DICT_5X5_100'
+            - 'DICT_5X5_250'
+            - 'DICT_5X5_1000'
+            - 'DICT_6X6_50'
+            - 'DICT_6X6_100'
+            - 'DICT_6X6_250'
+            - 'DICT_6X6_1000'
+            - 'DICT_7X7_50'
+            - 'DICT_7X7_100'
+            - 'DICT_7X7_250'
+            - 'DICT_7X7_1000'
+            - 'DICT_ARUCO_ORIGINAL'
+        half-rolling-window-size:
+          help: "Half of the rolling window size"
+          type: int
+          default: 20
+        aruco-crop-size:
+          help: "Size of the crop for Aruco markers"
+          type: int
+          default: 50
+        aruco-error-correction-rate:
+          help: "Error correction rate for Aruco markers"
+          type: float
+          default: 0.6
+        aruco-adaptive-thresh-constant:
+          help: "Adaptive threshold constant for Aruco markers"
+          type: int
+          default: 7
+        aruco-adaptive-thresh-win-size-max:
+          help: "Maximum adaptive threshold window size for Aruco markers"
+          type: int
+          default: 23
+        aruco-adaptive-thresh-win-size-step:
+          help: "Step size for adaptive threshold window size for Aruco markers"
+          type: int
+          default: 10
+        aruco-adaptive-thresh-win-size-min:
+          help: "Minimum adaptive threshold window size for Aruco markers"
+          type: int
+          default: 3
+        
     paths:
       args:
         tracking-model-dir:
