@@ -1,0 +1,24 @@
+executor: slurm
+
+default-resources:
+    runtime: 1440
+    mem: "64G"
+    cpus_per_task: 2
+
+# General Snakemake settings
+local-cores: 2
+jobs: 512
+keep-going: True
+printshellcmds: True
+scheduler: greedy
+
+# Container and environment settings
+use-singularity: True
+singularity-args: "--nv"
+
+# Rule-specific resource overrides
+set-resources:
+    run_sleap:
+        slurm_extra: "'--gres=gpu:1'"
+        mem: "32G"
+        runtime: 360
