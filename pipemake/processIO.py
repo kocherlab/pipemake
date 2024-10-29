@@ -1,5 +1,6 @@
 from pipemake.fileIO import FileIO, TableIO
 from pipemake.wildcardIO import WildcardIO
+from pipemake.pathIO import DirIO
 
 
 class ProcessIO:
@@ -27,6 +28,10 @@ class ProcessIO:
             FileIO.create(input_filename, **kwargs), standardize_func="standardize"
         )
 
+    @classmethod
+    def fromDirStr(cls, path_name="", **kwargs):
+        return cls(DirIO.create(path_name, **kwargs), standardize_func="standardize")
+
     def standardize(self, standardized_filename="", **kwargs):
         self.standardize_call(standardized_filename, **kwargs)
 
@@ -45,6 +50,8 @@ def standardizeInput(method="", args={}):
         standardize_input_call = ProcessIO.fromTableFile(**args)
     elif method == "file-str":
         standardize_input_call = ProcessIO.fromFileStr(**args)
+    elif method == "dir-str":
+        standardize_input_call = ProcessIO.fromDirStr(**args)
     else:
         raise Exception(f"No standardization method given for: {method}")
 
@@ -60,6 +67,8 @@ def returnPaths(method="", args={}):
         return_path_call = ProcessIO.fromTableFile(**args)
     elif method == "file-str":
         return_path_call = ProcessIO.fromFileStr(**args)
+    elif method == "dir-str":
+        return_path_call = ProcessIO.fromDirStr(**args)
     else:
         raise Exception(f"No standardization method given for: {method}")
 

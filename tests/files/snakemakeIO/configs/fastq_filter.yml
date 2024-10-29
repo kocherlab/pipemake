@@ -17,6 +17,10 @@ parser:
           type: str
           action: confirmFile
           mutually-exclusive: "input-parser"
+        dir-test:
+          help: "Testing directory"
+          type: str
+          action: confirmDir
         fastq-copy-method:
           help: "Socifies if FASTQs should be copied or symbolically linked."
           choices:
@@ -96,10 +100,19 @@ setup:
           sample_column: 'samples'
       snakefiles:
         - test_script
-
-command-line:
-  cores: 20
-  use-singularity: True
+  
+  test_input:
+    dir-method:
+      input:
+        args:
+          - "workflow_prefix"
+          - "dir-test"
+      standardize:
+        method: "dir-str"
+        args:
+          standardized_directory: "Test_Directory"
+          workflow_prefix: "{workflow_prefix}"
+          copy_method: 'symbolic_link'
 
 snakefiles:
   - fastq_filter_fastp
