@@ -4,15 +4,19 @@ from pipemake.pathIO import DirIO
 
 
 class ProcessIO:
-    def __init__(self, processIO, standardize_func=None, **kwargs):
+    def __init__(
+        self, processIO, standardize_func=None, standardize_type=None, **kwargs
+    ):
         self.processIO = processIO
         self.standardize_call = getattr(self.processIO, standardize_func)
+        self.standardize_type = standardize_type
 
     @classmethod
     def fromWildcardStr(cls, wildcard_str="", **kwargs):
         return cls(
             WildcardIO.fromStr(wildcard_str, **kwargs),
             standardize_func="standardizedFiles",
+            standardize_type="file",
         )
 
     @classmethod
@@ -20,20 +24,38 @@ class ProcessIO:
         return cls(
             TableIO.fromFilenameStr(table_filename, **kwargs),
             standardize_func="standardizedFiles",
+            standardize_type="file",
         )
 
     @classmethod
     def fromFileStr(cls, input_filename="", **kwargs):
         return cls(
-            FileIO.create(input_filename, **kwargs), standardize_func="standardize"
+            FileIO.create(input_filename, **kwargs),
+            standardize_func="standardize",
+            standardize_type="file",
         )
 
     @classmethod
     def fromDirStr(cls, path_name="", **kwargs):
-        return cls(DirIO.create(path_name, **kwargs), standardize_func="standardize")
+        return cls(
+            DirIO.create(path_name, **kwargs),
+            standardize_func="standardize",
+            standardize_type="dir",
+        )
 
-    def standardize(self, standardized_filename="", **kwargs):
+    def standardize(self, **kwargs):
+        if self.standardize_type == "file":
+            self._standardize_file(**kwargs)
+        elif self.standardize_type == "dir":
+            self._standardize_dir(**kwargs)
+        else:
+            raise Exception(f"Standardize type not recognized: {self.standardize_type}")
+
+    def _standardize_file(self, standardized_filename="", **kwargs):
         self.standardize_call(standardized_filename, **kwargs)
+
+    def _standardize_dir(self, standardized_directory="", **kwargs):
+        self.standardize_call(standardized_directory, **kwargs)
 
     def returnSamples(self, **kwargs):
         return self.processIO.returnSamples()

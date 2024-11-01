@@ -55,9 +55,6 @@ parser:
         tracking-max-tracking:
           help: "If true then the tracker will cap the max number of tracks. (default: False)"
           action: store_true
-        tracking-max-tracks:
-          help: "Maximum number of tracks to keep"
-          type: int
     naps-parms:
       args:
         start-frame:
@@ -151,7 +148,7 @@ setup:
         args:
           wildcard_str: "{video-wildcard}"
           standardized_filename: "{video-standardized-wildcard}"
-          out_dir: "{tracking-videos-dir"
+          out_dir: "{tracking-videos-dir}"
           copy_method: '{video-copy-method}'
       samples:
         method: "wildcard-str"

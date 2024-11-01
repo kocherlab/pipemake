@@ -8,7 +8,6 @@ from pipemake.snakemakeIO import (
     SnakePipelineIO,
     SnakeFileIO,
     SnakeRuleIO,
-    SnakeAttributeIO,
 )
 
 
@@ -193,6 +192,7 @@ def test_SnakeFileIO_wo_error(smk_filename):
 
     # Generate the module file and confirm it exists
     test_module.write(out_filename)
+    print(out_filename)
     assert os.path.exists(out_filename)
 
     with open(cmp_filename, "w") as cmp_file:
@@ -248,33 +248,3 @@ def test_SnakeRuleIO_w_script(rule_filename):
     test_rule = SnakeRuleIO.read(rule_str=test_str, indent_style="    ")
 
     assert test_rule._rule_script_files == ["test.py"]
-
-
-@pytest.mark.parametrize(
-    "rule_name, attribute_type, attribute_text",
-    [
-        ("fastp_single_end", "params", "min_length=config['min_length']"),
-        ("fastp_pair_end", "resources", "\t\tmem_mb=16000"),
-    ],
-)
-def test_SnakeAttributeIO(rule_name, attribute_type, attribute_text):
-    # Assign the attribute
-    test_attribute = SnakeAttributeIO.process(
-        rule_name=rule_name,
-        attribute_type=attribute_type,
-        attribute_text=attribute_text,
-        indent_style="\t",
-    )
-
-    # Assign the attribute argument
-    attribute_text_arg = attribute_text.split("=")[0].strip()
-
-    # Check if the attributes were created correctly
-    if attribute_type == "params":
-        with pytest.raises(Exception):
-            test_attribute.updateSnakeResource()
-    elif attribute_type == "resources":
-        assert (
-            test_attribute.updateSnakeResource()
-            == f'\t\tmem_mb=config["{attribute_type}"]["{rule_name}"]["{attribute_text_arg}"]'
-        )
