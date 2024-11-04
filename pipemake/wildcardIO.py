@@ -1,4 +1,5 @@
 import os
+import logging
 import itertools
 
 from pipemake.fileIO import FileIO
@@ -63,6 +64,13 @@ class WildcardIO:
             dict(zip(wildcard_names, v)) for v in itertools.product(*wildcard_values)
         ]:
             sample_filename = self.wildcard_str.format(**sample_wildcard_dict)
+
+            # Confirm the sample file exists
+            if not os.path.isfile(sample_filename):
+                logging.warning(
+                    f"Unable to find file: {sample_filename}. This may occur if wildcards are not always combined."
+                )
+                continue
 
             # Check if any standardized wildcards are missing
             missing_wildcards = [

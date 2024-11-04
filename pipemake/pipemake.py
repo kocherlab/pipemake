@@ -230,7 +230,11 @@ def pipeline_parser(config_pipelines):
                                         f"Function not supported: {suffix['function']}"
                                     )
 
+                    # Assign the default string
                     arg_args["default"] = default_str
+
+                    # Add the default string to the help message
+                    arg_args["help"] += f" (default: {default_str})"
 
                 # Assign the argument to a mutually exclusive group, if applicable
                 if "mutually-exclusive" in arg_args:
