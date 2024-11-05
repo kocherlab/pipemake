@@ -7,27 +7,30 @@ parser:
       mutually-exclusive-groups:
         input-parser:
           required: True
+      wildcards-args:
+        fastq-standardized-wildcard:
+          help: "Standardized wildcard statement used to store FASTQs"
+          type: str
+          default: 
+            str: "{samples}_{reads}.fq.gz"
       args:
         fastq-wildcard:
           help: "Wildcard statement to represent FASTQs"
           type: str
           mutually-exclusive: "input-parser"
+          wildcards: "fastq-standardized-wildcard"
         fastq-table:
           help: "Table with sample and FASTQs filenames"
           type: str
           action: confirmFile
           mutually-exclusive: "input-parser"
+          wildcards: "fastq-standardized-wildcard"
         fastq-copy-method:
           help: "Socifies if FASTQs should be copied or symbolically linked."
           choices:
             - 'symbolic_link'
             - 'copy'
           default: 'symbolic_link'
-        fastq-standardized-wildcard:
-          help: "Standardized wildcard statement used to store FASTQs"
-          type: str
-          default: 
-            str: "{samples}_{reads}.fq.gz"
         min-length:
           help: "Minimum length of reads to keep"
           type: int

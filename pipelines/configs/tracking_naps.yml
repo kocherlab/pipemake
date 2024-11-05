@@ -110,8 +110,7 @@ parser:
         aruco-adaptive-thresh-win-size-step:
           help: "Step size for adaptive threshold window size for Aruco markers"
           type: int
-          default: 10uired: True
-    sleap-par
+          default: 10
         aruco-adaptive-thresh-win-size-min:
           help: "Minimum adaptive threshold window size for Aruco markers"
           type: int

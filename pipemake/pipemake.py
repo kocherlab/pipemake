@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import re
 import sys
 import random
 import string
@@ -131,6 +132,7 @@ def pipeline_parser(config_pipelines):
         for pipeline_arg_group, group_args in pipeline_parser_dict[
             "arg-groups"
         ].items():
+            # Check if mutually exclusive groups are present
             if "mutually-exclusive-groups" not in group_args:
                 continue
 
@@ -174,6 +176,62 @@ def pipeline_parser(config_pipelines):
             "arg-groups"
         ].items():
             """2. Add the arguments to the argument subparser"""
+
+            # Create dict to store the arg wildcard
+            arg_wildcards = {}
+
+            # Check if wildcards are present
+            if "wildcards-args" in group_args:
+                # Loop the arguments in the group
+                for pipeline_arg_name, arg_args in group_args["wildcards-args"].items():
+                    # Configure the default params, if specified
+                    if "default" in arg_args and isinstance(arg_args["default"], dict):
+                        default_str = arg_args["default"]["str"]
+                        if "suffix" in arg_args["default"]:
+                            if isinstance(arg_args["default"]["suffix"], str):
+                                arg_args["default"]["suffix"] = [
+                                    arg_args["default"]["suffix"]
+                                ]
+                            for suffix in arg_args["default"]["suffix"]:
+                                # Add underscores if needed
+                                if default_str:
+                                    default_str += "_"
+
+                                # Process suffix strings
+                                if isinstance(suffix, str):
+                                    default_str += suffix
+
+                                # Process suffix dicts
+                                elif isinstance(suffix, dict):
+                                    # Convert the suffix dict to lowercase keys
+                                    suffix_dict = {
+                                        _k.lower(): _v for _k, _v in suffix.items()
+                                    }
+
+                                    if "function" not in suffix_dict:
+                                        raise Exception(
+                                            f"Suffix dict not supported: {suffix_dict}"
+                                        )
+
+                                    if suffix["function"] == "jobTimeStamp":
+                                        default_str += jobTimeStamp()
+                                    elif suffix["function"] == "jobRandomString":
+                                        default_str += jobRandomString()
+                                    else:
+                                        raise Exception(
+                                            f"Function not supported: {suffix['function']}"
+                                        )
+
+                        # Assign the default string
+                        arg_args["default"] = default_str
+
+                    # Assign the argument wildcards, if applicable
+                    arg_wildcards[pipeline_arg_name] = re.findall(
+                        r"\{(.*?)\}", arg_args["default"]
+                    )
+
+                    # Add the argument to the args argument group
+                    group_args["args"][pipeline_arg_name] = arg_args
 
             # Loop the arguments in the group
             for pipeline_arg_name, arg_args in group_args["args"].items():
@@ -233,8 +291,33 @@ def pipeline_parser(config_pipelines):
                     # Assign the default string
                     arg_args["default"] = default_str
 
+                # Assign the argument wildcards, if applicable
+                if "wildcards" in arg_args:
+                    # Check if the wildcards is valid
+                    if arg_args["wildcards"] not in arg_wildcards:
+                        raise Exception(
+                            f'Wildcards not found ({arg_args["wildcards"]}) for argument {pipeline_arg_name}'
+                        )
+
+                    # Confirm no default value is present
+                    if "default" in arg_args:
+                        raise Exception(
+                            f'Wildcards are incompatible with default values ({arg_args["default"]}) for argument {pipeline_arg_name}'
+                        )
+
                     # Add the default string to the help message
-                    arg_args["help"] += f" (default: {default_str})"
+                    arg_args["help"] += (
+                        f' (supported wildcards: {", ".join(arg_wildcards[arg_args["wildcards"]])})'
+                    )
+
+                    del arg_args["wildcards"]
+
+                # Check if a default value exists
+                elif "default" in arg_args and not isinstance(
+                    arg_args["default"], dict
+                ):
+                    # Add the default string to the help message
+                    arg_args["help"] += f' (default: { arg_args["default"]})'
 
                 # Assign the argument to a mutually exclusive group, if applicable
                 if "mutually-exclusive" in arg_args:
