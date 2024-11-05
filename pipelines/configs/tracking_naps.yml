@@ -42,7 +42,7 @@ parser:
           help: "Name of the ArUco tag node"
           type: str
           required: True
-    sleap-parms:
+    sleap-prams:
       args:
         tracking-batch-size:
           help: "Batch size for tracking"
@@ -55,7 +55,7 @@ parser:
         tracking-max-tracking:
           help: "If true then the tracker will cap the max number of tracks. (default: False)"
           action: store_true
-    naps-parms:
+    naps-prams:
       args:
         start-frame:
           help: "Start frame for tracking"
@@ -110,7 +110,8 @@ parser:
         aruco-adaptive-thresh-win-size-step:
           help: "Step size for adaptive threshold window size for Aruco markers"
           type: int
-          default: 10
+          default: 10uired: True
+    sleap-par
         aruco-adaptive-thresh-win-size-min:
           help: "Minimum adaptive threshold window size for Aruco markers"
           type: int
