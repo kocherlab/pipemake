@@ -36,36 +36,36 @@ This would display the following information:
                                  [--singularity-dir SINGULARITY_DIR] 
                                  [-h]
 
-fastq-filter required arguments:
-  --fastq-wildcard FASTQ_WILDCARD
-                        Wildcard statement to represent FASTQs
-  --fastq-table FASTQ_TABLE
-                        Table with sample and FASTQs filenames
+    fastq-filter required arguments:
+    --fastq-wildcard FASTQ_WILDCARD
+                            Wildcard statement to represent FASTQs
+    --fastq-table FASTQ_TABLE
+                            Table with sample and FASTQs filenames
 
-fastq-filter paths arguments:
-  --unfiltered-fastq-dir UNFILTERED_FASTQ_DIR
-                        Directory to store unfiltered FASTQ files (default: FASTQ/Unfiltered)
-  --filtered-fastq-dir FILTERED_FASTQ_DIR
-                        Directory to store filtered FASTQ files (default: FASTQ/Filtered)
+    fastq-filter paths arguments:
+    --unfiltered-fastq-dir UNFILTERED_FASTQ_DIR
+                            Directory to store unfiltered FASTQ files (default: FASTQ/Unfiltered)
+    --filtered-fastq-dir FILTERED_FASTQ_DIR
+                            Directory to store filtered FASTQ files (default: FASTQ/Filtered)
 
-fastq-filter optional arguments:
-  --fastq-copy-method {symbolic_link,copy}
-                        Socifies if FASTQs should be copied or symbolically linked.
-  --fastq-standardized-wildcard FASTQ_STANDARDIZED_WILDCARD
-                        Standardized wildcard statement used to store FASTQs (default: {samples}_{reads}.fq.gz)
-  --min-length MIN_LENGTH
-                        Minimum length of reads to keep (default: 50)
-  --workflow-prefix WORKFLOW_PREFIX
-                        Assign the workflow prefix
-  --work-dir WORK_DIR   Assign the working directory for snakemake. If not provided, the current directory will be used.
-  --scale-threads SCALE_THREADS
-                        Scale the threads for each task
-  --scale-mem SCALE_MEM
-                        Scale the memory (RAM) for each task
-  --resource-yml        Create a seperate resource yaml
-  --singularity-dir SINGULARITY_DIR
-                        Assign different directory of singularity images
-  -h, --help            show this help message and exit
+    fastq-filter optional arguments:
+    --fastq-copy-method {symbolic_link,copy}
+                            Socifies if FASTQs should be copied or symbolically linked.
+    --fastq-standardized-wildcard FASTQ_STANDARDIZED_WILDCARD
+                            Standardized wildcard statement used to store FASTQs (default: {samples}_{reads}.fq.gz)
+    --min-length MIN_LENGTH
+                            Minimum length of reads to keep (default: 50)
+    --workflow-prefix WORKFLOW_PREFIX
+                            Assign the workflow prefix
+    --work-dir WORK_DIR   Assign the working directory for snakemake. If not provided, the current directory will be used.
+    --scale-threads SCALE_THREADS
+                            Scale the threads for each task
+    --scale-mem SCALE_MEM
+                            Scale the memory (RAM) for each task
+    --resource-yml        Create a seperate resource yaml
+    --singularity-dir SINGULARITY_DIR
+                            Assign different directory of singularity images
+    -h, --help            show this help message and exit
 
 You may notice that the arguments are divided into three categories: required, paths, and optional.
 
