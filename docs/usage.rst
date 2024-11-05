@@ -87,6 +87,7 @@ For example, let's examine the files within the example directory `example/fastq
     test2_R1.fq.gz
 
 As you can see, the directory contains:
+
 * A set of paired-end FASTQ files: `test1_R1.fq.gz`, `test1_R2.fq.gz`
 * A single-end FASTQ file: `test2_R1.fq.gz`.
 
