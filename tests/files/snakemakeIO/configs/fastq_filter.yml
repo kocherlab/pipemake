@@ -4,7 +4,7 @@ parser:
   help: Filter FASTQ files using fastp
   arg-groups:
     basic:
-      mutually-exclusive-groups:
+      mutually-exclusive-args:
         input-parser:
           required: True
       args:

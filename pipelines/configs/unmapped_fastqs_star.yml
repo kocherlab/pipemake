@@ -4,7 +4,7 @@ parser:
   help: Create unmapped FASTQs using STAR
   arg-groups:
     basic:
-      mutually-exclusive-groups:
+      mutually-exclusive-args:
         input-parser:
           required: True
       args:

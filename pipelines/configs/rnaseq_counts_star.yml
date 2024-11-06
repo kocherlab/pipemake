@@ -4,7 +4,7 @@ parser:
   help: Count RNAseq reads within a genome assembly using STAR and featureCounts
   arg-groups:
     basic:
-      mutually-exclusive-groups:
+      mutually-exclusive-args:
         input-parser:
           required: True
       args:

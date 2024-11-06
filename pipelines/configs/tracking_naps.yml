@@ -4,7 +4,7 @@ parser:
   help: Track MP4 videos using SLEAP and NAPS
   arg-groups:
     basic:
-      mutually-exclusive-groups:
+      mutually-exclusive-args:
         input-parser:
           required: True
       args:
