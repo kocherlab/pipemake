@@ -42,7 +42,7 @@ parser:
           help: "Name of the ArUco tag node"
           type: str
           required: True
-    sleap-prams:
+    sleap-params:
       args:
         tracking-batch-size:
           help: "Batch size for tracking"
@@ -55,7 +55,7 @@ parser:
         tracking-max-tracking:
           help: "If true then the tracker will cap the max number of tracks. (default: False)"
           action: store_true
-    naps-prams:
+    naps-params:
       args:
         start-frame:
           help: "Start frame for tracking"

@@ -110,6 +110,7 @@ setup:
       standardize:
         method: "dir-str"
         args:
+          path_name: "{dir-test}"
           standardized_directory: "Test_Directory"
           workflow_prefix: "{workflow_prefix}"
           copy_method: 'symbolic_link'
