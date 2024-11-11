@@ -50,7 +50,7 @@ This would display the following information:
 
     fastq-filter optional arguments:
     --fastq-copy-method {symbolic_link,copy}
-                            Socifies if FASTQs should be copied or symbolically linked.
+                            Specifies if FASTQs should be copied or symbolically linked.
     --fastq-standardized-wildcard FASTQ_STANDARDIZED_WILDCARD
                             Standardized wildcard statement used to store FASTQs (default: {samples}_{reads}.fq.gz)
     --min-length MIN_LENGTH
