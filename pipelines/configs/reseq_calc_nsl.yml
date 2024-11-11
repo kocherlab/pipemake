@@ -11,7 +11,7 @@ parser:
           required: True
           action: confirmFile
         reseq-copy-method:
-          help: "Socifies if resequencing files should be copied or symbolically linked."
+          help: "Specifies if resequencing files should be copied or symbolically linked."
           choices:
             - 'symbolic_link'
             - 'copy'

@@ -26,7 +26,7 @@ parser:
           mutually-exclusive: "input-parser"
           wildcards: "fastq-standardized-wildcard"
         fastq-copy-method:
-          help: "Socifies if FASTQs should be copied or symbolically linked."
+          help: "Specifies if FASTQs should be copied or symbolically linked."
           choices:
             - 'symbolic_link'
             - 'copy'
@@ -62,7 +62,7 @@ setup:
           wildcard_str: "{fastq-wildcard}"
           standardized_filename: "{fastq-standardized-wildcard}"
           out_dir: "{unfiltered-fastq-dir}"
-          copy_method: '{fastq_copy_method}'
+          copy_method: '{fastq-copy-method}'
           gzipped: True
       samples:
         method: "wildcard-str"
@@ -83,7 +83,7 @@ setup:
           table_filename: "{fastq-table}"
           standardized_filename: "{fastq-standardized-wildcard}"
           out_dir: "{unfiltered-fastq-dir}"
-          copy_method: '{fastq_copy_method}'
+          copy_method: '{fastq-copy-method}'
           sample_column: 'samples'
           gzipped: True
       samples:

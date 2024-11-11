@@ -7,27 +7,30 @@ parser:
       mutually-exclusive-args:
         input-parser:
           required: True
-      args:
-        video-wildcard:
-          help: "Wildcard statement to represent videos to track"
-          type: str
-          mutually-exclusive: "input-parser"
-        video-table:
-          help: "Table with video IDs and filenames"
-          type: str
-          action: confirmFile
-          mutually-exclusive: "input-parser"
-        video-copy-method:
-          help: "Socifies if videos should be copied or symbolically linked."
-          choices:
-            - 'symbolic_link'
-            - 'copy'
-          default: 'symbolic_link'
+      wildcards-args:
         video-standardized-wildcard:
           help: "Standardized wildcard statement used to store videos"
           type: str
           default: 
             str: "{video_ids}.mp4"
+      args:
+        video-wildcard:
+          help: "Wildcard statement to represent videos to track"
+          type: str
+          mutually-exclusive: "input-parser"
+          wildcards: "video-standardized-wildcard"
+        video-table:
+          help: "Table with video IDs and filenames"
+          type: str
+          action: confirmFile
+          mutually-exclusive: "input-parser"
+          wildcards: "video-standardized-wildcard"
+        video-copy-method:
+          help: "Specifies if videos should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
         centroid-model:
           help: "Centroid model directory"
           type: str
@@ -38,6 +41,12 @@ parser:
           type: str
           required: True
           action: confirmDir
+        model-copy-method:
+          help: "Specifies if models should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
         tag-node-name:
           help: "Name of the ArUco tag node"
           type: str
@@ -190,6 +199,7 @@ setup:
           path_name: "{centroid-model}"
           standardized_directory: "centroid_model"
           out_dir: "{tracking-model-dir}"
+          copy_method: "{model-copy-method}"
 
   instance_model:
     dir-method:
@@ -203,6 +213,7 @@ setup:
           path_name: "{instance-model}"
           standardized_directory: "instance_model"
           out_dir: "{tracking-model-dir}"
+          copy_method: "{model-copy-method}"
 
 snakefiles:
   - tracking_sleap

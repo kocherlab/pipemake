@@ -11,7 +11,7 @@ parser:
           required: True
           action: confirmFile
         reseq-copy-method:
-          help: "Socifies if resequencing files should be copied or symbolically linked."
+          help: "Specifies if resequencing files should be copied or symbolically linked."
           choices:
             - 'symbolic_link'
             - 'copy'
@@ -128,7 +128,7 @@ setup:
           input_filename: "{model-file}"
           standardized_filename: "{species}.model"
           out_dir: "{models-dir}"
-          copy_method: '{reseq-copy-method}'
+          copy_method: 'copy'
           gzipped: False
 
 snakefiles:

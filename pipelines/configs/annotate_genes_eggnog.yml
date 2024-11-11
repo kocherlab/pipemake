@@ -10,10 +10,16 @@ parser:
           type: str
           required: True
           action: confirmFile
-        eggnod-data-dir:
+        eggnog-data-dir:
           help: "eggNOG database directory"
           type: str
           action: confirmDir
+        eggnog-copy-method:
+          help: "Specifies if EggNOG directory should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
         assembly-version:
           help: "Assembly Version"
           type: str
@@ -59,19 +65,21 @@ setup:
           input_filename: "{aa-transcript-fasta}"
           standardized_filename: "{species}_{assembly-version}.{annotation-version}_pep.fa"
           out_dir: "{annotations-dir}"
+          copy_method: "copy"
           gzipped: False
   eggnog_db:
     dir-method:
       input:
         args:
-          - "eggnod-data-dir"
+          - "eggnog-data-dir"
           - "downloads-dir"
       standardize:
         method: "dir-str"
         args:
-          path_name: "{eggnod-data-dir}"
+          path_name: "{eggnog-data-dir}"
           standardized_directory: "EggNOG"
           out_dir: "{downloads-dir}"
+          copy_method: "{eggnog-copy-method}"
           gzipped: False
 
 snakefiles:

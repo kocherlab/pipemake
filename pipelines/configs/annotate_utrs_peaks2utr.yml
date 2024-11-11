@@ -10,6 +10,12 @@ parser:
           type: str
           required: True
           action: confirmFile
+        rnaseq-copy-method:
+          help: "Specifies if RNAseq BAM should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
         annotations-gff:
           help: "Annotations GFF"
           type: str
@@ -67,7 +73,7 @@ setup:
           input_filename: "{rnaseq-bam}"
           standardized_filename: "{species}_{assembly-version}.bam"
           out_dir: "{rnaseq-bam-dir}"
-          copy_method: 'symbolic_link'
+          copy_method: "{rnaseq-copy-method}"
           gzipped: True
 
   gff_input:
@@ -82,6 +88,7 @@ setup:
           input_filename: "{annotations-gff}"
           standardized_filename: "{species}_{assembly-version}.{annotation-version}.gff3"
           out_dir: "{annotations-dir}"
+          copy_method: "copy"
           gzipped: False
 
 snakefiles:

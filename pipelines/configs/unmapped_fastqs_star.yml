@@ -7,27 +7,30 @@ parser:
       mutually-exclusive-args:
         input-parser:
           required: True
-      args:
-        rnaseq-wildcard:
-          help: "Wildcard statement to represent RNAseq FASTQs"
-          type: str
-          mutually-exclusive: "input-parser"
-        rnaseq-table:
-          help: "Table with sample and FASTQs filenames"
-          type: str
-          action: confirmFile
-          mutually-exclusive: "input-parser"
-        rnaseq-copy-method:
-          help: "Socifies if RNAseq FASTQs should be copied or symbolically linked."
-          choices:
-            - 'symbolic_link'
-            - 'copy'
-          default: 'symbolic_link'
+      wildcards-args:
         rnaseq-standardized-wildcard:
           help: "Standardized wildcard statement used to store RNAseq FASTQs"
           type: str
           default: 
             str: "{samples}_{reads}.fq.gz"
+      args:
+        rnaseq-wildcard:
+          help: "Wildcard statement to represent RNAseq FASTQs"
+          type: str
+          mutually-exclusive: "input-parser"
+          wildcards: "rnaseq-standardized-wildcard"
+        rnaseq-table:
+          help: "Table with sample and FASTQs filenames"
+          type: str
+          action: confirmFile
+          mutually-exclusive: "input-parser"
+          wildcards: "rnaseq-standardized-wildcard"
+        rnaseq-copy-method:
+          help: "Specifies if RNAseq FASTQs should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
         assembly-fasta:
           help: "Assembly fasta"
           type: str
@@ -38,6 +41,12 @@ parser:
           type: str
           required: True
           action: confirmFile
+        assembly-copy-method:
+          help: "Specifies if assembly files should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
         read-len:
           help: "Read Length"
           type: str
@@ -97,7 +106,7 @@ setup:
           wildcard_str: "{rnaseq-wildcard}"
           standardized_filename: "{rnaseq-standardized-wildcard}"
           out_dir: "{rnaseq-fastq-dir}"
-          copy_method: '{rnaseq_copy_method}'
+          copy_method: '{rnaseq-copy-method}'
           gzipped: True
       samples:
         method: "wildcard-str"
@@ -118,7 +127,7 @@ setup:
           table_filename: "{rnaseq-table}"
           standardized_filename: "{rnaseq-standardized-wildcard}"
           out_dir: "{rnaseq-fastq-dir}"
-          copy_method: '{rnaseq_copy_method}'
+          copy_method: '{rnaseq-copy-method}'
           sample_column: 'samples'
           gzipped: True
       samples:
@@ -139,6 +148,7 @@ setup:
           input_filename: "{assembly-fasta}"
           standardized_filename: "{species}_{assembly_version}.fa"
           out_dir: "{assembly-dir}"
+          copy_method: "{assembly-copy-method}"
           gzipped: False
   
   gtf_input:
@@ -153,6 +163,7 @@ setup:
           input_filename: "{assembly-gtf}"
           standardized_filename: "{species}_{assembly_version}.gtf"
           out_dir: "{assembly-dir}"
+          copy_method: "{assembly-copy-method}"
           gzipped: False
 
 snakefiles:
