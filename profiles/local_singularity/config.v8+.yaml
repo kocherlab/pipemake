@@ -1,0 +1,16 @@
+restart-times: 0
+local-cores: 16
+latency-wait: 1440
+jobs: 4
+keep-going: True
+rerun-incomplete: True
+printshellcmds: True
+
+# Container and environment settings
+use-singularity: True
+singularity-args: "--nv"
+
+# Set resources for specific rules
+set-resources:
+  run_sleap:
+      n_jobs: 1

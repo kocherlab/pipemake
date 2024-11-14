@@ -138,7 +138,7 @@ The following is an example of a **Pipeline** configuration file:
               action: confirmFile
               mutually-exclusive: 'input-parser'
             rnaseq-copy-method:
-              help: "Socifies if RNAseq FASTQs should be copied or symbolically linked."
+              help: "Specifies if RNAseq FASTQs should be copied or symbolically linked."
               choices:
                 - 'symbolic_link'
                 - 'copy'
@@ -354,7 +354,7 @@ The `arg-groups` sub-section is used by `pipemake` to define command-line argume
               action: confirmFile
               mutually-exclusive: input-parser
             rnaseq-copy-method:
-              help: "Socifies if RNAseq FASTQs should be copied or symbolically linked."
+              help: "Specifies if RNAseq FASTQs should be copied or symbolically linked."
               choices:
                 - 'symbolic_link'
                 - 'copy'

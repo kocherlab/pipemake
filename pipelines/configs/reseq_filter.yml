@@ -10,6 +10,12 @@ parser:
           type: str
           required: True
           action: confirmFile
+        reseq-copy-method:
+          help: "Specifies if resequencing files should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
         missing-cutoff:
           help: "Missing data cutoff"
           type: float
@@ -74,6 +80,7 @@ setup:
           input_filename: "{reseq-vcf}"
           standardized_filename: "{species}_{assembly-version}.vcf.gz"
           out_dir: "{reseq-unfiltered-vcf-dir}"
+          copy_method: '{reseq-copy-method}'
           gzipped: True
 
 snakefiles:

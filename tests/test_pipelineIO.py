@@ -64,10 +64,10 @@ def test_ConfigPipelineIO_fromYAML_parser_dict(config_yaml):
     assert "paths" in config.parser_dict["arg-groups"]
     assert "args" in config.parser_dict["arg-groups"]["basic"]
     assert "args" in config.parser_dict["arg-groups"]["paths"]
-    assert "mutually-exclusive-groups" in config.parser_dict["arg-groups"]["basic"]
+    assert "mutually-exclusive-args" in config.parser_dict["arg-groups"]["basic"]
     assert (
         "input-parser"
-        in config.parser_dict["arg-groups"]["basic"]["mutually-exclusive-groups"]
+        in config.parser_dict["arg-groups"]["basic"]["mutually-exclusive-args"]
     )
     assert "fastq-wildcard" in config.parser_dict["arg-groups"]["basic"]["args"]
     assert "type" in config.parser_dict["arg-groups"]["basic"]["args"]["fastq-wildcard"]

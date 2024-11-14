@@ -10,6 +10,12 @@ parser:
           type: str
           required: True
           action: confirmFile
+        reseq-copy-method:
+          help: "Specifies if resequencing files should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
         model-file:
           help: "Model filename"
           type: str
@@ -82,6 +88,7 @@ setup:
           input_filename: "{reseq-vcf}"
           standardized_filename: "{species}_{assembly-version}.vcf.gz"
           out_dir: "{reseq-unfiltered-vcf-dir}"
+          copy_method: "{reseq-copy-method}"
           gzipped: True
 
   model_input:
@@ -96,6 +103,7 @@ setup:
           input_filename: "{model-file}"
           standardized_filename: "{species}.model"
           out_dir: "{models-dir}"
+          copy_method: "copy"
           gzipped: False
 
 snakefiles:

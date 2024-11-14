@@ -4,30 +4,37 @@ parser:
   help: Filter FASTQ files using fastp
   arg-groups:
     basic:
-      mutually-exclusive-groups:
+      mutually-exclusive-args:
         input-parser:
           required: True
-      args:
-        fastq-wildcard:
-          help: "Wildcard statement to represent FASTQs"
-          type: str
-          mutually-exclusive: "input-parser"
-        fastq-table:
-          help: "Table with sample and FASTQs filenames"
-          type: str
-          action: confirmFile
-          mutually-exclusive: "input-parser"
-        fastq-copy-method:
-          help: "Socifies if FASTQs should be copied or symbolically linked."
-          choices:
-            - 'symbolic_link'
-            - 'copy'
-          default: 'symbolic_link'
+      wildcards-args:
         fastq-standardized-wildcard:
           help: "Standardized wildcard statement used to store FASTQs"
           type: str
           default: 
             str: "{samples}_{reads}.fq.gz"
+      args:
+        fastq-wildcard:
+          help: "Wildcard statement to represent FASTQs"
+          type: str
+          mutually-exclusive: "input-parser"
+          wildcards: "fastq-standardized-wildcard"
+        fastq-table:
+          help: "Table with sample and FASTQs filenames"
+          type: str
+          action: confirmFile
+          mutually-exclusive: "input-parser"
+          wildcards: "fastq-standardized-wildcard"
+        fastq-copy-method:
+          help: "Specifies if FASTQs should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        dir-test:
+          help: "Testing directory"
+          type: str
+          action: confirmDir
         min-length:
           help: "Minimum length of reads to keep"
           type: int
@@ -64,7 +71,7 @@ setup:
           standardized_filename: "{fastq-standardized-wildcard}"
           out_dir: "{unfiltered-fastq-dir}"
           workflow_prefix: "{workflow_prefix}"
-          copy_method: '{fastq_copy_method}'
+          copy_method: '{fastq-copy-method}'
           gzipped: True
       samples:
         method: "wildcard-str"
@@ -86,7 +93,7 @@ setup:
           standardized_filename: "{fastq-standardized-wildcard}"
           out_dir: "{unfiltered-fastq-dir}"
           workflow_prefix: "{workflow_prefix}"
-          copy_method: '{fastq_copy_method}'
+          copy_method: '{fastq-copy-method}'
           sample_column: 'samples'
           gzipped: True
       samples:
@@ -96,10 +103,20 @@ setup:
           sample_column: 'samples'
       snakefiles:
         - test_script
-
-command-line:
-  cores: 20
-  use-singularity: True
+  
+  test_input:
+    dir-method:
+      input:
+        args:
+          - "workflow_prefix"
+          - "dir-test"
+      standardize:
+        method: "dir-str"
+        args:
+          path_name: "{dir-test}"
+          standardized_directory: "Test_Directory"
+          workflow_prefix: "{workflow_prefix}"
+          copy_method: 'symbolic_link'
 
 snakefiles:
   - fastq_filter_fastp

@@ -50,17 +50,6 @@ class FileIO:
         # Stores path if using a link
         self.link_path = ""
 
-    @property
-    def args(self):
-        # Create dict to store optional args
-        arg_dict = {}
-
-        # Assign potential args
-        if self.link_path:
-            arg_dict["bind"] = self.link_path
-
-        return arg_dict
-
     @classmethod
     def create(cls, *args, **kwargs):
         return cls(*args, **kwargs)

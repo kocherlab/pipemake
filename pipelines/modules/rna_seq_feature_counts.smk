@@ -105,7 +105,7 @@ rule feature_counts_report:
             "featureCounts",
         ),
     singularity:
-        "docker://aewebb/pipemake_utils:v0.1.27"
+        "docker://aewebb/pipemake_utils:v0.1.30"
     resources:
         mem_mb=2000,
     threads: 1

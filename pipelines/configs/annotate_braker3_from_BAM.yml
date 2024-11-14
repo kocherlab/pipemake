@@ -10,6 +10,12 @@ parser:
           type: str
           required: True
           action: confirmFile
+        rnaseq-copy-method:
+          help: "Specifies if RNAseq BAM should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
         assembly-fasta:
           help: "Assembly file"
           type: str
@@ -20,6 +26,12 @@ parser:
           type: str
           required: True
           action: confirmFile
+        fasta-copy-method:
+          help: "Specifies if assembly and hints files should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
         busco-database:
           help: "Name of BUSCO database"
           type: str
@@ -89,7 +101,7 @@ setup:
           input_filename: "{rnaseq-bam}"
           standardized_filename: "{species}_{assembly_version}.bam"
           out_dir: "{rnaseq-bam-dir}"
-          copy_method: 'symbolic_link'
+          copy_method: "{rnaseq-copy-method}"
           gzipped: True
 
   assembly_input:
@@ -104,6 +116,7 @@ setup:
           input_filename: "{assembly-fasta}"
           standardized_filename: "{species}_{assembly_version}.fa"
           out_dir: "{assembly-dir}"
+          copy_method: "{fasta-copy-method}"
           gzipped: False
 
   hints_input:
@@ -118,6 +131,7 @@ setup:
           input_filename: "{hints-fasta}"
           standardized_filename: "ProteinHints.fa"
           out_dir: "{homology-dir}"
+          copy_method: "{fasta-copy-method}"
           gzipped: False
 
 snakefiles:

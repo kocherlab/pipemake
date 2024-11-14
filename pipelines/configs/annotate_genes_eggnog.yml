@@ -1,0 +1,87 @@
+pipeline: annotate-genes-eggnog
+version: 1.0
+parser:
+  help: Annotate genes using eggNOG
+  arg-groups:
+    basic:
+      args:
+        aa-transcript-fasta:
+          help: "Amino acid transcript file"
+          type: str
+          required: True
+          action: confirmFile
+        eggnog-data-dir:
+          help: "eggNOG database directory"
+          type: str
+          action: confirmDir
+        eggnog-copy-method:
+          help: "Specifies if EggNOG directory should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        assembly-version:
+          help: "Assembly Version"
+          type: str
+          default:
+            str: "v"
+            suffix:
+              - function: jobRandomString
+        annotation-version:
+          help: "Annotation Version"
+          type: str
+          default:
+            str: ""
+            suffix:
+              - function: jobRandomString
+        species:
+          help: "Species name"
+          type: str
+          default:
+            str: "Sp"
+            suffix:
+              - function: jobRandomString
+    paths:
+      args:
+        downloads-dir:
+          help: "Directory to store downloads"
+          type: str
+          default: "Downloads"
+        annotations-dir:
+          help: "Directory to store annotations"
+          type: str
+          default: 
+            str: "Annotations"
+setup:
+  aa_transcript_input:
+    file-method:
+      input:
+        args:
+          - "aa-transcript-fasta"
+          - "annotations-dir"
+      standardize:
+        method: "file-str"
+        args:
+          input_filename: "{aa-transcript-fasta}"
+          standardized_filename: "{species}_{assembly-version}.{annotation-version}_pep.fa"
+          out_dir: "{annotations-dir}"
+          copy_method: "copy"
+          gzipped: False
+  eggnog_db:
+    dir-method:
+      input:
+        args:
+          - "eggnog-data-dir"
+          - "downloads-dir"
+      standardize:
+        method: "dir-str"
+        args:
+          path_name: "{eggnog-data-dir}"
+          standardized_directory: "EggNOG"
+          out_dir: "{downloads-dir}"
+          copy_method: "{eggnog-copy-method}"
+          gzipped: False
+
+snakefiles:
+  - download_eggnog_database
+  - annotations_eggnog_mapper

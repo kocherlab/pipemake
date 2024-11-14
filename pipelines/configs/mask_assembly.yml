@@ -10,6 +10,12 @@ parser:
           type: str
           required: True
           action: confirmFile
+        assembly-copy-method:
+          help: "Specifies if assembly files should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
         assembly-version:
           help: "Assembly Version"
           type: str
@@ -47,6 +53,7 @@ setup:
           input_filename: "{assembly-fasta}"
           standardized_filename: "{species}_{assembly_version}.fa"
           out_dir: "{assembly-dir}"
+          copy_method: "{assembly-copy-method}"
           gzipped: False
 
 snakefiles:

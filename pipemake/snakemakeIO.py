@@ -1,6 +1,5 @@
 import os
 import re
-import copy
 import yaml
 import shutil
 import logging
@@ -239,9 +238,6 @@ class SnakePipelineIO:
         url_table_file.close()
 
     def writeConfig(self, pipeline_args):
-        # Create a list of pipeline args to make sure they are all used
-        pipeline_args_unused = set(pipeline_args.keys())
-
         # Create yml dicts
         yml_config_dict = {}
         yml_resource_dict = {"resources": {}}
@@ -272,9 +268,6 @@ class SnakePipelineIO:
             if pipeline_arg not in pipeline_args:
                 raise Exception(f"Pipeline arg not found: {pipeline_arg}")
 
-            # Remove the pipeline arg from the unused list
-            pipeline_args_unused.remove(pipeline_arg)
-
             # Check if the group is not in the yml dict
             if group and group not in yml_config_dict:
                 yml_config_dict[group] = {}
@@ -283,12 +276,6 @@ class SnakePipelineIO:
                 yml_config_dict[config_arg] = pipeline_args[pipeline_arg]
             else:
                 yml_config_dict[group][config_arg] = pipeline_args[pipeline_arg]
-
-        # Check if there are unused pipeline args
-        # if pipeline_args_unused:
-
-        # Report the unused pipeline args
-        # for unused_arg in pipeline_args_unused: logging.warning(f"Configuration argument not found in Snakemake modules: {unused_arg}")
 
         # Populate the resource yml dict
         for rule_name, rule_resource_dict in self._resource_params.items():
@@ -571,7 +558,7 @@ class SnakeFileIO:
             # Loop the file rules
             for rule in self._file_rules:
                 # Write the rule, if included in the output
-                if rule.in_output:
+                if rule._output_rule:
                     smk_file.write(f"\n\n{rule}")
 
     @classmethod
@@ -581,25 +568,34 @@ class SnakeFileIO:
 
 class SnakeRuleIO:
     def __init__(
-        self, rule_list, singularity_dir="", indent_style=None, output_rule="", **kwargs
+        self, rule_str, singularity_dir="", indent_style=None, output_rule="", **kwargs
     ):
         # Assign the rule argument to populate
-        self.rule_name = rule_list[0].split()[1][:-1]
-        self.in_output = False if self.rule_name == output_rule else True
+        self._original_text = rule_str
+        self._original_text_list = self._original_text.splitlines()
+        self.rule_name = self._original_text_list[0].split()[1][:-1]
+        self._output_rule = False if self.rule_name == output_rule else True
         self._singularity_dir = singularity_dir
         self._indent_style = indent_style
         self._rule_config_params = set()
         self._rule_singularity_dict = {}
         self._rule_script_files = []
-        self._rule_resource_params = defaultdict(int)
-        self._rule_text = rule_list[0] + "\n"
+        self._rule_resource_params = {}
+        self._rule_text = self._original_text_list[0] + "\n"
         self._rule_output_list = []
 
         # Assign the fixed arguments
         self._resource_attributes = ["threads", "resources"]
 
-        # Parse the rule
-        self._parseRule(rule_list[1:])
+        # Update and assign the rule parameters
+        if self._output_rule:
+            self._updateRule(self._original_text_list[1:])
+            self._setParams()
+
+        # Set the output list
+        elif not self._output_rule:
+            self._setOutput(self._original_text_list[1:])
+            self._setParams()
 
     def __str__(self):
         return self._rule_text
@@ -607,246 +603,95 @@ class SnakeRuleIO:
     def __repr__(self):
         return self._rule_text
 
-    def _parseRule(self, rule_list):
-        def processAttribute(rule_attribute, rule_line):
-            # Assign the rule attribute
-            processed_attribute = SnakeAttributeIO.process(
-                self.rule_name,
-                rule_attribute,
-                rule_line,
-                singularity_dir=self._singularity_dir,
-                indent_style=self._indent_style,
-            )
-
-            # Update the SnakeFile, if a resource or container
-            if processed_attribute.is_resource:
-                rule_line = processed_attribute.updateSnakeResource()
-            elif processed_attribute.is_container:
-                rule_line = processed_attribute.updateSnakeContainer()
-            elif processed_attribute.is_script:
-                rule_line = processed_attribute.updateScript()
-
-            # Update the rule params
-            if processed_attribute.is_resource:
-                self._rule_resource_params.update(processed_attribute.updateParams())
-            elif processed_attribute.is_container:
-                self._rule_singularity_dict.update(processed_attribute.updateParams())
-            elif processed_attribute.is_script:
-                self._rule_script_files.append(processed_attribute.updateParams())
-            else:
-                self._rule_config_params.update(processed_attribute.updateParams())
-
-            # Check if the rule is output, confirm the attribute is input, and update the rule output
-            if not self.in_output and rule_attribute == "input":
-                self._rule_output_list.append(rule_line.rstrip())
-
-            return rule_line
-
-        # Assign the current rule attribute
-        rule_attribute = ""
-
-        # Loop the rule block and parse the attributes
-        for rule_line in rule_list:
-            if not rule_line.strip():
-                continue
-
-            # Split the line by the indent style
-            rule_line_list = rule_line.rstrip().split(self._indent_style)
-
-            # Assign the attribute level
-            attribute_level = _attributeLevel(rule_line_list)
-
-            # Check if the line is a rule attribute (without an assigned value)
-            if attribute_level == 1 and rule_line.rstrip().endswith(":"):
-                rule_attribute = rule_line_list[1][:-1]
-
-            # Check if the line is a rule attribute (with an assigned value)
-            elif attribute_level == 1 and not rule_line.rstrip().endswith(":"):
-                # Split the attribute, confirm a value is assigned
-                split_attribute = [_a.strip() for _a in rule_line_list[1].split(":", 1)]
-                if len(split_attribute) != 2:
-                    raise Exception(
-                        f"Rule attribute error. Unable to assign attribute: {rule_line_list[1]}"
-                    )
-
-                # Process the attribute
-                rule_line = processAttribute(split_attribute[0], rule_line)
-
-            # Check if the line is a atrribute value line and if so, process the attribute
-            elif attribute_level >= 2:
-                rule_line = processAttribute(rule_attribute, rule_line)
-
-            # Update the rule text
-            self._rule_text += rule_line + "\n"
-
     @classmethod
     def read(cls, rule_str, *args, **kwargs):
-        return cls(rule_str.splitlines(), *args, **kwargs)
+        return cls(rule_str, *args, **kwargs)
 
+    def _updateResource(self, resource_attribute, rule_line, attribute_level):
+        # Assign the resource str
+        resource_str = rule_line.strip()
 
-class SnakeAttributeIO:
-    def __init__(
-        self,
-        rule_name,
-        attribute_type,
-        attribute_text,
-        singularity_dir="",
-        indent_style=None,
-        resource_attributes=["threads", "resources"],
-        **kwargs,
-    ):
-        # Assign the required attributes
-        self._rule_name = rule_name
-        self._type = attribute_type
-        self._singularity_dir = singularity_dir
-        self._indent_style = indent_style
-        self._original_text = attribute_text
-        self._multiline_text = True if attribute_text.endswith(",") else False
-        self._resource_attributes = resource_attributes
-        self.is_resource = (
-            True if attribute_type in self._resource_attributes else False
-        )
-        self.is_container = True if attribute_type == "singularity" else False
-        self.is_script = True if attribute_type == "script" else False
-        self._resource_assignment_type = ":"
-        self._container = None
-        self._path = None
+        # Check if the resource is a plain integer
+        if resource_str.isdigit():
+            resource_name = resource_attribute
+            resource_value = int(resource_str)
 
-        # Assign the config attributes
-        self._resource_assignment_dict = defaultdict(int)
-        self._resource_replacment_dict = defaultdict(str)
-        self._config_assignment_set = set()
-
-        # Process the attribute
-        if self.is_container:
-            self._parseContainer()
-        elif self.is_resource:
-            self._parseResource()
-        elif self.is_script:
-            self._parseScript()
         else:
-            self._parseConfig()
+            # Assign the expected resource syntax
+            resource_syntax_dict = {1: ":", 2: "="}
 
-    @classmethod
-    def process(cls, *args, **kwargs):
-        return cls(*args, **kwargs)
-
-    def _parseResource(self):
-        # Create the working text
-        working_text = (
-            copy.deepcopy(self._original_text)
-            if not self._multiline_text
-            else self._original_text[:-1]
-        )
-
-        # Create a string to store the resource name
-        resource_name = ""
-
-        # Assign the resource as threads, for a single argument assignment
-        if self._type == "threads":
-            # Confirm the threads is threads assignment
-            if _attributeLevel(working_text.split(self._indent_style)) != 1:
+            # Check if the resource attributes can be assigned
+            if resource_syntax_dict[attribute_level] not in rule_line:
                 raise Exception(
-                    f"Config threads error. Incorrect number of indents: {self._original_text}"
+                    f"Resource attribute error for {resource_attribute}. Value not assigned: {rule_line}"
                 )
 
-            # Confirm a single colon sign is present
-            if working_text.count(":") != 1:
-                raise Exception(
-                    f"Config threads error. Expected colon: {self._original_text}"
-                )
-
-            # Update the resource name and working text, by splitting the text by the assignment type
-            resource_name, working_text = [
-                _v.strip()
-                for _v in working_text.strip().split(self._resource_assignment_type, 1)
-            ]
-
-        # Check if the resource is a resources, for single or multiple argument assignment
-        elif self._type == "resources":
-            # Confirm the resource is resource assignment
-            if _attributeLevel(working_text.split(self._indent_style)) != 2:
-                raise Exception(
-                    f"Config resource error. Incorrect number of indents: {self._original_text}"
-                )
-
-            # Confirm a single equal sign is present
-            if working_text.count("=") != 1:
-                raise Exception(
-                    f"Config resource error. Expected equals siqn: {self._original_text}"
-                )
-
-            # Update the resource assignment type
-            self._resource_assignment_type = "="
-
-            # Update the resource name and working text, by splitting the text by the assignment type
-            resource_name, working_text = [
-                _v.strip()
-                for _v in working_text.strip().split(self._resource_assignment_type, 1)
-            ]
-
-        # Check for a simple resource (integer) assignment
-        if working_text.isdigit():
-            # Confirm the resource has a name
-            if not resource_name:
-                raise Exception(
-                    f"Config resource error. No resource name: {self._original_text}"
-                )
-
-            # Add the resource assignment to the dict
-            self._resource_assignment_dict[resource_name] = int(working_text)
-            self._resource_replacment_dict[working_text] = (
-                f'config["resources"]["{self._rule_name}"]["{resource_name}"]'
+            # Assign the resource name and value
+            resource_name, resource_value = rule_line.strip().split(
+                resource_syntax_dict[attribute_level]
             )
 
-        # Check for a complex resource assignment
-        else:
-            # Find all occurences of the word resources followed by one or more sets of square brackets ending with a colon
-            for resource_match in re.finditer(r"resources(\[(.*?)\])+\:", working_text):
-                # Get the resource str
-                resource_str = resource_match.group(0)
+            # Remove any whitespaces
+            resource_name = resource_name.strip()
+            resource_value = resource_value.strip()
 
-                # Split the param str by either square brackets using regex
-                resource_list = [
-                    _p
-                    for _p in re.split(
-                        r"\[|\]", resource_str[:-1].replace('"', "").replace("'", "")
-                    )
-                    if _p
-                ][1:]
+            # Remove any trailing commas
+            if resource_value.endswith(","):
+                resource_value = resource_value[:-1]
 
-                # Check that the resource list is a single argument
-                if len(resource_list) != 1:
-                    raise Exception(
-                        f"Config resource error. Too many arguments in complex assignment: {self._original_text}"
-                    )
-
-                # Assign the resource argument
-                resource_name = resource_list[0]
-
-                # Get text after resource_str in the working_text
-                resource_suffix = working_text[
-                    working_text.find(resource_str) + len(resource_str) :
-                ]
-
-                # Get the first match between curly brackets without returning the brackets
-                resource_suffix_match = re.search(r" ?{(.*?)}", resource_suffix)
-
-                # Assign the match str and value
-                resource_value_str = resource_suffix_match.group(0)
-                resource_value = resource_suffix_match.group(1)
-
-                # Add the resource assignment to the dict
-                self._resource_assignment_dict[resource_name] = int(resource_value)
-                self._resource_replacment_dict[resource_str + resource_value_str] = (
-                    f'config["resources"]["{self._rule_name}"]["{resource_name}"]'
+            # Determine if the resource value type
+            if not resource_value.isdigit():
+                raise Exception(
+                    f"Complex resource support not yet implemented: {rule_line}"
                 )
 
-    def _parseConfig(self):
+        # Assign the resource value
+        self._rule_resource_params[resource_name] = int(resource_value)
+
+        # Assign the resource config attribute
+        resource_config = f'config["resources"]["{self.rule_name}"]["{resource_name}"]'
+
+        # Update the resource list
+        rule_line = rule_line.replace(str(resource_value), resource_config)
+
+        return rule_line
+
+    def _updateContainer(self, container_str):
+        # Check if a singularity directory is specified
+        if not self._singularity_dir:
+            return container_str
+
+        # Assign the container text
+        container_url = container_str.strip().split('"')[1]
+
+        # Store the container
+        container = Singularity.fromURL(container_url, self._singularity_dir)
+
+        # Add the container to the singularity dict
+        self._rule_singularity_dict[container.returnPath()] = container
+
+        return container.updateContainer(container_str)
+
+    def _updateScript(self, script_str, script_dir="scripts"):
+        # Assign the script path
+        script_path = Path(script_str.strip().split('"')[1])
+
+        # Add the script file to the list
+        self._rule_script_files.append(script_path.name)
+
+        # Assign the script path
+        script_output_path = os.path.join("..", script_dir, script_path.name)
+
+        # Return the container path
+        return script_str.split('"')[0] + f'"{script_output_path}"'
+
+    def _setParams(self):
         # Find all occurences of the word config follpwed by one or more sets of square brackets
-        for config_match in re.finditer(r"config(\[(.*?)\])+", self._original_text):
-            # Get the config match str
-            config_str = config_match.group(0)
+        for config_match in re.finditer(r"config(\[[^\]]*\])+", self._original_text):
+            # Get the config string by removing newlines and whitespaces
+            config_str = "".join(
+                [_s.strip() for _s in config_match.group(0).splitlines()]
+            )
 
             # Split the param str by either square brackets using regex
             config_list = [
@@ -873,102 +718,75 @@ class SnakeAttributeIO:
                 )
 
             # Add the config assignment to the set
-            self._config_assignment_set.add(tuple(config_list))
+            self._rule_config_params.add(tuple(config_list))
 
-    def _parseContainer(self):
-        # Check if the attribute is not a container
-        if not self.is_container:
-            raise Exception(
-                f"Attribute assignment error. Not a container: {self.is_container} {self._original_text}"
-            )
+    def _updateRule(self, rule_list):
+        for rule_line in rule_list:
+            if not rule_line.strip():
+                continue
 
-        # Check if the attribute is a multiline text
-        if self._multiline_text:
-            raise Exception(
-                f"Container assignment error. Cannot be multiline text: {self._original_text}"
-            )
+            # Split the line by the indent style
+            rule_line_list = rule_line.rstrip().split(self._indent_style)
 
-        # Assign the container text
-        container_url = self._original_text.strip().split('"')[1]
+            # Assign the attribute level
+            attribute_level = _attributeLevel(rule_line_list)
 
-        # Store the container
-        self._container = Singularity.fromURL(container_url, self._singularity_dir)
+            # Check if the line is a rule attribute
+            if attribute_level == 1:
+                attribute_name, attribute_value = [
+                    _a.strip() for _a in rule_line_list[1].split(":", 1)
+                ]
 
-    def _parseScript(self):
-        # Check if the attribute is not a script
-        if not self.is_script:
-            raise Exception(
-                f"Attribute assignment error. Not a script: {self.is_container} {self._original_text}"
-            )
+            # Process resource attributes
+            if attribute_name in self._resource_attributes:
+                if attribute_value:
+                    rule_line = self._updateResource(
+                        attribute_name, rule_line, attribute_level
+                    )
+                elif attribute_level > 1:
+                    rule_line = self._updateResource(
+                        attribute_name, rule_line, attribute_level
+                    )
 
-        # Assign the script text
-        self._path = Path(self._original_text.strip().split('"')[1])
+            # Process container attributes
+            elif attribute_name == "singularity":
+                if attribute_value:
+                    rule_line = self._updateContainer(rule_line)
+                elif attribute_level > 1:
+                    rule_line = self._updateContainer(rule_line)
 
-    def updateSnakeResource(self):
-        # Check if the attribute is not a resource
-        if not self.is_resource:
-            raise Exception(
-                f"Attribute assignment error. Not a resource: {self.is_resource} {self._original_text}"
-            )
+            # Process script attributes
+            elif attribute_name == "script":
+                if attribute_value:
+                    rule_line = self._updateScript(rule_line)
+                elif attribute_level > 1:
+                    rule_line = self._updateScript(rule_line)
 
-        # Loop the resource assignments
-        for (
-            resource_original_text,
-            resource_assignment,
-        ) in self._resource_replacment_dict.items():
-            # Replace the resource assignment with the string
-            self._original_text = self._original_text.replace(
-                resource_original_text, resource_assignment
-            )
+            # Update the rule text
+            self._rule_text += rule_line + "\n"
 
-        return self._original_text
+    def _setOutput(self, rule_list):
+        for rule_line in rule_list:
+            if not rule_line.strip():
+                continue
 
-    def updateSnakeContainer(self):
-        # Skip updating if the singularity dir is not provided
-        if not self._singularity_dir:
-            return self._original_text
+            # Split the line by the indent style
+            rule_line_list = rule_line.rstrip().split(self._indent_style)
 
-        # Check if the attribute is not a container
-        if not self.is_container:
-            raise Exception(
-                f"Attribute assignment error. Not a container: {self.is_container} {self._original_text}"
-            )
+            # Assign the attribute level
+            attribute_level = _attributeLevel(rule_line_list)
 
-        # Return the container path
-        return self._container.updateContainer(self._original_text)
+            # Check if the line is a rule attribute
+            if attribute_level == 1 and rule_line.rstrip().endswith(":"):
+                attribute_name = rule_line_list[1][:-1]
 
-    def updateScript(self, script_dir="scripts"):
-        # Check if the attribute is not a script
-        if not self.is_script:
-            raise Exception(
-                f"Attribute assignment error. Not a script: {self.is_script} {self._original_text}"
-            )
+            # Check if the rule is output, confirm the attribute is input, and update the rule output
+            elif attribute_name == "input":
+                self._rule_output_list.append(rule_line.rstrip())
 
-        # Assign the script path
-        script_path = os.path.join("..", script_dir, self._path.name)
-
-        # Return the container path
-        return self._original_text.split('"')[0] + f'"{script_path}"'
-
-    def updateParams(self):
-        # Check if the attribute is a container, return the container dict
-        if self.is_container:
-            if not self._singularity_dir:
-                return {}
-            else:
-                return {self._container.returnPath(): self._container}
-
-        # Check if the attribute is a resource, return the resource assignment dict
-        elif self.is_resource:
-            return self._resource_assignment_dict
-
-        # Check if the attribute is a script, return the script name
-        elif self.is_script:
-            return self._path.name
-
-        # If not a resource or container, return the config assignment set
-        else:
-            return self._config_assignment_set
+        # Check that output list was populated
+        if not self._rule_output_list:
+            raise Exception("Output list not populated for rule")
 
 
 def _attributeLevel(attribute_list):

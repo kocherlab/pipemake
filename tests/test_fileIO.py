@@ -133,28 +133,6 @@ def test_FileIO_returnPaths(filename, copy_method):
 
 
 @pytest.mark.parametrize(
-    "filename, standardized_filename, gzipped, copy_method",
-    [
-        ("tests/files/fileIO/test1_R1.fq.gz", "test1_R1.fq", True, "symbolic_link"),
-        ("tests/files/fileIO/test1_R1.fq.gz", "test1_R1.fq", True, "copy"),
-    ],
-)
-def test_FileIO_args(filename, standardized_filename, gzipped, copy_method):
-    test_dir = tempfile.mkdtemp()
-    test_File = FileIO.create(filename)
-    test_File.standardize(
-        standardized_filename,
-        out_dir=test_dir,
-        gzipped=gzipped,
-        copy_method=copy_method,
-    )
-    if copy_method == "copy":
-        assert test_File.args == {}
-    else:
-        assert test_File.args == {"bind": os.path.dirname(test_File.filename)}
-
-
-@pytest.mark.parametrize(
     "filename",
     ["tests/files/fileIO/test_table2.tsv"],
 )

@@ -1,0 +1,220 @@
+pipeline: tracking-naps
+version: 1.0
+parser:
+  help: Track MP4 videos using SLEAP and NAPS
+  arg-groups:
+    basic:
+      mutually-exclusive-args:
+        input-parser:
+          required: True
+      wildcards-args:
+        video-standardized-wildcard:
+          help: "Standardized wildcard statement used to store videos"
+          type: str
+          default: 
+            str: "{video_ids}.mp4"
+      args:
+        video-wildcard:
+          help: "Wildcard statement to represent videos to track"
+          type: str
+          mutually-exclusive: "input-parser"
+          wildcards: "video-standardized-wildcard"
+        video-table:
+          help: "Table with video IDs and filenames"
+          type: str
+          action: confirmFile
+          mutually-exclusive: "input-parser"
+          wildcards: "video-standardized-wildcard"
+        video-copy-method:
+          help: "Specifies if videos should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        centroid-model:
+          help: "Centroid model directory"
+          type: str
+          required: True
+          action: confirmDir
+        instance-model:
+          help: "Instance model directory"
+          type: str
+          required: True
+          action: confirmDir
+        model-copy-method:
+          help: "Specifies if models should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        tag-node-name:
+          help: "Name of the ArUco tag node"
+          type: str
+          required: True
+    sleap-params:
+      args:
+        tracking-batch-size:
+          help: "Batch size for tracking"
+          type: int
+          default: 4
+        tracking-tracker:
+          help: "Tracker to use for tracking"
+          type: str
+          default: "simplemaxtracks"
+        tracking-max-tracking:
+          help: "If true then the tracker will cap the max number of tracks. (default: False)"
+          action: store_true
+    naps-params:
+      args:
+        start-frame:
+          help: "Start frame for tracking"
+          type: int
+          required: True
+        end-frame:
+          help: "End frame for tracking"
+          type: int
+          required: True
+        aruco-marker-set:
+          help: "Aruco marker set"
+          type: str
+          required: True
+          choices:
+            - 'DICT_4X4_50'
+            - 'DICT_4X4_100'
+            - 'DICT_4X4_250'
+            - 'DICT_4X4_1000'
+            - 'DICT_5X5_50'
+            - 'DICT_5X5_100'
+            - 'DICT_5X5_250'
+            - 'DICT_5X5_1000'
+            - 'DICT_6X6_50'
+            - 'DICT_6X6_100'
+            - 'DICT_6X6_250'
+            - 'DICT_6X6_1000'
+            - 'DICT_7X7_50'
+            - 'DICT_7X7_100'
+            - 'DICT_7X7_250'
+            - 'DICT_7X7_1000'
+            - 'DICT_ARUCO_ORIGINAL'
+        half-rolling-window-size:
+          help: "Half of the rolling window size"
+          type: int
+          default: 20
+        aruco-crop-size:
+          help: "Size of the crop for Aruco markers"
+          type: int
+          default: 50
+        aruco-error-correction-rate:
+          help: "Error correction rate for Aruco markers"
+          type: float
+          default: 0.6
+        aruco-adaptive-thresh-constant:
+          help: "Adaptive threshold constant for Aruco markers"
+          type: int
+          default: 7
+        aruco-adaptive-thresh-win-size-max:
+          help: "Maximum adaptive threshold window size for Aruco markers"
+          type: int
+          default: 23
+        aruco-adaptive-thresh-win-size-step:
+          help: "Step size for adaptive threshold window size for Aruco markers"
+          type: int
+          default: 10
+        aruco-adaptive-thresh-win-size-min:
+          help: "Minimum adaptive threshold window size for Aruco markers"
+          type: int
+          default: 3
+        
+    paths:
+      args:
+        tracking-model-dir:
+          help: "Directory to store models"
+          type: str
+          default: "Models/SLEAP"
+        tracking-videos-dir:
+          help: "Directory to tracking videos"
+          type: str
+          default: "Tracking/Videos"
+        tracking-sleap-dir:
+          help: "Directory to store SLEAP tracking output"
+          type: str
+          default: "Tracking/SLEAP"
+        tracking-naps-dir:
+          help: "Directory to store NAPS tracking output"
+          type: str
+          default: "Tracking/NAPS"
+setup:
+  video_input:
+    wildcard-method:
+      input:
+        args:
+          - "video-wildcard"
+          - "video-standardized-wildcard"
+          - "video-copy-method"
+          - "tracking-videos-dir"
+      standardize:
+        method: "wildcard-str"
+        args:
+          wildcard_str: "{video-wildcard}"
+          standardized_filename: "{video-standardized-wildcard}"
+          out_dir: "{tracking-videos-dir}"
+          copy_method: '{video-copy-method}'
+      samples:
+        method: "wildcard-str"
+        args:
+          wildcard_str: "{video-wildcard}"
+          sample_wildcards: 
+            - 'video_ids'
+
+    table-method:
+      input:
+        args:
+          - "video-table"
+          - "video-standardized-wildcard"
+          - "video-copy-method"
+          - "tracking-videos-dir"
+      standardize:
+        method: "table-file"
+        args:
+          table_filename: "{video-table}"
+          standardized_filename: "{video-standardized-wildcard}"
+          out_dir: "{video-fastq-dir}"
+          copy_method: '{video-copy-method}'
+          sample_column: 'video_ids'
+      samples:
+        method: "table-file"
+        args:
+          table_filename: "{video-table}"
+          sample_column: 'video_ids'
+  
+  centroid_model:
+    dir-method:
+      input:
+        args:
+          - "centroid-model"
+          - "tracking-model-dir"
+      standardize:
+        method: "dir-str"
+        args:
+          path_name: "{centroid-model}"
+          standardized_directory: "centroid_model"
+          out_dir: "{tracking-model-dir}"
+          copy_method: "{model-copy-method}"
+
+  instance_model:
+    dir-method:
+      input:
+        args:
+          - "instance-model"
+          - "tracking-model-dir"
+      standardize:
+        method: "dir-str"
+        args:
+          path_name: "{instance-model}"
+          standardized_directory: "instance_model"
+          out_dir: "{tracking-model-dir}"
+          copy_method: "{model-copy-method}"
+
+snakefiles:
+  - tracking_sleap
+  - tracking_naps
