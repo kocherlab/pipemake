@@ -30,12 +30,12 @@ rule create_longest_aa_transcript:
             f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}_pep",
         ),
     singularity:
-        "docker://aewebb/pipemake_utils:v0.1.31"
+        "docker://aewebb/pipemake_utils:v1.0.0"
     resources:
         mem_mb=12000,
     threads: 1
     shell:
-        "longest-transcript --input-filename {input} --output-prefix {params.out_prefix} --input-type AA --database pipemake"
+        "longest-transcript --input-filename {input} --output-prefix {params.out_prefix} --input-type AA --database pipemake --output-primary-id gene"
 
 
 rule run_eggnog_mapper:
