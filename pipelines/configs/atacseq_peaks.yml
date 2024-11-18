@@ -1,4 +1,5 @@
-pipeline: atacseq-peaks-bwa
+pipeline: atacseq-peaks-macs3
+version: 1.0
 parser:
   help: Generate peaks for bulk ATAC-Seq data using bwa and MACS3
   arg-groups:
