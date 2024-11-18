@@ -3,39 +3,42 @@ parser:
   help: Generate peaks for bulk ATAC-Seq data using bwa and MACS3
   arg-groups:
     basic:
-      mutually-exclusive-groups:
+      mutually-exclusive-args:
         input-parser:
           required: True
+      wildcards-args:
+        atacseq-standardized-wildcard:
+          help: "Standardized wildcard statement used to store ATACseq FASTQs"
+          type: str
+          default: 
+            str: "{sample}-{read}.fastq.gz"
       args:
         atacseq-wildcard:
           help: "Wildcard statement to represent ATACseq FASTQs"
           type: str
           mutually-exclusive: "input-parser"
+          wildcards: "atacseq-standardized-wildcard"
         atacseq-table:
           help: "Table with sample and FASTQs filenames"
           type: str
           action: confirmFile
           mutually-exclusive: "input-parser"
+          wildcards: "atacseq-standardized-wildcard"
         atacseq-copy-method:
           help: "Specifies if ATACseq FASTQs should be copied or symbolically linked."
           choices:
             - 'symbolic_link'
             - 'copy'
           default: 'symbolic_link'
-        atacseq-standardized-wildcard:
-          help: "Standardized wildcard statement used to store ATACseq FASTQs"
-          type: str
-          default: 
-            str: "{sample}-{read}.fastq.gz"
+        genome-size:
+          help: "Genome size in basepairs for focal species"
+          type: int
+          required: True
         assembly-fasta:
           help: "Assembly fasta"
           type: str
           required: True
           action: confirmFile
-        genome-size:
-          help: "Genome size in basepairs for focal species"
-          type: int
-          required: True
         assembly-version:
           help: "Assembly Version"
           type: str
@@ -64,10 +67,6 @@ parser:
           help: "Directory to store the FASTQs files"
           type: str
           default: "ATACseq/FASTQs"
-        atacseq-bam-dir:
-          help: "Directory to store BAM files"
-          type: str
-          default: "ATACseq/BAMs"
         atacseq-aligned-bam-dir:
           help: "Directory to store sorted BAM files"
           type: str
@@ -76,6 +75,10 @@ parser:
           help: "Directory to store sorted BAM files"
           type: str
           default: "ATACseq/BAMs/Sorted"
+        atacseq-dedup-bam-dir:
+          help: "Directory to store deduplicated BAM files"
+          type: str
+          default: "ATACseq/BAMs/Deduplicated"
         atacseq-peak-dir:
           help: "Directory to store ATACseq peaks"
           type: str
@@ -139,6 +142,7 @@ command-line:
   use-singularity: True
 
 snakefiles:
-  - atac_seq_bwa.smk
-  - atac_seq_sort.smk
-  - atac_seq_MACS3_peaks_DEV.smk
+  - atac_seq_align_bwa.smk
+  - atac_seq_sort_samtools.smk
+  - atac_seq_dedup_sambamba.smk
+  - atac_seq_peaks_MACS3.smk
