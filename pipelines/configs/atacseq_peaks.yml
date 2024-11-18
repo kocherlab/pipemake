@@ -1,0 +1,144 @@
+pipeline: atacseq-peaks-bwa
+parser:
+  help: Generate peaks for bulk ATAC-Seq data using bwa and MACS3
+  arg-groups:
+    basic:
+      mutually-exclusive-groups:
+        input-parser:
+          required: True
+      args:
+        atacseq-wildcard:
+          help: "Wildcard statement to represent ATACseq FASTQs"
+          type: str
+          mutually-exclusive: "input-parser"
+        atacseq-table:
+          help: "Table with sample and FASTQs filenames"
+          type: str
+          action: confirmFile
+          mutually-exclusive: "input-parser"
+        atacseq-copy-method:
+          help: "Specifies if ATACseq FASTQs should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        atacseq-standardized-wildcard:
+          help: "Standardized wildcard statement used to store ATACseq FASTQs"
+          type: str
+          default: 
+            str: "{sample}-{read}.fastq.gz"
+        assembly-fasta:
+          help: "Assembly fasta"
+          type: str
+          required: True
+          action: confirmFile
+        genome-size:
+          help: "Genome size in basepairs for focal species"
+          type: int
+          required: True
+        assembly-version:
+          help: "Assembly Version"
+          type: str
+          default:
+            str: "v"
+            suffix:
+              - function: jobRandomString
+        species:
+          help: "Species name"
+          type: str
+          default:
+            str: "Sp"
+            suffix:
+              - function: jobRandomString
+    paths:
+      args:
+        assembly-dir:
+          help: "Directory to store assembly"
+          type: str
+          default: "Assembly"
+        index-dir:
+          help: "Directory to store indices"
+          type: str
+          default: "Indices"
+        atacseq-fastq-dir:
+          help: "Directory to store the FASTQs files"
+          type: str
+          default: "ATACseq/FASTQs"
+        atacseq-bam-dir:
+          help: "Directory to store BAM files"
+          type: str
+          default: "ATACseq/BAMs"
+        atacseq-aligned-bam-dir:
+          help: "Directory to store sorted BAM files"
+          type: str
+          default: "ATACseq/BAMs/Aligned"
+        atacseq-sorted-bam-dir:
+          help: "Directory to store sorted BAM files"
+          type: str
+          default: "ATACseq/BAMs/Sorted"
+        atacseq-peak-dir:
+          help: "Directory to store ATACseq peaks"
+          type: str
+          default: "ATACseq/Peaks" 
+setup:
+  atacseq_input:
+    wildcard-method:
+      input:
+        args:
+          - "atacseq-wildcard"
+          - "atacseq-standardized-wildcard"
+          - "atacseq-fastq-dir"
+      standardize:
+        method: "wildcard-str"
+        args:
+          wildcard_str: "{atacseq-wildcard}"
+          standardized_filename: "{atacseq-standardized-wildcard}"
+          out_dir: "{atacseq-fastq-dir}"
+          copy_method: '{atacseq_copy_method}'
+          gzipped: True
+      samples:
+        method: "wildcard-str"
+        args:
+          wildcard_str: "{atacseq-wildcard}"
+          sample_wildcard: 'sample'
+
+    table-method:
+      input:
+        args:
+          - "atacseq-table"
+          - "atacseq-standardized-wildcard"
+          - "atacseq-fastq-dir"
+      standardize:
+        method: "table-file"
+        args:
+          table_filename: "{atacseq-table}"
+          standardized_filename: "{atacseq-standardized-wildcard}"
+          out_dir: "{atacseq-fastq-dir}"
+          copy_method: '{atacseq_copy_method}'
+          gzipped: True
+      samples:
+        method: "table-file"
+        args:
+          table_filename: "{atacseq-table}"
+  assembly_input:
+    file-method:
+      input:
+        args:
+          - "assembly-fasta"
+          - "assembly-dir"
+      standardize:
+        method: "file-str"
+        args:
+          input_filename: "{assembly-fasta}"
+          standardized_filename: "{species}_{assembly_version}.fa"
+          out_dir: "{assembly-dir}"
+          gzipped: False
+  
+command-line:
+  cores: 20
+  use-singularity: True
+
+snakefiles:
+  - atac_seq_bwa.smk
+  - atac_seq_sort.smk
+  - atac_seq_MACS3_peaks_DEV.smk
