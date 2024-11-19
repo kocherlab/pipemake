@@ -79,12 +79,7 @@ rule bwa_mem_single_end_atac_seq:
         r1_reads=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["atacseq_fastq_dir"],
-            "{sample}-R1.fastq.gz",
-        ),
-        assembly=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            f"{config['species']}_{config['assembly_version']}.fa",
+            "{sample}_R1.fastq.gz",
         ),
         index_fasta=os.path.join(
             config["paths"]["workflow_prefix"],
@@ -112,12 +107,12 @@ rule bwa_mem_pair_end_atac_seq:
         r1_reads=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["atacseq_fastq_dir"],
-            "{sample}-R1.fastq.gz",
+            "{sample}_R1.fastq.gz",
         ),
         r2_reads=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["atacseq_fastq_dir"],
-            "{sample}-R2.fastq.gz",
+            "{sample}_R2.fastq.gz",
         ),
         index_fasta=os.path.join(
             config["paths"]["workflow_prefix"],
