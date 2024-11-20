@@ -9,7 +9,7 @@ echo "export PM_SINGULARITY_DIR=${image_dir}" >> "${PREFIX}/etc/conda/activate.d
 
 
 mkdir -p "${PREFIX}/etc/conda/deactivate.d"
-echo "unset PM_SNAKEMAKE_DIR=${pipeline_dir}" > "${PREFIX}/etc/conda/deactivate.d/${PKG_NAME}_deactivate.sh"
-echo "unset PM_SINGULARITY_DIR=${image_dir}" >> "${PREFIX}/etc/conda/deactivate.d/${PKG_NAME}_deactivate.sh"
+echo "unset PM_SNAKEMAKE_DIR" > "${PREFIX}/etc/conda/deactivate.d/${PKG_NAME}_deactivate.sh"
+echo "unset PM_SINGULARITY_DIR" >> "${PREFIX}/etc/conda/deactivate.d/${PKG_NAME}_deactivate.sh"
 
 python -m pip install --no-deps --ignore-installed .
