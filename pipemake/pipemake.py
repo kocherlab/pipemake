@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import shutil
 
 from pipemake.logger import startLogger, logArgDict
 from pipemake.parser import PipelineParser
@@ -25,7 +26,6 @@ def main():
     # Parse the aguments from the configs
     pipeline_parser = PipelineParser.create(pipeline_configs)
     pipeline_args = pipeline_parser.returnArgs()
-    # pipeline_args = pipeline_parser(pipeline_configs)
 
     # Assign the pipeline directory to an environment variable, if found
     if os.environ.get("PM_SINGULARITY_DIR") and not pipeline_args["singularity_dir"]:
@@ -37,6 +37,15 @@ def main():
     # Check that a pipeline was assigned
     if not pipeline_args["pipeline"]:
         raise Exception("No pipeline specified")
+
+    # Check for a previous workflow directory
+
+    if os.path.exists(pipeline_args["workflow_prefix"]) and pipeline_args["overwrite"]:
+        shutil.rmtree(pipeline_args["workflow_prefix"])
+    else:
+        raise Exception(
+            f"Workflow directory already exists: {pipeline_args['workflow_prefix']}"
+        )
 
     # Assign the pipeline job directory
     pipeline_args["pipeline_job_dir"] = os.path.join(
