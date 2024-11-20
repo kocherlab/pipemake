@@ -12,7 +12,7 @@ parser:
           help: "Standardized wildcard statement used to store ATACseq FASTQs"
           type: str
           default: 
-            str: "{sample}-{read}.fastq.gz"
+            str: "{samples}_{reads}.fastq.gz"
       args:
         atacseq-wildcard:
           help: "Wildcard statement to represent ATACseq FASTQs"
