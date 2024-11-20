@@ -42,7 +42,7 @@ def main():
 
     if os.path.exists(pipeline_args["workflow_prefix"]) and pipeline_args["overwrite"]:
         shutil.rmtree(pipeline_args["workflow_prefix"])
-    else:
+    elif os.path.exists(pipeline_args["workflow_prefix"]):
         raise Exception(
             f"Workflow directory already exists: {pipeline_args['workflow_prefix']}"
         )
