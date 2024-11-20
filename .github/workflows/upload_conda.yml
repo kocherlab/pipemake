@@ -24,19 +24,33 @@ jobs:
           python-version: 3.9
           channels: conda-forge,bioconda,conda-forge/label/python_rc
           channel-priority: true
-      - name: Build Ubuntu
-        if: matrix.os == 'ubuntu-latest'
-        shell: bash -l {0}
-        env:
-          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
-        run: |
-          conda build .conda --output-folder build
-          anaconda -t "$ANACONDA_API_TOKEN" upload --user kocherlab build/linux-64/*.tar.bz2
       - name: Build Windows
         if: matrix.os == 'windows-latest'
         shell: powershell
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
         run: |
-          conda build .conda --output-folder build
+          conda build .conda/pipemake --output-folder build
           anaconda -t "$env:ANACONDA_API_TOKEN" upload --user kocherlab build/win-64/*.tar.bz2
+      - name: Build Ubuntu - External
+        if: matrix.os == 'ubuntu-latest'
+        shell: bash -l {0}
+        env:
+          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
+        run: |
+          conda build .conda/pipemake --output-folder build
+      - name: Build Ubuntu - Internal Argo
+        if: matrix.os == 'ubuntu-latest'
+        shell: bash -l {0}
+        env:
+          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
+        run: |
+          conda build .conda/pipemake-internal-argo --output-folder build
+      - name: Upload Ubuntu
+        if: matrix.os == 'ubuntu-latest'
+        shell: bash -l {0}
+        env:
+          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
+        run: |
+          anaconda -t "$ANACONDA_API_TOKEN" upload --user kocherlab build/linux-64/*.tar.bz2
+        
