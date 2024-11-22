@@ -3,7 +3,7 @@ rule all:
         expand(
             os.path.join(
                 config["paths"]["workflow_prefix"],
-                config["paths"]["atac_seq_sorted_bam_dir"],
+                config["paths"]["atacseq_sorted_bam_dir"],
                 "{sample}.sortedByCoord.bam",
             ),
             sample=config["samples"],
@@ -14,19 +14,19 @@ rule sort_bam:
     input:
         os.path.join(
             config["paths"]["workflow_prefix"],
-            config["paths"]["atac_seq_sorted_bam_dir"],
-            "{sample}.sortedByCoord.bam",
+            config["paths"]["atacseq_aligned_bam_dir"],
+            "{sample}.Aligned.bam",
         ),
     output:
         os.path.join(
             config["paths"]["workflow_prefix"],
-            config["paths"]["atac_seq_peaks_dir"],
-            "{sample}.narrowPeak",
+            config["paths"]["atacseq_sorted_bam_dir"],
+            "{sample}.sortedByCoord.bam",
         ),
     singularity:
-        "docker://biocontainers/samtools:v1.3_cv3"
+        "docker://aewebb/samtools:v1.20"
     resources:
         mem_mb=16000,
     threads: 4
     shell:
-        "Genrich -t {input} -o {output} -v"
+        "samtools sort -@ {threads} -o {output} {input}"

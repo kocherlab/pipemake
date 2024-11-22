@@ -1,0 +1,37 @@
+# Jinja template: Process setup.py to obtain version and metadata
+{% set data = load_setup_py_data() %}
+
+package:
+  name: pipemake-minimal
+  version: {{ data.get('version') }}
+
+about:
+  home: {{ data.get('url') }}
+  license: {{ data.get('license') }}
+  summary: "Pipemake: A pipeline creation tool using Snakemake"
+
+build:
+  number: 0
+  entry_points:
+    - pipemake=pipemake.pipemake:main
+
+source:
+  path: ../../
+
+requirements:
+  host:
+    - pip
+    - python >=3.8
+    - conda-forge/label/python_rc::_python_rc
+    - conda-forge::immutables
+  run:
+    - pip
+    - python >=3.8
+    - conda-forge::python_abi
+    - bioconda::snakemake >=8.11.3
+
+test:
+  imports:
+    - pipemake
+  run:
+    - pipemake --help

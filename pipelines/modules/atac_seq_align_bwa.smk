@@ -6,7 +6,7 @@ rule all:
         expand(
             os.path.join(
                 config["paths"]["workflow_prefix"],
-                config["paths"]["atac_seq_aligned_bam_dir"],
+                config["paths"]["atacseq_aligned_bam_dir"],
                 "{sample}.Aligned.bam",
             ),
             sample=config["samples"],
@@ -71,20 +71,15 @@ rule bwa_index_atac_seq:
     threads: 4
     shell:
         "cp {input} {params.index_fasta} && "
-        "bwa {params.index_fasta}"
+        "bwa index {params.index_fasta}"
 
 
 rule bwa_mem_single_end_atac_seq:
     input:
         r1_reads=os.path.join(
             config["paths"]["workflow_prefix"],
-            config["paths"]["atac_seq_fastq_dir"],
-            "{sample}_R1.fq.gz",
-        ),
-        assembly=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            f"{config['species']}_{config['assembly_version']}.fa",
+            config["paths"]["atacseq_fastq_dir"],
+            "{sample}_R1.fastq.gz",
         ),
         index_fasta=os.path.join(
             config["paths"]["workflow_prefix"],
@@ -95,7 +90,7 @@ rule bwa_mem_single_end_atac_seq:
     output:
         os.path.join(
             config["paths"]["workflow_prefix"],
-            config["paths"]["atac_seq_aligned_bam_dir"],
+            config["paths"]["atacseq_aligned_bam_dir"],
             "{sample}.Aligned.bam",
         ),
     singularity:
@@ -111,13 +106,13 @@ rule bwa_mem_pair_end_atac_seq:
     input:
         r1_reads=os.path.join(
             config["paths"]["workflow_prefix"],
-            config["paths"]["atac_seq_fastq_dir"],
-            "{sample}_R1.fq.gz",
+            config["paths"]["atacseq_fastq_dir"],
+            "{sample}_R1.fastq.gz",
         ),
         r2_reads=os.path.join(
             config["paths"]["workflow_prefix"],
-            config["paths"]["atac_seq_fastq_dir"],
-            "{sample}_R2.fq.gz",
+            config["paths"]["atacseq_fastq_dir"],
+            "{sample}_R2.fastq.gz",
         ),
         index_fasta=os.path.join(
             config["paths"]["workflow_prefix"],
@@ -128,7 +123,7 @@ rule bwa_mem_pair_end_atac_seq:
     output:
         os.path.join(
             config["paths"]["workflow_prefix"],
-            config["paths"]["atac_seq_aligned_bam_dir"],
+            config["paths"]["atacseq_aligned_bam_dir"],
             "{sample}.Aligned.bam",
         ),
     singularity:

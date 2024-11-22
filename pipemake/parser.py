@@ -266,6 +266,12 @@ class PipelineParser:
             type=str,
         )
         pipeline_arg_groups["optional"].add_argument(
+            "--no-overwrite",
+            help="Do not overwrite existing files",
+            action="store_false",
+            dest="overwrite",
+        )
+        pipeline_arg_groups["optional"].add_argument(
             "-h", "--help", action="help", help="show this help message and exit"
         )
 

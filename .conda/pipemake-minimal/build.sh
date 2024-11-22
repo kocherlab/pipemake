@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 
 pipeline_dir="${PREFIX}/share/pipelines"
-mkdir -p $pipeline_dir
-cp -r pipelines/* $pipeline_dir
 
 mkdir -p "${PREFIX}/etc/conda/activate.d"
 echo "export PM_SNAKEMAKE_DIR=${pipeline_dir}" > "${PREFIX}/etc/conda/activate.d/${PKG_NAME}_activate.sh"
