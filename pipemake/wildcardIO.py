@@ -2,9 +2,10 @@ import os
 import logging
 import itertools
 
-from pipemake.fileIO import FileIO
-
+from collections import defaultdict
 from snakemake.io import glob_wildcards
+
+from pipemake.fileIO import FileIO
 
 
 class WildcardIO:
@@ -41,17 +42,35 @@ class WildcardIO:
 
     @classmethod
     def fromStr(cls, wildcard_str, **kwargs):
-        wildcard_dict = {}
+        # Create a dictionary to store the wildcard values
+        wildcard_dict = defaultdict(list)
 
         # Use glob to retrieve wildcard entries
         wildcard_data = glob_wildcards(wildcard_str)
 
         # Loop the wildcard names - i.e. fields
         for wildcard_name in wildcard_data._fields:
-            # Report the IDs in order without duplicates
-            wildcard_dict[wildcard_name] = list(
-                dict.fromkeys(getattr(wildcard_data, wildcard_name))
-            )
+            # Assign the wildcard values
+            wildcard_values = list(dict.fromkeys(getattr(wildcard_data, wildcard_name)))
+
+            # Loop the wildcard values
+            for wildcard_value in wildcard_values:
+                # Skip if the wildcard value is not a path
+                if os.sep in wildcard_value:
+                    # Assign the possible wildcard directory
+                    wildcard_directory = os.path.join(
+                        os.path.dirname(wildcard_str), os.path.dirname(wildcard_value)
+                    )
+
+                    # Check if the wildcard value contains a directory
+                    if os.path.isdir(wildcard_directory):
+                        logging.warning(
+                            f"Wildcard ({wildcard_name}) value contains a directory: {os.path.dirname(wildcard_value)}. This is often caused by a subdirectory in the wildcard directory."
+                        )
+                        continue
+
+                # Append the wildcard value to the wildcard dict
+                wildcard_dict[wildcard_name].append(wildcard_value)
 
         return cls(wildcard_str, wildcard_dict, **kwargs)
 
