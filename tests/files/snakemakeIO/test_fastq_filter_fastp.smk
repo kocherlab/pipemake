@@ -32,7 +32,7 @@ rule fastp_single_end:
         ),
         min_length=config["min_length"],
     singularity:
-        "{PATH}/pipemake_utils.v0.1.27.sif"
+        "{PATH}/sambamba.v1.0.1.sif"
     resources:
         mem_mb=config["resources"]["fastp_single_end"]["mem_mb"],
     threads: config["resources"]["fastp_single_end"]["threads"]
@@ -81,7 +81,7 @@ rule fastp_pair_end:
         ),
         min_length=config["min_length"],
     singularity:
-        "{PATH}/pipemake_utils.v0.1.27.sif"
+        "{PATH}/sambamba.v1.0.1.sif"
     resources:
         mem_mb=config["resources"]["fastp_pair_end"]["mem_mb"],
     threads: config["resources"]["fastp_pair_end"]["threads"]

@@ -39,7 +39,7 @@ rule fastp_pair_end:
         ),
         min_length=config["min_length"],
     singularity:
-        "docker://aewebb/pipemake_utils:v0.1.27"
+        "docker://aewebb/sambamba:v1.0.1"
     resources:
         mem_mb=config["resources"]["fastp_pair_end"]["mem_mb"],
     threads: config["resources"]["fastp_pair_end"]["threads"]

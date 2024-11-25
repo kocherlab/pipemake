@@ -142,7 +142,7 @@ def test_SnakePipelineIO_wo_error(
     assert os.path.exists(os.path.join(test_dir, "test.yml"))
 
     # Check if the singularity containers were built
-    assert os.path.isfile(os.path.join(singularity_dir, "pipemake_utils.v0.1.27.sif"))
+    assert os.path.isfile(os.path.join(singularity_dir, "sambamba.v1.0.1.sif"))
 
     # Read the config yaml
     with open(os.path.join(test_dir, "test.yml"), "r") as yaml_file:
