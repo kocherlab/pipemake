@@ -284,8 +284,8 @@ rule reseq_cat_xpnsl_bash:
     threads: 1
     shell:
         """
-        cat {input.scan_xpnsl} > {output.scan_xpnsl}
-        cat {input.norm_xpnsl} > {output.norm_xpnsl}
+        awk 'FNR>1 || NR==1' {input.scan_xpnsl} > {output.scan_xpnsl}
+        awk 'FNR>1 || NR==1' {input.norm_xpnsl} > {output.norm_xpnsl}
         cat {input.scan_log} > {output.scan_log}
         cat {input.norm_log} > {output.norm_log}
         """
