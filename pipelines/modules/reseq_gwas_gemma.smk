@@ -314,7 +314,7 @@ rule filter_gemma:
         mem_mb=2000,
     threads: 1
     singularity:
-        "docker://aewebb/pipemake_utils:v0.1.27"
+        "docker://aewebb/pipemake_utils:v1.1.1"
     shell:
         "filter-gemma --gemma-file {input} --min-log-pvalue {params.min_log_pvalue} --out-prefix {params.out_prefix}"
 
@@ -347,5 +347,7 @@ rule plot_gemma:
     resources:
         mem_mb=2000,
     threads: 1
+    singularity:
+        "docker://aewebb/pipemake_utils:v1.1.1"
     shell:
         "manhattan-plot --input-file {input} --chrom-col chr --pos-col ps --stat-col p_wald --plot-stat-text 'Wald test p-value' --chrom-pos-sep '_' --plot-neg-log --out-prefix {params.out_prefix}"
