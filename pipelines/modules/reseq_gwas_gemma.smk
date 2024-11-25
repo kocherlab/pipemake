@@ -126,7 +126,7 @@ rule gemma_model_phenotype_file:
         mem_mb=2000,
     threads: 1
     singularity:
-        "docker://aewebb/pipemake_utils:v0.1.27"
+        "docker://aewebb/pipemake_utils:v1.1.1"
     shell:
         "ped-phenotype-file --fam {input.fam_file} --model-file {input.model_file} --model-name {wildcards.model} --numeric --out-prefix {params.out_prefix}"
 

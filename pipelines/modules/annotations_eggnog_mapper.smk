@@ -30,7 +30,7 @@ rule create_longest_aa_transcript:
             f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}_pep",
         ),
     singularity:
-        "docker://aewebb/pipemake_utils:v1.0.0"
+        "docker://aewebb/pipemake_utils:v1.1.1"
     resources:
         mem_mb=12000,
     threads: 1

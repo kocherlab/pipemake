@@ -46,6 +46,6 @@ rule model_ind_file:
         mem_mb=2000,
     threads: 1
     singularity:
-        "docker://aewebb/pipemake_utils:v0.1.27"
+        "docker://aewebb/pipemake_utils:v1.1.1"
     shell:
         "model-inds --model-file {input} --model-name {wildcards.model} --out-prefix {params.out_prefix}"
