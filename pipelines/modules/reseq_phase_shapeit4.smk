@@ -104,7 +104,7 @@ rule reseq_index_unphased_bcftools:
         mem_mb=24000,
     threads: 12
     shell:
-        "bcftools index -f {input.vcf}"
+        "bcftools index -f {input}"
 
 
 rule reseq_phase_chroms_shapeit4:

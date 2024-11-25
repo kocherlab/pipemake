@@ -27,16 +27,9 @@ rule reseq_prep_nsl_vcf_bcftools:
             os.path.join(
                 config["paths"]["workflow_prefix"],
                 config["paths"]["reseq_phased_vcf_dir"],
-                "SplitByChrom",
+                "nSL",
                 "{chrom}.nsl.vcf.gz",
             )
-        ),
-    params:
-        out_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_phased_vcf_dir"],
-            "SplitByChrom",
-            "{chrom}",
         ),
     singularity:
         "docker://aewebb/bcftools:v1.20"
@@ -52,7 +45,7 @@ rule reseq_nsl_selscan:
         os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["reseq_phased_vcf_dir"],
-            "SplitByChrom",
+            "nSL",
             "{chrom}.nsl.vcf.gz",
         ),
     output:
