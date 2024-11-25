@@ -10,6 +10,16 @@ rule all:
             ),
             model=config["models"],
         ),
+        expand(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["reseq_popgen_dir"],
+                "GEMMA",
+                "{model}",
+                f"{config['species']}_{config['assembly_version']}.pruned.lmm.manhattan.png",
+            ),
+            model=config["models"],
+        ),
 
 
 rule gemma_model_bed:
@@ -307,3 +317,35 @@ rule filter_gemma:
         "docker://aewebb/pipemake_utils:v0.1.27"
     shell:
         "filter-gemma --gemma-file {input} --min-log-pvalue {params.min_log_pvalue} --out-prefix {params.out_prefix}"
+
+
+rule plot_gemma:
+    input:
+        os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["reseq_popgen_dir"],
+            "GEMMA",
+            "{model}",
+            f"{config['species']}_{config['assembly_version']}.pruned.lmm.assoc.txt",
+        ),
+    output:
+        os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["reseq_popgen_dir"],
+            "GEMMA",
+            "{model}",
+            f"{config['species']}_{config['assembly_version']}.pruned.lmm.manhattan.png",
+        ),
+    params:
+        out_prefix=os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["reseq_popgen_dir"],
+            "GEMMA",
+            "{model}",
+            f"{config['species']}_{config['assembly_version']}.pruned.lmm",
+        ),
+    resources:
+        mem_mb=2000,
+    threads: 1
+    shell:
+        "manhattan-plot --input-file {input} --chrom-col chr --pos-col ps --stat-col p_wald --plot-stat-text 'Wald test p-value' --chrom-pos-sep '_' --plot-neg-log --out-prefix {params.out_prefix}"

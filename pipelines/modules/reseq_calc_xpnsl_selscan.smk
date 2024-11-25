@@ -4,25 +4,13 @@ rule all:
             config["paths"]["workflow_prefix"],
             config["paths"]["reseq_popgen_dir"],
             "XPnSL",
-            f"{config['species']}_{config['assembly_version']}.xpnsl.out",
+            f"{config['species']}_{config['assembly_version']}.xpnsl.manhattan.png",
         ),
         os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["reseq_popgen_dir"],
             "XPnSL",
-            f"{config['species']}_{config['assembly_version']}.xpnsl.out.log",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "XPnSL",
-            f"{config['species']}_{config['assembly_version']}.xpnsl.norm",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "XPnSL",
-            f"{config['species']}_{config['assembly_version']}.xpnsl.norm.log",
+            f"{config['species']}_{config['assembly_version']}.abs_xpnsl.manhattan.png",
         ),
 
 
@@ -288,4 +276,44 @@ rule reseq_cat_xpnsl_bash:
         awk 'FNR>1 || NR==1' {input.norm_xpnsl} > {output.norm_xpnsl}
         cat {input.scan_log} > {output.scan_log}
         cat {input.norm_log} > {output.norm_log}
+        """
+
+
+rule plot_norm_xpnsl_pipemake:
+    input:
+        os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["reseq_popgen_dir"],
+            "XPnSL",
+            f"{config['species']}_{config['assembly_version']}.xpnsl.norm",
+        ),
+    output:
+        os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["reseq_popgen_dir"],
+            "XPnSL",
+            f"{config['species']}_{config['assembly_version']}.xpnsl.manhattan.png",
+        ),
+        os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["reseq_popgen_dir"],
+            "XPnSL",
+            f"{config['species']}_{config['assembly_version']}.abs_xpnsl.manhattan.png",
+        ),
+    params:
+        out_prefix=os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["reseq_popgen_dir"],
+            "XPnSL",
+            f"{config['species']}_{config['assembly_version']}",
+        ),
+    singularity:
+        "docker://aewebb/pipemake_utils:v0.1.27"
+    resources:
+        mem_mb=2000,
+    threads: 1
+    shell:
+        """
+        manhattan-plot --input-file {input} --chrom-col id --pos-col id --stat-col normxpehh --plot-stat-text "Noramlized XPnSL" --chrom-pos-sep '_' --out-prefix {params.out_prefix}.xpnsl
+        manhattan-plot --input-file {input} --chrom-col id --pos-col id --stat-col normxpehh --plot-stat-text "Noramlized XPnSL" --chrom-pos-sep '_' --plot-abs --out-prefix {params.out_prefix}.abs_xpnsl
         """
