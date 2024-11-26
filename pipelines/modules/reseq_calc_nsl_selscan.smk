@@ -20,7 +20,7 @@ rule reseq_prep_nsl_vcf_bcftools:
             config["paths"]["workflow_prefix"],
             config["paths"]["reseq_phased_vcf_dir"],
             "SplitByChrom",
-            "{chrom}.vcf.gz",
+            "{chrom_nsl}.vcf.gz",
         ),
     output:
         temp(
@@ -28,7 +28,7 @@ rule reseq_prep_nsl_vcf_bcftools:
                 config["paths"]["workflow_prefix"],
                 config["paths"]["reseq_phased_vcf_dir"],
                 "nSL",
-                "{chrom}.nsl.vcf.gz",
+                "{chrom_nsl}.nsl.vcf.gz",
             )
         ),
     singularity:
@@ -46,7 +46,7 @@ rule reseq_nsl_selscan:
             config["paths"]["workflow_prefix"],
             config["paths"]["reseq_phased_vcf_dir"],
             "nSL",
-            "{chrom}.nsl.vcf.gz",
+            "{chrom_nsl}.nsl.vcf.gz",
         ),
     output:
         temp(
@@ -54,7 +54,7 @@ rule reseq_nsl_selscan:
                 config["paths"]["workflow_prefix"],
                 config["paths"]["reseq_popgen_dir"],
                 "nSL",
-                "{chrom}.nsl.out",
+                "{chrom_nsl}.nsl.out",
             )
         ),
         temp(
@@ -62,7 +62,7 @@ rule reseq_nsl_selscan:
                 config["paths"]["workflow_prefix"],
                 config["paths"]["reseq_popgen_dir"],
                 "nSL",
-                "{chrom}.nsl.log",
+                "{chrom_nsl}.nsl.log",
             )
         ),
     params:
@@ -70,7 +70,7 @@ rule reseq_nsl_selscan:
             config["paths"]["workflow_prefix"],
             config["paths"]["reseq_popgen_dir"],
             "nSL",
-            "{chrom}",
+            "{chrom_nsl}",
         ),
         maf=config["maf"],
     singularity:
@@ -88,7 +88,7 @@ rule reseq_normalize_nsl_norm:
             config["paths"]["workflow_prefix"],
             config["paths"]["reseq_popgen_dir"],
             "nSL",
-            "{chrom}.nsl.out",
+            "{chrom_nsl}.nsl.out",
         ),
     output:
         temp(
@@ -96,7 +96,7 @@ rule reseq_normalize_nsl_norm:
                 config["paths"]["workflow_prefix"],
                 config["paths"]["reseq_popgen_dir"],
                 "nSL",
-                f"{{chrom}}.nsl.out.{config['bins']}bins.norm",
+                f"{{chrom_nsl}}.nsl.out.{config['bins']}bins.norm",
             )
         ),
         temp(
@@ -104,7 +104,7 @@ rule reseq_normalize_nsl_norm:
                 config["paths"]["workflow_prefix"],
                 config["paths"]["reseq_popgen_dir"],
                 "nSL",
-                f"{{chrom}}.nsl.out.{config['bins']}bins.log",
+                f"{{chrom_nsl}}.nsl.out.{config['bins']}bins.log",
             )
         ),
     params:
@@ -112,7 +112,7 @@ rule reseq_normalize_nsl_norm:
             config["paths"]["workflow_prefix"],
             config["paths"]["reseq_popgen_dir"],
             "nSL",
-            "{chrom}.nsl.out",
+            "{chrom_nsl}.nsl.out",
         ),
         bins=config["bins"],
     singularity:
@@ -134,56 +134,56 @@ def aggregate_nsl_reseq(wildcards):
                 config["paths"]["workflow_prefix"],
                 config["paths"]["reseq_popgen_dir"],
                 "nSL",
-                "{chrom}.nsl.out",
+                "{chrom_nsl}.nsl.out",
             ),
-            chrom=glob_wildcards(
+            chrom_nsl=glob_wildcards(
                 os.path.join(
                     checkpoint_output,
-                    "{chrom}.vcf.gz",
+                    "{chrom_nsl}.vcf.gz",
                 )
-            ).chrom,
+            ).chrom_nsl,
         ),
         "scan_log": expand(
             os.path.join(
                 config["paths"]["workflow_prefix"],
                 config["paths"]["reseq_popgen_dir"],
                 "nSL",
-                "{chrom}.nsl.log",
+                "{chrom_nsl}.nsl.log",
             ),
-            chrom=glob_wildcards(
+            chrom_nsl=glob_wildcards(
                 os.path.join(
                     checkpoint_output,
-                    "{chrom}.vcf.gz",
+                    "{chrom_nsl}.vcf.gz",
                 )
-            ).chrom,
+            ).chrom_nsl,
         ),
         "norm_nsl": expand(
             os.path.join(
                 config["paths"]["workflow_prefix"],
                 config["paths"]["reseq_popgen_dir"],
                 "nSL",
-                f"{{chrom}}.nsl.out.{config['bins']}bins.norm",
+                f"{{chrom_nsl}}.nsl.out.{config['bins']}bins.norm",
             ),
-            chrom=glob_wildcards(
+            chrom_nsl=glob_wildcards(
                 os.path.join(
                     checkpoint_output,
-                    "{chrom}.vcf.gz",
+                    "{chrom_nsl}.vcf.gz",
                 )
-            ).chrom,
+            ).chrom_nsl,
         ),
         "norm_log": expand(
             os.path.join(
                 config["paths"]["workflow_prefix"],
                 config["paths"]["reseq_popgen_dir"],
                 "nSL",
-                f"{{chrom}}.nsl.out.{config['bins']}bins.log",
+                f"{{chrom_nsl}}.nsl.out.{config['bins']}bins.log",
             ),
-            chrom=glob_wildcards(
+            chrom_nsl=glob_wildcards(
                 os.path.join(
                     checkpoint_output,
-                    "{chrom}.vcf.gz",
+                    "{chrom_nsl}.vcf.gz",
                 )
-            ).chrom,
+            ).chrom_nsl,
         ),
     }
 
