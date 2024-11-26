@@ -46,7 +46,7 @@ rule reseq_model_fst_phenotype_file:
         mem_mb=2000,
     threads: 1
     singularity:
-        "docker://aewebb/pipemake_utils:v1.1.1"
+        "docker://aewebb/pipemake_utils:v1.1.3"
     shell:
         "ped-phenotype-file --fam {input.fam_file} --model-file {input.model_file} --model-name {wildcards.model} --out-prefix {params.out_prefix} --out-format plink2 --pheno-header {wildcards.model}"
 

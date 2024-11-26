@@ -226,6 +226,6 @@ rule softmask_r2:
             f"{config['species']}_{config['assembly_version']}.fa.masked",
         ),
     singularity:
-        "docker://aewebb/pipemake_utils:v1.1.1"
+        "docker://aewebb/pipemake_utils:v1.1.3"
     shell:
         "softmask.py {input.assembly} {input.masked_assembly} {output}"
