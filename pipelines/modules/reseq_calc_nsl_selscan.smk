@@ -28,6 +28,7 @@ rule reseq_prep_nsl_vcf_bcftools:
                 config["paths"]["workflow_prefix"],
                 config["paths"]["reseq_phased_vcf_dir"],
                 "nSL",
+                "SplitByChrom",
                 "{chrom_nsl}.nsl.vcf.gz",
             )
         ),
@@ -46,6 +47,7 @@ rule reseq_nsl_selscan:
             config["paths"]["workflow_prefix"],
             config["paths"]["reseq_phased_vcf_dir"],
             "nSL",
+            "SplitByChrom",
             "{chrom_nsl}.nsl.vcf.gz",
         ),
     output:
@@ -54,6 +56,7 @@ rule reseq_nsl_selscan:
                 config["paths"]["workflow_prefix"],
                 config["paths"]["reseq_popgen_dir"],
                 "nSL",
+                "SplitByChrom",
                 "{chrom_nsl}.nsl.out",
             )
         ),
@@ -62,6 +65,7 @@ rule reseq_nsl_selscan:
                 config["paths"]["workflow_prefix"],
                 config["paths"]["reseq_popgen_dir"],
                 "nSL",
+                "SplitByChrom",
                 "{chrom_nsl}.nsl.log",
             )
         ),
@@ -70,6 +74,7 @@ rule reseq_nsl_selscan:
             config["paths"]["workflow_prefix"],
             config["paths"]["reseq_popgen_dir"],
             "nSL",
+            "SplitByChrom",
             "{chrom_nsl}",
         ),
         maf=config["maf"],
@@ -88,6 +93,7 @@ rule reseq_normalize_nsl_norm:
             config["paths"]["workflow_prefix"],
             config["paths"]["reseq_popgen_dir"],
             "nSL",
+            "SplitByChrom",
             "{chrom_nsl}.nsl.out",
         ),
     output:
@@ -96,6 +102,7 @@ rule reseq_normalize_nsl_norm:
                 config["paths"]["workflow_prefix"],
                 config["paths"]["reseq_popgen_dir"],
                 "nSL",
+                "SplitByChrom",
                 f"{{chrom_nsl}}.nsl.out.{config['bins']}bins.norm",
             )
         ),
@@ -104,6 +111,7 @@ rule reseq_normalize_nsl_norm:
                 config["paths"]["workflow_prefix"],
                 config["paths"]["reseq_popgen_dir"],
                 "nSL",
+                "SplitByChrom",
                 f"{{chrom_nsl}}.nsl.out.{config['bins']}bins.log",
             )
         ),
@@ -112,6 +120,7 @@ rule reseq_normalize_nsl_norm:
             config["paths"]["workflow_prefix"],
             config["paths"]["reseq_popgen_dir"],
             "nSL",
+            "SplitByChrom",
             "{chrom_nsl}.nsl.out",
         ),
         bins=config["bins"],
@@ -134,6 +143,7 @@ def aggregate_nsl_reseq(wildcards):
                 config["paths"]["workflow_prefix"],
                 config["paths"]["reseq_popgen_dir"],
                 "nSL",
+                "SplitByChrom",
                 "{chrom_nsl}.nsl.out",
             ),
             chrom_nsl=glob_wildcards(
@@ -148,6 +158,7 @@ def aggregate_nsl_reseq(wildcards):
                 config["paths"]["workflow_prefix"],
                 config["paths"]["reseq_popgen_dir"],
                 "nSL",
+                "SplitByChrom",
                 "{chrom_nsl}.nsl.log",
             ),
             chrom_nsl=glob_wildcards(
@@ -162,6 +173,7 @@ def aggregate_nsl_reseq(wildcards):
                 config["paths"]["workflow_prefix"],
                 config["paths"]["reseq_popgen_dir"],
                 "nSL",
+                "SplitByChrom",
                 f"{{chrom_nsl}}.nsl.out.{config['bins']}bins.norm",
             ),
             chrom_nsl=glob_wildcards(
@@ -176,6 +188,7 @@ def aggregate_nsl_reseq(wildcards):
                 config["paths"]["workflow_prefix"],
                 config["paths"]["reseq_popgen_dir"],
                 "nSL",
+                "SplitByChrom",
                 f"{{chrom_nsl}}.nsl.out.{config['bins']}bins.log",
             ),
             chrom_nsl=glob_wildcards(
