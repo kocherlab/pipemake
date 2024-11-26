@@ -71,5 +71,4 @@ setup:
           gzipped: True
 
 snakefiles:
-  - reseq_phase_shapeit4
   - reseq_calc_nsl_selscan
