@@ -49,13 +49,11 @@ checkpoint reseq_split_unphased_bcftools:
             f"{config['species']}_{config['assembly_version']}.vcf.gz",
         ),
     output:
-        temp(
-            directory(
-                os.path.join(
-                    config["paths"]["workflow_prefix"],
-                    config["paths"]["reseq_filtered_vcf_dir"],
-                    "SplitByChrom",
-                )
+        directory(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["reseq_filtered_vcf_dir"],
+                "SplitByChrom",
             )
         ),
     params:
