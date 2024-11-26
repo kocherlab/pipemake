@@ -94,11 +94,6 @@ rule reseq_phase_chroms_shapeit4:
             "SplitByChrom",
             "{chrom}.vcf.gz.csi",
         ),
-        chrom_log=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_filtered_vcf_dir"],
-            f"{config['species']}_{config['assembly_version']}.chrom.log",
-        ),
     output:
         temp(
             os.path.join(
@@ -114,11 +109,7 @@ rule reseq_phase_chroms_shapeit4:
         mem_mb=24000,
     threads: 12
     shell:
-        """
-        date=$(date +'%a %b %H:%M:%S %Y')
-        echo "##shapeit4_phaseCommand=--input {input.vcf} --region {wildcards.chrom} --output {output} --thread {threads};  Date=$date" >> {input.chrom_log}
-        shapeit4 --input {input.vcf} --region {wildcards.chrom} --output {output} --thread {threads}
-        """
+        "shapeit4 --input {input.vcf} --region {wildcards.chrom} --output {output} --thread {threads}"
 
 
 rule reseq_prep_nsl_vcf_bcftools:
@@ -350,7 +341,7 @@ rule plot_norm_nsl_pipemake:
             f"{config['species']}_{config['assembly_version']}",
         ),
     singularity:
-        "docker://aewebb/pipemake_utils:v1.1.1"
+        "docker://aewebb/pipemake_utils:v1.1.2"
     resources:
         mem_mb=2000,
     threads: 1
