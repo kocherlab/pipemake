@@ -40,6 +40,18 @@ rule create_longest_aa_transcript:
 
 rule run_eggnog_mapper:
     input:
+        os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["downloads_dir"],
+            "EggNOG",
+            f"eggnog.db",
+        ),
+        os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["downloads_dir"],
+            "EggNOG",
+            f"eggnog.taxa.db",
+        ),
         out_prefix=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["annotations_dir"],
