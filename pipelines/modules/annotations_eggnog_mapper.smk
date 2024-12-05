@@ -40,19 +40,19 @@ rule create_longest_aa_transcript:
 
 rule run_eggnog_mapper:
     input:
-        os.path.join(
+        eggnog_db=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["downloads_dir"],
             "EggNOG",
             f"eggnog.db",
         ),
-        os.path.join(
+        taxa_db=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["downloads_dir"],
             "EggNOG",
             f"eggnog.taxa.db",
         ),
-        out_prefix=os.path.join(
+        transcripts=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["annotations_dir"],
             "EggNOG",
@@ -88,4 +88,4 @@ rule run_eggnog_mapper:
         mem_mb=12000,
     threads: 12
     shell:
-        "emapper.py --data_dir {params.data_dir} -i {input} -o {params.out_prefix} --cpu {threads} --excel --temp_dir {params.eggnod_dir}"
+        "emapper.py --data_dir {params.data_dir} -i {input.transcripts} -o {params.out_prefix} --cpu {threads} --excel --temp_dir {params.eggnod_dir}"
