@@ -1,23 +1,23 @@
 .. filetypes:
 
 ###################
-Pipemake File Types
+pipemake File Types
 ###################
 
-Pipemake operates using a combination of two file types: Snakemake files and pipeline configuration files.
+pipemake operates using a combination of two file types: Snakemake files and pipeline configuration files.
 
 *************************
 Snakemake files (Modules)
 *************************
 
-Snakemake files are used to define Pipemake **Modules**. In general, **Modules** follow the same structure and nomenclature as typical Snakemake files. However, Pipemake **Modules** are focused on being reusable. This is achieved by following a few key principles:
+Snakemake files are used to define pipemake **Modules**. In general, **Modules** follow the same structure and nomenclature as typical Snakemake files. However, pipemake **Modules** are focused on being reusable. This is achieved by following a few key principles:
 
 * Limiting a **Module** to a collection of rules used to perform a particular task (align reads, call variants, annotate a genome, etc.)
 * Consistent input and output usage
 * All paths begin with the configurable term `workflow_prefix` (e.g., `os.path.join(config['paths']['workflow_prefix'], 'Data')`)
 * Using singularity containers to ensure a consistent software environment
 
-By following these principles, Pipemake **Modules** may be easily used in multiple pipelines. For example, a basic snakemake file that aligns reads from a sample to a reference genome might have the following rules:
+By following these principles, pipemake **Modules** may be easily used in multiple pipelines. For example, a basic snakemake file that aligns reads from a sample to a reference genome might have the following rules:
 
 .. code-block::
 
@@ -43,7 +43,7 @@ By following these principles, Pipemake **Modules** may be easily used in multip
         shell:
             "bwa mem -t 8 {input.ref} {input.reads} | samtools view -bS - > {output}"
 
-To convert this into a Pipemake **Module** with configurable files, we would only need to modify the input and output files as follows:
+To convert this into a pipemake **Module** with configurable files, we would only need to modify the input and output files as follows:
 
 .. code-block::
 
@@ -97,7 +97,7 @@ In the above example, the `count_reads` rule uses BAM files stored within the `c
 
 .. note::
 
-    Pipemake is designed to detect configurable terms and will ensure the terms are properly assigned in the configuration file. Configurable terms may also be grouped together in the configuration file. For example, the filepath terms `config['paths']['workflow_prefix']`, `config['paths']['assembly_dir']`, `config['paths']['rnaseq_fastq_dir']`, and `config['paths']['rnaseq_aligned_bam_dir']` will be stored together within `config['paths']`. Grouping related terms together allows for a more organized configuration file, but is not required.
+    pipemake is designed to detect configurable terms and will ensure the terms are properly assigned in the configuration file. Configurable terms may also be grouped together in the configuration file. For example, the filepath terms `config['paths']['workflow_prefix']`, `config['paths']['assembly_dir']`, `config['paths']['rnaseq_fastq_dir']`, and `config['paths']['rnaseq_aligned_bam_dir']` will be stored together within `config['paths']`. Grouping related terms together allows for a more organized configuration file, but is not required.
 
 .. attention::
 
@@ -107,7 +107,7 @@ In the above example, the `count_reads` rule uses BAM files stored within the `c
 Pipeline configuration files
 ****************************
 
-Pipemake uses YAML-formatted files to define **Pipelines**. These files are used to define the following aspects of a pipeline:
+pipemake uses YAML-formatted files to define **Pipelines**. These files are used to define the following aspects of a pipeline:
 
 * The **Pipeline** name, description, and version
 * Command-line arguments (input files, configurable terms, pipeline parameters, etc.)
@@ -296,7 +296,7 @@ The following is an example of a **Pipeline** configuration file:
 Pipeline configuration guide
 ****************************
 
-A pipeline configuration file begins with the `pipeline` keyword, which is used to define the name of the pipeline. As this name is used to identify a pipeline within `pipemake`, it must be unique. Next is the `version` keyword, which is used to define the version of the pipeline and is included to track changes to the pipeline over time. 
+A pipeline configuration file begins with the `pipeline` keyword, which is used to define the name of the pipeline. As this name is used to identify a pipeline within pipemake, it must be unique. Next is the `version` keyword, which is used to define the version of the pipeline and is included to track changes to the pipeline over time. 
 
 The configuration file then consists of the following required sections: `parser`, `setup`, and `snakefiles`.
 
@@ -319,7 +319,7 @@ The parser section is used to create the command-line interface for a pipeline. 
 help:
 *****
 
-The help sub-section is used to define the description of the pipeline, which is displayed when `Pipemake` is run with the `--help` flag.
+The help sub-section is used to define the description of the pipeline, which is displayed when pipemake is run with the `--help` flag.
 
 .. code-block::
 
@@ -330,7 +330,7 @@ The help sub-section is used to define the description of the pipeline, which is
 arg-groups:
 ***********
 
-The `arg-groups` sub-section is used by `pipemake` to define command-line argument groups. The `basic` group is reserved by `pipemake`, arguments within this group will be automatically grouped within `required` or `optional` based on their `required` keyword. Users may place all arguments within the `basic` group or create additional groups as desired. Additional `arg-groups` may be defined as needed to organize related arguments within the pipeline help message, for example grouping all path arguments together in `paths`.
+The `arg-groups` sub-section is used by pipemake to define command-line argument groups. The `basic` group is reserved by pipemake, arguments within this group will be automatically grouped within `required` or `optional` based on their `required` keyword. Users may place all arguments within the `basic` group or create additional groups as desired. Additional `arg-groups` may be defined as needed to organize related arguments within the pipeline help message, for example grouping all path arguments together in `paths`.
 
 .. code-block::
 
@@ -395,7 +395,7 @@ Each `arg-groups` may use the `mutually-exclusive-groups` keyword to define mutu
             input-parser:
               required: True
 
-In this example, `pipemake` will create a single `mutually-exclusive-group` called `input-parser`. Currently, `mutually-exclusive-groups` supports the following keywords:
+In this example, pipemake will create a single `mutually-exclusive-group` called `input-parser`. Currently, `mutually-exclusive-groups` supports the following keywords:
 
 Optional keywords currently supported:
 
@@ -407,7 +407,7 @@ Optional keywords currently supported:
 
 .. attention::
 
-    At present, `pipemake` requires that the name of `mutually-exclusive-groups` to be unique among all `arg-groups`.
+    At present, pipemake requires that the name of `mutually-exclusive-groups` to be unique among all `arg-groups`.
 
 args:
 =====
@@ -439,7 +439,7 @@ At present, `pipemake` supports the following actions:
 
 .. note::
 
-    Additional actions may be added in the future, or updates to `pipemake` to allow for custom actions.
+    Additional actions may be added in the future, or updates to pipemake to allow for custom actions.
 
 default:
 --------

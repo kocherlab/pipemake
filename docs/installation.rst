@@ -1,16 +1,16 @@
 .. _installation:
 
 ##################################
-Pipemake Installation Instructions
+pipemake Installation Instructions
 ##################################
 
-We recommend installing Pipemake using Conda. This is the simplest and most reliable installation method to ensure that all dependencies are installed correctly.
+We recommend installing pipemake using Conda. This is the simplest and most reliable installation method to ensure that all dependencies are installed correctly.
 
 *****
 Conda
 *****
 
-To install Pipemake in an environment with `Snakemake <https://snakemake.readthedocs.i/>`_, please run the following commands:
+To install pipemake in an environment with `Snakemake <https://snakemake.readthedocs.i/>`_, please run the following commands:
 
 .. code-block:: bash
 
@@ -28,7 +28,7 @@ pip
 ***
 .. caution::
     
-    While Pipemake may also be installed using pip, Snakemake will have limited functionality and this method is not recommended. Instead we only recommend using pip if an environment with Snakemake already exists.
+    While pipemake may also be installed using pip, Snakemake will have limited functionality and this method is not recommended. Instead we only recommend using pip if an environment with Snakemake already exists.
 
 .. code-block:: bash
 

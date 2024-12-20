@@ -1,0 +1,3 @@
+samples	reads:R1	reads:R2
+test1	lane01_test1_read_1.fq.gz	lane01_test1_read_4.fq.gz	
+test2	lane01_test2_read_1.fq.gz	lane01_test2_read_4.fq.gz
