@@ -11,6 +11,4 @@ mkdir -p "${PREFIX}/etc/conda/deactivate.d"
 echo "unset PM_SNAKEMAKE_DIR" > "${PREFIX}/etc/conda/deactivate.d/${PKG_NAME}_deactivate.sh"
 echo "unset PM_SINGULARITY_DIR" >> "${PREFIX}/etc/conda/deactivate.d/${PKG_NAME}_deactivate.sh"
 
-pip install snakemake-executor-plugin-slurm
-
 python -m pip install --no-deps --ignore-installed .

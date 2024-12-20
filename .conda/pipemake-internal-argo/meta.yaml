@@ -29,6 +29,7 @@ requirements:
     - python >=3.8
     - conda-forge::python_abi
     - bioconda::snakemake >=8.11.3
+    - bioconda::snakemake-executor-plugin-slurm >=0.11.2
 
 test:
   imports:
