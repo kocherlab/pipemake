@@ -1,6 +1,14 @@
 rule all:
     input:
-        expand(os.path.join(config["paths"]["workflow_prefix"],config["paths"]["rnaseq_sorted_bam_dir"], "{sample}.sortedByCoord.bam",), sample=config["samples"],),
+        expand(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["rnaseq_sorted_bam_dir"],
+                "{sample}.sortedByCoord.bam",
+            ),
+            sample=config["samples"],
+        ),
+
 
 rule sort_bam_rnaseq:
     input:
