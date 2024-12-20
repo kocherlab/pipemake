@@ -179,7 +179,7 @@ def test_processIO_fromTableFile(table_file):
     assert returnPaths(
         method="table-file",
         args={"table_filename": table_file, "sample_column": "samples"},
-    ) == [os.path.dirname(table_file)]
+    ) == [os.path.abspath(os.path.dirname(table_file))]
     samples_dict = returnSamples(
         method="table-file",
         args={"table_filename": table_file, "sample_column": "samples"},

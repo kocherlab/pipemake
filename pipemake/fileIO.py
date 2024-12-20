@@ -267,7 +267,7 @@ class TableIO:
                     path_name = os.path.dirname(sample_filename)
                     if not os.path.isdir(path_name):
                         raise Exception(f"Unable to assign path: {path_name}")
-                    path_set.add(path_name)
+                    path_set.add(os.path.abspath(path_name))
 
             return list(path_set)
 

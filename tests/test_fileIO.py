@@ -234,7 +234,9 @@ def test_TableIO_returnPaths(filename, copy_method):
     if copy_method == "copy":
         assert test_seqtable.returnPaths(copy_method) == []
     else:
-        assert test_seqtable.returnPaths(copy_method) == [os.path.dirname(filename)]
+        assert test_seqtable.returnPaths(copy_method) == [
+            os.path.abspath(os.path.dirname(filename))
+        ]
 
 
 @pytest.mark.parametrize(
