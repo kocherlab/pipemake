@@ -99,7 +99,8 @@ html_favicon = "_static/favicon.png"
 # https://pradyunsg.me/furo/customisation/
 html_theme_options = {
     "external_links": [
-        ("GitHub", "https://github.com/kocherlab/naps"),
+        {'name': 'GitHub', 'url': 'https://github.com/kocherlab/naps'},
+        {'name': 'Kocher Lab', 'url': 'https://kocherlab.princeton.edu//'},
     ],
 }
 
