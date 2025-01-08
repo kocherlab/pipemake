@@ -10,6 +10,6 @@ dependencies:
   - pip:
     - sphinx-copybutton
     - sphinx-press-theme
-    - pydata-sphinx-theme
+    - sphinx-book-theme
     - sphinx-argparse
     - linkify-it-py

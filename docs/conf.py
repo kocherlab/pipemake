@@ -91,7 +91,7 @@ default_role = "py:obj"
 # html_theme = "furo"
 # Gotta have sphinx-press-theme installed
 #html_theme = "press"
-html_theme = "pydata_sphinx_theme"
+html_theme = "sphinx_book_theme"
 html_favicon = "_static/favicon.png"
 
 
