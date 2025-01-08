@@ -37,57 +37,64 @@
         https://anaconda.org/kocherlab/pipemake/badges/license.svg
         :target: https://github.com/kocherlab/pipemake/blob/main/LICENSE
 
-********
+
 pipemake
-********
+========
 pipemake is a lightweight, flexible, and easy-to-use tool for creating and managing `Snakemake <https://snakemake.readthedocs.i/>`_ pipelines. It was designed with three primary goals: 
 
 1. Offer a collection of curated, customizable genomic analysis pipelines for researchers seeking to rapidly integrate Snakemake-based workflows into their research.
 2. Optimize computational efficiency and reproducibility by fully operating in the Snakemake ecosystem.
 3. Streamline development by creating a flexible platform with swappable pipelines that easily reuse previously written Snakemake code.
 
+
+User Guide
+----------
+
 .. toctree::
-    :hidden:
-    :caption: pipemake Documentation
 
     installation
     pipelines
     usage
     other_files
     filetypes
+
+Contact
+-------
+
+.. toctree::
+
     contact
 
-================
+
+    
+
+
 Getting pipemake
-================
-------------
+----------------
+
 Conda
-------------
+^^^^^
 
 .. code-block:: bash
 
     conda install -n base -c conda-forge mamba
     mamba create -c conda-forge -c bioconda -c kocherlab -n pipemake pipemake
 
-
-======
 Issues
-======
+------
 
 1. Check the `docs <https://pipemake.rtfd.io/>`_.
 2. Search the `issues on GitHub <https://github.com/kocherlab/pipemake/issues>`_ or open a new one.
 
-============
 Contributors
-============
+------------
 
 * **Andrew Webb**, Department of Ecology and Evolutionary Biology, Lewis-Sigler Institute for Integrative Genomics, Princeton University, Howard Hughes Medical Institute, Chevy Chase, MD, USA
 * **Scott Wolf**, Research Computing, Princeton University, Princeton, NJ, USA
 * **Ian M Traniello**, Department of Ecology and Evolutionary Biology and Lewis-Sigler Institute for Integrative Genomics, Princeton University
 * **Sarah Kocher**, Department of Ecology and Evolutionary Biology, Lewis-Sigler Institute for Integrative Genomics, Princeton University, Howard Hughes Medical Institute, Chevy Chase, MD, USA
 
-=======
 License
-=======
+-------
 
 Pipemake is licensed under the MIT license. See the `LICENSE <https://github.com/kocherlab/pipemake/blob/main/LICENSE>`_ file for details.
