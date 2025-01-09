@@ -272,6 +272,10 @@ class SnakePipelineIO:
             if group and group not in yml_config_dict:
                 yml_config_dict[group] = {}
 
+            # Skip the pipeline arg if it is None
+            if pipeline_args[pipeline_arg] is None:
+                continue
+
             if not group:
                 yml_config_dict[config_arg] = pipeline_args[pipeline_arg]
             else:

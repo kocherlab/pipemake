@@ -4,6 +4,9 @@ parser:
   help: Filter resequencing VCF files using bcftools
   arg-groups:
     basic:
+      mutually-exclusive-args:
+        region-args:
+          required: False
       args:
         reseq-vcf:
           help: "Resequencing VCF file"
@@ -36,6 +39,16 @@ parser:
           help: "Maximum allele count"
           type: int
           default: 2
+        include_regions:
+          help: "Region file to include"
+          type: str
+          mutually-exclusive: "region-args"
+          action: confirmFile
+        exclude_regions:
+          help: "Region file to exclude"
+          type: str
+          mutually-exclusive: "region-args"
+          action: confirmFile
         species:
           help: "Species name"
           type: str

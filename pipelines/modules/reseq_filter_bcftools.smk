@@ -26,10 +26,12 @@ rule filter_basic_vcf_bcftools:
         maf=config["maf_cutoff"],
         qual=config["qual_cutoff"],
         missing_cutoff=config["missing_cutoff"],
+        include_regions=lambda config: f"--targets-file {config['include_regions']}" if 'include_regions' in config else '',
+        exclude_regions=lambda config: f"--targets-file ^{config['exclude_regions']}" if 'exclude_regions' in config else '',
     resources:
         mem_mb=16000,
     threads: 4
     singularity:
         "docker://aewebb/bcftools:v1.20"
     shell:
-        "bcftools view --min-alleles {params.min_alleles} --max-alleles {params.max_alleles} --types snps --include 'MAF>={params.maf} && QUAL>={params.qual} && F_MISSING<={params.missing_cutoff}' --output-type z --output-file {output} --threads {threads} {input}"
+        "bcftools view {params.include_regions} {params.exclude_regions} --min-alleles {params.min_alleles} --max-alleles {params.max_alleles} --types snps --include 'MAF>={params.maf} && QUAL>={params.qual} && F_MISSING<={params.missing_cutoff}' --output-type z --output-file {output} --threads {threads} {input}"
