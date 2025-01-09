@@ -87,9 +87,10 @@ class PipelineParser:
         # Ceate a dictionary to store each subparser
         self._pipeline_subparsers_dict = {}
 
-        for pipeline_name, pipeline_config in config_pipelines.items():
+        # Load the pipeline in sorted order
+        for pipeline_name in sorted(config_pipelines.keys()):
             # Assign the arguments for each pipeline
-            self._assignPipeline(pipeline_name, pipeline_config)
+            self._assignPipeline(pipeline_name, config_pipelines[pipeline_name])
 
     def _assignPipeline(self, pipeline_name, pipeline_config):
         # Assign the pipeline parser
