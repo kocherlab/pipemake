@@ -39,13 +39,15 @@ rule feature_counts_pair_end:
             "featureCounts",
             "{sample}.featurecounts.txt",
         ),
+    params:
+        count_strand=config["count_strand"],
     singularity:
         "docker://aewebb/subread:v2.0.1"
     resources:
         mem_mb=4000,
     threads: 4
     shell:
-        "featureCounts -p -T {threads} -a {input.gtf_file} -o {output} {input.sorted_bam}"
+        "featureCounts -s {params.count_strand} -p -T {threads} -a {input.gtf_file} -o {output} {input.sorted_bam}"
 
 
 rule feature_counts_single_end:
@@ -72,13 +74,15 @@ rule feature_counts_single_end:
             "featureCounts",
             "{sample}.featurecounts.txt",
         ),
+    params:
+        count_strand=config["count_strand"],
     singularity:
         "docker://aewebb/subread:v2.0.1"
     resources:
         mem_mb=4000,
     threads: 4
     shell:
-        "featureCounts -T {threads} -a {input.gtf_file} -o {output} {input.sorted_bam}"
+        "featureCounts -s {params.count_strand} -T {threads} -a {input.gtf_file} -o {output} {input.sorted_bam}"
 
 
 rule feature_counts_report:
