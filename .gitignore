@@ -13,5 +13,8 @@ tests/__pycache__/
 # OS generated files
 .DS_Store
 
+# Snakemake
+.snakemake/
+
 # Sphinx documentation
 docs/_build/
