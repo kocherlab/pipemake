@@ -39,16 +39,14 @@ parser:
           help: "Maximum allele count"
           type: int
           default: 2
-        include_regions:
+        include-regions:
           help: "Region file to include"
           type: str
           mutually-exclusive: "region-args"
-          action: confirmFile
-        exclude_regions:
+        exclude-regions:
           help: "Region file to exclude"
           type: str
           mutually-exclusive: "region-args"
-          action: confirmFile
         species:
           help: "Species name"
           type: str

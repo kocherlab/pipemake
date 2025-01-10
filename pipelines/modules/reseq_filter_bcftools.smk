@@ -26,8 +26,8 @@ rule filter_basic_vcf_bcftools:
         maf=config["maf_cutoff"],
         qual=config["qual_cutoff"],
         missing_cutoff=config["missing_cutoff"],
-        include_regions=lambda config: f"--targets-file {config['include_regions']}" if 'include_regions' in config else '',
-        exclude_regions=lambda config: f"--targets-file ^{config['exclude_regions']}" if 'exclude_regions' in config else '',
+        include_regions=f"--targets {config['include_regions']}" if 'include_regions' in config else '',
+        exclude_regions=f"--targets ^{config['exclude_regions']}" if 'exclude_regions' in config else '',
     resources:
         mem_mb=16000,
     threads: 4
