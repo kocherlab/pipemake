@@ -46,6 +46,10 @@ By following these principles, pipemake **Modules** may be easily used in multip
 To convert this into a pipemake **Module** with configurable files, we would only need to modify the input and output files as follows:
 
 .. code-block::
+    
+    rule all:
+        input:
+            os.path.join(config['paths']['workflow_prefix'], config['paths']['rnaseq_aligned_bam_dir'], "{sample}.bam")
 
     rule index_reference:
         input:

@@ -60,14 +60,16 @@ pipemake is a lightweight, flexible, and easy-to-use tool for creating and manag
 ================
 Getting pipemake
 ================
-------------
-Conda
-------------
+
+-----
+mamba
+-----
 
 .. code-block:: bash
 
-    conda install -n base -c conda-forge mamba
     mamba create -c conda-forge -c bioconda -c kocherlab -n pipemake pipemake
+
+For more information, see the :ref:`installation` instructions.
 
 
 ======
