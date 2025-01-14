@@ -52,3 +52,16 @@ pip
     `Snakemake <https://snakemake.readthedocs.i/>`_,
 
 
+**********************
+Singularity containers
+**********************
+
+pipemake also includes the option to store Singularity containers in a predefined directory. This is useful for groups that wish to maintain a single set of containers. This can be done by setting the environmental variable `PM_SINGULARITY_DIR` to the desired directory. For example:
+
+.. code-block:: bash
+
+    export PM_SINGULARITY_DIR=/path/to/singularity
+
+.. note::
+
+    It's also possible to use the argument `--singularity-dir` when running the `pipemake` command to specify the desired directory.
