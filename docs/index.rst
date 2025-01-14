@@ -53,8 +53,8 @@ pipemake is a lightweight, flexible, and easy-to-use tool for creating and manag
     installation
     pipelines
     usage
-    other_files
     filetypes
+    create
     contact
 
 ================
@@ -69,8 +69,7 @@ mamba
 
     mamba create -c conda-forge -c bioconda -c kocherlab -n pipemake pipemake
 
-For more information, see the :ref:`installation` instructions.
-
+For more information, see the :ref:`installation`.
 
 ======
 Issues
