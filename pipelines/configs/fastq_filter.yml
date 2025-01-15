@@ -36,6 +36,15 @@ parser:
           type: int
           default:
             str: "50"
+        cut-front:
+          help: "Trim from the front of the reads"
+          action: store_true
+        cut-tail:
+          help: "Trim from the tail of the reads"
+          action: store_true
+        cut-right:
+          help: "Trim the right side of the reads, starting from the 5' end"
+          action: store_true
     paths:
       args:
         unfiltered-fastq-dir:
