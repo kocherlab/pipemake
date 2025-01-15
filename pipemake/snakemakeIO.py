@@ -690,21 +690,28 @@ class SnakeRuleIO:
         return script_str.split('"')[0] + f'"{script_output_path}"'
 
     def _setParams(self):
-        # Find all occurences of the word config follpwed by one or more sets of square brackets
-        for config_match in re.finditer(r"config(\[[^\]]*\])+", self._original_text):
-            # Get the config string by removing newlines and whitespaces
-            config_str = "".join(
-                [_s.strip() for _s in config_match.group(0).splitlines()]
-            )
+        
+        def mergeLines (str):
+            return ''.join([_s.strip() for _s in str.splitlines()])
+
+        # Find all configs, separated by optional and required
+        for config_match in re.finditer(r"config((\[[^\]]*\])+)|if\s*(.*?)\s*in\s*?config((\[[^\]]*\])*)?", self._original_text):
+
+            # Check if the match is an optional config param
+            if 'if' in config_match.group(0):
+                config_str = f'[{config_match.group(3)}]'
+                if config_match.group(4):
+                    config_str = mergeLines(config_match.group(4)) + config_str            
+            
+            # Check if the match is a required config param
+            else:
+                config_str = mergeLines(config_match.group(1))
+
+            # Remove quotes from the config string
+            config_str = config_str.replace('"', "").replace("'", "")
 
             # Split the param str by either square brackets using regex
-            config_list = [
-                _p
-                for _p in re.split(
-                    r"\[|\]", config_str.replace('"', "").replace("'", "")
-                )
-                if _p
-            ][1:]
+            config_list = tuple([_p for _p in re.split(r"\[|\]", config_str) if _p])
 
             # Check if the match is associated with a value
             config_has_value = (
