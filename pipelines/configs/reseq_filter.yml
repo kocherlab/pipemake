@@ -40,11 +40,11 @@ parser:
           type: int
           default: 2
         include-regions:
-          help: "Region file to include"
+          help: "Region(s) to include. Multiple regions can be specified by separating them with a comma."
           type: str
           mutually-exclusive: "region-args"
         exclude-regions:
-          help: "Region file to exclude"
+          help: "Region(s) to exclude. Multiple regions can be specified by separating them with a comma."
           type: str
           mutually-exclusive: "region-args"
         species:
