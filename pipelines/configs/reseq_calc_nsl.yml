@@ -20,6 +20,10 @@ parser:
           help: "Minor allele frequency"
           type: float
           default: 0.05
+        window-size:
+          help: "Window size for nSL calculation"
+          type: int
+          default: 10000
         bins:
           help: "Number of bins for normalization"
           type: int

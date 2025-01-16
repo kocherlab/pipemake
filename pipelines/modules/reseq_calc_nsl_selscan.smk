@@ -189,7 +189,7 @@ rule reseq_normalize_nsl_norm:
             "{chrom}.nsl.out",
         ),
     output:
-        temp(
+        norm_file=temp(
             os.path.join(
                 config["paths"]["workflow_prefix"],
                 config["paths"]["reseq_popgen_dir"],
@@ -197,7 +197,15 @@ rule reseq_normalize_nsl_norm:
                 f"{{chrom}}.nsl.out.{config['bins']}bins.norm",
             )
         ),
-        temp(
+        window_file=temp(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["reseq_popgen_dir"],
+                "nSL",
+                f"{{chrom}}.nsl.out.{config['bins']}bins.norm.{str(config['window_size'])[:-3]}kb.windows",
+            )
+        ),
+        log_file=temp(
             os.path.join(
                 config["paths"]["workflow_prefix"],
                 config["paths"]["reseq_popgen_dir"],
@@ -213,13 +221,17 @@ rule reseq_normalize_nsl_norm:
             "{chrom}.nsl.out",
         ),
         bins=config["bins"],
+        window_size=config["window_size"],
     singularity:
         "docker://aewebb/selscan:v2.0.3"
     resources:
         mem_mb=2000,
     threads: 1
     shell:
-        "norm --nsl --files {input} --bins {params.bins} 2> {params.out_prefix}.{params.bins}bins.log"
+        """
+        norm --nsl --bp-win --winsize {params.window_size} --files {input} --bins {params.bins} 2> {output.log_file}
+        sed -i $'s/^/{wildcards.chrom}\t/' {output.window_file}
+        """
 
 
 def aggregate_nsl_reseq(wildcards):
@@ -260,6 +272,15 @@ def aggregate_nsl_reseq(wildcards):
             ),
             chrom=chrom_wildcards,
         ),
+        "norm_windows": expand(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["reseq_popgen_dir"],
+                "nSL",
+                f"{{chrom}}.nsl.out.{config['bins']}bins.norm.{str(config['window_size'])[:-3]}kb.windows",
+            ),
+            chrom=chrom_wildcards,
+        ),
         "norm_log": expand(
             os.path.join(
                 config["paths"]["workflow_prefix"],
@@ -294,6 +315,12 @@ rule reseq_cat_nsl_bash:
             "nSL",
             f"{config['species']}_{config['assembly_version']}.nsl.norm",
         ),
+        norm_windows=os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["reseq_popgen_dir"],
+            "nSL",
+            f"{config['species']}_{config['assembly_version']}.nsl.norm.windows",
+        ),
         norm_log=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["reseq_popgen_dir"],
@@ -307,6 +334,7 @@ rule reseq_cat_nsl_bash:
         """
         cat {input.scan_nsl} > {output.scan_nsl}
         cat {input.norm_nsl} > {output.norm_nsl}
+        cat {input.norm_windows} > {output.norm_windows}
         cat {input.scan_log} > {output.scan_log}
         cat {input.norm_log} > {output.norm_log}
         """
