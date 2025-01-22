@@ -41,7 +41,7 @@ rule run_sleap:
         tracking_pre_cull_to_target=f'--tracking.pre_cull_to_target {config["tracking_pre_cull_to_target"]}' if 'tracking_pre_cull_to_target' in config else '',
         tracking_target_instance_count=f'--tracking.target_instance_count {config["tracking_target_instance_count"]}' if 'tracking_target_instance_count' in config else '',
         tracking_clean_instance_count=f'--tracking.clean_instance_count {config["tracking_clean_instance_count"]}' if 'tracking_clean_instance_count' in config else '',
-        tracking_max_tracking=f'--tracking.max_tracking' if 'tracking_max_tracking' in config else '',
+        tracking_max_tracking=f'--tracking.max_tracking' if config['tracking_max_tracking'] else '',
         tracking_max_tracks=f'--tracking.max_tracks {config["tracking_max_tracks"]}' if 'tracking_max_tracks' in config else '',
     singularity:
         "docker://swwolf/sleap:1.3.4"
