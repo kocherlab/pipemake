@@ -36,18 +36,30 @@ rule run_sleap:
         ),
         tracking_batch_size=config["tracking_batch_size"],
         tracking_tracker=config["tracking_tracker"],
-        tracking_max_tracking=config["tracking_max_tracking"],
+        tracking_similarity=f'--tracking.similarity {config["tracking_similarity"]}' if config["tracking_similarity"] else '',
+        tracking_post_connect_single_breaks=f'--tracking.post_connect_single_breaks {config["tracking_post_connect_single_breaks"]}' if config["tracking_post_connect_single_breaks"] else '',
+        tracking_pre_cull_to_target=f'--tracking.pre_cull_to_target {config["tracking_pre_cull_to_target"]}' if config["tracking_pre_cull_to_target"] else '',
+        tracking_target_instance_count=f'--tracking.target_instance_count {config["tracking_target_instance_count"]}' if config["tracking_target_instance_count"] else '',
+        tracking_clean_instance_count=f'--tracking.clean_instance_count {config["tracking_clean_instance_count"]}' if config["tracking_clean_instance_count"] else '',
+        tracking_max_tracking=f'--tracking.max_tracking' if config["tracking_max_tracking"] else '',
+        tracking_max_tracks=f'--tracking.max_tracks {config["tracking_max_tracks"]}' if config["tracking_max_tracks"] else '',
     singularity:
         "docker://swwolf/sleap:latest"
     shell:
         """
         sleap-track \
         {input.input_video} \
+        --output {output} \
         -m {params.centroid_model} \
         -m {params.instance_model} \
-        --output {output} \
         --verbosity json \
         --batch-size {params.tracking_batch_size} \
         --tracking.tracker {params.tracking_tracker} \
-        --tracking.max_tracking {params.tracking_max_tracking} \
+        {params.tracking_similarity} \
+        {params.tracking_post_connect_single_breaks} \
+        {params.tracking_pre_cull_to_target} \
+        {params.tracking_target_instance_count} \
+        {params.tracking_clean_instance_count} \
+        {params.tracking_max_tracking} \
+        {params.tracking_max_tracks}
         """

@@ -49,6 +49,9 @@ rule run_naps:
         aruco_crop_size=config["aruco_crop_size"],
     singularity:
         "docker://swwolf/naps:latest"
+    resources:
+        mem_mb=32000,
+    threads: 1
     shell:
         """
         naps-track \
@@ -67,3 +70,4 @@ rule run_naps:
         --aruco-crop-size {params.aruco_crop_size} \
         --output {params.output_prefix}
         """
+

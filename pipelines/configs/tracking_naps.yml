@@ -60,10 +60,33 @@ parser:
         tracking-tracker:
           help: "Tracker to use for tracking"
           type: str
-          default: "simplemaxtracks"
+        tracking-similarity:
+          help: "Similarity threshold for tracking"
+          type: str
+          choices:
+            - 'instance'
+            - 'normalized_instance'
+            - 'object_keypoint'
+            - 'centroid'
+            - 'iou'
+        tracking-post-connect-single-breaks:
+          help: "If non-zero and target_instance_count is also non-zero, then connect track breaks when exactly one track is lost and exactly one track is spawned in frame."
+          type: int
+        tracking-pre-cull-to-target:
+          help: "If non-zero and target_instance_count is also non-zero, then cull instances over target count per frame before tracking"
+          type: int
+        tracking-target-instance-count:
+          help: "Target number of instances to track per frame"
+          type: int
+        tracking-clean-instance-count:
+          help: "Target number of instances to clean after tracking"
+          type: int
         tracking-max-tracking:
-          help: "If true then the tracker will cap the max number of tracks. (default: False)"
+          help: "If true then the tracker will cap the max number of tracks. Set the max number of tracks with --tracking-max-tracks"
           action: store_true
+        tracking-max-tracks:
+          help: "Maximum number of tracks to keep"
+          type: int
     naps-params:
       args:
         start-frame:
