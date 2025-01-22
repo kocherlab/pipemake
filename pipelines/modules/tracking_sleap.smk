@@ -44,7 +44,7 @@ rule run_sleap:
         tracking_max_tracking=f'--tracking.max_tracking' if 'tracking_max_tracking' in config else '',
         tracking_max_tracks=f'--tracking.max_tracks {config["tracking_max_tracks"]}' if 'tracking_max_tracks' in config else '',
     singularity:
-        "docker://swwolf/sleap:latest"
+        "docker://swwolf/sleap:1.3.4"
     shell:
         """
         sleap-track \
