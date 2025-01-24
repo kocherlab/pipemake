@@ -10,7 +10,31 @@ rule all:
         ),
 
 
-rule pacbio_to_fastq:
+rule index_pacbio_bam:
+    input:
+        os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["pacbio_bam_dir"],
+            "{sample}.bam",
+        ),
+    output:
+        temp(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["pacbio_bam_dir"],
+                "{sample}.bam.pbi",
+            ),
+        ),
+    singularity:
+        "docker://aewebb/pbtk:v3.4.0"
+    resources:
+        mem_mb=8000,
+    threads: 1
+    shell:
+        "pbindex {input}"
+
+
+rule pacbio_bam_to_fastq:
     input:
         pacbio_bam=os.path.join(
             config["paths"]["workflow_prefix"],

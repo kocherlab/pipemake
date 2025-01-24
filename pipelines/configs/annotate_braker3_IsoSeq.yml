@@ -12,7 +12,7 @@ parser:
           help: "Standardized wildcard statement used to store PacBio-HiFi BAMs"
           type: str
           default: 
-            str: "{samples}.{exts}"
+            str: "{samples}.bam"
       args:
         isoseq-wildcard:
           help: "Wildcard statement to represent IsoSeq FASTQs"
@@ -25,6 +25,10 @@ parser:
           action: confirmFile
           mutually-exclusive: "input-parser"
           wildcards: "isoseq-standardized-wildcard"
+        isoseq-index-ext:
+          help: "File extensions for PacBio-HiFi BAMs"
+          type: str
+          default: "pbi"
         isoseq-copy-method:
           help: "Specifies if IsoSeq FASTQs should be copied or symbolically linked."
           choices:
@@ -133,6 +137,7 @@ setup:
         args:
           - "isoseq-wildcard"
           - "isoseq-standardized-wildcard"
+          - "isoseq-index-ext"
           - "pacbio-bam-dir"
       standardize:
         method: "wildcard-str"
@@ -141,8 +146,7 @@ setup:
           standardized_filename: "{isoseq-standardized-wildcard}"
           out_dir: "{pacbio-bam-dir}"
           copy_method: '{isoseq-copy-method}'
-          gzipped: True
-          file_extensions: '{isoseq-file-extensions}'
+          index_ext: '{isoseq-index-ext}'
 
       samples:
         method: "wildcard-str"
@@ -156,6 +160,7 @@ setup:
         args:
           - "isoseq-table"
           - "isoseq-standardized-wildcard"
+          - "isoseq-index-ext"
           - "pacbio-bam-dir"
       standardize:
         method: "table-file"
@@ -165,7 +170,6 @@ setup:
           out_dir: "{pacbio-bam-dir}"
           copy_method: '{isoseq-copy-method}'
           sample_column: 'samples'
-          gzipped: True
       samples:
         method: "table-file"
         args:
