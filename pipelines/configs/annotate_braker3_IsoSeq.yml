@@ -1,21 +1,42 @@
-pipeline: annotate-braker3-with-bam
+pipeline: annotate-braker3-isoseq
 version: 1.0
 parser:
-  help: Annotate an assembly using BRAKER3 using a processed BAM file
+  help: Annotate an assembly using BRAKER3 using IsoSeq data
   arg-groups:
     basic:
-      args:
-        rnaseq-bam:
-          help: "RNAseq BAM file"
-          type: str
+      mutually-exclusive-args:
+        input-parser:
           required: True
+      wildcards-args:
+        isoseq-standardized-wildcard:
+          help: "Standardized wildcard statement used to store PacBio-HiFi BAMs"
+          type: str
+          default: 
+            str: "{samples}.{exts}"
+      args:
+        isoseq-wildcard:
+          help: "Wildcard statement to represent IsoSeq FASTQs"
+          type: str
+          mutually-exclusive: "input-parser"
+          wildcards: "isoseq-standardized-wildcard"
+        isoseq-table:
+          help: "Table with sample and FASTQs filenames"
+          type: str
           action: confirmFile
-        rnaseq-copy-method:
-          help: "Specifies if RNAseq BAM should be copied or symbolically linked."
+          mutually-exclusive: "input-parser"
+          wildcards: "isoseq-standardized-wildcard"
+        isoseq-copy-method:
+          help: "Specifies if IsoSeq FASTQs should be copied or symbolically linked."
           choices:
             - 'symbolic_link'
             - 'copy'
           default: 'symbolic_link'
+        isoseq-file-extensions:
+          help: "Supports file extensions for PacBio-HiFi BAMs"
+          type: list
+          default:
+            - "bam"
+            - "bam.pbi"
         assembly-fasta:
           help: "Assembly file"
           type: str
@@ -75,10 +96,27 @@ parser:
           help: "Directory to store downloads"
           type: str
           default: "Downloads"
-        rnaseq-merged-bam-dir:
+        pacbio-bam-dir:
+          help: "Directory to store PacBio BAM files"
+          type: str
+          default: "IsoSeq/PacBio/"
+        isoseq-fastq-dir:
+          help: "Directory to store the FASTQs files"
+          type: str
+          default: "IsoSeq/FASTQs"
+        isoseq-merged-bam-dir:
           help: "Directory to store BAM files"
           type: str
-          default: "RNAseq/BAMs/Merged"
+          default: "IsoSeq/BAMs/Merged"
+        isoseq-aligned-bam-dir:
+          help: "Directory to store sorted BAM files"
+          type: str
+          default: "IsoSeq/BAMs/Aligned"
+        isoseq-sorted-bam-dir:
+          help: "Directory to store sorted BAM files"
+          type: str
+          default: 
+            str: "IsoSeq/BAMs/Sorted"
         annotations-dir:
           help: "Directory to store annotations"
           type: str
@@ -89,21 +127,50 @@ parser:
           type: str
           default: "Assembly/RepeatModeler"
 setup:
-  rnaseq_input:
-    file-method:
+  isoseq_input:
+    wildcard-method:
       input:
         args:
-          - "rnaseq-bam"
-          - "rnaseq-bam-dir"
+          - "isoseq-wildcard"
+          - "isoseq-standardized-wildcard"
+          - "pacbio-bam-dir"
       standardize:
-        method: "file-str"
+        method: "wildcard-str"
         args:
-          input_filename: "{rnaseq-bam}"
-          standardized_filename: "{species}_{assembly_version}.bam"
-          out_dir: "{rnaseq-bam-dir}"
-          copy_method: "{rnaseq-copy-method}"
+          wildcard_str: "{isoseq-wildcard}"
+          standardized_filename: "{isoseq-standardized-wildcard}"
+          out_dir: "{pacbio-bam-dir}"
+          copy_method: '{isoseq-copy-method}'
           gzipped: True
+          file_extensions: '{isoseq-file-extensions}'
 
+      samples:
+        method: "wildcard-str"
+        args:
+          wildcard_str: "{isoseq-wildcard}"
+          sample_wildcards: 
+            - 'samples'
+
+    table-method:
+      input:
+        args:
+          - "isoseq-table"
+          - "isoseq-standardized-wildcard"
+          - "pacbio-bam-dir"
+      standardize:
+        method: "table-file"
+        args:
+          table_filename: "{isoseq-table}"
+          standardized_filename: "{isoseq-standardized-wildcard}"
+          out_dir: "{pacbio-bam-dir}"
+          copy_method: '{isoseq-copy-method}'
+          sample_column: 'samples'
+          gzipped: True
+      samples:
+        method: "table-file"
+        args:
+          table_filename: "{isoseq-table}"
+          sample_column: 'samples'
   assembly_input:
     file-method:
       input:
@@ -135,8 +202,7 @@ setup:
           gzipped: False
 
 snakefiles:
-  - repeatmasking
-  - annotate_braker3
-  - download_compleasm
-  - assembly_compleasm
-  - annotations_busco
+  - iso_seq_fastqs
+  - iso_seq_align_minimap2
+  - iso_seq_sort
+  - iso_seq_merge

@@ -94,10 +94,10 @@ parser:
           help: "Directory to store the FASTQs files"
           type: str
           default: "RNAseq/FASTQs"
-        rnaseq-bam-dir:
+        rnaseq-merged-bam-dir:
           help: "Directory to store BAM files"
           type: str
-          default: "RNAseq/BAMs"
+          default: "RNAseq/BAMs/Merged"
         rnaseq-aligned-bam-dir:
           help: "Directory to store sorted BAM files"
           type: str

@@ -2,7 +2,7 @@ rule all:
     input:
         os.path.join(
             config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_merged_bam_dir"],
+            config["paths"]["isoseq_merged_bam_dir"],
             f"{config['species']}_{config['assembly_version']}.bam",
         ),
 
@@ -12,7 +12,7 @@ rule merge_bam:
         expand(
             os.path.join(
                 config["paths"]["workflow_prefix"],
-                config["paths"]["rnaseq_sorted_bam_dir"],
+                config["paths"]["isoseq_sorted_bam_dir"],
                 "{sample}.sortedByCoord.bam",
             ),
             sample=config["samples"],
@@ -20,7 +20,7 @@ rule merge_bam:
     output:
         os.path.join(
             config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_merged_bam_dir"],
+            config["paths"]["isoseq_merged_bam_dir"], 
             f"{config['species']}_{config['assembly_version']}.bam",
         ),
     singularity:
@@ -30,3 +30,5 @@ rule merge_bam:
     threads: 4
     shell:
         "samtools merge -@ {threads} -r {output} {input}"
+
+        singularity exec -B ${PWD}:${PWD} braker3_lr.sif braker.pl --genome=genome.fa --prot_seq=protein_db.fa –-bam=isoseq.bam --threads=${T}
