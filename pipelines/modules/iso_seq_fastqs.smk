@@ -57,7 +57,7 @@ rule pacbio_bam_to_fastq:
     params:
         pacbio_prefix=os.path.join(
             config["paths"]["workflow_prefix"],
-            config["paths"]["pacbio_bam_dir"],
+            config["paths"]["isoseq_fastq_dir"],
             "{sample}",
         ),
     singularity:
