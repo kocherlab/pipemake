@@ -138,6 +138,6 @@ setup:
           gzipped: False
 snakefiles:
   - lr_reseq_align_minimap2
-  - reseq_bam_sort
+  - reseq_sort
 
 
