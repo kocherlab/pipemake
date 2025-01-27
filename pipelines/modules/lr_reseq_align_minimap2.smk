@@ -36,4 +36,4 @@ rule longread_reseq_align_minimap2:
         mem_mb=16000,
     threads: 4
     shell:
-        "minimap2 -t {threads} -ax map-hifi -uf {input.fasta_file} {input.isoseq_fastqs} | samtools view --threads {threads} -bh -o {output}"
+        "minimap2 -t {threads} -ax map-hifi -uf {input.fasta_file} {input.reseq_fastqs} | samtools view --threads {threads} -bh -o {output}"
