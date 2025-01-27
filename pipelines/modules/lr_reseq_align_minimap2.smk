@@ -3,7 +3,7 @@ rule all:
         expand(
             os.path.join(
                 config["paths"]["workflow_prefix"],
-                config["paths"]["isoseq_aligned_bam_dir"],
+                config["paths"]["reseq_aligned_bam_dir"],
                 "{sample}.Aligned.bam",
             ),
             sample=config["samples"],
