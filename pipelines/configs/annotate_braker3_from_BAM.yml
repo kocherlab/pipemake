@@ -136,7 +136,7 @@ setup:
 
 snakefiles:
   - repeatmasking
-  - annotate_braker3
+  - annotate_rnaseq_braker3
   - download_compleasm
   - assembly_compleasm
   - annotations_busco

@@ -51,7 +51,7 @@ rule annotate_braker3:
         ),
         augustus_config="/Genomics/argo/users/aewebb/.augustus",
     singularity:
-        "docker://teambraker/braker3:v3.0.7.5"
+        "docker://teambraker/braker3:v3.0.7.6"
     resources:
         mem_mb=32000,
     threads: 20

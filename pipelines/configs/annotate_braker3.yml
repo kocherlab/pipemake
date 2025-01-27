@@ -194,7 +194,7 @@ snakefiles:
   - rna_seq_sort
   - rna_seq_merge
   - repeatmasking
-  - annotate_braker3
+  - annotate_rnaseq_braker3
   - download_compleasm
   - assembly_compleasm
   - annotations_busco
