@@ -9,10 +9,10 @@ parser:
           required: True
       wildcards-args:
         isoseq-standardized-wildcard:
-          help: "Standardized wildcard statement used to store PacBio-HiFi BAMs"
+          help: "Standardized wildcard statement used to store IsoSeq FASTQs"
           type: str
           default: 
-            str: "{samples}.bam"
+            str: "{samples}_{reads}.fq.gz"
       args:
         isoseq-wildcard:
           help: "Wildcard statement to represent IsoSeq FASTQs"
@@ -100,10 +100,6 @@ parser:
           help: "Directory to store downloads"
           type: str
           default: "Downloads"
-        pacbio-bam-dir:
-          help: "Directory to store PacBio BAM files"
-          type: str
-          default: "IsoSeq/PacBio/"
         isoseq-fastq-dir:
           help: "Directory to store the FASTQs files"
           type: str
@@ -138,13 +134,13 @@ setup:
           - "isoseq-wildcard"
           - "isoseq-standardized-wildcard"
           - "isoseq-index-ext"
-          - "pacbio-bam-dir"
+          - "isoseq-fastq-dir"
       standardize:
         method: "wildcard-str"
         args:
           wildcard_str: "{isoseq-wildcard}"
           standardized_filename: "{isoseq-standardized-wildcard}"
-          out_dir: "{pacbio-bam-dir}"
+          out_dir: "{isoseq-fastq-dir}"
           copy_method: '{isoseq-copy-method}'
           index_ext: '{isoseq-index-ext}'
 
@@ -161,13 +157,13 @@ setup:
           - "isoseq-table"
           - "isoseq-standardized-wildcard"
           - "isoseq-index-ext"
-          - "pacbio-bam-dir"
+          - "isoseq-fastq-dir"
       standardize:
         method: "table-file"
         args:
           table_filename: "{isoseq-table}"
           standardized_filename: "{isoseq-standardized-wildcard}"
-          out_dir: "{pacbio-bam-dir}"
+          out_dir: "{isoseq-fastq-dir}"
           copy_method: '{isoseq-copy-method}'
           sample_column: 'samples'
       samples:
@@ -206,7 +202,11 @@ setup:
           gzipped: False
 
 snakefiles:
-  - iso_seq_fastqs
   - iso_seq_align_minimap2
   - iso_seq_sort
   - iso_seq_merge
+  - repeatmasking
+  - annotate_braker3
+  - download_compleasm
+  - assembly_compleasm
+  - annotations_busco

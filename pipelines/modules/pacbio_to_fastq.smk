@@ -3,8 +3,8 @@ rule all:
         expand(
             os.path.join(
                 config["paths"]["workflow_prefix"],
-                config["paths"]["isoseq_fastq_dir"],
-                "{sample}.fastq.gz",
+                config["paths"]["unfiltered_fastq_dir"],
+                "{sample}_R1.fq.gz",
             ),
             sample=config["samples"],
         ),
@@ -50,15 +50,15 @@ rule pacbio_bam_to_fastq:
         temp(
             os.path.join(
                 config["paths"]["workflow_prefix"],
-                config["paths"]["isoseq_fastq_dir"],
-                "{sample}.fastq.gz",
+                config["paths"]["unfiltered_fastq_dir"],
+                "{sample}_R1.fq.gz",
             ),
         ),
     params:
         pacbio_prefix=os.path.join(
             config["paths"]["workflow_prefix"],
-            config["paths"]["isoseq_fastq_dir"],
-            "{sample}",
+            config["paths"]["unfiltered_fastq_dir"],
+            "{sample}_R1",
         ),
     singularity:
         "docker://aewebb/pbtk:v3.4.0"
@@ -66,4 +66,7 @@ rule pacbio_bam_to_fastq:
         mem_mb=16000,
     threads: 4
     shell:
-        "bam2fastq --num-threads {threads} --output {params.pacbio_prefix} {input.pacbio_bam}"
+        """
+        bam2fastq --num-threads {threads} --output {params.pacbio_prefix} {input.pacbio_bam}
+        mv {params.pacbio_prefix}.fastq.gz {output}
+        """
