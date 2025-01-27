@@ -16,7 +16,7 @@ rule annotate_braker3:
         ),
         merged_bam=os.path.join(
             config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_bam_dir"],
+            config["paths"]["rnaseq-merged-bam-dir"],
             f"{config['species']}_{config['assembly_version']}.bam",
         ),
         protein_hints=os.path.join(

@@ -16,7 +16,7 @@ rule annotate_isoseq_braker3:
         ),
         merged_bam=os.path.join(
             config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_bam_dir"],
+            config["paths"]["isoseq-merged-bam-dir"],
             f"{config['species']}_{config['assembly_version']}.bam",
         ),
         protein_hints=os.path.join(
@@ -49,14 +49,14 @@ rule annotate_isoseq_braker3:
             config["paths"]["annotations_dir"],
             "BRAKER3",
         ),
-        augustus_config="/Genomics/argo/users/aewebb/.augustus",
+        augustus_path="/Genomics/argo/users/aewebb/.augustus",
     singularity:
         "docker://teambraker/braker3:isoseq"
     resources:
         mem_mb=32000,
     threads: 20
     shell:
-        "braker.pl --genome {input.masked_assembly} --prot_seq {input.protein_hints} --bam {input.merged_bam} -gff3 --softmasking --threads {threads} --workingdir {params.annotations_dir} --AUGUSTUS_CONFIG_PATH {params.augustus_config}"
+        "braker.pl --genome {input.masked_assembly} --prot_seq {input.protein_hints} --bam {input.merged_bam} -gff3 --softmasking --threads {threads} --workingdir {params.annotations_dir} --AUGUSTUS_CONFIG_PATH {params.augustus_path}"
 
 
 rule process_braker3:

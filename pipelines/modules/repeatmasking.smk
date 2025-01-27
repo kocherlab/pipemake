@@ -46,7 +46,7 @@ rule repeat_modeler_r1:
         mem_mb=40000,
     threads: 20
     singularity:
-        "docker://dfam/tetools:v1.88.5"
+        "docker://dfam/tetools:1.90"
     shell:
         r"""
         mkdir -p {params.db_dir}
@@ -95,7 +95,7 @@ rule repeat_masker_r1:
         mem_mb=24000,
     threads: 12
     singularity:
-        "docker://dfam/tetools:v1.88.5"
+        "docker://dfam/tetools:1.90"
     shell:
         "RepeatMasker -par {threads} -dir {params.mask_dir} -lib {input.families} {input.assembly}"
 
