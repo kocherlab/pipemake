@@ -11,7 +11,7 @@ rule annotate_3prime_utrs_peaks2utr:
     input:
         merged_bam=os.path.join(
             config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_bam_dir"],
+            config["paths"]["rnaseq-merged-bam-dir"],
             f"{config['species']}_{config['assembly_version']}.bam",
         ),
         base_gff=os.path.join(
