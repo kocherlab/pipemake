@@ -44,7 +44,7 @@ rule repeat_modeler_r1:
         ),
     threads: 20
     singularity:
-        "docker://dfam/tetools:v1.88.5"
+        "docker://dfam/tetools:1.90"
     shell:
         r"""
         mkdir {params.db_dir} &&
@@ -91,7 +91,7 @@ rule repeat_masker_r1:
         ),
     threads: 20
     singularity:
-        "docker://dfam/tetools:v1.88.5"
+        "docker://dfam/tetools:1.90"
     shell:
         "RepeatMasker -par {threads} -dir {params.mask_dir} -lib {input.families} {input.assembly}"
 
@@ -151,7 +151,7 @@ rule repeat_modeler_r2:
         ),
     threads: 20
     singularity:
-        "docker://dfam/tetools:v1.88.5"
+        "docker://dfam/tetools:1.90"
     shell:
         r"""
         mkdir {params.db_dir} &&
@@ -200,7 +200,7 @@ rule repeat_masker_r2:
         ),
     threads: 20
     singularity:
-        "docker://dfam/tetools:v1.88.5"
+        "docker://dfam/tetools:1.90"
     shell:
         "RepeatMasker -par {threads} -dir {params.mask_dir} -lib {input.families} {input.assembly}"
 
