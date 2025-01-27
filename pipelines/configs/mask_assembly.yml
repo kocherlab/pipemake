@@ -1,7 +1,7 @@
 pipeline: mask-assembly
 version: 1.0
 parser:
-  help: Annotate an assembly using BRAKER3
+  help: Mask an assembly using RepeatModeler
   arg-groups:
     basic:
       args:
