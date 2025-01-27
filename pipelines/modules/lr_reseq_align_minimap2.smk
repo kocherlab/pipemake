@@ -20,7 +20,7 @@ rule longread_reseq_align_minimap2:
         reseq_fastqs=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["reseq_fastq_dir"],
-            "{sample}_R1.fastq.gz",
+            "{sample}_R1.fq.gz",
         ),
     output:
         temp(
