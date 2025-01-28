@@ -49,14 +49,13 @@ rule annotate_braker3:
             config["paths"]["annotations_dir"],
             "BRAKER3",
         ),
-        augustus_config="/Genomics/argo/users/aewebb/.augustus",
     singularity:
         "docker://teambraker/braker3:v3.0.7.6"
     resources:
         mem_mb=32000,
     threads: 20
     shell:
-        "braker.pl --genome {input.masked_assembly} --prot_seq {input.protein_hints} --bam {input.merged_bam} -gff3 --softmasking --threads {threads} --workingdir {params.annotations_dir} --AUGUSTUS_CONFIG_PATH {params.augustus_config}"
+        "braker.pl --genome {input.masked_assembly} --prot_seq {input.protein_hints} --bam {input.merged_bam} -gff3 --softmasking --threads {threads} --workingdir {params.annotations_dir}"
 
 
 rule process_braker3:
