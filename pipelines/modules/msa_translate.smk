@@ -24,7 +24,7 @@ rule translate_msf:
             "{sample}.fasta",
         ),
     singularity:
-        "docker://aewebb/pipemake_utils:v1.2.0"
+        "docker://aewebb/pipemake_utils:v1.2.1"
     resources:
         mem_mb=2000,
     threads: 1

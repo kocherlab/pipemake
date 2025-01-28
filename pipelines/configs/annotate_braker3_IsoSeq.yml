@@ -210,3 +210,4 @@ snakefiles:
   - download_compleasm
   - assembly_compleasm
   - annotations_busco
+  - download_augustus

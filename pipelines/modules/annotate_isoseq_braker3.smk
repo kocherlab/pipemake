@@ -24,6 +24,12 @@ rule annotate_isoseq_braker3:
             config["paths"]["homology_dir"],
             "ProteinHints.fa",
         ),
+        augustus_check=os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["downloads"],
+            "augustus",
+            f"config.chk",
+        ),
     output:
         os.path.join(
             config["paths"]["workflow_prefix"],
@@ -49,14 +55,19 @@ rule annotate_isoseq_braker3:
             config["paths"]["annotations_dir"],
             "BRAKER3",
         ),
-        augustus_path="/Genomics/argo/users/aewebb/.augustus",
+        augustus_config=os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["downloads"],
+            "augustus",
+            "config",
+        ),
     singularity:
         "docker://teambraker/braker3:isoseq"
     resources:
         mem_mb=32000,
     threads: 20
     shell:
-        "braker.pl --genome {input.masked_assembly} --prot_seq {input.protein_hints} --bam {input.merged_bam} -gff3 --softmasking --threads {threads} --workingdir {params.annotations_dir} --AUGUSTUS_CONFIG_PATH {params.augustus_path}"
+        "braker.pl --genome {input.masked_assembly} --prot_seq {input.protein_hints} --bam {input.merged_bam} -gff3 --softmasking --threads {threads} --workingdir {params.annotations_dir} --AUGUSTUS_CONFIG_PATH {params.augustus_config}"
 
 
 rule process_braker3:
@@ -101,7 +112,7 @@ rule process_braker3:
         assembly_version=config["assembly_version"],
         annotation_version=config["annotation_version"],
     singularity:
-        "docker://aewebb/pipemake_utils:v1.1.3"
+        "docker://aewebb/pipemake_utils:v1.2.1"
     resources:
         mem_mb=2000,
     threads: 1

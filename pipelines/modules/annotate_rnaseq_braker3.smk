@@ -24,6 +24,12 @@ rule annotate_braker3:
             config["paths"]["homology_dir"],
             "ProteinHints.fa",
         ),
+        augustus_check=os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["downloads"],
+            "augustus",
+            f"config.chk",
+        ),
     output:
         os.path.join(
             config["paths"]["workflow_prefix"],
@@ -49,7 +55,12 @@ rule annotate_braker3:
             config["paths"]["annotations_dir"],
             "BRAKER3",
         ),
-        augustus_config="/Genomics/argo/users/aewebb/.augustus",
+        augustus_config=os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["downloads"],
+            "augustus",
+            "config",
+        ),
     singularity:
         "docker://teambraker/braker3:v3.0.7.6"
     resources:
@@ -101,7 +112,7 @@ rule process_braker3:
         assembly_version=config["assembly_version"],
         annotation_version=config["annotation_version"],
     singularity:
-        "docker://aewebb/pipemake_utils:v1.1.3"
+        "docker://aewebb/pipemake_utils:v1.2.1"
     resources:
         mem_mb=2000,
     threads: 1

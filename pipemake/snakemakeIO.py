@@ -690,19 +690,20 @@ class SnakeRuleIO:
         return script_str.split('"')[0] + f'"{script_output_path}"'
 
     def _setParams(self):
-        
-        def mergeLines (str):
-            return ''.join([_s.strip() for _s in str.splitlines()])
+        def mergeLines(str):
+            return "".join([_s.strip() for _s in str.splitlines()])
 
         # Find all configs, separated by optional and required
-        for config_match in re.finditer(r"config((\[(?![^\]]*:[^\]]*)[^\]]*\])*)|if\s*(.*?)\s*in\s*?config((\[(?![^\]]*:[^\]]*)[^\]]*\])*)?", self._original_text):
-
+        for config_match in re.finditer(
+            r"config(\[\"[^\"]+\"\](?:\[\"[^\"]+\"\])*)|if\s*(.*?)\s*in\s*?config((\[(?![^\]]*:[^\]]*)[^\]]*\])*)?",
+            self._original_text,
+        ):
             # Check if the match is an optional config param
-            if 'if' in config_match.group(0):
-                config_str = f'[{config_match.group(3)}]'
+            if "if" in config_match.group(0):
+                config_str = f"[{config_match.group(3)}]"
                 if config_match.group(4):
-                    config_str = mergeLines(config_match.group(4)) + config_str            
-            
+                    config_str = mergeLines(config_match.group(4)) + config_str
+
             # Check if the match is a required config param
             else:
                 config_str = mergeLines(config_match.group(1))
