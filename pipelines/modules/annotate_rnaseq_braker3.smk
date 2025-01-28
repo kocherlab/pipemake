@@ -24,6 +24,12 @@ rule annotate_braker3:
             config["paths"]["homology_dir"],
             "ProteinHints.fa",
         ),
+        augustus_check=os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["downloads"],
+            "augustus",
+            f"config.chk",
+        ),
     output:
         os.path.join(
             config["paths"]["workflow_prefix"],
@@ -49,13 +55,19 @@ rule annotate_braker3:
             config["paths"]["annotations_dir"],
             "BRAKER3",
         ),
+        augustus_config=os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["downloads"],
+            "augustus",
+            "config",
+        ),
     singularity:
         "docker://teambraker/braker3:v3.0.7.6"
     resources:
         mem_mb=32000,
     threads: 20
     shell:
-        "braker.pl --genome {input.masked_assembly} --prot_seq {input.protein_hints} --bam {input.merged_bam} -gff3 --softmasking --threads {threads} --workingdir {params.annotations_dir}"
+        "braker.pl --genome {input.masked_assembly} --prot_seq {input.protein_hints} --bam {input.merged_bam} -gff3 --softmasking --threads {threads} --workingdir {params.annotations_dir} --AUGUSTUS_CONFIG_PATH {params.augustus_config}"
 
 
 rule process_braker3:
