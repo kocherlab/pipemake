@@ -100,7 +100,7 @@ rule process_braker3:
         assembly_version=config["assembly_version"],
         annotation_version=config["annotation_version"],
     singularity:
-        "docker://aewebb/pipemake_utils:v1.1.3"
+        "docker://aewebb/pipemake_utils:v1.2.1"
     resources:
         mem_mb=2000,
     threads: 1

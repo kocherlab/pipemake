@@ -308,7 +308,7 @@ rule plot_norm_xpnsl_pipemake:
             f"{config['species']}_{config['assembly_version']}",
         ),
     singularity:
-        "docker://aewebb/pipemake_utils:v1.1.3"
+        "docker://aewebb/pipemake_utils:v1.2.1"
     resources:
         mem_mb=2000,
     threads: 1
