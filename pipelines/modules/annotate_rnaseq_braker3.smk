@@ -39,9 +39,9 @@ rule annotate_braker3:
         ),
         augustus_check=os.path.join(
             config["paths"]["workflow_prefix"],
-            config["paths"]["downloads"],
+            config["paths"]["downloads_dir"],
             "augustus",
-            f"config.chk",
+            f".config.chk",
         ),
     output:
         os.path.join(
@@ -68,11 +68,13 @@ rule annotate_braker3:
             config["paths"]["annotations_dir"],
             "BRAKER3",
         ),
-        augustus_config=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["downloads"],
-            "augustus",
-            "config",
+        augustus_config=os.path.abspath(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["downloads_dir"],
+                "augustus",
+                "config",
+            )
         ),
     singularity:
         "docker://teambraker/braker3:v3.0.7.6"

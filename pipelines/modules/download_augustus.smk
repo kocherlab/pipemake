@@ -2,9 +2,9 @@ rule all:
     input:
         os.path.join(
             config["paths"]["workflow_prefix"],
-            config["paths"]["downloads"],
+            config["paths"]["downloads_dir"],
             "augustus",
-            f"config.chk",
+            f".config.chk",
         ),
 
 
@@ -12,19 +12,19 @@ rule download_augustus_config:
     output:
         os.path.join(
             config["paths"]["workflow_prefix"],
-            config["paths"]["downloads"],
+            config["paths"]["downloads_dir"],
             "augustus",
-            f"config.chk",
+            f".config.chk",
         ),
     params:
         out_dir=os.path.join(
             config["paths"]["workflow_prefix"],
-            config["paths"]["downloads"],
+            config["paths"]["downloads_dir"],
             "augustus",
         ),
         tmp_dir=os.path.join(
             config["paths"]["workflow_prefix"],
-            config["paths"]["downloads"],
+            config["paths"]["downloads_dir"],
             "tmp_augustus",
         ),
     singularity:
