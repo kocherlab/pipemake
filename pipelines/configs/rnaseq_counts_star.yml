@@ -144,7 +144,7 @@ setup:
       samples:
         method: "table-file"
         args:
-          table_filename: "{fastq-table}"
+          table_filename: "{rnaseq-table}"
           sample_column: 'samples'
   
   assembly_input:
