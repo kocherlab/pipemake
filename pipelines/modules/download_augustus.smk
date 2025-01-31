@@ -4,7 +4,7 @@ rule all:
             config["paths"]["workflow_prefix"],
             config["paths"]["downloads_dir"],
             "augustus",
-            f"config.chk",
+            f".config.chk",
         ),
 
 
@@ -14,7 +14,7 @@ rule download_augustus_config:
             config["paths"]["workflow_prefix"],
             config["paths"]["downloads_dir"],
             "augustus",
-            f"config.chk",
+            f".config.chk",
         ),
     params:
         out_dir=os.path.join(
