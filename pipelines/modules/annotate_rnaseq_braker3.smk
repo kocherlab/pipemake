@@ -39,7 +39,7 @@ rule annotate_braker3:
         ),
         augustus_check=os.path.join(
             config["paths"]["workflow_prefix"],
-            config["paths"]["downloads"],
+            config["paths"]["downloads_dir"],
             "augustus",
             f"config.chk",
         ),
@@ -70,7 +70,7 @@ rule annotate_braker3:
         ),
         augustus_config=os.path.join(
             config["paths"]["workflow_prefix"],
-            config["paths"]["downloads"],
+            config["paths"]["downloads_dir"],
             "augustus",
             "config",
         ),
