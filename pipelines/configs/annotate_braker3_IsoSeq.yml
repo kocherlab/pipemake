@@ -207,6 +207,7 @@ snakefiles:
   - iso_seq_merge
   - repeatmasking
   - annotate_isoseq_braker3
+  - process_braker3
   - download_compleasm
   - assembly_compleasm
   - annotations_busco
