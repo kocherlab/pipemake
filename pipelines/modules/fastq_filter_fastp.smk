@@ -43,9 +43,9 @@ rule fastp_single_end:
             "{sample}",
         ),
         min_length=config["min_length"],
-        cut_front='--cut_front' if 'cut_front' in config else '',
-        cut_tail='--cut_tail' if 'cut_tail' in config else '',
-        cut_right='--cut_right' if 'cut_right' in config else '',
+        cut_front="--cut_front" if "cut_front" in config else "",
+        cut_tail="--cut_tail" if "cut_tail" in config else "",
+        cut_right="--cut_right" if "cut_right" in config else "",
     singularity:
         "docker://aewebb/fastp:v0.23.4"
     resources:
@@ -95,9 +95,9 @@ rule fastp_pair_end:
             "{sample}",
         ),
         min_length=config["min_length"],
-        cut_front='--cut_front' if config['cut_front'] else '',
-        cut_tail='--cut_tail' if config['cut_tail'] else '',
-        cut_right='--cut_right' if config['cut_right'] else '',
+        cut_front="--cut_front" if "cut_front" in config else "",
+        cut_tail="--cut_tail" if "cut_tail" in config else "",
+        cut_right="--cut_right" if "cut_right" in config else "",
     singularity:
         "docker://aewebb/fastp:v0.23.4"
     resources:
