@@ -700,9 +700,9 @@ class SnakeRuleIO:
         ):
             # Check if the match is an optional config param
             if "if" in config_match.group(0):
-                config_str = f"[{config_match.group(3)}]"
-                if config_match.group(4):
-                    config_str = mergeLines(config_match.group(4)) + config_str
+                config_str = f"[{config_match.group(2)}]"
+                if config_match.group(3):
+                    config_str = mergeLines(config_match.group(3)) + config_str
 
             # Check if the match is a required config param
             else:
