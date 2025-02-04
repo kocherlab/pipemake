@@ -695,7 +695,7 @@ class SnakeRuleIO:
 
         # Find all configs, separated by optional and required
         for config_match in re.finditer(
-            r"config(\[\"[^\"]+\"\](?:\[\"[^\"]+\"\])*)|if\s*(.*?)\s*in\s*?config((\[(?![^\]]*:[^\]]*)[^\]]*\])*)?",
+            r"(?<=config)(\[[^:\]]+\]+)*|if\s*(.*?)\s*in\s*?config((\[(?![^\]]*:[^\]]*)[^\]]*\])*)?",
             self._original_text,
         ):
             # Check if the match is an optional config param
@@ -706,7 +706,7 @@ class SnakeRuleIO:
 
             # Check if the match is a required config param
             else:
-                config_str = mergeLines(config_match.group(1))
+                config_str = mergeLines(config_match.group(0))
 
             # Remove quotes from the config string
             config_str = config_str.replace('"', "").replace("'", "")
