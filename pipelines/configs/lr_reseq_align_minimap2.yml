@@ -78,6 +78,10 @@ parser:
           help: "Directory to store sorted BAM files"
           type: str
           default: "reseq/BAMs/Sorted"
+        reseq-coverage-dir:
+          help: "Directory to store coverage files"
+          type: str
+          default: "reseq/Coverage"
 setup:
   reseq_input:
     wildcard-method:
@@ -139,5 +143,6 @@ setup:
 snakefiles:
   - lr_reseq_align_minimap2
   - reseq_sort
+  - reseq_coverage
 
 
