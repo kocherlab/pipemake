@@ -143,6 +143,7 @@ setup:
 snakefiles:
   - lr_reseq_align_minimap2
   - reseq_sort
-  - reseq_coverage
+  - reseq_bam_coverage
+  - reseq_plot_coverage
 
 
