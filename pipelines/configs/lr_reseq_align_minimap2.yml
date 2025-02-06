@@ -142,7 +142,10 @@ setup:
           gzipped: False
 snakefiles:
   - lr_reseq_align_minimap2
+  - index_assembly
   - reseq_sort
-  - reseq_coverage
+  - reseq_bam_coverage
+  - reseq_plot_coverage
+  
 
 

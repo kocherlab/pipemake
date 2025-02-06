@@ -7,7 +7,7 @@ rule all:
         ),
 
 
-rule reseq_coverage_deeptools:
+rule reseq_plot_coverage_deeptools:
     input:
         bam=expand(
             os.path.join(
@@ -34,7 +34,7 @@ rule reseq_coverage_deeptools:
     singularity:
         "docker://aewebb/deeptools:v3.5.6"
     resources:
-        mem_mb=4000,
+        mem_mb=16000,
     threads: 1
     shell:
         "plotCoverage -b {input.bam} -o {output}"
