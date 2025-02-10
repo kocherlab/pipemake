@@ -44,7 +44,7 @@ jobs:
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
         run: |
-          anaconda -t "$env:ANACONDA_API_TOKEN" upload --user kocherlab build/win-64/*.tar.bz2
+          anaconda -t "$env:ANACONDA_API_TOKEN" upload --user kocherlab build/win-64/*.conda
       - name: Build Ubuntu - External Minimal
         if: matrix.os == 'ubuntu-latest'
         shell: bash -l {0}
@@ -72,5 +72,5 @@ jobs:
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
         run: |
-          anaconda -t "$ANACONDA_API_TOKEN" upload --user kocherlab build/linux-64/*.tar.bz2
+          anaconda -t "$ANACONDA_API_TOKEN" upload --user kocherlab build/linux-64/*.conda
         
