@@ -1,18 +1,3 @@
-config: "test.yaml"
-
-
-rule all:
-    input:
-        expand(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["filtered_fastq_dir"],
-                "{sample}_R1.fq.gz",
-            ),
-            sample=config["samples"],
-        ),
-
-
 rule script_call:
     input:
         r1_reads=os.path.join(
