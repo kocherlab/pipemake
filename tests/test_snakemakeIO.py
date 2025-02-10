@@ -248,3 +248,24 @@ def test_SnakeRuleIO_w_script(rule_filename):
     test_rule = SnakeRuleIO.read(rule_str=test_str, indent_style="    ")
 
     assert test_rule._rule_script_files == ["test.py"]
+
+
+@pytest.mark.parametrize(
+    "rule_filename", [("tests/files/snakemakeIO/rules/test_config.smk")]
+)
+def test_SnakeRuleIO_w_config(rule_filename):
+    # Read the rule and store it as a string
+    with open(rule_filename, "r") as test_file:
+        test_str = test_file.read()
+
+    # Test if the function raises an error
+    config_test = SnakeRuleIO.read(rule_str=test_str, indent_style="    ")
+
+    assert ("test1",) in config_test._rule_config_params
+    assert ("params", "test2") in config_test._rule_config_params
+    assert ("test3",) in config_test._rule_config_params
+    assert ("test4",) in config_test._rule_config_params
+    assert ("params", "test5") in config_test._rule_config_params
+    assert ("params", "test6") in config_test._rule_config_params
+    assert ("test7",) in config_test._rule_config_params
+    assert ("params", "test8") in config_test._rule_config_params
