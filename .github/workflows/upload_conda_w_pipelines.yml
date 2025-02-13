@@ -2,8 +2,6 @@ name: Conda w/ Pipelines Upload
 
 on:
   workflow_dispatch:
-  release:
-    types: [published]
 
 jobs:
   build:
