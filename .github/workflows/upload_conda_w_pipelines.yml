@@ -1,4 +1,4 @@
-name: Conda Complete Upload
+name: Conda w/ Pipelines Upload
 
 on:
   workflow_dispatch:
