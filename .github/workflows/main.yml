@@ -1,0 +1,55 @@
+name: Conda Complete Upload
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    name: Build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["ubuntu-latest", "windows-latest"]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniconda-version: "latest"
+          mamba-version: "*"
+          activate-environment: pipemake
+          environment-file: .conda/environment_build.yml
+          python-version: 3.9
+          channels: conda-forge,bioconda,conda-forge/label/python_rc
+          channel-priority: true
+      - name: Build Windows - External
+        if: matrix.os == 'windows-latest'
+        shell: powershell
+        env:
+          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
+        run: |
+          conda build .conda/pipemake --output-folder build
+      - name: Upload Windows
+        if: matrix.os == 'windows-latest'
+        shell: powershell
+        env:
+          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
+        run: |
+          anaconda -t "$env:ANACONDA_API_TOKEN" upload --user kocherlab build/win-64/*.conda
+      - name: Build Ubuntu - External
+        if: matrix.os == 'ubuntu-latest'
+        shell: bash -l {0}
+        env:
+          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
+        run: |
+          conda build .conda/pipemake --output-folder build
+      - name: Upload Ubuntu
+        if: matrix.os == 'ubuntu-latest'
+        shell: bash -l {0}
+        env:
+          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
+        run: |
+          anaconda -t "$ANACONDA_API_TOKEN" upload --user kocherlab build/linux-64/*.conda
+        
