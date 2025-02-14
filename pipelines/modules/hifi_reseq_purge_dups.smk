@@ -112,7 +112,7 @@ rule update_json:
             json.dump(data, f, indent=2)
 
 
-rule hifi_wo_hic_reseq_assemble_hifiasm:
+rule hifi_assembly_purge_dups:
     input:
         os.path.join(
             config["paths"]["workflow_prefix"],
@@ -134,7 +134,27 @@ rule hifi_wo_hic_reseq_assemble_hifiasm:
     singularity:
         "docker://aewebb/purge_dups:v1.2.6"
     resources:
-        mem_mb=56000,
-    threads: 16
+        mem_mb=30000,
+    threads: 12
     shell:
         "run_purge_dups.py {input} /opt/conda/envs/purge_dups/bin {params.species} -p bash"
+
+
+rule collect_purged_fasta:
+    input:
+        os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["reseq_assembled_dir"],
+            "purge_dups",
+            "{sample}",
+            "seqs",
+            "{sample}.p_ctg.purged.fa",
+        ),
+    output:
+        os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["reseq_assembled_dir"],
+            f"{{sample}}_{config['species']}_{config['assembly_version']}.fa",
+        ),
+    shell:
+        "cp {input} {output}"
