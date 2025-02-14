@@ -1,13 +1,3 @@
-config = {
-    "samples": ["bc2027"],
-    "paths": {
-        "workflow_prefix": "TEST",
-        "reseq_fastq_dir": "fastq",
-        "reseq_assembled_dir": "assembled",
-    },
-}
-
-
 rule all:
     input:
         expand(
@@ -15,7 +5,9 @@ rule all:
                 config["paths"]["workflow_prefix"],
                 config["paths"]["reseq_assembled_dir"],
                 "purge_dups",
-                "{sample}.json",
+                "{sample}",
+                "seqs",
+                "{sample}.p_ctg.purged.fa",
             ),
             sample=config["samples"],
         ),
@@ -37,6 +29,9 @@ rule create_fastq_list:
                 "{sample}.list",
             ),
         ),
+    resources:
+        mem_mb=2000,
+    threads: 1
     shell:
         "echo {input} > {output}"
 
@@ -72,7 +67,10 @@ rule build_config:
             "{sample}_tmp",
         ),
     singularity:
-        "purge_dups/purge_dups_v1.2.6.sif"
+        "docker://aewebb/purge_dups:v1.2.6"
+    resources:
+        mem_mb=2000,
+    threads: 1
     shell:
         "pd_config.py {input.assembled_fasta} {input.fastq_list} -n {output} -l {params.output_dir}"
 
@@ -101,6 +99,9 @@ rule update_json:
                 "{sample}",
             ),
         ),
+    resources:
+        mem_mb=2000,
+    threads: 1
     run:
         import json
 
@@ -109,3 +110,31 @@ rule update_json:
         data["out_dir"] = params.out_dir
         with open(output[0], "w") as f:
             json.dump(data, f, indent=2)
+
+
+rule hifi_wo_hic_reseq_assemble_hifiasm:
+    input:
+        os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["reseq_assembled_dir"],
+            "purge_dups",
+            "{sample}.json",
+        ),
+    output:
+        os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["reseq_assembled_dir"],
+            "purge_dups",
+            "{sample}",
+            "seqs",
+            "{sample}.p_ctg.purged.fa",
+        ),
+    params:
+        species=config["species"],
+    singularity:
+        "docker://aewebb/purge_dups:v1.2.6"
+    resources:
+        mem_mb=56000,
+    threads: 16
+    shell:
+        "run_purge_dups.py {input} /opt/conda/envs/purge_dups/bin {params.species} -p bash"
