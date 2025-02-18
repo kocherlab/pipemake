@@ -100,7 +100,7 @@ setup:
       samples:
         method: "table-file"
         args:
-          table_filename: "{fastq-table}"
+          table_filename: "{reseq-table}"
           sample_column: 'samples'
   
 snakefiles:
