@@ -29,6 +29,7 @@ rule hifi_wo_hic_reseq_assemble_hifiasm:
         output_prefix=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["reseq_assembled_dir"],
+            "hifiasm",
             "{sample}",
         ),
     singularity:

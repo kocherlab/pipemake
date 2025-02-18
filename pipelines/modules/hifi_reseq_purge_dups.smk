@@ -69,10 +69,13 @@ rule build_config:
     singularity:
         "docker://aewebb/purge_dups:v1.2.6"
     resources:
-        mem_mb=2000,
+        mem_mb=4000,
     threads: 1
     shell:
-        "pd_config.py {input.assembled_fasta} {input.fastq_list} -n {output} -l {params.output_dir}"
+        """
+        pd_config.py {input.assembled_fasta} {input.fastq_list} -n {output} -l {params.output_dir}
+        sleep 30
+        """
 
 
 rule update_json:
@@ -99,6 +102,7 @@ rule update_json:
                 "{sample}",
             ),
         ),
+        busco_db=config["busco_database"],
     resources:
         mem_mb=2000,
     threads: 1
@@ -108,6 +112,7 @@ rule update_json:
         with open(input[0], "r") as f:
             data = json.load(f)
         data["out_dir"] = params.out_dir
+        data["busco"]["lineage"] = params.busco_db
         with open(output[0], "w") as f:
             json.dump(data, f, indent=2)
 
