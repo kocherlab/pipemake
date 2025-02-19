@@ -59,4 +59,5 @@ rule hifi_cvt_hifiasm_gfa_to_fasta:
     shell:
         """
         awk '/^S/{{print ">"$2"\\n"$3}}' {input} | fold > {output}
+        sleep 30
         """
