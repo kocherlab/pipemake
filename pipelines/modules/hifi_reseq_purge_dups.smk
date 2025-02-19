@@ -4,10 +4,7 @@ rule all:
             os.path.join(
                 config["paths"]["workflow_prefix"],
                 config["paths"]["reseq_assembled_dir"],
-                "purge_dups",
-                "{sample}",
-                "seqs",
-                "{sample}.p_ctg.purged.fa",
+                f"{{sample}}_{config['species']}_{config['assembly_version']}.fa",
             ),
             sample=config["samples"],
         ),
@@ -161,5 +158,15 @@ rule collect_purged_fasta:
             config["paths"]["reseq_assembled_dir"],
             f"{{sample}}_{config['species']}_{config['assembly_version']}.fa",
         ),
+    params:
+        output_dir=os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["reseq_assembled_dir"],
+            "purge_dups",
+            "{sample}_tmp",
+        ),
     shell:
-        "cp {input} {output}"
+        """
+        cp {input} {output}
+        rm -rf {params.output_dir}
+        """
