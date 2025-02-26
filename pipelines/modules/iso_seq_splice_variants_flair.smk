@@ -53,7 +53,7 @@ rule isoseq_align_flair:
             f"{config['species']}_{config['assembly_version']}.aligned",
         ),
     singularity:
-        "docker://aewebb/falir:v2.0.0"
+        "docker://aewebb/flair:v2.0.0"
     resources:
         mem_mb=16000,
     threads: 4
@@ -106,7 +106,7 @@ rule isoseq_reseq_correct_flair:
             f"{config['species']}_{config['assembly_version']}.corrected",
         ),
     singularity:
-        "docker://aewebb/falir:v2.0.0"
+        "docker://aewebb/flair:v2.0.0"
     resources:
         mem_mb=16000,
     threads: 4
@@ -171,7 +171,7 @@ rule isoseq_reseq_collapse_flair:
             f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}",
         ),
     singularity:
-        "docker://aewebb/falir:v2.0.0"
+        "docker://aewebb/flair:v2.0.0"
     resources:
         mem_mb=16000,
     threads: 4
