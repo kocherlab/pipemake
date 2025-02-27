@@ -36,12 +36,30 @@ parser:
           type: str
           required: True
           action: confirmFile
+        species:
+          help: "Species name"
+          type: str
+          default:
+            str: "Sp"
+            suffix:
+              - function: jobRandomString
+        assembly-version:
+          help: "Assembly Version"
+          type: str
+          default:
+            str: "v"
+            suffix:
+              - function: jobRandomString       
         min-length:
           help: "Minimum length of reads to keep"
           type: int
           default:
-            str: "50"
-
+            str: "44"
+        min-match:
+          help: "Minimum number of matches to keep"
+          type: int
+          default:
+            str: "97"
     paths:
       args:
         assembly-dir:
