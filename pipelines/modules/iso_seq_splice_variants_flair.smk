@@ -86,18 +86,6 @@ rule isoseq_reseq_correct_flair:
             "flair",
             f"{config['species']}_{config['assembly_version']}.corrected_all_corrected.bed",
         ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["annotations_dir"],
-            "flair",
-            f"{config['species']}_{config['assembly_version']}.corrected_all_inconsistent.bed",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["annotations_dir"],
-            "flair",
-            f"{config['species']}_{config['assembly_version']}.corrected_cannot_verify.bed",
-        ),
     params:
         out_prefix=os.path.join(
             config["paths"]["workflow_prefix"],
@@ -145,14 +133,14 @@ rule isoseq_reseq_collapse_flair:
             config["paths"]["workflow_prefix"],
             config["paths"]["annotations_dir"],
             "flair",
-            f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}.gtf",
+            f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}.isoforms.gtf",
         ),
         temp(
             os.path.join(
                 config["paths"]["workflow_prefix"],
                 config["paths"]["annotations_dir"],
                 "flair",
-                f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}.bed",
+                f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}.isoforms.bed",
             ),
         ),
         temp(
@@ -160,7 +148,7 @@ rule isoseq_reseq_collapse_flair:
                 config["paths"]["workflow_prefix"],
                 config["paths"]["annotations_dir"],
                 "flair",
-                f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}.fa",
+                f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}.isoforms.fa",
             ),
         ),
     params:
@@ -185,7 +173,7 @@ rule process_flair_output:
             config["paths"]["workflow_prefix"],
             config["paths"]["annotations_dir"],
             "flair",
-            f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}.gtf",
+            f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}.isoforms.gtf",
         ),
     output:
         os.path.join(
