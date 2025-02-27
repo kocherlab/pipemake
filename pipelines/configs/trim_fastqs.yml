@@ -1,7 +1,7 @@
-pipeline: fastq-filter
+pipeline: trim-fastqs
 version: 1.0
 parser:
-  help: Filter FASTQ files using fastp
+  help: Trim short reads FASTQ files using fastp
   arg-groups:
     basic:
       mutually-exclusive-args:
@@ -102,4 +102,4 @@ setup:
           sample_column: 'samples'
 
 snakefiles:
-  - fastq_filter_fastp
+  - fastq_trim_fastp
