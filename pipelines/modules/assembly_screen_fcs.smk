@@ -28,8 +28,8 @@ rule assembly_screen_fcs_adaptor:
             config["paths"]["assembly_dir"],
             "fcs-adaptor",
         ),
-        prok="--prok" if "prok" in config else "",
-        euk="--euk" if "euk" in config else "",
+        prok="--prok" if config["prok"] else "",
+        euk="--euk" if config["euk"] else "",
     singularity:
         "docker://ncbi/fcs-adaptor:0.5.4"
     resources:

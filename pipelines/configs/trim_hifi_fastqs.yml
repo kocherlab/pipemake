@@ -7,6 +7,8 @@ parser:
       mutually-exclusive-args:
         input-parser:
           required: True
+        taxa-type:
+          required: True
       wildcards-args:
         fastq-standardized-wildcard:
           help: "Standardized wildcard statement used to store FASTQs"
@@ -60,6 +62,16 @@ parser:
           type: int
           default:
             str: "97"
+        eukaryote-screen:
+          help: "Eukaryote assembly screen"
+          dest: "euk"
+          action: store_true
+          mutually-exclusive: "taxa-type"
+        prokaryote-screen:
+          help: "Prokaryote assembly screen"
+          dest: "prok"
+          action: store_true
+          mutually-exclusive: "taxa-type"
     paths:
       args:
         assembly-dir:
