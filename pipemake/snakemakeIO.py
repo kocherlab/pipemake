@@ -643,6 +643,13 @@ class SnakeRuleIO:
             if resource_value.endswith(","):
                 resource_value = resource_value[:-1]
 
+            # Check if the resource defines the shell executable, and return the rule line if so
+            if resource_name == "shell_exec":
+                self._rule_resource_params[resource_name] = resource_value.replace(
+                    '"', ""
+                ).replace("'", "")
+                return rule_line
+
             # Determine if the resource value type
             if not resource_value.isdigit():
                 raise Exception(
