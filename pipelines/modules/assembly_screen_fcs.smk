@@ -34,6 +34,7 @@ rule assembly_screen_fcs_adaptor:
         "docker://ncbi/fcs-adaptor:0.5.4"
     resources:
         mem_mb=16000,
+        shell_exec="sh",
     threads: 1
     shell:
-        "/app/fcs/bin/av_screen_x {input} --output {params.out_prefix} {params.prok} {params.euk}"
+        "av_screen_x {input} --output {params.out_prefix} {params.prok} {params.euk}"
