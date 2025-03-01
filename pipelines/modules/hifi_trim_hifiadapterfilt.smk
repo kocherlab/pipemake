@@ -79,6 +79,20 @@ rule hifi_assembly_screen_hifiadapterfiltFCS:
             config["paths"]["filtered_fastq_dir"],
             "{sample}_R1.filt.fcsfilt.fastq.gz",
         ),
+        temp(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["filtered_fastq_dir"],
+                "{sample}_R1.filt.blocklist",
+            )
+        ),
+        temp(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["filtered_fastq_dir"],
+                "{sample}_R1.filt.fastq",
+            )
+        ),
     params:
         out_dir=os.path.join(
             config["paths"]["workflow_prefix"],
