@@ -79,10 +79,15 @@ rule hifi_assembly_screen_hifiadapterfiltFCS:
             config["paths"]["filtered_fastq_dir"],
             "{sample}_R1.filt.fcsfilt.fastq.gz",
         ),
+    params:
+        out_dir=os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["filtered_fastq_dir"],
+        ),
     singularity:
         "docker://aewebb/hifiadapterfilt:v3.0.0"
     resources:
         mem_mb=16000,
     threads: 4
     shell:
-        "hifiadapterfiltFCS.sh -r {input.filtered_reads} -f {input.fcs_adaptor_report} -t {threads}"
+        "hifiadapterfiltFCS.sh -r {input.filtered_reads} -f {input.fcs_adaptor_report} -o {params.out_dir} -t {threads}"
