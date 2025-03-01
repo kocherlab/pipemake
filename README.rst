@@ -36,23 +36,24 @@
    :target: https://github.com/kocherlab/pipemake/blob/main/LICENSE
 
 ********
-Pipemake
+pipemake
 ********
-Pipemake is a lightweight, flexible, and easy-to-use tool for creating and managing `Snakemake <https://snakemake.readthedocs.i/>`_ pipelines. It was designed with two primary goals: 
+pipemake is a lightweight, flexible, and easy-to-use tool for creating and managing `Snakemake <https://snakemake.readthedocs.io/>`_ pipelines. It was designed with three primary goals: 
 
-1. Provide a collection of pre-built and easy to modify bioinformatic pipelines with an enphasis on genomics and social behavior analysis
-2. Provide a user-friendly interface for creating and managing pipelines with minimal programming experience
+1. Offer a collection of curated, customizable genomic analysis pipelines for researchers seeking to rapidly integrate Snakemake-based workflows into their research.
+2. Optimize computational efficiency and reproducibility by fully operating in the Snakemake ecosystem.
+3. Streamline development by creating a flexible platform with swappable pipelines that easily reuse previously written Snakemake code.
 
 ================
-Getting Pipemake
+Getting pipemake
 ================
+
 -----
-Mamba
+mamba
 -----
 
 .. code-block:: bash
 
-    conda install -n base -c conda-forge mamba
     mamba create -c conda-forge -c bioconda -c kocherlab -n pipemake pipemake
 
 ======
