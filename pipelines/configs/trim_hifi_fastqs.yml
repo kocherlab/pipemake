@@ -1,11 +1,13 @@
-pipeline: fastq-filter
+pipeline: trim-hifi-fastqs
 version: 1.0
 parser:
-  help: Filter FASTQ files using fastp
+  help: Trim PacBio HiFi reads FASTQ files using HiFiAdapterFilt
   arg-groups:
     basic:
       mutually-exclusive-args:
         input-parser:
+          required: True
+        taxa-type:
           required: True
       wildcards-args:
         fastq-standardized-wildcard:
@@ -31,22 +33,51 @@ parser:
             - 'symbolic_link'
             - 'copy'
           default: 'symbolic_link'
+        assembly-fasta:
+          help: "Assembly file"
+          type: str
+          required: True
+          action: confirmFile
+        species:
+          help: "Species name"
+          type: str
+          default:
+            str: "Sp"
+            suffix:
+              - function: jobRandomString
+        assembly-version:
+          help: "Assembly Version"
+          type: str
+          default:
+            str: "v"
+            suffix:
+              - function: jobRandomString       
         min-length:
           help: "Minimum length of reads to keep"
           type: int
           default:
-            str: "50"
-        cut-front:
-          help: "Trim from the front of the reads"
+            str: "44"
+        min-match:
+          help: "Minimum number of matches to keep"
+          type: int
+          default:
+            str: "97"
+        eukaryote-screen:
+          help: "Eukaryote assembly screen"
+          dest: "euk"
           action: store_true
-        cut-tail:
-          help: "Trim from the tail of the reads"
+          mutually-exclusive: "taxa-type"
+        prokaryote-screen:
+          help: "Prokaryote assembly screen"
+          dest: "prok"
           action: store_true
-        cut-right:
-          help: "Trim the right side of the reads, starting from the 5' end"
-          action: store_true
+          mutually-exclusive: "taxa-type"
     paths:
       args:
+        assembly-dir:
+          help: "Directory to store assembly"
+          type: str
+          default: "Assembly"
         unfiltered-fastq-dir:
           help: "Directory to store unfiltered FASTQ files"
           type: str
@@ -100,6 +131,22 @@ setup:
         args:
           table_filename: "{fastq-table}"
           sample_column: 'samples'
+  
+  assembly_input:
+    file-method:
+      input:
+        args:
+          - "assembly-fasta"
+          - "assembly-dir"
+      standardize:
+        method: "file-str"
+        args:
+          input_filename: "{assembly-fasta}"
+          standardized_filename: "{species}_{assembly_version}.fa"
+          out_dir: "{assembly-dir}"
+          copy_method: copy
+          gzipped: False
 
 snakefiles:
-  - fastq_filter_fastp
+  - assembly_screen_fcs
+  - hifi_trim_hifiadapterfilt

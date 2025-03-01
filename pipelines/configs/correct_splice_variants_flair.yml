@@ -1,7 +1,7 @@
-pipeline: lr-reseq-align-minimap2
+pipeline: correct-splice-variants-flair
 version: 1.0
 parser:
-  help: Align long reads to a genome assembly using minimap2
+  help: Correct splice variants using flair
   arg-groups:
     basic:
       mutually-exclusive-args:
@@ -36,12 +36,18 @@ parser:
           type: str
           required: True
           action: confirmFile
-        assembly-copy-method:
-          help: "Specifies if assembly files should be copied or symbolically linked."
-          choices:
-            - 'symbolic_link'
-            - 'copy'
-          default: 'symbolic_link'
+        assembly-gtf:
+          help: "Assembly GTF"
+          type: str
+          required: True
+          action: confirmFile
+        species:
+          help: "Species name"
+          type: str
+          default:
+            str: "Sp"
+            suffix:
+              - function: jobRandomString
         assembly-version:
           help: "Assembly Version"
           type: str
@@ -49,11 +55,11 @@ parser:
             str: "v"
             suffix:
               - function: jobRandomString
-        species:
-          help: "Species name"
+        annotation-version:
+          help: "Annotation Version"
           type: str
           default:
-            str: "Sp"
+            str: "v"
             suffix:
               - function: jobRandomString
     paths:
@@ -62,26 +68,14 @@ parser:
           help: "Directory to store assembly"
           type: str
           default: "Assembly"
-        index-dir:
-          help: "Directory to store indices"
+        annotations-dir:
+          help: "Directory to store annotation"
           type: str
-          default: "Indices"
+          default: "Annotations"
         reseq-fastq-dir:
           help: "Directory to store the FASTQs files"
           type: str
           default: "reseq/FASTQs"
-        reseq-aligned-bam-dir:
-          help: "Directory to store sorted BAM files"
-          type: str
-          default: "reseq/BAMs/Aligned"
-        reseq-sorted-bam-dir:
-          help: "Directory to store sorted BAM files"
-          type: str
-          default: "reseq/BAMs/Sorted"
-        reseq-coverage-dir:
-          help: "Directory to store coverage files"
-          type: str
-          default: "reseq/Coverage"
 setup:
   reseq_input:
     wildcard-method:
@@ -126,26 +120,38 @@ setup:
           table_filename: "{fastq-table}"
           sample_column: 'samples'
   
-  assembly_input:
+  assembly_fasta:
     file-method:
       input:
         args:
           - "assembly-fasta"
           - "assembly-dir"
+          - "assembly-version"
       standardize:
         method: "file-str"
         args:
           input_filename: "{assembly-fasta}"
-          standardized_filename: "{species}_{assembly_version}.fa"
+          standardized_filename: "{species}_{assembly-version}.fa"
           out_dir: "{assembly-dir}"
-          copy_method: "{assembly-copy-method}"
+          copy_method: copy
           gzipped: False
-snakefiles:
-  - lr_reseq_align_minimap2
-  - assembly_index
-  - reseq_sort
-  - reseq_bam_coverage
-  - reseq_plot_coverage
   
+  assembly_gtf:
+    file-method:
+      input:
+        args:
+          - "assembly-gtf"
+          - "annotations-dir"
+          - "assembly-version"
+          - "annotation-version"
+      standardize:
+        method: "file-str"
+        args:
+          input_filename: "{assembly-gtf}"
+          standardized_filename: "{species}_{assembly-version}.{annotation-version}.gtf"
+          out_dir: "{annotations-dir}"
+          copy_method: copy
+          gzipped: False
 
-
+snakefiles:
+  - iso_seq_splice_variants_flair

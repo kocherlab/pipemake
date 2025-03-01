@@ -87,6 +87,7 @@ def test_SnakePipelineIO_wo_error(
     # Add a module to the pipeline
     test_pipeline.addModule("fastq_filter_fastp.smk")
     test_pipeline.addModule("test_script.smk")
+    test_pipeline.addModule("test_shell_exec.smk")
 
     # Create the output directories
     unfiltered_fastq_dir = os.path.join(test_dir, "fastq")
@@ -154,6 +155,9 @@ def test_SnakePipelineIO_wo_error(
         assert "fastp_single_end" in config_dict["resources"]
         assert "mem_mb" in config_dict["resources"]["fastp_single_end"]
         assert 16000 == config_dict["resources"]["fastp_single_end"]["mem_mb"]
+        assert "shell_call" in config_dict["resources"]
+        assert "shell_exec" in config_dict["resources"]["shell_call"]
+        assert "sh" == config_dict["resources"]["shell_call"]["shell_exec"]
         assert "threads" in config_dict["resources"]["fastp_single_end"]
         assert 4 == config_dict["resources"]["fastp_single_end"]["threads"]
         assert "fastp_pair_end" in config_dict["resources"]
@@ -269,3 +273,21 @@ def test_SnakeRuleIO_w_config(rule_filename):
     assert ("params", "test6") in config_test._rule_config_params
     assert ("test7",) in config_test._rule_config_params
     assert ("params", "test8") in config_test._rule_config_params
+
+
+@pytest.mark.parametrize(
+    "rule_filename", [("tests/files/snakemakeIO/rules/test_shell_exec.smk")]
+)
+def test_SnakeRuleIO_w_shell_exec(rule_filename):
+    # Read the rule and store it as a string
+    with open(rule_filename, "r") as test_file:
+        test_str = test_file.read()
+
+    # Test if the function raises an error
+    shell_exec_test = SnakeRuleIO.read(rule_str=test_str, indent_style="    ")
+
+    assert shell_exec_test._rule_resource_params == {
+        "threads": 4,
+        "mem_mb": 16000,
+        "shell_exec": "sh",
+    }

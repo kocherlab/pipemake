@@ -17,7 +17,7 @@ rule longread_reseq_align_minimap2:
             config["paths"]["assembly_dir"],
             f"{config['species']}_{config['assembly_version']}.fa",
         ),
-        reseq_fastqs=os.path.join(
+        reseq_fastq=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["reseq_fastq_dir"],
             "{sample}_R1.fq.gz",
@@ -36,4 +36,4 @@ rule longread_reseq_align_minimap2:
         mem_mb=16000,
     threads: 4
     shell:
-        "minimap2 -t {threads} -ax map-hifi -uf {input.fasta_file} {input.reseq_fastqs} | samtools view --threads {threads} -bh -o {output}"
+        "minimap2 -t {threads} -ax map-hifi -uf {input.fasta_file} {input.reseq_fastq} | samtools view --threads {threads} -bh -o {output}"
