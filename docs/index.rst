@@ -40,7 +40,7 @@
 ********
 pipemake
 ********
-pipemake is a lightweight, flexible, and easy-to-use tool for creating and managing `Snakemake <https://snakemake.readthedocs.i/>`_ pipelines. It was designed with three primary goals: 
+pipemake is a lightweight, flexible, and easy-to-use tool for creating and managing `Snakemake <https://snakemake.readthedocs.io/>`_ pipelines. It was designed with three primary goals: 
 
 1. Offer a collection of curated, customizable genomic analysis pipelines for researchers seeking to rapidly integrate Snakemake-based workflows into their research.
 2. Optimize computational efficiency and reproducibility by fully operating in the Snakemake ecosystem.
