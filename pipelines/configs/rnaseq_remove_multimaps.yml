@@ -1,4 +1,4 @@
-pipeline: rnaseq-counts-star
+pipeline: rnaseq-remove-multimaps
 version: 1.0
 parser:
   help: Count RNAseq reads within a genome assembly using STAR and featureCounts
@@ -36,25 +36,12 @@ parser:
           type: str
           required: True
           action: confirmFile
-        assembly-gtf:
-          help: "Assembly GTF"
-          type: str
-          required: True
-          action: confirmFile
         assembly-copy-method:
           help: "Specifies if assembly files should be copied or symbolically linked."
           choices:
             - 'symbolic_link'
             - 'copy'
           default: 'symbolic_link'
-        read-len:
-          help: "Read Length"
-          type: int
-          required: True
-        count-strand:
-          help: "Strandedness for counting (0 = unstranded, 1 = stranded, 2 = reverse stranded)"
-          type: int
-          default: 0
         assembly-version:
           help: "Assembly Version"
           type: str
@@ -80,17 +67,13 @@ parser:
           type: str
           default: "Indices"
         rnaseq-fastq-dir:
-          help: "Directory to store the FASTQs files"
+          help: "Directory to store the unfiltered FASTQs files"
           type: str
-          default: "RNAseq/FASTQs"
-        rnaseq-splice-aligned-dir:
-          help: "Directory to store BAM files"
+          default: "RNAseq/FASTQs/Unfiltered"
+        rnaseq-filtered-fastq-dir:
+          help: "Directory to store the filtered FASTQs files"
           type: str
-          default: "RNAseq/SpliceJunctions/Aligned"
-        rnaseq-bam-dir:
-          help: "Directory to store BAM files"
-          type: str
-          default: "RNAseq/BAMs"
+          default: "RNAseq/FASTQs/Filtered"
         rnaseq-aligned-bam-dir:
           help: "Directory to store aligned BAM files"
           type: str
@@ -99,10 +82,7 @@ parser:
           help: "Directory to store sorted BAM files"
           type: str
           default: "RNAseq/BAMs/Sorted"
-        rnaseq-count-dir:
-          help: "Directory to store RNAseq counts"
-          type: str
-          default: "RNAseq/Counts" 
+        
 setup:
   rnaseq_input:
     wildcard-method:
@@ -161,25 +141,10 @@ setup:
           out_dir: "{assembly-dir}"
           copy_method: "{assembly-copy-method}"
           gzipped: False
-  
-  gtf_input:
-    file-method:
-      input:
-        args:
-          - "assembly-gtf"
-          - "assembly-dir"
-      standardize:
-        method: "file-str"
-        args:
-          input_filename: "{assembly-gtf}"
-          standardized_filename: "{species}_{assembly_version}.gtf"
-          out_dir: "{assembly-dir}"
-          copy_method: "{assembly-copy-method}"
-          gzipped: False
 
 snakefiles:
-  - rna_seq_2pass_star
+  - rna_seq_star_remove_multimap
   - rna_seq_sort
-  - rna_seq_feature_counts
+  - rna_seq_bam_to_fastq
 
 
