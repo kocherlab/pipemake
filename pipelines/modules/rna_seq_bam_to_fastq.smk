@@ -1,4 +1,4 @@
-ruleorder: star_pair_end_rnaseq > star_single_end_rnaseq
+ruleorder: bam_to_pair_end_fastq > bam_to_single_end_fastq
 
 
 rule all:
