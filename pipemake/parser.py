@@ -181,10 +181,24 @@ class PipelineParser:
                 # Process the default arg of the wildcard
                 wildcards_args = self._processArgDefaults(wildcards_args)
 
-                # Assign the argument wildcards, if applicable
-                arg_wildcards[wildcard_name] = re.findall(
-                    r"\{(.*?)\}", wildcards_args["default"]
-                )
+                # Check if the default is a string
+                if not isinstance(wildcards_args["default"], str):
+                    raise Exception(
+                        f"Wildcards default must be a string: {wildcards_args['default']}"
+                    )
+
+                # Assign argument wildcards, if not a formatted string
+                if (
+                    "{" not in wildcards_args["default"]
+                    and "}" not in wildcards_args["default"]
+                ):
+                    arg_wildcards[wildcard_name] = [wildcards_args["default"]]
+
+                # Assign the argument wildcards, if a formatted string
+                else:
+                    arg_wildcards[wildcard_name] = re.findall(
+                        r"\{(.*?)\}", wildcards_args["default"]
+                    )
 
                 # Add the argument to the args argument group
                 group_args["args"][wildcard_name] = wildcards_args
