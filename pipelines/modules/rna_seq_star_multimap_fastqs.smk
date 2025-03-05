@@ -149,7 +149,7 @@ rule star_pair_end:
     threads: 4
     shell:
         """
-        STAR --runThreadN {threads} --runMode alignReads --genomeDir {params.index_dir} --outReadsUnmapped Fastx --outFilterMultimapNmax 1 --outSAMtype BAM Unsorted --outFileNamePrefix {params.bam_prefix} --readFilesCommand zcat --readFilesIn {input.r1_reads} {input.r2_reads}
+        STAR --runThreadN {threads} --runMode alignReads --genomeDir {params.index_dir} --outReadsUnmapped Fastx --outFilterMultimapScoreRange 0 --outFilterMultimapNmax 1 --outSAMtype BAM Unsorted --outFileNamePrefix {params.bam_prefix} --readFilesCommand zcat --readFilesIn {input.r1_reads} {input.r2_reads}
         gzip {params.bam_prefix}Unmapped.out.mate1
         gzip {params.bam_prefix}Unmapped.out.mate2
         """

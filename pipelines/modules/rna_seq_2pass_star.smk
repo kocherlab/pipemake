@@ -183,10 +183,12 @@ rule star_single_end_p2:
             "{sample}.SJ.filtered.tab",
         ),
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_aligned_bam_dir"],
-            "{sample}.Aligned.bam",
+        temp(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["rnaseq_aligned_bam_dir"],
+                "{sample}.Aligned.bam",
+            ),
         ),
         os.path.join(
             config["paths"]["workflow_prefix"],
