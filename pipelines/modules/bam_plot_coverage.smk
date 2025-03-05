@@ -2,17 +2,17 @@ rule all:
     input:
         os.path.join(
             config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_coverage_dir"],
+            config["paths"]["bam_coverage_dir"],
             f"{config['species']}_{config['assembly_version']}.png",
         ),
 
 
-rule reseq_plot_coverage_deeptools:
+rule plot_coverage_deeptools:
     input:
         bam=expand(
             os.path.join(
                 config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_sorted_bam_dir"],
+                config["paths"]["plot_sorted_bam_dir"],
                 "{sample}.sortedByCoord.bam",
             ),
             sample=config["samples"],
@@ -20,7 +20,7 @@ rule reseq_plot_coverage_deeptools:
         index=expand(
             os.path.join(
                 config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_sorted_bam_dir"],
+                config["paths"]["plot_sorted_bam_dir"],
                 "{sample}.sortedByCoord.bam.bai",
             ),
             sample=config["samples"],
@@ -28,13 +28,15 @@ rule reseq_plot_coverage_deeptools:
     output:
         os.path.join(
             config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_coverage_dir"],
+            config["paths"]["bam_coverage_dir"],
             f"{config['species']}_{config['assembly_version']}.png",
         ),
+    params:
+        skip_zero="--skipZeros" if config["skip_zero"] else "",
     singularity:
         "docker://aewebb/deeptools:v3.5.6"
     resources:
         mem_mb=16000,
     threads: 1
     shell:
-        "plotCoverage -b {input.bam} -o {output}"
+        "plotCoverage -b {input.bam} -o {output} {params.skip_zero}"
