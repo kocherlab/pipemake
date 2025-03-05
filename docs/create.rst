@@ -203,7 +203,7 @@ The following is an example of a **Pipeline** configuration file:
               type: str
               default: "RNAseq/BAMs"
             rnaseq-aligned-bam-dir:
-              help: "Directory to store sorted BAM files"
+              help: "Directory to store aligned BAM files"
               type: str
               default: "RNAseq/BAMs/Aligned"
             rnaseq-sorted-bam-dir:

@@ -188,14 +188,14 @@ def test_TableIO_unique_column(filename):
     ["tests/files/fileIO/id_table.tsv"],
 )
 def test_TableIO_no_file_column(filename):
-    test_seqtable = TableIO.fromFilenameStr(filename, sample_column="SRA")
-    assert "SRA" in test_seqtable.samples
-    assert set(test_seqtable.samples["SRA"]) == set(
+    test_seqtable = TableIO.fromFilenameStr(filename, sample_column="samples")
+    assert "samples" in test_seqtable.samples
+    assert set(test_seqtable.samples["samples"]) == set(
         ["SRR000001", "SRR000002", "SRR000003", "SRR000004"]
     )
-    assert test_seqtable._sample_column == "SRA"
+    assert test_seqtable._sample_column == "samples"
     assert test_seqtable._file_columns == set()
-    assert test_seqtable._table_columns == {"SRA"}
+    assert test_seqtable._table_columns == {"samples"}
 
 
 @pytest.mark.parametrize(
