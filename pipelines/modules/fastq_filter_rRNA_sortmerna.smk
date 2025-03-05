@@ -91,8 +91,8 @@ rule sortmerna_single_end:
     singularity:
         "docker://aewebb/sortmerna:v4.3.6"
     resources:
-        mem_mb=16000,
-    threads: 4
+        mem_mb=48000,
+    threads: 8
     shell:
         """
         sortmerna --threads {threads} --ref /opt/DBs/{params.sortmerna_db} --reads {input.r1_reads} --workdir {output.work_dir} --idx-dir {params.index_dir} --other {params.read_prefix} --fastx 
@@ -153,8 +153,8 @@ rule sortmerna_pair_end:
     singularity:
         "docker://aewebb/sortmerna:v4.3.6"
     resources:
-        mem_mb=16000,
-    threads: 4
+        mem_mb=48000,
+    threads: 8
     shell:
         """
         sortmerna --threads {threads} --ref /opt/DBs/{params.sortmerna_db} --reads {input.r1_reads} --reads {input.r2_reads} --workdir {output.work_dir} --idx-dir {params.index_dir} --other {params.read_prefix} --fastx --out2 --paired_in
