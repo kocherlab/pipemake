@@ -12,22 +12,22 @@ Calling pipemake without any arguments or with the help flags will display the c
 
 Once a pipeline has been selected, you may view the pipeline's arguments by simply adding the pipeline name to the command. 
 
-For example, to view the arguments for the `fastq-filter` pipeline, you would use the following command:
+For example, to view the arguments for the `trim-fastqs` pipeline, you would use the following command:
 
 .. code-block:: bash
 
-    pipemake fastq-filter
+    pipemake trim-fastqs
 
 This would display the following information:
 
 .. code-block:: text
 
-    usage: pipemake fastq-filter (--fastq-wildcard FASTQ_WILDCARD | --fastq-table FASTQ_TABLE)
+    usage: pipemake trim-fastqs (--fastq-wildcard FASTQ_WILDCARD | --fastq-table FASTQ_TABLE)
                                  [--fastq-copy-method {symbolic_link,copy}] 
                                  [--fastq-standardized-wildcard FASTQ_STANDARDIZED_WILDCARD] 
                                  [--min-length MIN_LENGTH] 
-                                 [--unfiltered-fastq-dir UNFILTERED_FASTQ_DIR] 
-                                 [--filtered-fastq-dir FILTERED_FASTQ_DIR]
+                                 [--untrimmed-fastq-dir UNTRIMMED_FASTQ_DIR] 
+                                 [--trimmed-fastq-dir TRIMMED_FASTQ_DIR]
                                  [--workflow-prefix WORKFLOW_PREFIX]
                                  [--work-dir WORK_DIR]
                                  [--scale-threads SCALE_THREADS]
@@ -36,19 +36,19 @@ This would display the following information:
                                  [--singularity-dir SINGULARITY_DIR] 
                                  [-h]
 
-    fastq-filter required arguments:
+    trim-fastqs required arguments:
     --fastq-wildcard FASTQ_WILDCARD
                             Wildcard statement to represent FASTQs
     --fastq-table FASTQ_TABLE
                             Table with sample and FASTQs filenames
 
-    fastq-filter paths arguments:
-    --unfiltered-fastq-dir UNFILTERED_FASTQ_DIR
-                            Directory to store unfiltered FASTQ files (default: FASTQ/Unfiltered)
-    --filtered-fastq-dir FILTERED_FASTQ_DIR
-                            Directory to store filtered FASTQ files (default: FASTQ/Filtered)
+    trim-fastqs paths arguments:
+    --untrimmed-fastq-dir UNTRIMMED_FASTQ_DIR
+                            Directory to store untrimmed FASTQ files (default: FASTQ/Untrimmed)
+    --trimmed-fastq-dir TRIMMED_FASTQ_DIR
+                            Directory to store trimmed FASTQ files (default: FASTQ/Trimmed)
 
-    fastq-filter optional arguments:
+    trim-fastqs optional arguments:
     --fastq-copy-method {symbolic_link,copy}
                             Specifies if FASTQs should be copied or symbolically linked.
     --fastq-standardized-wildcard FASTQ_STANDARDIZED_WILDCARD
@@ -73,12 +73,12 @@ You may notice that the arguments are divided into three categories: required, p
 * **paths** is a pipeline-defined category that holds path-defining arguments for convenience. Other pipeline-defined categories may exist depending on the pipeline.
 * **optional** is the category that holds optional arguments that modify the pipeline's behavior.
 
-For the `fastq-filter` pipeline to operate, the user must provided either the `--fastq-wildcard` or `--fastq-table` argument.
+For the `trim-fastqs` pipeline to operate, the user must provided either the `--fastq-wildcard` or `--fastq-table` argument.
 
 * `--fastq-wildcard` is used to specify a wildcard statement that represents the FASTQ files
 * `--fastq-table` is used to specify a table with sample and FASTQ filenames
 
-For example, let's examine the files within the example directory `example/fastq-filter`:
+For example, let's examine the files within the example directory `example/trim-fastqs`:
 
 .. code-block:: bash
 
@@ -93,23 +93,23 @@ As you can see, the directory contains:
 
 Since these files share a similar naming convention, we can use the `--fastq-wildcard` argument to assign the files. To do this, we must use the same wildcards as `--fastq-standardized-wildcard`, `samples` and `reads` (see default).
 
-If you wanted to perform the `fastq-filter` pipeline on these files, you may  use the following command:
+If you wanted to perform the `trim-fastqs` pipeline on these files, you may  use the following command:
 
 .. code-block:: bash
 
-    pipemake fastq-filter --fastq-wildcard example/fastq-filter/{samples}_{reads}.fq.gz --workflow-prefix FilterTest
+    pipemake trim-fastqs --fastq-wildcard example/trim-fastqs/{samples}_{reads}.fq.gz --workflow-prefix TrimTest
 
-This would generate a snakemake workflow called **FilterTest** that includes the snakemake file **FilterTest.smk**, the configuaration file **FilterTest.yaml**, and the workflow directory **FilterTest**.
+This would generate a snakemake workflow called **TrimTest** that includes the snakemake file **TrimTest.smk**, the configuaration file **TrimTest.yaml**, and the workflow directory **TrimTest**.
 
 .. note::
     
     A warning will be displayed if the input files have inconsistent wildcard usage (such as using paired-end alongside single-end files).
 
-The workflow includes all neccessary files to execute the `fastq-filter` pipeline on the provided FASTQ samples: **test1** and **test2**. 
+The workflow includes all neccessary files to execute the `trim-fastqs` pipeline on the provided FASTQ samples: **test1** and **test2**. 
 
 The workflow could then be executed using the following command:
 
 .. code-block:: bash
 
-    snakemake -s FilterTest.smk --use-singularity --cores 4
+    snakemake -s TrimTest.smk --use-singularity --cores 4
 

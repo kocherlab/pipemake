@@ -1,32 +1,32 @@
-pipeline: lr-reseq-align-minimap2
+pipeline: iso-seq-align-minimap2
 version: 1.0
 parser:
-  help: Align long reads to a genome assembly using minimap2
+  help: Align IsoSeq reads to a genome assembly using minimap2
   arg-groups:
     basic:
       mutually-exclusive-args:
         input-parser:
           required: True
       wildcards-args:
-        reseq-standardized-wildcard:
-          help: "Standardized wildcard statement used to store reseq FASTQs"
+        isoseq-standardized-wildcard:
+          help: "Standardized wildcard statement used to store isoseq FASTQs"
           type: str
           default: 
             str: "{samples}_{reads}.fq.gz"
       args:
-        reseq-wildcard:
-          help: "Wildcard statement to represent reseq FASTQs"
+        isoseq-wildcard:
+          help: "Wildcard statement to represent isoseq FASTQs"
           type: str
           mutually-exclusive: "input-parser"
-          wildcards: "reseq-standardized-wildcard"
-        reseq-table:
+          wildcards: "isoseq-standardized-wildcard"
+        isoseq-table:
           help: "Table with sample and FASTQs filenames"
           type: str
           action: confirmFile
           mutually-exclusive: "input-parser"
-          wildcards: "reseq-standardized-wildcard"
-        reseq-copy-method:
-          help: "Specifies if reseq FASTQs should be copied or symbolically linked."
+          wildcards: "isoseq-standardized-wildcard"
+        isoseq-copy-method:
+          help: "Specifies if isoseq FASTQs should be copied or symbolically linked."
           choices:
             - 'symbolic_link'
             - 'copy'
@@ -56,9 +56,10 @@ parser:
             str: "Sp"
             suffix:
               - function: jobRandomString
-        skip-zero:
+        dont-skip-zero:
           help: "Skip zero coverage regions"
-          action: store_true
+          dest: "skip_zero"
+          action: store_false
     paths:
       args:
         assembly-dir:
@@ -69,66 +70,62 @@ parser:
           help: "Directory to store indices"
           type: str
           default: "Indices"
-        reseq-fastq-dir:
+        isoseq-fastq-dir:
           help: "Directory to store the FASTQs files"
           type: str
-          default: "reseq/FASTQs"
-        reseq-aligned-bam-dir:
+          default: "IsoSeq/Fastq"
+        isoseq-aligned-bam-dir:
           help: "Directory to store sorted BAM files"
           type: str
-          default: "reseq/BAMs/Aligned"
-        reseq-sorted-bam-dir:
+          default: "IsoSeq/BAMs/Aligned"
+        isoseq-sorted-bam-dir:
           help: "Directory to store sorted BAM files"
           type: str
-          default: "reseq/BAMs/Sorted"
-        reseq-coverage-dir:
-          help: "Directory to store coverage files"
-          type: str
-          default: "reseq/Coverage"
+          default: "IsoSeq/BAMs/Sorted"
         plot-sorted-bam-dir:
           help: "Directory of sorted BAM files to plot"
           type: str
-          default: "reseq/BAMs/Sorted"
+          default: "IsoSeq/BAMs/Sorted"
         bam-coverage-dir:
           help: "Directory to store coverage files"
           type: str
-          default: "reseq/Coverage"
+          default: "IsoSeq/Coverage"
 setup:
   reseq_input:
     wildcard-method:
       input:
         args:
-          - "reseq-wildcard"
-          - "reseq-standardized-wildcard"
-          - "reseq-fastq-dir"
+          - "isoseq-wildcard"
+          - "isoseq-standardized-wildcard"
+          - "isoseq-fastq-dir"
       standardize:
         method: "wildcard-str"
         args:
-          wildcard_str: "{reseq-wildcard}"
-          standardized_filename: "{reseq-standardized-wildcard}"
-          out_dir: "{reseq-fastq-dir}"
-          copy_method: '{reseq-copy-method}'
+          wildcard_str: "{isoseq-wildcard}"
+          standardized_filename: "{isoseq-standardized-wildcard}"
+          out_dir: "{isoseq-fastq-dir}"
+          copy_method: '{isoseq-copy-method}'
           gzipped: True
       samples:
         method: "wildcard-str"
         args:
-          wildcard_str: "{reseq-wildcard}"
+          wildcard_str: "{isoseq-wildcard}"
           sample_wildcards: 
             - 'samples'
 
     table-method:
       input:
         args:
-          - "reseq-table"
-          - "reseq-standardized-wildcard"
-          - "reseq-fastq-dir"
+          - "isoseq-table"
+          - "isoseq-standardized-wildcard"
+          - "isoseq-fastq-dir"
       standardize:
         method: "table-file"
         args:
-          table_filename: "{reseq-table}"
-          standardized_filename: "{reseq-standardized-wildcard}"
-          out_dir: "{reseq-fastq-dir}"
-          copy_method: '{reseq-copy-method}'
+          table_filename: "{isoseq-table}"
+          standardized_filename: "{isoseq-standardized-wildcard}"
+          out_dir: "{isoseq-fastq-dir}"
+          copy_method: '{isoseq-copy-method}'
           sample_column: 'samples'
           gzipped: True
       samples:
@@ -152,10 +149,8 @@ setup:
           copy_method: "{assembly-copy-method}"
           gzipped: False
 snakefiles:
-  - lr_reseq_align_minimap2
-  - assembly_index
-  - reseq_sort
-  - reseq_bam_coverage
+  - iso_seq_align_minimap2
+  - iso_seq_sort
   - bam_plot_coverage
   
 
