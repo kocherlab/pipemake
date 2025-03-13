@@ -78,6 +78,11 @@ parser:
           help: "Directory to store assembly"
           type: str
           default: "Assembly"
+        pacbio-bam-dir:
+          help: "Directory to store PacBio BAM files"
+          type: str
+          default: 
+            str: "PacBio/"
         unfiltered-fastq-dir:
           help: "Directory to store unfiltered FASTQ files"
           type: str
