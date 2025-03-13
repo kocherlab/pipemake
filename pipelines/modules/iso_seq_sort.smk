@@ -32,7 +32,7 @@ rule sort_bam_isoseq:
         "docker://aewebb/samtools:v1.20"
     resources:
         mem_mb=8000,
-    threads: 1
+    threads: 4
     shell:
         """
         samtools sort -@ {threads} -o {output} {input}"
