@@ -35,6 +35,6 @@ rule sort_bam_isoseq:
     threads: 4
     shell:
         """
-        samtools sort -@ {threads} -o {output} {input}"
-        samtools index {output}
+        samtools sort -@ {threads} -o {output.bam} {input}
+        samtools index {output.bam}
         """
