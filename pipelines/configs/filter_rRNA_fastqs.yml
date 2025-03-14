@@ -39,7 +39,7 @@ parser:
             - "smr_v4.3_default_db.fasta"
             - "smr_v4.3_sensitive_db.fasta"
             - "smr_v4.3_sensitive_db_rfam_seeds.fasta"
-          required: True
+          default: "smr_v4.3_default_db.fasta"
     paths:
       args:
         unfiltered-fastq-dir:
