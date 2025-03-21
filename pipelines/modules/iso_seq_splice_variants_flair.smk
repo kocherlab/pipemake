@@ -129,7 +129,8 @@ checkpoint isoseq_split_bed_flair:
         ),
     shell:
         """
-        awk '{print > "{params.out_prefix}."$1".bed"}' {input}
+        mkdir -p {output}
+        awk '{{print > "{params.out_prefix}."$1".bed"}}' {input}
         """
 
 
