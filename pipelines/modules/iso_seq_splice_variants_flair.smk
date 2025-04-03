@@ -61,7 +61,7 @@ rule isoseq_align_flair:
         "flair align --threads {threads} --genome {input.fasta_file} --reads {input.reseq_fastq} --output {params.out_prefix}"
 
 
-rule isoseq_reseq_correct_flair:
+rule isoseq_correct_flair:
     input:
         fasta_file=os.path.join(
             config["paths"]["workflow_prefix"],
@@ -84,14 +84,14 @@ rule isoseq_reseq_correct_flair:
             config["paths"]["workflow_prefix"],
             config["paths"]["annotations_dir"],
             "flair",
-            f"{config['species']}_{config['assembly_version']}.corrected_all_corrected.bed",
+            f"{config['species']}_{config['assembly_version']}_all_corrected.bed",
         ),
     params:
         out_prefix=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["annotations_dir"],
             "flair",
-            f"{config['species']}_{config['assembly_version']}.corrected",
+            f"{config['species']}_{config['assembly_version']}",
         ),
     singularity:
         "docker://aewebb/flair:v2.0.0"
@@ -102,7 +102,39 @@ rule isoseq_reseq_correct_flair:
         "flair correct --threads {threads} --genome {input.fasta_file} --query {input.align_bed} --gtf {input.gtf_file} --output {params.out_prefix}"
 
 
-rule isoseq_reseq_collapse_flair:
+checkpoint isoseq_split_bed_flair:
+    input:
+        os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["annotations_dir"],
+            "flair",
+            f"{config['species']}_{config['assembly_version']}_all_corrected.bed",
+        ),
+    output:
+        directory(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["annotations_dir"],
+                "flair",
+                "split_corrected",
+            ),
+        ),
+    params:
+        out_prefix=os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["annotations_dir"],
+            "flair",
+            "split_corrected",
+            f"{config['species']}_{config['assembly_version']}_all_corrected",
+        ),
+    shell:
+        """
+        mkdir -p {output}
+        awk '{{print > "{params.out_prefix}."$1".bed"}}' {input}
+        """
+
+
+rule isoseq_collapse_flair:
     input:
         fasta_file=os.path.join(
             config["paths"]["workflow_prefix"],
@@ -126,21 +158,22 @@ rule isoseq_reseq_collapse_flair:
             config["paths"]["workflow_prefix"],
             config["paths"]["annotations_dir"],
             "flair",
-            f"{config['species']}_{config['assembly_version']}.corrected_all_corrected.bed",
+            "split_corrected",
+            f"{config['species']}_{config['assembly_version']}_all_corrected.{{chrom}}.bed",
         ),
     output:
         os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["annotations_dir"],
             "flair",
-            f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}.isoforms.gtf",
+            f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}.{{chrom}}.isoforms.gtf",
         ),
         temp(
             os.path.join(
                 config["paths"]["workflow_prefix"],
                 config["paths"]["annotations_dir"],
                 "flair",
-                f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}.isoforms.bed",
+                f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}.{{chrom}}.isoforms.bed",
             ),
         ),
         temp(
@@ -148,7 +181,7 @@ rule isoseq_reseq_collapse_flair:
                 config["paths"]["workflow_prefix"],
                 config["paths"]["annotations_dir"],
                 "flair",
-                f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}.isoforms.fa",
+                f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}.{{chrom}}.isoforms.fa",
             ),
         ),
     params:
@@ -156,7 +189,7 @@ rule isoseq_reseq_collapse_flair:
             config["paths"]["workflow_prefix"],
             config["paths"]["annotations_dir"],
             "flair",
-            f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}",
+            f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}.{{chrom}}",
         ),
     singularity:
         "docker://aewebb/flair:v2.0.0"
@@ -167,14 +200,27 @@ rule isoseq_reseq_collapse_flair:
         "flair collapse --threads {threads} --genome {input.fasta_file} --gtf {input.gtf_file} --reads {input.reseq_fastq} --annotation_reliant generate --check_splice --query {input.corrected_bed} --output {params.out_prefix}"
 
 
-rule process_flair_output:
-    input:
-        gtf_file=os.path.join(
+def aggregate_collapse(wildcards):
+    checkpoint_output = checkpoints.isoseq_split_bed_flair.get(**wildcards).output[0]
+    return expand(
+        os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["annotations_dir"],
             "flair",
-            f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}.isoforms.gtf",
+            f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}.{{chrom}}.isoforms.gtf",
         ),
+        chrom=glob_wildcards(
+            os.path.join(
+                checkpoint_output,
+                f"{config['species']}_{config['assembly_version']}_all_corrected.{{chrom}}.bed",
+            )
+        ).chrom,
+    )
+
+
+rule process_flair_output:
+    input:
+        aggregate_collapse,
     output:
         os.path.join(
             config["paths"]["workflow_prefix"],
@@ -182,4 +228,4 @@ rule process_flair_output:
             f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}.splice_corrected.gtf",
         ),
     shell:
-        "cp {input.gtf_file} {output}"
+        "cat {input} > {output}"
