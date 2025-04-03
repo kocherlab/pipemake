@@ -49,7 +49,7 @@ rule MACS3_peaks_pair_end:
     singularity:
         "docker://aewebb/macs3:v3.0.1"
     resources:
-        mem_mb=4000,
+        mem_mb=64000,
     threads: 4
     shell:
         "macs3 callpeak -t {input.bam} -f BAMPE -g {params.gs} -n {params.out_prefix} --keep-dup all"
@@ -85,7 +85,7 @@ rule MACS3_peaks_single_end:
     singularity:
         "docker://aewebb/macs3:v3.0.1"
     resources:
-        mem_mb=4000,
+        mem_mb=64000,
     threads: 4
     shell:
         "macs3 callpeak -t {input.bam} -f BAM -g {params.gs} -n {params.out_prefix} --keep-dup all"
