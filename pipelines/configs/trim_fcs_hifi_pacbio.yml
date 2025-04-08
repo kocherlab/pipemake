@@ -1,7 +1,7 @@
-pipeline: trim-hifi-pacbio
+pipeline: trim-fcs-hifi-pacbio
 version: 1.0
 parser:
-  help: Trim PacBio HiFi BAMs using HiFiAdapterFilt
+  help: Trim PacBio HiFi BAMs using HiFiAdapterFiltFSC
   arg-groups:
     basic:
       mutually-exclusive-args:

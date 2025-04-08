@@ -33,25 +33,6 @@ parser:
             - 'symbolic_link'
             - 'copy'
           default: 'symbolic_link'
-        assembly-fasta:
-          help: "Assembly file"
-          type: str
-          required: True
-          action: confirmFile
-        species:
-          help: "Species name"
-          type: str
-          default:
-            str: "Sp"
-            suffix:
-              - function: jobRandomString
-        assembly-version:
-          help: "Assembly Version"
-          type: str
-          default:
-            str: "v"
-            suffix:
-              - function: jobRandomString       
         min-length:
           help: "Minimum length of reads to keep"
           type: int
@@ -74,10 +55,6 @@ parser:
           mutually-exclusive: "taxa-type"
     paths:
       args:
-        assembly-dir:
-          help: "Directory to store assembly"
-          type: str
-          default: "Assembly"
         unfiltered-fastq-dir:
           help: "Directory to store unfiltered FASTQ files"
           type: str
@@ -131,22 +108,6 @@ setup:
         args:
           table_filename: "{fastq-table}"
           sample_column: 'samples'
-  
-  assembly_input:
-    file-method:
-      input:
-        args:
-          - "assembly-fasta"
-          - "assembly-dir"
-      standardize:
-        method: "file-str"
-        args:
-          input_filename: "{assembly-fasta}"
-          standardized_filename: "{species}_{assembly_version}.fa"
-          out_dir: "{assembly-dir}"
-          copy_method: copy
-          gzipped: False
 
 snakefiles:
-  - assembly_screen_fcs
   - hifi_trim_hifiadapterfilt
