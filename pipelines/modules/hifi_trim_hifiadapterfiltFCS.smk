@@ -29,7 +29,7 @@ rule pacbio_bam_to_fasta:
         "docker://aewebb/bamtools:v2.5.2"
     resources:
         mem_mb=16000,
-    threads: 4
+    threads: 1
     shell:
         "bamtools convert -format fasta -in {input} -out {output}"
 
