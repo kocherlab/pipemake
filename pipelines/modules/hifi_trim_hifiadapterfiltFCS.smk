@@ -22,7 +22,7 @@ rule pacbio_bam_to_fasta:
             os.path.join(
                 config["paths"]["workflow_prefix"],
                 config["paths"]["unfiltered_fastq_dir"],
-                "{sample}_R1.fa",
+                "{sample}_R1.fasta",
             ),
         ),
     singularity:
@@ -39,7 +39,7 @@ rule hifi_reads_screen_fcs_adaptor:
         os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["unfiltered_fastq_dir"],
-            "{sample}_R1.fa",
+            "{sample}_R1.fasta",
         ),
     output:
         os.path.join(
@@ -61,19 +61,19 @@ rule hifi_reads_screen_fcs_adaptor:
     singularity:
         "docker://ncbi/fcs-adaptor:0.5.4"
     resources:
-        mem_mb=16000,
+        mem_mb=32000,
         shell_exec="sh",
     threads: 1
     shell:
         "av_screen_x {input} --output {params.out_prefix} {params.prok} {params.euk}"
 
 
-rule hifi_assembly_screen_hifiadapterfiltFCS:
+rule hifi_screen_hifiadapterfiltFCS:
     input:
         reads=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["unfiltered_fastq_dir"],
-            "{sample}_R1.fq.gz",
+            "{sample}_R1.fastq.gz",
         ),
         fcs_adaptor_report=os.path.join(
             config["paths"]["workflow_prefix"],

@@ -15,7 +15,7 @@ rule hifi_reads_screen_hifiadapterfilt:
         os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["unfiltered_fastq_dir"],
-            "{sample}_R1.fq.gz",
+            "{sample}_R1.fastq.gz",
         ),
     output:
         os.path.join(
