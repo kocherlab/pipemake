@@ -4,7 +4,7 @@ rule all:
             os.path.join(
                 config["paths"]["workflow_prefix"],
                 config["paths"]["unfiltered_fastq_dir"],
-                "{sample}_R1.fq.gz",
+                "{sample}_R1.fastq.gz",
             ),
             sample=config["samples"],
         ),
@@ -22,7 +22,7 @@ rule pacbio_bam_to_fastq:
             os.path.join(
                 config["paths"]["workflow_prefix"],
                 config["paths"]["unfiltered_fastq_dir"],
-                "{sample}_R1.fq.gz",
+                "{sample}_R1.fastq.gz",
             ),
         ),
     singularity:
@@ -31,4 +31,4 @@ rule pacbio_bam_to_fastq:
         mem_mb=16000,
     threads: 1
     shell:
-        "bamtools convert -format fastq -in {input}| gzip > {output}"
+        "bamtools convert -format fastq -in {input} | gzip > {output}"
