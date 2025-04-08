@@ -4,7 +4,7 @@ rule all:
             os.path.join(
                 config["paths"]["workflow_prefix"],
                 config["paths"]["filtered_fastq_dir"],
-                "{sample}_R1.filt.fcsfilt.fastq.gz",
+                "{sample}_R1.fcsfilt.fastq.gz",
             ),
             sample=config["samples"],
         ),
