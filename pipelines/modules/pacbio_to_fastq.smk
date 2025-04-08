@@ -29,6 +29,6 @@ rule pacbio_bam_to_fastq:
         "docker://aewebb/bamtools:v2.5.2"
     resources:
         mem_mb=16000,
-    threads: 4
+    threads: 1
     shell:
         "bamtools convert -format fastq -in {input}| gzip > {output}"
