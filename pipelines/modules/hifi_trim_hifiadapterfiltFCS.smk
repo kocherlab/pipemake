@@ -46,6 +46,7 @@ rule hifi_reads_screen_fcs_adaptor:
             config["paths"]["workflow_prefix"],
             config["paths"]["unfiltered_fastq_dir"],
             "fcs-adaptor",
+            "{sample}",
             "fcs_adaptor_report.txt",
         ),
     params:
@@ -53,6 +54,7 @@ rule hifi_reads_screen_fcs_adaptor:
             config["paths"]["workflow_prefix"],
             config["paths"]["unfiltered_fastq_dir"],
             "fcs-adaptor",
+            "{sample}",
         ),
         prok="--prok" if config["prok"] else "",
         euk="--euk" if config["euk"] else "",
@@ -77,6 +79,7 @@ rule hifi_assembly_screen_hifiadapterfiltFCS:
             config["paths"]["workflow_prefix"],
             config["paths"]["unfiltered_fastq_dir"],
             "fcs-adaptor",
+            "{sample}",
             "fcs_adaptor_report.txt",
         ),
     output:
