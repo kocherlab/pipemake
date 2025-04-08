@@ -75,7 +75,7 @@ rule hifi_assembly_screen_hifiadapterfiltFCS:
         ),
         fcs_adaptor_report=os.path.join(
             config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
+            config["paths"]["unfiltered_fastq_dir"],
             "fcs-adaptor",
             "fcs_adaptor_report.txt",
         ),
