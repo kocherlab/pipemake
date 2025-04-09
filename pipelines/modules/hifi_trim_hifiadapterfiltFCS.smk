@@ -68,11 +68,32 @@ rule hifi_reads_screen_fcs_adaptor:
         "av_screen_x {input} --output {params.out_prefix} {params.prok} {params.euk}"
 
 
+rule link_fastq_hifiadapterfiltFCS:
+    input:
+        os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["unfiltered_fastq_dir"],
+            "{sample}_R1.fastq.gz",
+        ),
+    output:
+        temp(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["filtered_fastq_dir"],
+                "{sample}_R1.fastq.gz",
+            )
+        ),
+    run:
+        import os
+
+        os.symlink(os.path.abspath(input[0]), output[0])
+
+
 rule hifi_screen_hifiadapterfiltFCS:
     input:
         reads=os.path.join(
             config["paths"]["workflow_prefix"],
-            config["paths"]["unfiltered_fastq_dir"],
+            config["paths"]["filtered_fastq_dir"],
             "{sample}_R1.fastq.gz",
         ),
         fcs_adaptor_report=os.path.join(
