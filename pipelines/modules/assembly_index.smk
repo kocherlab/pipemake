@@ -7,7 +7,7 @@ rule all:
         ),
 
 
-rule sort_bam_rnaseq:
+rule index_assembly:
     input:
         os.path.join(
             config["paths"]["workflow_prefix"],
