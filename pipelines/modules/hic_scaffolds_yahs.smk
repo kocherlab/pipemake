@@ -3,96 +3,72 @@ rule all:
         expand(
             os.path.join(
                 config["paths"]["workflow_prefix"],
-                config["paths"]["assembly_dir"],
+                config["paths"]["hic_juicebox_dir"],
                 "{sample}_{ec_type}_converted.fasta",
             ),
             sample=config["samples"],
             ec_type=["ec", "noec"],
         ),
+        expand(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["hic_juicebox_dir"],
+                "{sample}_{ec_type}.hic",
+            ),
+            sample=config["samples"],
+            ec_type=["ec", "noec"],
+        ),
 
-rule index_hifi_assembly_samtools:
+rule index_hifi_assembly:
     input:
         os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["assembly_dir"],
             'hifiasm',
-            f"{config['assembly_sample']}.fa",
+            '{sample}.fa',
         ),
     output:
         os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["assembly_dir"],
             'hifiasm',
-            f"{config['assembly_sample']}.fa.fai",
+            '{sample}.fa.fai',
+        ),
+        os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["assembly_dir"],
+            'hifiasm',
+            '{sample}.fa.bwt.2bit.64',
         ),
     singularity:
-        "docker://aewebb/samtools:v1.20"
+        "docker://aewebb/bwa-mem2:v2.2.1"
     resources:
-        mem_mb=4000,
+        mem_mb=8000,
     threads: 1
     shell:
-        "samtools faidx {input}"
-
-rule index_hifi_assembly_bwa:
-    input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            'hifiasm',
-            f"{config['assembly_sample']}.fa",
-        ),
-    output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            'hifiasm',
-            f"{config['assembly_sample']}.fa.amb",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            'hifiasm',
-            f"{config['assembly_sample']}.fa.ann",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            'hifiasm',
-            f"{config['assembly_sample']}.fa.bwt",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            'hifiasm',
-            f"{config['assembly_sample']}.fa.pac",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            'hifiasm',
-            f"{config['assembly_sample']}.fa.sa",
-        ),
-    singularity:
-        "docker://aewebb/bwa:v0.7.18"
-    resources:
-        mem_mb=4000,
-    threads: 1
-    shell:
-        "bwa index {input}"
-
+        """
+        bwa-mem2 index {input}
+        samtools faidx {input}
+        """
 
 rule align_hic_reads_bwa:
     input:
         read_fastq=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["hic_fastq_dir"],
-            "{sample}_{read}.fq.gz
+            "HiC_{read}.fq.gz",
+        ),
+        assembly_fasta=os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["assembly_dir"],
+            'hifiasm',
+            '{sample}.fa',
         ),
         index_fasta=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["assembly_dir"],
             'hifiasm',
-            f"{config['assembly_sample']}.fa",
+            '{sample}.fa.fai',
         ),
     output:
         temp(
@@ -103,12 +79,12 @@ rule align_hic_reads_bwa:
             )
         ),
     singularity:
-        "docker://aewebb/bwa:v0.7.18"
+        "docker://aewebb/bwa-mem2:v2.2.1"
     resources:
         mem_mb=32000,
     threads: 4
     shell:
-        "bwa mem -t {threads} {input.index_fasta} {input.read_fastq} | samtools view --threads {threads} -bh -o {output}"
+        "bwa-mem2 mem -t {threads} {input.assembly_fasta} {input.read_fastq} | samtools view --threads {threads} -bh -o {output}"
 
 rule filter_hic_reads:
     input:
@@ -128,10 +104,10 @@ rule filter_hic_reads:
     singularity:
         "docker://aewebb/arima_mapping:05222024"
     resources:
-        mem_mb=8000,
-    threads: 1
+        mem_mb=16000,
+    threads: 4
     shell:
-        "samtools view -h {input} | filter_five_end.pl | samtools view {threads} -bh -o {output}"
+        "samtools view -h {input} | filter_five_end.pl | samtools view --threads {threads} -bh -o {output}"
 
 rule combine_hic_reads:
     input:
@@ -149,7 +125,7 @@ rule combine_hic_reads:
             config["paths"]["workflow_prefix"],
             config["paths"]["assembly_dir"],
             'hifiasm',
-            f"{config['assembly_sample']}.fa",
+            '{sample}.fa',
         ),
     output:
         temp(
@@ -164,8 +140,8 @@ rule combine_hic_reads:
     singularity:
         "docker://aewebb/arima_mapping:05222024"
     resources:
-        mem_mb=8000,
-    threads: 1
+        mem_mb=16000,
+    threads: 4
     shell:
         "two_read_bam_combiner.pl {input.r1_bam} {input.r2_bam} samtools {params.mapq_filter} | samtools view -bh -t {input.index_fasta} | samtools sort -@ {threads} -o {output}"
 
@@ -220,7 +196,7 @@ rule mark_duplicates:
     singularity:
         "docker://aewebb/gatk4:v4.6.1.0"
     resources:
-        mem_mb=8000,
+        mem_mb=16000,
     threads: 1
     shell:
         """
@@ -259,7 +235,8 @@ rule yahs_ec:
         index_fasta=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["assembly_dir"],
-            f"{config['assembly_sample']}.fa",
+            'hifiasm',
+            '{sample}.fa',
         ),
     output:
         os.path.join(
@@ -298,7 +275,7 @@ rule yahs_noec:
             config["paths"]["workflow_prefix"],
             config["paths"]["assembly_dir"],
             'hifiasm',
-            f"{config['assembly_sample']}.fa",
+            '{sample}.fa',
         ),
     output:
         os.path.join(
@@ -341,26 +318,28 @@ rule yahs_juicer_pre_noec:
             config["paths"]["workflow_prefix"],
             config["paths"]["assembly_dir"],
             'hifiasm',
-            f"{config['assembly_sample']}.fa.fai",
+            '{sample}.fa.fai',
         ),
     output:
         txt=os.path.join(
             config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            'juicebox',
+            config["paths"]["hic_juicebox_dir"],
             "{sample}_{ec_type}.txt",
+        ),
+        agp=os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["hic_juicebox_dir"],
+            "{sample}_{ec_type}.liftover.agp",
         ),
         log=os.path.join(
             config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            'juicebox',
+            config["paths"]["hic_juicebox_dir"],
             "{sample}_{ec_type}_juicer_pre.log",
         ),
     params:
         out_prefix=os.path.join(
             config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            'juicebox',
+            config["paths"]["hic_juicebox_dir"],
             "{sample}_{ec_type}",
         ),
     singularity:
@@ -375,21 +354,18 @@ rule juicer_tools_pre:
     input:
         txt=os.path.join(
             config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            'juicebox',
+            config["paths"]["hic_juicebox_dir"],
             "{sample}_{ec_type}.txt",
         ),
         log=os.path.join(
             config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            'juicebox',
+            config["paths"]["hic_juicebox_dir"],
             "{sample}_{ec_type}_juicer_pre.log",
         ),
     output:
-        os.path.join(
+        hic=os.path.join(
             config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            'juicebox',
+            config["paths"]["hic_juicebox_dir"],
             "{sample}_{ec_type}.hic",
         ),
     singularity:
@@ -400,36 +376,33 @@ rule juicer_tools_pre:
     shell:
         """
         assembly_size=$(grep 'PRE_C_SIZE' {input.log} | awk '{{print $3}}')
-        java -jar /opt/juicer_tools.jar pre {input.txt} {output} <(echo "assembly ${assembly_size}")
+        java -jar /opt/juicer_tools.jar pre {input.txt} {output.hic} <(echo "assembly ${{assembly_size}}")
         """
 
-rule create_liftover_fasta:
+rule create_converted_fasta:
     input:
         agp=os.path.join(
             config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            'juicebox',
+            config["paths"]["hic_juicebox_dir"],
             "{sample}_{ec_type}.liftover.agp",
         ),
         fasta=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["assembly_dir"],
             'hifiasm',
-            f"{config['assembly_sample']}.fa",
+            '{sample}.fa',
         ),
     output:
         bed=temp(
             os.path.join(
                 config["paths"]["workflow_prefix"],
-                config["paths"]["assembly_dir"],
-                'juicebox',
+                config["paths"]["hic_juicebox_dir"],
                 "{sample}_{ec_type}.bed",
             )
         ),
         fasta=os.path.join(
             config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            'juicebox',
+            config["paths"]["hic_juicebox_dir"],
             "{sample}_{ec_type}_converted.fasta",
         ),
     singularity:
@@ -442,23 +415,3 @@ rule create_liftover_fasta:
         awk -v OFS='\t' '{{print $6, $7, $8, $1}}' {input.agp} > {output.bed}
         bedtools getfasta -nameOnly -fi {input.fasta} -bed {output.bed} > {output.fasta}
         """
-
-rule copy_liftover_fasta:
-    input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            'juicebox',
-            "{sample}_{ec_type}_converted.fasta",
-        ),
-    output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            "{sample}_{ec_type}_converted.fasta",
-        ),
-    resources:
-        mem_mb=4000,
-    threads: 1
-    shell:
-        "cp {input} {output}"
