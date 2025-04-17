@@ -31,31 +31,7 @@ rule bwa_index_atac_seq:
             config["paths"]["workflow_prefix"],
             config["paths"]["index_dir"],
             "BWA",
-            f"{config['species']}_{config['assembly_version']}.fa.amb",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["index_dir"],
-            "BWA",
-            f"{config['species']}_{config['assembly_version']}.fa.ann",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["index_dir"],
-            "BWA",
-            f"{config['species']}_{config['assembly_version']}.fa.bwt",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["index_dir"],
-            "BWA",
-            f"{config['species']}_{config['assembly_version']}.fa.pac",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["index_dir"],
-            "BWA",
-            f"{config['species']}_{config['assembly_version']}.fa.sa",
+            f"{config['species']}_{config['assembly_version']}.fa.bwt.2bit.64",
         ),
     params:
         index_fasta=os.path.join(
