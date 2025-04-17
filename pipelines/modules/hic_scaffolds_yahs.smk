@@ -336,7 +336,7 @@ rule yahs_juicer_pre_noec:
     output:
         txt=temp(
             os.path.join(
-                onfig["paths"]["workflow_prefix"],
+                config["paths"]["workflow_prefix"],
                 config["paths"]["hic_juicebox_dir"],
                 "{sample}_{ec_type}.txt",
             )
