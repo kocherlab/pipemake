@@ -42,10 +42,6 @@ parser:
             - 'symbolic_link'
             - 'copy'
           default: 'symbolic_link'
-        read-len:
-          help: "Read Length"
-          type: int
-          required: True
         assembly-version:
           help: "Assembly Version"
           type: str
@@ -154,6 +150,6 @@ setup:
           gzipped: False
   
 snakefiles:
-  - rna_seq_star
+  - rna_seq_star_wo_gtf
   - rna_seq_sort
 
