@@ -1,16 +1,16 @@
 rule all:
     input:
-        snail_png=os.path.join(
+        os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["figures_dir"],
             f"{config['species']}_{config['assembly_version']}_scaff_snail.png",
         ),
-        blob_png=os.path.join(
+        os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["figures_dir"],
             f"{config['species']}_{config['assembly_version']}_scaff_blob.png",
         ),
-        cumulative_png=os.path.join(
+        os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["figures_dir"],
             f"{config['species']}_{config['assembly_version']}_scaff_cumulative.png",
@@ -247,7 +247,7 @@ rule blobtk_blobtools_add_busco:
                 config["paths"]["blobtools_dir"],
                 '.busco.chk'
             )
-        ),${assembly}_blobblurbout.tsv
+        ),
     singularity:
         "docker://genomehubs/blobtoolkit:4.4.5"
     resources:
