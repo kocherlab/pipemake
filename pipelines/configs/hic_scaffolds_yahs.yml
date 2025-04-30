@@ -145,8 +145,8 @@ setup:
           standardized_filename: "{assembly-standardized-wildcard}"
           out_dir: "{assembly-dir}/hifiasm"
           copy_method: '{assembly-copy-method}'
-          gzipped: False
           sample_column: 'samples'
+          gzipped: False
       samples:
         method: "table-file"
         args:

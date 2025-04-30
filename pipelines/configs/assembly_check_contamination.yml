@@ -1,0 +1,128 @@
+pipeline: assembly-check-contamination
+version: 1.0
+parser:
+  help: Check for contamination in assembly using HiC data
+  arg-groups:
+    basic:
+      args:
+        hifi-fastq:
+          help: "HIFI FASTQ file"
+          type: str
+          required: True
+          action: confirmFile
+        assembly-fasta:
+          help: "Assembly file"
+          type: str
+          required: True
+          action: confirmFile
+        busco-table:
+          help: "BUSCO table file"
+          type: str
+          required: True
+          action: confirmFile
+        hifi-sample:
+          help: "Sample name for HIFI FASTQ file"
+          type: str
+          default: 'HiFi'
+        species:
+          help: "Species name"
+          type: str
+          default:
+            str: "Sp"
+            suffix:
+              - function: jobRandomString
+        assembly-version:
+          help: "Assembly Version"
+          type: str
+          default:
+            str: "v"
+            suffix:
+              - function: jobRandomString
+        blastx-max-length:
+          help: "Maximum length of the blastx output"
+          type: int
+          default: 10000000
+        ncbi-nt-db:
+          help: "Path to the NCBI nt database"
+          type: str
+          required: True
+        uniprot-db:
+          help: "Path to the Uniprot database"
+          type: str
+          required: True
+          action: confirmFile
+        ncbi_taxa_db:
+          help: "Path to the NCBI taxa database"
+          type: str
+          required: True
+          action: confirmDir
+    paths:
+      args:
+        assembly-dir:
+          help: "Directory to store assembly"
+          type: str
+          default: "Assembly"
+        hifi-fastq-dir:
+          help: "Directory to store the HIFI FASTQ files"
+          type: str
+          default: "HiFi/FASTQs"
+        hifi-bam-dir:
+          help: "Directory to store the sorted HiC BAM files"
+          type: str
+          default: "HiC/BAMs"
+        blast-dir:
+          help: "Directory to store the BLAST output"
+          type: str
+          default: "Assembly/BLAST"
+        blobtools-dir:
+          help: "Directory to store the BlobTools output"
+          type: str
+          default: "Assembly/blobtools"
+setup:
+  hifi_input:
+    file-method:
+      input:
+        args:
+          - "hifi-fastq"
+          - "hifi-fastq-dir"
+      standardize:
+        method: "file-str"
+        args:
+          input_filename: "{hifi-fastq"
+          standardized_filename: "{hifi_sample}.fq.gz"
+          out_dir: "{hifi-fastq-dir}"
+          copy_method: symbolic_link
+          gzipped: True
+
+  assembly_input:
+    file-method:
+      input:
+        args:
+          - "assembly-fasta"
+          - "assembly-dir"
+      standardize:
+        method: "file-str"
+        args:
+          input_filename: "{assembly-fasta}"
+          standardized_filename: "{species}_{assembly_version}.fa"
+          out_dir: "{assembly-dir}"
+          copy_method: copy
+          gzipped: False
+
+  busco_input:
+    file-method:
+      input:
+        args:
+          - "busco-table"
+          - "assembly-dir"
+      standardize:
+        method: "file-str"
+        args:
+          input_filename: "{busco-table}"
+          standardized_filename: "{species}_{assembly_version}.busco.full_table.tsv"
+          out_dir: "{assembly-dir}"
+          copy_method: copy
+          gzipped: False
+
+snakefiles:
+  - assembly_contamination_blobtools
