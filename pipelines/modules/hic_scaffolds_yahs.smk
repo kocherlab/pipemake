@@ -19,37 +19,39 @@ rule all:
             ec_type=["ec", "noec"],
         ),
 
+
 rule index_hifi_assembly:
     input:
         os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["assembly_dir"],
-            'hifiasm',
-            '{sample}.fa',
+            "hifiasm",
+            "{sample}.fa",
         ),
     output:
         os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["assembly_dir"],
-            'hifiasm',
-            '{sample}.fa.fai',
+            "hifiasm",
+            "{sample}.fa.fai",
         ),
         os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["assembly_dir"],
-            'hifiasm',
-            '{sample}.fa.bwt.2bit.64',
+            "hifiasm",
+            "{sample}.fa.bwt.2bit.64",
         ),
     singularity:
         "docker://aewebb/bwa-mem2:v2.2.1"
     resources:
-        mem_mb=8000,
+        mem_mb=16000,
     threads: 1
     shell:
         """
         bwa-mem2 index {input}
         samtools faidx {input}
         """
+
 
 rule align_hic_reads_bwa:
     input:
@@ -61,14 +63,14 @@ rule align_hic_reads_bwa:
         assembly_fasta=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["assembly_dir"],
-            'hifiasm',
-            '{sample}.fa',
+            "hifiasm",
+            "{sample}.fa",
         ),
         index_fasta=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["assembly_dir"],
-            'hifiasm',
-            '{sample}.fa.fai',
+            "hifiasm",
+            "{sample}.fa.fai",
         ),
     output:
         temp(
@@ -85,6 +87,7 @@ rule align_hic_reads_bwa:
     threads: 4
     shell:
         "bwa-mem2 mem -t {threads} {input.assembly_fasta} {input.read_fastq} | samtools view --threads {threads} -bh -o {output}"
+
 
 rule filter_hic_reads:
     input:
@@ -109,6 +112,7 @@ rule filter_hic_reads:
     shell:
         "samtools view -h {input} | filter_five_end.pl | samtools view --threads {threads} -bh -o {output}"
 
+
 rule combine_hic_reads:
     input:
         r1_bam=os.path.join(
@@ -124,8 +128,8 @@ rule combine_hic_reads:
         index_fasta=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["assembly_dir"],
-            'hifiasm',
-            '{sample}.fa',
+            "hifiasm",
+            "{sample}.fa",
         ),
     output:
         temp(
@@ -144,6 +148,7 @@ rule combine_hic_reads:
     threads: 4
     shell:
         "two_read_bam_combiner.pl {input.r1_bam} {input.r2_bam} samtools {params.mapq_filter} | samtools view -bh -t {input.index_fasta} | samtools sort -@ {threads} -o {output}"
+
 
 rule add_read_groups:
     input:
@@ -170,6 +175,7 @@ rule add_read_groups:
     shell:
         "gatk AddOrReplaceReadGroups INPUT={input} OUTPUT={output} ID={wildcards.sample} LB={wildcards.sample} SM={wildcards.sample} PL=ILLUMINA PU=none"
 
+
 rule mark_duplicates:
     input:
         os.path.join(
@@ -177,7 +183,7 @@ rule mark_duplicates:
             config["paths"]["hic_sorted_bam_dir"],
             "{sample}.sorted_groups.bam",
         ),
-    output: 
+    output:
         bam=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["hic_sorted_bam_dir"],
@@ -204,6 +210,7 @@ rule mark_duplicates:
         samtools index {output.bam}
         """
 
+
 rule dedup_bam_stats:
     input:
         os.path.join(
@@ -225,6 +232,7 @@ rule dedup_bam_stats:
     shell:
         "get_stats.pl {input} > {output}"
 
+
 rule yahs_ec:
     input:
         dedup_bam=os.path.join(
@@ -235,8 +243,8 @@ rule yahs_ec:
         index_fasta=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["assembly_dir"],
-            'hifiasm',
-            '{sample}.fa',
+            "hifiasm",
+            "{sample}.fa",
         ),
     output:
         os.path.join(
@@ -274,19 +282,23 @@ rule yahs_noec:
         index_fasta=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["assembly_dir"],
-            'hifiasm',
-            '{sample}.fa',
+            "hifiasm",
+            "{sample}.fa",
         ),
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["hic_yahs_dir"],
-            "{sample}_yahsout_noec.bin",
+        temp(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["hic_yahs_dir"],
+                "{sample}_yahsout_noec.bin",
+            )
         ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["hic_yahs_dir"],
-            "{sample}_yahsout_noec_scaffolds_final.agp",
+        temp(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["hic_yahs_dir"],
+                "{sample}_yahsout_noec_scaffolds_final.agp",
+            )
         ),
     params:
         out_prefix=os.path.join(
@@ -301,6 +313,7 @@ rule yahs_noec:
     threads: 1
     shell:
         "yahs --no-contig-ec {input.index_fasta} {input.dedup_bam} -o {params.out_prefix}"
+
 
 rule yahs_juicer_pre_noec:
     input:
@@ -317,19 +330,23 @@ rule yahs_juicer_pre_noec:
         assembly_index=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["assembly_dir"],
-            'hifiasm',
-            '{sample}.fa.fai',
+            "hifiasm",
+            "{sample}.fa.fai",
         ),
     output:
-        txt=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["hic_juicebox_dir"],
-            "{sample}_{ec_type}.txt",
+        txt=temp(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["hic_juicebox_dir"],
+                "{sample}_{ec_type}.txt",
+            )
         ),
-        agp=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["hic_juicebox_dir"],
-            "{sample}_{ec_type}.liftover.agp",
+        agp=temp(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["hic_juicebox_dir"],
+                "{sample}_{ec_type}.liftover.agp",
+            )
         ),
         log=os.path.join(
             config["paths"]["workflow_prefix"],
@@ -349,6 +366,7 @@ rule yahs_juicer_pre_noec:
     threads: 1
     shell:
         "juicer pre -a -o {params.out_prefix} {input.reads_bin} {input.assembly_agp} {input.assembly_index} 2> {output.log}"
+
 
 rule juicer_tools_pre:
     input:
@@ -379,6 +397,7 @@ rule juicer_tools_pre:
         java -jar /opt/juicer_tools.jar pre {input.txt} {output.hic} <(echo "assembly ${{assembly_size}}")
         """
 
+
 rule create_converted_fasta:
     input:
         agp=os.path.join(
@@ -389,8 +408,8 @@ rule create_converted_fasta:
         fasta=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["assembly_dir"],
-            'hifiasm',
-            '{sample}.fa',
+            "hifiasm",
+            "{sample}.fa",
         ),
     output:
         bed=temp(
