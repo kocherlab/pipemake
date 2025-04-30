@@ -78,6 +78,10 @@ parser:
           help: "Directory to store the BlobTools output"
           type: str
           default: "Assembly/blobtools"
+        figures-dir:
+          help: "Directory to store the BlobTools figures"
+          type: str
+          default: "Assembly/Figures"
 setup:
   hifi_input:
     file-method:
