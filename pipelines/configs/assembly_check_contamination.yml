@@ -92,7 +92,7 @@ setup:
       standardize:
         method: "file-str"
         args:
-          input_filename: "{hifi-fastq"
+          input_filename: "{hifi-fastq}"
           standardized_filename: "{hifi_sample}.fq.gz"
           out_dir: "{hifi-fastq-dir}"
           copy_method: symbolic_link

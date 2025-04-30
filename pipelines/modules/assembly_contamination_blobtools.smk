@@ -247,7 +247,7 @@ rule blobtk_blobtools_add_busco:
                 config["paths"]["blobtools_dir"],
                 '.busco.chk'
             )
-        ),${assembly}_blobblurbout.tsv
+        ),
     singularity:
         "docker://genomehubs/blobtoolkit:4.4.5"
     resources:
