@@ -1,16 +1,24 @@
 rule all:
     input:
-        os.path.join(
+        snail_png=os.path.join(
             config["paths"]["workflow_prefix"],
-            config["paths"]["blobtools_dir"],
-            '.hits.chk'
+            config["paths"]["figures_dir"],
+            f"{config['species']}_{config['assembly_version']}_scaff_snail.png",
+        ),
+        blob_png=os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["figures_dir"],
+            f"{config['species']}_{config['assembly_version']}_scaff_blob.png",
+        ),
+        cumulative_png=os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["figures_dir"],
+            f"{config['species']}_{config['assembly_version']}_scaff_cumulative.png",
         ),
         os.path.join(
             config["paths"]["workflow_prefix"],
-            config["paths"]["blobtools_dir"],
-            '.busco.chk'
-        )
-
+            f"{config['paths']['blobtools_dir']}_blobblurbout.tsv",
+        ),
 
 rule hifi_align_minimap2:
     input:
@@ -231,7 +239,7 @@ rule blobtk_blobtools_add_busco:
             config["paths"]["workflow_prefix"],
             config["paths"]["blobtools_dir"],
             '.cov.chk'
-        )
+        ),
     output:
         temp(
             os.path.join(
@@ -239,7 +247,7 @@ rule blobtk_blobtools_add_busco:
                 config["paths"]["blobtools_dir"],
                 '.busco.chk'
             )
-        ),
+        ),${assembly}_blobblurbout.tsv
     singularity:
         "docker://genomehubs/blobtoolkit:4.4.5"
     resources:
@@ -247,3 +255,84 @@ rule blobtk_blobtools_add_busco:
     threads: 1
     shell:
         "blobtools add --busco {input.busco_table} {params.blob_dir} && touch {output}"
+
+rule blobblurb:
+    input:
+        busco_table=os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["assembly_dir"],
+            f"{config['species']}_{config['assembly_version']}.busco.full_table.tsv",
+        ),
+        hits_chk=os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["blobtools_dir"],
+            '.hits.chk'
+        ),
+        busco_chk=os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["blobtools_dir"],
+            '.busco.chk'
+        )
+    output:
+        os.path.join(
+            config["paths"]["workflow_prefix"],
+            f"{config['paths']['blobtools_dir']}_blobblurbout.tsv",
+        )
+    params:
+        blob_dir=os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["blobtools_dir"],
+        ),
+    singularity:
+        "docker://aewebb/blobblurb:05152024"
+    resources:
+        mem_mb=16000,
+    threads: 1
+    shell:
+        "blobblurb {params.blob_dir} {input.busco_table}"
+
+rule blobbtk_plot:
+    input:
+        hits_chk=os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["blobtools_dir"],
+            '.hits.chk'
+        ),
+        busco_chk=os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["blobtools_dir"],
+            '.busco.chk'
+        )
+    output:
+        snail_png=os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["figures_dir"],
+            f"{config['species']}_{config['assembly_version']}_scaff_snail.png",
+        ),
+        blob_png=os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["figures_dir"],
+            f"{config['species']}_{config['assembly_version']}_scaff_blob.png",
+        ),
+        cumulative_png=os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["figures_dir"],
+            f"{config['species']}_{config['assembly_version']}_scaff_cumulative.png",
+        ),
+    params:
+        blob_dir=os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["blobtools_dir"],
+        ),
+    singularity:
+        "docker://genomehubs/blobtoolkit:4.4.5"
+    resources:
+        mem_mb=16000,
+    threads: 1
+    shell:
+        """
+        sed -i '/level/d' {params.blob_dir}/meta.json
+        blobtk plot -v snail -d {params.blob_dir} -o {output.snail_png}
+        blobtk plot -v blob -d {params.blob_dir} -o {output.blob_png}
+        blobtk plot -v cumulative -d {params.blob_dir} -o {output.cumulative_png}
+        """
