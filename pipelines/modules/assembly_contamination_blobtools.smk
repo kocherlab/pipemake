@@ -44,7 +44,7 @@ rule hifi_align_minimap2:
         mem_mb=56000,
     threads: 16
     shell:
-        "minimap2 -ax map-hifi -t {threads} {input.assembly_fasta} {input.hifi_fastq} | samtools sort -@{threads} --threads {threads} -bh -o {output}"
+        "minimap2 -ax map-hifi -t {threads} {input.assembly_fasta} {input.hifi_fastq} | samtools sort -@{threads} --threads {threads} -O bam -o {output}"
 
 
 rule blastn_assembly_nt:
@@ -93,12 +93,13 @@ rule short_assembly_records_for_blastx:
     singularity:
         "docker://aewebb/seqkit:v2.10.0"
     resources:
-        mem_mb=56000,
-    threads: 16
+        mem_mb=16000,
+    threads: 1
     shell:
         """
         let "max_length={params.max_length} - 1"
         seqkit seq -M $max_length {input} > {output}
+        sleep 60
         """
 
 rule blastx_short_assembly_records_diamond:
