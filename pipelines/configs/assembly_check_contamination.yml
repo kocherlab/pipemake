@@ -51,7 +51,7 @@ parser:
           type: str
           required: True
           action: confirmFile
-        ncbi_taxa_db:
+        ncbi-taxa-db:
           help: "Path to the NCBI taxa database"
           type: str
           required: True
