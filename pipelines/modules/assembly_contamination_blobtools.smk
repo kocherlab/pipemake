@@ -1,16 +1,16 @@
 rule all:
     input:
-        snail_png=os.path.join(
+        os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["figures_dir"],
             f"{config['species']}_{config['assembly_version']}_scaff_snail.png",
         ),
-        blob_png=os.path.join(
+        os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["figures_dir"],
             f"{config['species']}_{config['assembly_version']}_scaff_blob.png",
         ),
-        cumulative_png=os.path.join(
+        os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["figures_dir"],
             f"{config['species']}_{config['assembly_version']}_scaff_cumulative.png",
