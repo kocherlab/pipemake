@@ -65,7 +65,7 @@ rule blastn_assembly_nt:
     params:
         ncbi_nt_db=config["ncbi_nt_db"],
     singularity:
-        "docker://aewebb/ncbi-blast:v2.16.0"
+        "docker://ncbi/blast:2.16.0"
     resources:
         mem_mb=56000,
     threads: 16
