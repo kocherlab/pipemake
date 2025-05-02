@@ -1,4 +1,4 @@
-pipeline: filter-rRNA-fastqs
+pipeline: fastq-filter-rRNA
 version: 1.0
 parser:
   help: Filter rRNA reads from FASTQ files using SortMeRNA
