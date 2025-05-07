@@ -120,7 +120,7 @@ class ConfigPipelineIO:
 
     def helpMessage(self, pipeline_args):
         if not pipeline_args["singularity_dir"]:
-            logging.warn(
+            logging.warning(
                 "No singularity path specified, this may result in redundant singularity containers. Please consider specifying the singularity path by including the --singularity-dir argument or setting the PM_SINGULARITY_DIR environment variable."
             )
 
@@ -196,6 +196,13 @@ class ConfigPipelineIO:
                         setup_args["args"][setup_method] = processSetupArgs(
                             assignment_arg_str
                         )
+
+            # Check if the method was assigned
+            if not setup_args["method"]:
+                logging.warning(
+                    f"Setup method not assigned for {setup_name}, skipping setup"
+                )
+                return
 
             # Standardize the input arguments
             for setup_arg, setup_value in setup_dict["args"].items():

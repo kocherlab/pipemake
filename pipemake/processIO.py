@@ -70,6 +70,9 @@ class ProcessIO:
 
 
 def processInput(method="", args={}):
+    # Convert method to lowercase and replace hyphens with underscores
+    method = method.replace("-", "_").lower()
+
     # Create the standardization call
     if method == "wildcard_str":
         processed_input = ProcessIO.fromWildcardStr(**args)
