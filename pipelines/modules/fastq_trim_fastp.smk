@@ -3,45 +3,18 @@ ruleorder: fastp_pair_end > fastp_single_end
 
 rule all:
     input:
-        expand(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["trimmed_fastq_dir"],
-                "{sample}.json",
-            ),
-            sample=config["samples"],
-        ),
+        expand("FASTQ/Trimmed/{sample}.json", sample=config["samples"]),
 
 
 rule fastp_single_end:
     input:
-        r1_reads=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["untrimmed_fastq_dir"],
-            "{sample}_R1.fq.gz",
-        ),
+        r1_reads="FASTQ/Untrimmed/{sample}_R1.fq.gz",
     output:
-        r1_reads=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["trimmed_fastq_dir"],
-            "{sample}_R1.fq.gz",
-        ),
-        json=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["trimmed_fastq_dir"],
-            "{sample}.json",
-        ),
-        html=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["trimmed_fastq_dir"],
-            "{sample}.html",
-        ),
+        r1_reads="FASTQ/Trimmed/{sample}_R1.fq.gz",
+        json="FASTQ/Trimmed/{sample}.json",
+        html="FASTQ/Trimmed/{sample}.html",
     params:
-        sample_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["trimmed_fastq_dir"],
-            "{sample}",
-        ),
+        sample_prefix="FASTQ/Trimmed/{sample}",
         min_length=config["min_length"],
         cut_front="--cut_front" if "cut_front" in config else "",
         cut_tail="--cut_tail" if "cut_tail" in config else "",
@@ -57,43 +30,15 @@ rule fastp_single_end:
 
 rule fastp_pair_end:
     input:
-        r1_reads=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["untrimmed_fastq_dir"],
-            "{sample}_R1.fq.gz",
-        ),
-        r2_reads=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["untrimmed_fastq_dir"],
-            "{sample}_R2.fq.gz",
-        ),
+        r1_reads="FASTQ/Untrimmed/{sample}_R1.fq.gz",
+        r2_reads="FASTQ/Untrimmed/{sample}_R2.fq.gz",
     output:
-        r1_reads=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["trimmed_fastq_dir"],
-            "{sample}_R1.fq.gz",
-        ),
-        r2_reads=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["trimmed_fastq_dir"],
-            "{sample}_R2.fq.gz",
-        ),
-        json=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["trimmed_fastq_dir"],
-            "{sample}.json",
-        ),
-        html=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["trimmed_fastq_dir"],
-            "{sample}.html",
-        ),
+        r1_reads="FASTQ/Trimmed/{sample}_R1.fq.gz",
+        r2_reads="FASTQ/Trimmed/{sample}_R2.fq.gz",
+        json="FASTQ/Trimmed/{sample}.json",
+        html="FASTQ/Trimmed/{sample}.html",
     params:
-        sample_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["trimmed_fastq_dir"],
-            "{sample}",
-        ),
+        sample_prefix="FASTQ/Trimmed/{sample}",
         min_length=config["min_length"],
         cut_front="--cut_front" if "cut_front" in config else "",
         cut_tail="--cut_tail" if "cut_tail" in config else "",

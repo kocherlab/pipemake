@@ -58,8 +58,7 @@ class FileIO:
         self,
         standardized_filename,
         out_dir="",
-        workflow_prefix="",
-        work_dir="",
+        workflow_dir="",
         gzipped=None,
         copy_method="symbolic_link",
         **kwargs,
@@ -70,10 +69,8 @@ class FileIO:
         # Create path as needed
         if out_dir:
             dest_filename = os.path.join(out_dir, dest_filename)
-        if workflow_prefix:
-            dest_filename = os.path.join(workflow_prefix, dest_filename)
-        if work_dir:
-            dest_filename = os.path.join(work_dir, dest_filename)
+        if workflow_dir:
+            dest_filename = os.path.join(workflow_dir, dest_filename)
 
         # Create the output directory, if needed
         if not os.path.exists(os.path.dirname(dest_filename)):
