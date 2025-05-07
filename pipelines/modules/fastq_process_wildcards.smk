@@ -32,7 +32,7 @@ rule fastq_rename_basic_single_end:
 rule fastq_rename_basic_paired_end:
     input:
         r1_reads="FASTQ/Unprocessed_Wildcards/{sample}_1.fq.gz",
-        r2_reads="FASTQ/Unprocessed_Wildcards/{sample}_4.fq.gz",
+        r2_reads="FASTQ/Unprocessed_Wildcards/{sample}_2.fq.gz",
     output:
         r1_reads=temp("FASTQ/Unprocessed_Wildcards/{sample}_R1.fq.gz"),
         r2_reads=temp("FASTQ/Unprocessed_Wildcards/{sample}_R2.fq.gz"),

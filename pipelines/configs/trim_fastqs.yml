@@ -56,19 +56,20 @@ parser:
           action: store_true
 setup:
   fastq_input:
+    methods:
+      wildcard_str: "{fastq-wildcard}"
+      table_file: "{fastq-table}"
     args:
       standardized_filename: "{fastq-standardized-filename}"
       copy_method: '{fastq-copy-method}'
       sample_keywords:
         - 'samples'
       gzipped: True
-    methods: 
-      wildcard_str: "{fastq-wildcard}"
-      table_file: "{fastq-table}"
+    snakefiles:
+      - fastq_process_wildcards
 
 snakemake:
   modules:
-    - fastq_process_wildcards
     - fastq_trim_fastp
   links:
     - fastq_process_single_end > fastp_single_end
