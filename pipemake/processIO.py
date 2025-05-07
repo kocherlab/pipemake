@@ -22,27 +22,30 @@ class ProcessIO:
         )
 
     @classmethod
-    def fromTableFile(cls, table_filename="", **kwargs):
+    def fromTableFile(cls, table_file="", **kwargs):
         return cls(
-            TableIO.fromFilenameStr(table_filename, **kwargs),
+            TableIO.fromFilenameStr(table_file, **kwargs),
             standardize_func="standardizedFiles",
             standardize_type="file",
+            **kwargs,
         )
 
     @classmethod
-    def fromFileStr(cls, input_filename="", **kwargs):
+    def fromFileStr(cls, file_str="", **kwargs):
         return cls(
-            FileIO.create(input_filename, **kwargs),
+            FileIO.create(file_str, **kwargs),
             standardize_func="standardize",
             standardize_type="file",
+            **kwargs,
         )
 
     @classmethod
-    def fromDirStr(cls, path_name="", **kwargs):
+    def fromDirStr(cls, dir_str="", **kwargs):
         return cls(
-            DirIO.create(path_name, **kwargs),
+            DirIO.create(dir_str, **kwargs),
             standardize_func="standardize",
             standardize_type="dir",
+            **kwargs,
         )
 
     def standardize(self):

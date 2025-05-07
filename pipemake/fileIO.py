@@ -118,7 +118,7 @@ class FileIO:
 
 
 class TableIO:
-    def __init__(self, table_dataframe, sample_column="", **kwargs):
+    def __init__(self, table_dataframe, sample_keywords=[], **kwargs):
         # Confirm the table is a pandas DataFrame
         if not isinstance(table_dataframe, pd.DataFrame):
             raise Exception(
@@ -127,20 +127,20 @@ class TableIO:
 
         # Assign the basic arguments
         self._table_dataframe = table_dataframe
-        self._sample_column = sample_column
+        self._sample_keywords = sample_keywords
         self._file_columns = set()
-        self._table_columns = set([self._sample_column])
+        self._table_columns = set(self._sample_keywords)
         self.samples = defaultdict(list)
 
-        if self._sample_column not in self._table_dataframe.columns:
+        if set(self._sample_keywords).isdisjoint(set(self._table_dataframe.columns)):
             raise Exception(
-                f"Unable to assign sample column ({self._sample_column}) in DataFrame columns: {self._table_dataframe.columns}"
+                f"Unable to assign sample column ({list(set(self._sample_keywords) - set(self._table_dataframe.columns))}) in DataFrame columns: {self._table_dataframe.columns}"
             )
 
         # Assign arguments from the columns of the dataframe
         for col in self._table_dataframe.columns:
-            if col == self._sample_column:
-                self.samples[col] = list(self._table_dataframe[self._sample_column])
+            if col in self._sample_keywords:
+                self.samples[col] = list(self._table_dataframe[col])
             elif "filename" in col:
                 self._file_columns.add(col)
             elif ":" in col:
@@ -158,9 +158,6 @@ class TableIO:
 
         if len(self._file_columns) > 1:
             raise Exception("Files may exist within a single column")
-
-        # Create a set of all the columns
-        # self._table_columns = self._table_columns.union(self._file_columns)
 
     @property
     def _file_column(self):

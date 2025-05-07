@@ -3,9 +3,7 @@ import re
 import yaml
 import logging
 
-from pipemake.processIO import (
-    processInput,
-)  # standardizeInput, returnSamples, returnPaths
+from pipemake.processIO import processInput
 
 
 class ConfigPipelinesIO(dict):
@@ -223,11 +221,10 @@ class ConfigPipelineIO:
             if len(input_paths) > 0:
                 self._singularity_bindings.update(input_paths)
 
-            # Check for input samples
-            input_samples = processed_input.returnSamples()
+            # Check if any sample keywords were provided
+            if "sample_keywords" in setup_dict["args"]:
+                input_samples = processed_input.returnSamples()
 
-            # Check for input samples
-            if input_samples:
                 # Confirm the samples are not already assigned
                 if len(self.samples) > 0:
                     raise Exception("Samples already assigned")
@@ -236,8 +233,7 @@ class ConfigPipelineIO:
                 self.samples = input_samples
 
             if "snakefiles" in setup_dict:
-                for snakefiles in setup_dict["snakefiles"]:
-                    self._snakefiles.update(snakefiles)
+                self._snakefiles.update(setup_dict["snakefiles"])
 
             """
 

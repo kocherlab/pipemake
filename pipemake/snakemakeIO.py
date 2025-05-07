@@ -276,7 +276,12 @@ class SnakePipelineIO:
         for output_rule_attributes in self._pipeline_IO_attributes[output_rule][
             "input"
         ].keys():
-            link_rule += f"{self._indent_style}{self._indent_style}{output_rule_attributes}={'\n'.join(self._pipeline_IO_attributes[input_rule]['output'][output_rule_attributes])}\n"
+            link_file = "\n".join(
+                self._pipeline_IO_attributes[input_rule]["output"][
+                    output_rule_attributes
+                ]
+            )
+            link_rule += f"{self._indent_style}{self._indent_style}{output_rule_attributes}={link_file}\n"
 
         # Save the linked rule to the list
         self._linked_rules[output_rule] = link_rule
@@ -1056,9 +1061,10 @@ class SnakeRuleIO:
                     else:
                         attribute_name = len(self._rule_IO_attributes[attribute_group])
                         attribute_str = rule_line_list[2]
+
                         self._rule_IO_attributes[attribute_group][
                             attribute_name
-                        ].append(attribute_level)
+                        ].append(attribute_str)
 
                 # Append attribute text to the current attribute name (multi-line attributes)
                 elif attribute_level > 2:
