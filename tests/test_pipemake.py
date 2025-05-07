@@ -83,9 +83,8 @@ def test_pipemake_main_table_wo_error(table_str):
         main()
 
     # Check if the workflow files were created
-    assert os.path.isfile("Snakefile")
-    assert os.path.isfile("config.yml")
-    assert os.path.isdir(f"{workflow_prefix}")
+    assert os.path.isfile(f"{workflow_prefix}/Snakefile")
+    assert os.path.isfile(f"{workflow_prefix}/config.yml")
     assert os.path.isfile(f"{workflow_prefix}/pipemake/pipeline.log")
     assert os.path.isdir(f"{workflow_prefix}/pipemake")
     assert os.path.isfile(f"{workflow_prefix}/pipemake/backups/Snakefile.bkp")
@@ -97,7 +96,7 @@ def test_pipemake_main_table_wo_error(table_str):
     assert os.path.isdir(f"{workflow_prefix}/pipemake/modules")
     assert os.path.isdir(f"{workflow_prefix}/FASTQ/Unfiltered")
 
-    with open("config.yml") as f:
+    with open(f"{workflow_prefix}/config.yml") as f:
         for line in f:
             print(line)
 
