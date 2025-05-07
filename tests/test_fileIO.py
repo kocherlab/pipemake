@@ -146,12 +146,12 @@ def test_TableIO_no_table_error(filename):
     ["tests/files/fileIO/test_table.tsv"],
 )
 def test_TableIO_fromFilenameStr(filename):
-    test_seqtable = TableIO.fromFilenameStr(filename, sample_column="samples")
+    test_seqtable = TableIO.fromFilenameStr(filename, sample_keywords=["samples"])
     assert "samples" in test_seqtable.samples
     assert set(test_seqtable.samples["samples"]) == set(["test1", "test2"])
     assert "reads" in test_seqtable.samples
     assert set(test_seqtable.samples["reads"]) == set(["R1", "R2"])
-    assert test_seqtable._sample_column == "samples"
+    assert test_seqtable._sample_keywords == ["samples"]
     assert test_seqtable._file_columns == {"reads"}
     assert test_seqtable._table_columns == {"samples", "reads"}
 
@@ -162,10 +162,10 @@ def test_TableIO_fromFilenameStr(filename):
 )
 def test_TableIO_unique_column(filename):
     test_dir = tempfile.mkdtemp()
-    test_seqtable = TableIO.fromFilenameStr(filename, sample_column="genomes")
+    test_seqtable = TableIO.fromFilenameStr(filename, sample_keywords=["genomes"])
     assert "genomes" in test_seqtable.samples
     assert set(test_seqtable.samples["genomes"]) == set(["genome1", "genome2"])
-    assert test_seqtable._sample_column == "genomes"
+    assert test_seqtable._sample_keywords == ["genomes"]
     assert test_seqtable._file_columns == {"filename"}
     assert test_seqtable._table_columns == {"genomes"}
 
@@ -188,12 +188,12 @@ def test_TableIO_unique_column(filename):
     ["tests/files/fileIO/id_table.tsv"],
 )
 def test_TableIO_no_file_column(filename):
-    test_seqtable = TableIO.fromFilenameStr(filename, sample_column="samples")
+    test_seqtable = TableIO.fromFilenameStr(filename, sample_keywords=["samples"])
     assert "samples" in test_seqtable.samples
     assert set(test_seqtable.samples["samples"]) == set(
         ["SRR000001", "SRR000002", "SRR000003", "SRR000004"]
     )
-    assert test_seqtable._sample_column == "samples"
+    assert test_seqtable._sample_keywords == ["samples"]
     assert test_seqtable._file_columns == set()
     assert test_seqtable._table_columns == {"samples"}
 
@@ -207,7 +207,7 @@ def test_TableIO_no_file_column(filename):
 )
 def test_TableIO_standardizedFiles(filename, copy_method):
     test_dir = tempfile.mkdtemp()
-    test_seqtable = TableIO.fromFilenameStr(filename, sample_column="samples")
+    test_seqtable = TableIO.fromFilenameStr(filename, sample_keywords=["samples"])
     test_seqtable.standardizedFiles(
         "{samples}_{reads}.test.fq.gz", out_dir=test_dir, copy_method=copy_method
     )
@@ -230,7 +230,7 @@ def test_TableIO_standardizedFiles(filename, copy_method):
     ],
 )
 def test_TableIO_returnPaths(filename, copy_method):
-    test_seqtable = TableIO.fromFilenameStr(filename, sample_column="samples")
+    test_seqtable = TableIO.fromFilenameStr(filename, sample_keywords=["samples"])
     if copy_method == "copy":
         assert test_seqtable.returnPaths(copy_method) == []
     else:
@@ -244,5 +244,5 @@ def test_TableIO_returnPaths(filename, copy_method):
     ["tests/files/fileIO/test_table.tsv"],
 )
 def test_TableIO_returnSamples(filename):
-    test_seqtable = TableIO.fromFilenameStr(filename, sample_column="samples")
+    test_seqtable = TableIO.fromFilenameStr(filename, sample_keywords=["samples"])
     assert test_seqtable.returnSamples()["samples"] == ["test1", "test2"]

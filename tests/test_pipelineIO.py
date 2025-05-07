@@ -87,30 +87,19 @@ def test_ConfigPipelineIO_fromYAML_setup_dict(config_yaml):
     config = ConfigPipelineIO.fromYAML(config_yaml)
 
     assert "fastq_input" in config._setup_dict
-    assert "wildcard-method" in config._setup_dict["fastq_input"]
-    assert "input" in config._setup_dict["fastq_input"]["wildcard-method"]
-    assert "args" in config._setup_dict["fastq_input"]["wildcard-method"]["input"]
+    assert "methods" in config._setup_dict["fastq_input"]
+    assert "wildcard_str" in config._setup_dict["fastq_input"]["methods"]
+    assert "table_file" in config._setup_dict["fastq_input"]["methods"]
+    assert "args" in config._setup_dict["fastq_input"]
     assert set(
         [
-            "workflow_prefix",
-            "fastq-wildcard",
-            "fastq-standardized-wildcard",
-            "unfiltered-fastq-dir",
+            "standardized_filename",
+            "out_dir",
+            "copy_method",
+            "sample_keywords",
+            "gzipped",
         ]
-    ) == set(config._setup_dict["fastq_input"]["wildcard-method"]["input"]["args"])
-    assert "standardize" in config._setup_dict["fastq_input"]["wildcard-method"]
-    assert (
-        "method" in config._setup_dict["fastq_input"]["wildcard-method"]["standardize"]
-    )
-    assert "args" in config._setup_dict["fastq_input"]["wildcard-method"]["standardize"]
-    assert (
-        "out_dir"
-        in config._setup_dict["fastq_input"]["wildcard-method"]["standardize"]["args"]
-    )
-    assert (
-        "gzipped"
-        in config._setup_dict["fastq_input"]["wildcard-method"]["standardize"]["args"]
-    )
+    ) == set(config._setup_dict["fastq_input"]["args"].keys())
 
 
 @pytest.mark.parametrize(
