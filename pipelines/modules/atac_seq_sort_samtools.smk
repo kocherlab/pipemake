@@ -1,28 +1,15 @@
 rule all:
     input:
         expand(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["atacseq_sorted_bam_dir"],
-                "{sample}.sortedByCoord.bam",
-            ),
-            sample=config["samples"],
+            "ATAC_seq/BAM/Sorted/{sample}.sortedByCoord.bam", sample=config["samples"]
         ),
 
 
 rule sort_bam:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["atacseq_aligned_bam_dir"],
-            "{sample}.Aligned.bam",
-        ),
+        "ATAC_seq/BAM/Aligned/{sample}.Aligned.bam",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["atacseq_sorted_bam_dir"],
-            "{sample}.sortedByCoord.bam",
-        ),
+        temp("ATAC_seq/BAM/Sorted/{sample}.sortedByCoord.bam"),
     singularity:
         "docker://aewebb/samtools:v1.20"
     resources:

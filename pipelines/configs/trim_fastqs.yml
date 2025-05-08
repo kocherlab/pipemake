@@ -76,7 +76,7 @@ snakemake:
       output: fastp_single_end
     - input: fastq_process_paired_end
       output: fastp_pair_end
-      files:
+      file_mappings:
         - input: r1_reads
           output: r1_reads
         - input: r2_reads
