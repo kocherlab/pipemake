@@ -1,0 +1,87 @@
+pipeline: iso-seq-align-minimap2
+version: 1.0
+parser:
+  help: Align IsoSeq reads to a genome assembly using minimap2
+  arg-groups:
+    basic:
+      mutually-exclusive-args:
+        input-parser:
+          required: True
+      wildcards-args:
+        isoseq-standardized-filename: "IsoSeq/FASTQ/{samples}_{reads}.fq.gz"
+      args:
+        isoseq-wildcard:
+          help: "Wildcard statement to represent isoseq FASTQs"
+          type: str
+          mutually-exclusive: "input-parser"
+          wildcards: "isoseq-standardized-filename"
+        isoseq-table:
+          help: "Table with sample and FASTQs filenames"
+          type: str
+          action: confirmFile
+          mutually-exclusive: "input-parser"
+          wildcards: "isoseq-standardized-filename"
+        isoseq-copy-method:
+          help: "Specifies if isoseq FASTQs should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        assembly-fasta:
+          help: "Assembly fasta"
+          type: str
+          required: True
+          action: confirmFile
+        assembly-copy-method:
+          help: "Specifies if assembly files should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        assembly-version:
+          help: "Assembly Version"
+          type: str
+          default:
+            str: "v"
+            suffix:
+              - function: jobRandomString
+        species:
+          help: "Species name"
+          type: str
+          default:
+            str: "Sp"
+            suffix:
+              - function: jobRandomString
+        dont-skip-zero:
+          help: "Skip zero coverage regions"
+          dest: "skip_zero"
+          action: store_false
+setup:
+  reseq_input:
+    methods:
+      wildcard-str: "{isoseq-wildcard}"
+      table-file: "{isoseq-table}"
+      args:
+          standardized_filename: "{isoseq-standardized-filename}"
+          copy_method: '{isoseq-copy-method}'
+          gzipped: True
+          sample_keywords:
+            - 'samples'
+  assembly_input:
+    methods:
+      file-str: "{assembly-fasta}"
+    args:
+      standardized_filename: "Assembly/{species}_{assembly_version}.fa"
+      copy_method: "{assembly-copy-method}"
+      gzipped: False
+
+snakemake:
+  modules:
+    - iso_seq_align_minimap2
+    - iso_seq_sort
+    - bam_plot_coverage
+  links:
+    - input: sort_bam_isoseq
+      output: plot_coverage_deeptools
+
+

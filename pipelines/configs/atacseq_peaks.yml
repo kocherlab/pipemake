@@ -1,0 +1,76 @@
+pipeline: atacseq-peaks-macs3
+version: 1.0
+parser:
+  help: Generate peaks for bulk ATAC-Seq data using bwa and MACS3
+  arg-groups:
+    basic:
+      mutually-exclusive-args:
+        input-parser:
+          required: True
+      wildcards-args:
+        atacseq-standardized-filename: "ATAC_seq/FASTQ/{samples}_{reads}.fastq.gz"
+      args:
+        atacseq-wildcard:
+          help: "Wildcard statement to represent ATACseq FASTQs"
+          type: str
+          mutually-exclusive: "input-parser"
+          wildcards: "atacseq-standardized-filename"
+        atacseq-table:
+          help: "Table with sample and FASTQs filenames"
+          type: str
+          action: confirmFile
+          mutually-exclusive: "input-parser"
+          wildcards: "atacseq-standardized-filename"
+        atacseq-copy-method:
+          help: "Specifies if ATACseq FASTQs should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        genome-size:
+          help: "Genome size in basepairs for focal species"
+          type: int
+          required: True
+        assembly-fasta:
+          help: "Assembly fasta"
+          type: str
+          required: True
+          action: confirmFile
+        assembly-version:
+          help: "Assembly Version"
+          type: str
+          default:
+            str: "v"
+            suffix:
+              - function: jobRandomString
+        species:
+          help: "Species name"
+          type: str
+          default:
+            str: "Sp"
+            suffix:
+              - function: jobRandomString
+setup:
+  atacseq_input:
+    methods:
+      wildcard-str: "{atacseq-wildcard}"
+      table-file: "{atacseq-table}"
+    args:  
+      standardized_filename: "{atacseq-standardized-filename}"
+      copy_method: '{atacseq_copy_method}'
+      gzipped: True
+      sample_keywords: 
+        - 'samples'
+  assembly_input:
+    methods:
+      file-str: "{assembly-fasta}"
+    args:
+      standardized_filename: "Assembly/{species}_{assembly_version}.fa"
+      gzipped: False
+  
+snakemake:
+  modules:
+    - atac_seq_align_bwa
+    - atac_seq_sort_samtools
+    - atac_seq_dedup_sambamba
+    - atac_seq_peaks_MACS3
