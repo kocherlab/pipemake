@@ -233,58 +233,92 @@ class SnakePipelineIO:
         logging.info(f"Module added to pipeline: {module_filename}")
 
     def addSnakeLink(self, link_statement):
-        # Skip if the link statement is blank
-        if link_statement.strip() == "":
-            logging.warning("Blank link statement found.")
-            return
+        # Assign the input and output rules from the link statement
+        input_rule = link_statement["input"]
+        output_block = link_statement["output"]
 
-        # Check if the link statement is valid
-        if not isinstance(link_statement, str) or link_statement.count(">") != 1:
-            raise Exception(f"Invalid link statement: {link_statement}")
+        # Create list to store the linked files
+        file_mappings = []
 
-        # Split the link statement "rule > rule" to the input and output rules
-        input_rule, output_rule = [_rule.strip() for _rule in link_statement.split(">")]
+        # Assign input and output rules if specified
+        if "files" in link_statement:
+            for files in link_statement["file_mappings"]:
+                file_mappings.append(files)
 
-        # Confirm the rules are not the same
-        if input_rule == output_rule:
-            raise Exception(f"Input and output rules are the same: {input_rule}")
+        # Convert the output block to a list for consistency
+        if isinstance(output_block, str):
+            output_block = [output_block]
 
-        # Check if the input rule is in the pipeline IO attributes
-        if input_rule not in self._pipeline_IO_attributes:
-            raise Exception(
-                f"Input rule not found in pipeline IO attributes: {input_rule}"
-            )
+        # Loop the output rule(s) in the output block
+        for output_rule in output_block:
+            # Confirm the rules are not the same
+            if input_rule == output_rule:
+                raise Exception(f"Input and output rules are the same: {input_rule}")
 
-        # Check if the output rule is in the pipeline IO attributes
-        if output_rule not in self._pipeline_IO_attributes:
-            raise Exception(
-                f"Output rule not found in pipeline IO attributes: {output_rule}"
-            )
+            # Check if the input rule is in the pipeline IO attributes
+            if input_rule not in self._pipeline_IO_attributes:
+                raise Exception(
+                    f"Input rule not found in pipeline IO attributes: {input_rule}"
+                )
 
-        # Confirm the rules have the same attribute names
-        if set(self._pipeline_IO_attributes[input_rule]["output"]) != set(
-            self._pipeline_IO_attributes[output_rule]["input"]
-        ):
-            raise Exception(
-                f"Input and output rules have different attribute names: {input_rule}, {output_rule}"
-            )
+            # Check if the output rule is in the pipeline IO attributes
+            if output_rule not in self._pipeline_IO_attributes:
+                raise Exception(
+                    f"Output rule not found in pipeline IO attributes: {output_rule}"
+                )
 
-        # Create the link rule
-        link_rule = f"use rule {output_rule} as link_{output_rule} with:\n{self._indent_style}input:\n"
+            # Check if the rules have linked files
+            if not file_mappings:
+                # Confirm the rules have the same attribute names
+                if not (
+                    set(self._pipeline_IO_attributes[input_rule]["output"])
+                    <= set(self._pipeline_IO_attributes[output_rule]["input"])
+                ):
+                    raise Exception(
+                        f"Input and output rules have different attribute names: {input_rule}, {output_rule}"
+                    )
 
-        # Add the linked attributes to the link rule
-        for output_rule_attributes in self._pipeline_IO_attributes[output_rule][
-            "input"
-        ].keys():
-            link_file = "\n".join(
-                self._pipeline_IO_attributes[input_rule]["output"][
-                    output_rule_attributes
+                # Create the linked files from the input and output rules
+                file_mappings = [
+                    {"input": _f, "output": _f}
+                    for _f in set(self._pipeline_IO_attributes[input_rule]["output"])
+                    & set(self._pipeline_IO_attributes[output_rule]["input"])
                 ]
-            )
-            link_rule += f"{self._indent_style}{self._indent_style}{output_rule_attributes}={link_file}\n"
 
-        # Save the linked rule to the list
-        self._linked_rules[output_rule] = link_rule
+            else:
+                for file_mapping in file_mappings:
+                    # Check if the linked file is in the input rule
+                    if (
+                        file_mapping["input"]
+                        not in self._pipeline_IO_attributes[input_rule]["output"]
+                    ):
+                        raise Exception(
+                            f"Linked file not found in input rule: {file_mapping}"
+                        )
+
+                    # Check if the linked file is in the output rule
+                    if (
+                        file_mapping["output"]
+                        not in self._pipeline_IO_attributes[output_rule]["input"]
+                    ):
+                        raise Exception(
+                            f"Linked file not found in output rule: {file_mapping}"
+                        )
+
+            # Create the link rule
+            link_rule = f"use rule {output_rule} as link_{output_rule} with:\n{self._indent_style}input:\n"
+
+            # Add the linked attributes to the link rule
+            for file_mapping in file_mappings:
+                link_file = "\n".join(
+                    self._pipeline_IO_attributes[input_rule]["output"][
+                        file_mapping["input"]
+                    ]
+                )
+                link_rule += f"{self._indent_style}{self._indent_style}{file_mapping['output']}={link_file}\n"
+
+            # Save the linked rule to the list
+            self._linked_rules[output_rule] = link_rule
 
     def buildSingularityContainers(self):
         # Loop the singularity containers

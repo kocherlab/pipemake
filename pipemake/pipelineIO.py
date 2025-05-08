@@ -85,9 +85,49 @@ class ConfigPipelineIO:
 
         # Check if linked rules are provided
         if "links" in config_dict["snakemake"]:
-            self._snakelinks = set(config_dict["snakemake"]["links"])
+            # Create a list to store the linked rules
+            self._snakelinks = []
+
+            # Create set to store the linked output
+            linked_output = set()
+
+            # Check the linked rule for error, and store the link
+            for link in config_dict["snakemake"]["links"]:
+                # Confirm both input and output are provided
+                if "input" not in link:
+                    raise Exception(f"Input not provided for the linked rule: {link}")
+                if "output" not in link:
+                    raise Exception(f"Output not provided for the linked rule: {link}")
+
+                # Check if the output is a list
+                if isinstance(link["output"], list):
+                    check_output = set(link["output"]).intersection(linked_output)
+                    if check_output:
+                        raise Exception(
+                            f"Output {check_output} already linked to another rule"
+                        )
+                    else:
+                        linked_output.update(link["output"])
+
+                # Check if the output is a string
+                elif isinstance(link["output"], str):
+                    if link["output"] in linked_output:
+                        raise Exception(
+                            f"Output {link['output']} already linked to another rule"
+                        )
+                    else:
+                        linked_output.add(link["output"])
+
+                # Raise an exception if the output is not a string or list
+                else:
+                    raise Exception(
+                        f"Output {link['output']} is not a string or list, please check the configuration file"
+                    )
+
+                # Append the rule to the linked rules
+                self._snakelinks.append(link)
         else:
-            self._snakelinks = set()
+            self._snakelinks = []
 
         config_dict.pop("snakemake")
 
@@ -106,7 +146,7 @@ class ConfigPipelineIO:
 
     @property
     def snakelinks(self):
-        return list(self._snakelinks)
+        return self._snakelinks
 
     @property
     def singularity_bindings(self):
@@ -241,109 +281,3 @@ class ConfigPipelineIO:
 
             if "snakefiles" in setup_dict:
                 self._snakefiles.update(setup_dict["snakefiles"])
-
-            """
-
-            
-
-            method_samples = returnSamples(**samples_args)
-
-                    # Confirm the samples are not already assigned
-                    if method_samples and len(self.samples) > 0:
-                        raise Exception("Samples already assigned")
-
-                    # Store the samples
-                    self.samples = method_samples
-
-                if "snakefiles" in method_args:
-                    # Add method snakefiles to the pipeline
-                    self._snakefiles.update(method_args["snakefiles"])
-
-            
-
-
-           
-            # Create a string to store the assigned method
-            assigned_method = ""
-
-            for method_name, method_args in setup_methods.items():
-                # Assign the input args
-                input_args = method_args["input"]
-
-                # Check for missing arguments
-                for input_arg in input_args["args"]:
-                    if input_arg.replace("-", "_") not in pipeline_args:
-                        raise Exception(
-                            f"Setup argument {input_arg} not found among pipeline argument"
-                        )
-
-                # Confirm expected args were specified
-                method_missing_args = [
-                    _a
-                    for _a in input_args["args"]
-                    if not pipeline_args[_a.replace("-", "_")]
-                ]
-
-                # Skip if missing arguments
-                if method_missing_args:
-                    continue
-
-                # Check if the method was already assigned and report an error if so
-                if assigned_method:
-                    raise Exception(
-                        f"Setup {setup_name} already assigned to {assigned_method}, cannot assign {method_name}"
-                    )
-                else:
-                    assigned_method = method_name
-
-                if "standardize" in method_args:
-                    # Create a dict of the standardize args
-                    std_args = copy.deepcopy(method_args["standardize"])
-
-                    # Add the workflow prefix to the args
-                    std_args["args"]["workflow_dir"] = "{workflow_dir}"
-
-                    # Update the arguments
-                    for std_arg, arg_params in std_args["args"].items():
-                        if not isinstance(arg_params, str):
-                            continue
-                        std_args["args"][std_arg] = arg_params.replace("-", "_").format(
-                            **pipeline_args
-                        )
-
-                    # Standardize the input
-                    standardizeInput(**std_args)
-
-                    # Assign the method paths
-                    method_paths = returnPaths(**std_args)
-
-                    # Check for method paths, and update the singularity bindings if found
-                    if len(method_paths) > 0:
-                        self._singularity_bindings.update(method_paths)
-
-                if "samples" in method_args:
-                    # Create a dict of the standardize args
-                    samples_args = copy.deepcopy(method_args["samples"])
-
-                    # Update the arguments
-                    for samples_arg, arg_params in samples_args["args"].items():
-                        if not isinstance(arg_params, str):
-                            continue
-                        samples_args["args"][samples_arg] = arg_params.replace(
-                            "-", "_"
-                        ).format(**pipeline_args)
-
-                    # Assign the samples from the method
-                    method_samples = returnSamples(**samples_args)
-
-                    # Confirm the samples are not already assigned
-                    if method_samples and len(self.samples) > 0:
-                        raise Exception("Samples already assigned")
-
-                    # Store the samples
-                    self.samples = method_samples
-
-                if "snakefiles" in method_args:
-                    # Add method snakefiles to the pipeline
-                    self._snakefiles.update(method_args["snakefiles"])
-            """
