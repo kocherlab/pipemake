@@ -1,0 +1,156 @@
+pipeline: hic-scaffolds-yahs
+version: 1.0
+parser:
+  help: Scaffold an assembly with Hi-C data using YAHs
+  arg-groups:
+    basic:
+      mutually-exclusive-args:
+        hic-parser:
+          required: True
+        assmbly-parser:
+          required: True
+      wildcards-args:
+        hic-standardized-wildcard:
+          help: "Standardized wildcard statement used to store HiC FASTQs"
+          type: str
+          default: 
+            str: "{reads}.fq.gz"
+        assembly-standardized-wildcard:
+          help: "Standardized wildcard statement used to store assembly FASTAs"
+          type: str
+          default: 
+            str: "{samples}.fa"
+      args:
+        hic-wildcard:
+          help: "Wildcard statement to represent HiC FASTQs"
+          type: str
+          mutually-exclusive: "hic-parser"
+          wildcards: "hic-standardized-wildcard"
+        hic-table:
+          help: "Table with sample and FASTQs filenames"
+          type: str
+          action: confirmFile
+          mutually-exclusive: "hic-parser"
+          wildcards: "hic-standardized-wildcard"
+        hic-copy-method:
+          help: "Specifies if HiC FASTQs should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        assembly-wildcard:
+          help: "Wildcard statement to represent assembly FASTAs"
+          type: str
+          mutually-exclusive: "assmbly-parser"
+          wildcards: "assembly-standardized-wildcard"
+        assembly-table:
+          help: "Table with sample and assembly filenames"
+          type: str
+          action: confirmFile
+          mutually-exclusive: "assmbly-parser"
+          wildcards: "assembly-standardized-wildcard"
+        assembly-copy-method:
+          help: "Specifies if the assembly FASTA should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+    paths:
+      args:
+        assembly-dir:
+          help: "Directory to store assembly"
+          type: str
+          default: "Assembly"
+        hic-fastq-dir:
+          help: "Directory to store the HiC files"
+          type: str
+          default: "HiC/FASTQs"
+        hic-aligned-bam-dir:
+          help: "Directory to store the aligned HiC BAM files"
+          type: str
+          default: "HiC/BAMs/Aligned"
+        hic-sorted-bam-dir:
+          help: "Directory to store the sorted HiC BAM files"
+          type: str
+          default: "HiC/BAMs/Sorted"
+        hic-yahs-dir:
+          help: "Directory to store the yahs output"
+          type: str
+          default: "HiC/yahs"
+        hic-juicebox-dir:
+          help: "Directory to store the juicebox output"
+          type: str
+          default: "HiC/juicebox"
+setup:
+  reseq_input:
+    wildcard-method:
+      input:
+        args:
+          - "hic-wildcard"
+          - "hic-standardized-wildcard"
+          - "hic-fastq-dir"
+      standardize:
+        method: "wildcard-str"
+        args:
+          wildcard_str: "{hic-wildcard}"
+          standardized_filename: "HiC_{hic-standardized-wildcard}"
+          out_dir: "{hic-fastq-dir}"
+          copy_method: '{hic-copy-method}'
+          gzipped: True
+
+    table-method:
+      input:
+        args:
+          - "hic-table"
+          - "hic-standardized-wildcard"
+          - "hic-fastq-dir"
+      standardize:
+        method: "table-file"
+        args:
+          table_filename: "{hic-table}"
+          standardized_filename: "HiC_{hic-standardized-wildcard}"
+          out_dir: "{hic-fastq-dir}"
+          copy_method: '{hic-copy-method}'
+          gzipped: True
+  
+  assembly_input:
+    wildcard-method:
+      input:
+        args:
+          - "assembly-wildcard"
+          - "assembly-dir"
+      standardize:
+        method: "wildcard-str"
+        args:
+          wildcard_str: "{assembly-wildcard}"
+          standardized_filename: "{assembly-standardized-wildcard}"
+          out_dir: "{assembly-dir}/hifiasm"
+          copy_method: "{assembly-copy-method}"
+          gzipped: False
+      samples:
+        method: "wildcard-str"
+        args:
+          wildcard_str: "{assembly-wildcard}"
+          sample_wildcards: 
+            - 'samples'
+    table-method:
+      input:
+        args:
+          - "assembly-table"
+          - "assembly-dir"
+      standardize:
+        method: "table-file"
+        args:
+          table_filename: "{assembly-table}"
+          standardized_filename: "{assembly-standardized-wildcard}"
+          out_dir: "{assembly-dir}/hifiasm"
+          copy_method: '{assembly-copy-method}'
+          sample_column: 'samples'
+          gzipped: False
+      samples:
+        method: "table-file"
+        args:
+          table_filename: "{assembly-table}"
+          sample_column: 'samples'
+snakefiles:
+  - hic_scaffolds_yahs
