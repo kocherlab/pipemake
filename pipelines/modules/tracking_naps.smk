@@ -1,39 +1,18 @@
 rule all:
     input:
         expand(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["tracking_naps_dir"],
-                "{video_id}_naps_tracked.slp",
-            ),
-            video_id=config["video_ids"],
+            "Tracking/NAPS/{video_id}_naps_tracked.slp", video_id=config["video_ids"]
         ),
 
 
 rule run_naps:
     input:
-        sleap_output=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["tracking_sleap_dir"],
-            "{video_id}_sleap_tracked.slp",
-        ),
-        input_video=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["tracking_videos_dir"],
-            "{video_id}.mp4",
-        ),
+        sleap_output="Tracking/SLEAP/{video_id}_sleap_tracked.slp",
+        input_video="Tracking/Videos/{video_id}.mp4",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["tracking_naps_dir"],
-            "{video_id}_naps_tracked.slp",
-        ),
+        "Tracking/NAPS/{video_id}_naps_tracked.slp",
     params:
-        output_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["tracking_naps_dir"],
-            "{video_id}_naps_tracked",
-        ),
+        output_prefix="Tracking/NAPS/{video_id}_naps_tracked",
         start_frame=config["start_frame"],
         end_frame=config["end_frame"],
         tag_node_name=config["tag_node_name"],
@@ -70,4 +49,3 @@ rule run_naps:
         --aruco-crop-size {params.aruco_crop_size} \
         --output {params.output_prefix}
         """
-

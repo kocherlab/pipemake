@@ -1,7 +1,7 @@
-pipeline: rnaseq-align-star
+pipeline: rnaseq-counts-star
 version: 1.0
 parser:
-  help: Align RNAseq reads within a genome assembly using STAR
+  help: Count RNAseq reads within a genome assembly using STAR and featureCounts
   arg-groups:
     basic:
       mutually-exclusive-args:
@@ -32,12 +32,25 @@ parser:
           type: str
           required: True
           action: confirmFile
+        assembly-gtf:
+          help: "Assembly GTF"
+          type: str
+          required: True
+          action: confirmFile
         assembly-copy-method:
           help: "Specifies if assembly files should be copied or symbolically linked."
           choices:
             - 'symbolic_link'
             - 'copy'
           default: 'symbolic_link'
+        read-len:
+          help: "Read Length"
+          type: int
+          required: True
+        count-strand:
+          help: "Strandedness for counting (0 = unstranded, 1 = stranded, 2 = reverse stranded)"
+          type: int
+          default: 0
         assembly-version:
           help: "Assembly Version"
           type: str
@@ -70,9 +83,17 @@ setup:
       standardized_filename: "Assembly/{species}_{assembly_version}.fa"
       copy_method: "{assembly-copy-method}"
       gzipped: False
-  
+  gtf_input:
+    methodS:
+      file-str: "{assembly-gtf}"
+    args:
+      standardized_filename: "Assembly/{species}_{assembly_version}.gtf"
+      copy_method: "{assembly-copy-method}"
+      gzipped: False
+
 snakemake:
   modules:
-    - rna_seq_star_wo_gtf
+    - star_create_index
+    - rna_seq_2pass_star
     - rna_seq_sort
-
+    - rna_seq_feature_counts

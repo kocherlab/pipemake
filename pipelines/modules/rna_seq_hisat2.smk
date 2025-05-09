@@ -3,79 +3,23 @@ ruleorder: hisat2_pair_end > hisat2_single_end
 
 rule all:
     input:
-        expand(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["rnaseq_aligned_bam_dir"],
-                "{sample}.Aligned.bam",
-            ),
-            sample=config["samples"],
-        ),
+        expand("RNAseq/BAM/Aligned/{sample}.Aligned.bam", sample=config["samples"]),
 
 
 rule hisat2_build:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            f"{config['species']}_{config['assembly_version']}.fa",
-        ),
+        f"Assembly{config['species']}_{config['assembly_version']}.fa",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["index_dir"],
-            "hisat2",
-            "hisat2_index.1.ht2",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["index_dir"],
-            "hisat2",
-            "hisat2_index.2.ht2",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["index_dir"],
-            "hisat2",
-            "hisat2_index.3.ht2",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["index_dir"],
-            "hisat2",
-            "hisat2_index.4.ht2",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["index_dir"],
-            "hisat2",
-            "hisat2_index.5.ht2",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["index_dir"],
-            "hisat2",
-            "hisat2_index.6.ht2",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["index_dir"],
-            "hisat2",
-            "hisat2_index.7.ht2",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["index_dir"],
-            "hisat2",
-            "hisat2_index.8.ht2",
-        ),
+        "Indices/hisat2/hisat2_index.1.ht2",
+        "Indices/hisat2/hisat2_index.2.ht2",
+        "Indices/hisat2/hisat2_index.3.ht2",
+        "Indices/hisat2/hisat2_index.4.ht2",
+        "Indices/hisat2/hisat2_index.5.ht2",
+        "Indices/hisat2/hisat2_index.6.ht2",
+        "Indices/hisat2/hisat2_index.7.ht2",
+        "Indices/hisat2/hisat2_index.8.ht2",
     params:
-        index_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["index_dir"],
-            "hisat2",
-            "hisat2_index",
-        ),
+        index_prefix="Indices/hisat2/hisat2_index",
     singularity:
         "docker://aewebb/hisat2:v2.2.1"
     resources:
@@ -87,30 +31,12 @@ rule hisat2_build:
 
 rule hisat2_single_end:
     input:
-        r1_reads=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_fastq_dir"],
-            "{sample}_R1.fq.gz",
-        ),
-        index1=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["index_dir"],
-            "hisat2",
-            "hisat2_index.1.ht2",
-        ),
+        r1_reads="RNAseq/FASTQ/{sample}_R1.fq.gz",
+        index1="Indices/hisat2/hisat2_index.1.ht2",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_aligned_bam_dir"],
-            "{sample}.Aligned.bam",
-        ),
+        "RNAseq/BAM/Aligned/{sample}.Aligned.bam",
     params:
-        index_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["index_dir"],
-            "hisat2",
-            "hisat2_index",
-        ),
+        index_prefix="Indices/hisat2/hisat2_index",
     singularity:
         "docker://aewebb/hisat2:v2.2.1"
     resources:
@@ -122,35 +48,13 @@ rule hisat2_single_end:
 
 rule hisat2_pair_end:
     input:
-        r1_reads=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_fastq_dir"],
-            "{sample}_R1.fq.gz",
-        ),
-        r2_reads=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_fastq_dir"],
-            "{sample}_R2.fq.gz",
-        ),
-        index1=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["index_dir"],
-            "hisat2",
-            "hisat2_index.1.ht2",
-        ),
+        r1_reads="RNAseq/FASTQ/{sample}_R1.fq.gz",
+        r2_reads="RNAseq/FASTQ/{sample}_R2.fq.gz",
+        index1="Indices/hisat2/hisat2_index.1.ht2",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_aligned_bam_dir"],
-            "{sample}.Aligned.bam",
-        ),
+        "RNAseq/BAM/Aligned/{sample}.Aligned.bam",
     params:
-        index_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["index_dir"],
-            "hisat2",
-            "hisat2_index",
-        ),
+        index_prefix="Indices/hisat2/hisat2_index",
     singularity:
         "docker://aewebb/hisat2:v2.2.1"
     resources:

@@ -8,7 +8,7 @@ parser:
         input-parser:
           required: True
       wildcards-args:
-        atacseq-standardized-filename: "ATAC_seq/FASTQ/{samples}_{reads}.fastq.gz"
+        atacseq-standardized-filename: "{samples}_{reads}.fastq.gz"
       args:
         atacseq-wildcard:
           help: "Wildcard statement to represent ATACseq FASTQs"
@@ -56,7 +56,7 @@ setup:
       wildcard-str: "{atacseq-wildcard}"
       table-file: "{atacseq-table}"
     args:  
-      standardized_filename: "{atacseq-standardized-filename}"
+      standardized_filename: "ATAC_seq/FASTQ/{atacseq-standardized-filename}"
       copy_method: '{atacseq_copy_method}'
       gzipped: True
       sample_keywords: 

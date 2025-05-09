@@ -1,10 +1,6 @@
 rule all:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_count_dir"],
-            f"{config['species']}_{config['assembly_version']}.featurecounts.tsv",
-        ),
+        f"RNAseq/Counts/{config['species']}_{config['assembly_version']}.featurecounts.tsv",
 
 
 ruleorder: feature_counts_pair_end > feature_counts_single_end
@@ -12,33 +8,12 @@ ruleorder: feature_counts_pair_end > feature_counts_single_end
 
 rule feature_counts_pair_end:
     input:
-        gtf_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            f"{config['species']}_{config['assembly_version']}.gtf",
-        ),
-        r1_reads=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_fastq_dir"],
-            "{sample}_R1.fq.gz",
-        ),
-        r2_reads=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_fastq_dir"],
-            "{sample}_R2.fq.gz",
-        ),
-        sorted_bam=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_sorted_bam_dir"],
-            "{sample}.sortedByCoord.bam",
-        ),
+        gtf_file=f"Assembly/{config['species']}_{config['assembly_version']}.gtf",
+        r1_reads="RNAseq/FASTQ/{sample}_R1.fq.gz",
+        r2_reads="RNAseq/FASTQ/{sample}_R2.fq.gz",
+        sorted_bam="RNAseq/BAM/Sorted/{sample}.sortedByCoord.bam",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_count_dir"],
-            "featureCounts",
-            "{sample}.featurecounts.txt",
-        ),
+        "RNAseq/Counts/featureCounts/{sample}.featurecounts.txt",
     params:
         count_strand=config["count_strand"],
     singularity:
@@ -52,28 +27,11 @@ rule feature_counts_pair_end:
 
 rule feature_counts_single_end:
     input:
-        gtf_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            f"{config['species']}_{config['assembly_version']}.gtf",
-        ),
-        r1_reads=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_fastq_dir"],
-            "{sample}_R1.fq.gz",
-        ),
-        sorted_bam=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_sorted_bam_dir"],
-            "{sample}.sortedByCoord.bam",
-        ),
+        gtf_file=f"Assembly{config['species']}_{config['assembly_version']}.gtf",
+        r1_reads="RNAseq/FASTQ/{sample}_R1.fq.gz",
+        sorted_bam="RNAseq/BAM/Sorted/{sample}.sortedByCoord.bam",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_count_dir"],
-            "featureCounts",
-            "{sample}.featurecounts.txt",
-        ),
+        "RNAseq/Counts/featureCounts/{sample}.featurecounts.txt",
     params:
         count_strand=config["count_strand"],
     singularity:
@@ -88,26 +46,13 @@ rule feature_counts_single_end:
 rule feature_counts_report:
     input:
         expand(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["rnaseq_count_dir"],
-                "featureCounts",
-                "{sample}.featurecounts.txt",
-            ),
+            "RNAseq/Counts/featureCounts/{sample}.featurecounts.txt",
             sample=config["samples"],
         ),
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_count_dir"],
-            f"{config['species']}_{config['assembly_version']}.featurecounts.tsv",
-        ),
+        f"RNAseq/Counts/{config['species']}_{config['assembly_version']}.featurecounts.tsv",
     params:
-        count_dir=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_count_dir"],
-            "featureCounts",
-        ),
+        count_dir="RNAseq/Counts/featureCounts",
     singularity:
         "docker://aewebb/pipemake_utils:v1.2.1"
     resources:

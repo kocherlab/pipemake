@@ -10,18 +10,8 @@ rule bwa_index_atac_seq:
     input:
         f"Assembly/{config['species']}_{config['assembly_version']}.fa",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["index_dir"],
-            "BWA",
-            f"{config['species']}_{config['assembly_version']}.fa",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["index_dir"],
-            "BWA",
-            f"{config['species']}_{config['assembly_version']}.fa.bwt.2bit.64",
-        ),
+        f"Index/BWA/{config['species']}_{config['assembly_version']}.fa",
+        f"Index/BWA/{config['species']}_{config['assembly_version']}.fa.bwt.2bit.64",
     params:
         index_fasta=f"Index/BWA/{config['species']}_{config['assembly_version']}.fa",
     singularity:

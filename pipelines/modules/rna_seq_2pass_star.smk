@@ -4,43 +4,17 @@ ruleorder: star_pair_end_p2 > star_single_end_p2
 
 rule all:
     input:
-        expand(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["rnaseq_aligned_bam_dir"],
-                "{sample}.Aligned.bam",
-            ),
-            sample=config["samples"],
-        ),
+        expand("RNAseq/BAM/Aligned/{sample}.Aligned.bam", sample=config["samples"]),
 
 
 rule star_genome_generate_rnaseq:
     input:
-        fasta_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            f"{config['species']}_{config['assembly_version']}.fa",
-        ),
-        gtf_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            f"{config['species']}_{config['assembly_version']}.gtf",
-        ),
+        fasta_file=f"Assembly/{config['species']}_{config['assembly_version']}.fa",
+        gtf_file=f"Assembly/{config['species']}_{config['assembly_version']}.gtf",
     output:
-        index_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["index_dir"],
-            "STAR",
-            "SAindex",
-        ),
+        index_file="Indices/STAR/SAindex",
     params:
-        index_dir=directory(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["index_dir"],
-                "STAR",
-            )
-        ),
+        index_dir="Indices/STAR",
         read_len=config["read_len"],
     singularity:
         "docker://aewebb/star:v2.7.11b"
@@ -57,37 +31,14 @@ rule star_genome_generate_rnaseq:
 
 rule star_single_end_p1:
     input:
-        r1_reads=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_fastq_dir"],
-            "{sample}_R1.fq.gz",
-        ),
-        index_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["index_dir"],
-            "STAR",
-            "SAindex",
-        ),
+        r1_reads="RNAseq/FASTQ/{sample}_R1.fq.gz",
+        index_file="Indices/STAR/SAindex",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_splice_aligned_dir"],
-            "{sample}.SJ.out.tab",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_splice_aligned_dir"],
-            "{sample}.Log.final.out",
-        ),
+        "RNAseq/SpliceJunctions/Aligned/{sample}.SJ.out.tab",
+        "RNAseq/SpliceJunctions/Aligned/{sample}.Log.final.out",
     params:
-        index_dir=os.path.join(
-            config["paths"]["workflow_prefix"], config["paths"]["index_dir"], "STAR"
-        ),
-        sj_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_splice_aligned_dir"],
-            "{sample}.",
-        ),
+        index_dir="Indices/STAR",
+        sj_prefix="RNAseq/SpliceJunctions/Aligned/{sample}.",
     singularity:
         "docker://aewebb/star:v2.7.11b"
     resources:
@@ -99,42 +50,15 @@ rule star_single_end_p1:
 
 rule star_pair_end_p1:
     input:
-        r1_reads=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_fastq_dir"],
-            "{sample}_R1.fq.gz",
-        ),
-        r2_reads=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_fastq_dir"],
-            "{sample}_R2.fq.gz",
-        ),
-        index_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["index_dir"],
-            "STAR",
-            "SAindex",
-        ),
+        r1_reads="RNAseq/FASTQ/{sample}_R1.fq.gz",
+        r2_reads="RNAseq/FASTQ/{sample}_R2.fq.gz",
+        index_file="Indices/STAR/SAindex",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_splice_aligned_dir"],
-            "{sample}.SJ.out.tab",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_splice_aligned_dir"],
-            "{sample}.Log.final.out",
-        ),
+        "RNAseq/SpliceJunctions/Aligned/{sample}.SJ.out.tab",
+        "RNAseq/SpliceJunctions/Aligned/{sample}.Log.final.out",
     params:
-        index_dir=os.path.join(
-            config["paths"]["workflow_prefix"], config["paths"]["index_dir"], "STAR"
-        ),
-        sj_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_splice_aligned_dir"],
-            "{sample}.",
-        ),
+        index_dir="Indices/STAR",
+        sj_prefix="RNAseq/SpliceJunctions/Aligned/{sample}.",
     singularity:
         "docker://aewebb/star:v2.7.11b"
     resources:
@@ -146,17 +70,9 @@ rule star_pair_end_p1:
 
 rule filter_star_sj_file:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_splice_aligned_dir"],
-            "{sample}.SJ.out.tab",
-        ),
+        "RNAseq/SpliceJunctions/Aligned/{sample}.SJ.out.tab",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_splice_aligned_dir"],
-            "{sample}.SJ.filtered.tab",
-        ),
+        "RNAseq/SpliceJunctions/Aligned/{sample}.SJ.filtered.tab",
     resources:
         mem_mb=2000,
     threads: 1
@@ -166,44 +82,15 @@ rule filter_star_sj_file:
 
 rule star_single_end_p2:
     input:
-        r1_reads=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_fastq_dir"],
-            "{sample}_R1.fq.gz",
-        ),
-        index_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["index_dir"],
-            "STAR",
-            "SAindex",
-        ),
-        sj_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_splice_aligned_dir"],
-            "{sample}.SJ.filtered.tab",
-        ),
+        r1_reads="RNAseq/FASTQ/{sample}_R1.fq.gz",
+        index_file="Indices/STAR/SAindex",
+        sj_file="RNAseq/SpliceJunctions/Aligned/{sample}.SJ.filtered.tab",
     output:
-        temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["rnaseq_aligned_bam_dir"],
-                "{sample}.Aligned.bam",
-            ),
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_aligned_bam_dir"],
-            "{sample}.Log.final.out",
-        ),
+        temp("RNAseq/BAM/Aligned/{sample}.Aligned.bam"),
+        "RNAseq/BAM/Aligned/{sample}.Log.final.out",
     params:
-        index_dir=os.path.join(
-            config["paths"]["workflow_prefix"], config["paths"]["index_dir"], "STAR"
-        ),
-        bam_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_aligned_bam_dir"],
-            "{sample}.",
-        ),
+        index_dir="Indices/STAR",
+        bam_prefix="RNAseq/BAM/Aligned/{sample}.",
     singularity:
         "docker://aewebb/star:v2.7.11b"
     resources:
@@ -218,47 +105,16 @@ rule star_single_end_p2:
 
 rule star_pair_end_p2:
     input:
-        r1_reads=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_fastq_dir"],
-            "{sample}_R1.fq.gz",
-        ),
-        r2_reads=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_fastq_dir"],
-            "{sample}_R2.fq.gz",
-        ),
-        index_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["index_dir"],
-            "STAR",
-            "SAindex",
-        ),
-        sj_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_splice_aligned_dir"],
-            "{sample}.SJ.filtered.tab",
-        ),
+        r1_reads="RNAseq/FASTQ/{sample}_R1.fq.gz",
+        r2_reads="RNAseq/FASTQ/{sample}_R2.fq.gz",
+        index_file="Indices/STAR/SAindex",
+        sj_file="RNAseq/SpliceJunctions/Aligned/{sample}.SJ.filtered.tab",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_aligned_bam_dir"],
-            "{sample}.Aligned.bam",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_aligned_bam_dir"],
-            "{sample}.Log.final.out",
-        ),
+        "RNAseq/BAM/Aligned/{sample}.Aligned.bam",
+        "RNAseq/BAM/Aligned/{sample}.Log.final.out",
     params:
-        index_dir=os.path.join(
-            config["paths"]["workflow_prefix"], config["paths"]["index_dir"], "STAR"
-        ),
-        bam_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_aligned_bam_dir"],
-            "{sample}.",
-        ),
+        index_dir="Indices/STAR",
+        bam_prefix="RNAseq/BAM/Aligned/{sample}.",
     singularity:
         "docker://aewebb/star:v2.7.11b"
     resources:

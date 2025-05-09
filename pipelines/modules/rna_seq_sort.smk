@@ -1,28 +1,13 @@
 rule all:
     input:
-        expand(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["rnaseq_sorted_bam_dir"],
-                "{sample}.sortedByCoord.bam",
-            ),
-            sample=config["samples"],
-        ),
+        expand("RNAseq/BAM/Sorted/{sample}.sortedByCoord.bam", sample=config["samples"]),
 
 
 rule sort_bam_rnaseq:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_aligned_bam_dir"],
-            "{sample}.Aligned.bam",
-        ),
+        "RNAseq/BAM/Aligned/{sample}.Aligned.bam",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_sorted_bam_dir"],
-            "{sample}.sortedByCoord.bam",
-        ),
+        "RNAseq/BAM/Sorted/{sample}.sortedByCoord.bam",
     singularity:
         "docker://aewebb/samtools:v1.20"
     resources:

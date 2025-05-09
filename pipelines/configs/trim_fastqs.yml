@@ -8,7 +8,7 @@ parser:
         input-parser:
           required: True
       wildcards-args:
-        fastq-standardized-filename: "FASTQ/Input/{samples}_{reads}.fq.gz"
+        fastq-standardized-filename: "{samples}_{reads}.fq.gz"
         sra-standardized-wildcard: "samples"
       args:
         fastq-wildcard:
@@ -60,7 +60,7 @@ setup:
       wildcard_str: "{fastq-wildcard}"
       table_file: "{fastq-table}"
     args:
-      standardized_filename: "{fastq-standardized-filename}"
+      standardized_filename: "FASTQ/Input/{fastq-standardized-filename}"
       copy_method: '{fastq-copy-method}'
       sample_keywords:
         - 'samples'
