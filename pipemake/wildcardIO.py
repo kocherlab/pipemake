@@ -9,7 +9,7 @@ from pipemake.fileIO import FileIO
 
 
 class WildcardIO:
-    def __init__(self, wildcard_str, wildcard_dict, sample_wildcards=[], **kwargs):
+    def __init__(self, wildcard_str, wildcard_dict, sample_keywords=[], **kwargs):
         # Confirm wildcards were assigned
         if not list(wildcard_dict):
             raise Exception(f"Unable to find wildcards within: {wildcard_str}")
@@ -35,10 +35,10 @@ class WildcardIO:
                     f"Unable to find wildcard values for: {', '.join(missing_wildcards)}"
                 )
 
-        if not sample_wildcards:
+        if not sample_keywords:
             self.samples = {}
         else:
-            self.samples = {_col: wildcard_dict[_col] for _col in sample_wildcards}
+            self.samples = {_col: wildcard_dict[_col] for _col in sample_keywords}
 
     @classmethod
     def fromStr(cls, wildcard_str, **kwargs):

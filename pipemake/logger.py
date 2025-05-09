@@ -32,7 +32,7 @@ def startLogger(log_filename=None, filemode="w"):
     stdout_log.setLevel(logging.WARNING)
 
     # Define the stdout format
-    console_format = logging.Formatter("%(funcName)s - %(levelname)s: %(message)s")
+    console_format = logging.Formatter("%(levelname)s: %(message)s")
 
     # Assign the format
     stdout_log.setFormatter(console_format)

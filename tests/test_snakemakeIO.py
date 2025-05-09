@@ -70,13 +70,15 @@ def test_SnakePipelineIO_wo_error(
 
     snakemake_job_prefix = os.path.join(test_dir, job_prefix)
 
+    os.makedirs(snakemake_job_prefix)
+
     # Create a test pipeline
     test_pipeline = SnakePipelineIO.open(
-        snakemake_job_prefix=snakemake_job_prefix,
-        workflow_prefix=snakemake_job_prefix,
+        # snakemake_job_prefix=snakemake_job_prefix,
+        workflow_dir=snakemake_job_prefix,
         pipeline_storage_dir=pipeline_storage_dir,
-        pipeline_job_dir=test_dir,
-        resource_yml=resource_yml,
+        # pipeline_job_dir=test_dir,
+        # resource_yml=resource_yml,
         scale_threads=scale_threads,
         scale_mem=scale_mem,
         singularity_dir=singularity_dir,
@@ -100,7 +102,7 @@ def test_SnakePipelineIO_wo_error(
             "samples": ["sample1", "sample2"],
             "unfiltered_fastq_dir": unfiltered_fastq_dir,
             "filtered_fastq_dir": filtered_fastq_dir,
-            "workflow_prefix": snakemake_job_prefix,
+            "workflow_dir": snakemake_job_prefix,
         }
     )
 
@@ -113,40 +115,41 @@ def test_SnakePipelineIO_wo_error(
     test_pipeline.close()
 
     # Check if the pipeline was written
-    assert os.path.exists(os.path.join(test_dir, "test.smk"))
+    assert os.path.exists(os.path.join(test_dir, job_prefix, "Snakefile"))
+    assert os.path.exists(os.path.join(test_dir, job_prefix, "config.yml"))
 
     # Check if the module was written
-    assert os.path.exists(os.path.join(test_dir, "modules", "fastq_filter_fastp.smk"))
+    assert os.path.exists(
+        os.path.join(test_dir, job_prefix, "modules", "fastq_filter_fastp.smk")
+    )
 
     # Check if the script was written
-    assert os.path.exists(os.path.join(test_dir, "scripts", "test.py"))
+    assert os.path.exists(os.path.join(test_dir, job_prefix, "scripts", "test.py"))
 
     # Check the contents of the script file
-    with open(os.path.join(test_dir, "scripts", "test.py"), "r") as f:
+    with open(os.path.join(test_dir, job_prefix, "scripts", "test.py"), "r") as f:
         test_script_content = f.read()
         assert 'print("Script Found")' in test_script_content
 
-    test_module_path = os.path.join(
-        test_pipeline._module_job_dir, "fastq_filter_fastp.smk"
-    )
+    test_module_path = os.path.join("modules", "fastq_filter_fastp.smk")
 
     # Check if a string is within the file
-    with open(os.path.join(test_dir, "test.smk"), "r") as f:
+    with open(os.path.join(test_dir, job_prefix, "Snakefile"), "r") as f:
         test_pipeline_content = f.read()
         assert (
-            'rule all:\n\tinput:\n\t\texpand(\n\t\t\tos.path.join(\n\t\t\t\tconfig["paths"]["workflow_prefix"],\n\t\t\t\tconfig["paths"]["filtered_fastq_dir"],\n\t\t\t\t"{sample}.json",\n\t\t\t),\n\t\t\tsample=config["samples"],\n\t\t),'
+            'rule all:\n\tinput:\n\t\texpand(\n\t\t\tos.path.join(\n\t\t\t\tconfig["paths"]["filtered_fastq_dir"],\n\t\t\t\t"{sample}.json",\n\t\t\t),\n\t\t\tsample=config["samples"],\n\t\t),'
             in test_pipeline_content
         )
         assert f'include: "{test_module_path}"' in test_pipeline_content
 
     # Check if the config file was written
-    assert os.path.exists(os.path.join(test_dir, "test.yml"))
+    assert os.path.exists(os.path.join(test_dir, job_prefix, "config.yml"))
 
     # Check if the singularity containers were built
     assert os.path.isfile(os.path.join(singularity_dir, "sambamba.v1.0.1.sif"))
 
     # Read the config yaml
-    with open(os.path.join(test_dir, "test.yml"), "r") as yaml_file:
+    with open(os.path.join(test_dir, job_prefix, "config.yml"), "r") as yaml_file:
         config_dict = yaml.safe_load(yaml_file)
         assert "samples" in config_dict
         assert ["sample1", "sample2"] == config_dict["samples"]
@@ -196,7 +199,7 @@ def test_SnakeFileIO_wo_error(smk_filename):
 
     # Generate the module file and confirm it exists
     test_module.write(out_filename)
-    print(out_filename)
+
     assert os.path.exists(out_filename)
 
     with open(cmp_filename, "w") as cmp_file:
@@ -233,7 +236,6 @@ def test_SnakeRuleIO_wo_error(rule_filename):
     assert test_rule.rule_name == "fastp_pair_end"
     assert test_rule._rule_resource_params == {"threads": 4, "mem_mb": 16000}
     assert test_rule._rule_config_params == {
-        ("paths", "workflow_prefix"),
         ("paths", "unfiltered_fastq_dir"),
         ("paths", "filtered_fastq_dir"),
         ("min_length",),

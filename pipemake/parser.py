@@ -87,6 +87,9 @@ class PipelineParser:
         # Ceate a dictionary to store each subparser
         self._pipeline_subparsers_dict = {}
 
+        # Create a dictionary to store the pipeline unparsed arguments
+        self._pipeline_arguments_dict = {}
+
         # Load the pipeline in sorted order
         for pipeline_name in sorted(config_pipelines.keys()):
             # Assign the arguments for each pipeline
@@ -175,33 +178,23 @@ class PipelineParser:
             arg_wildcards = {}
 
             # Check if wildcards are present
-            for wildcard_name, wildcards_args in self._yeildGroup(
+            for wildcard_name, wildcards_value in self._yeildGroup(
                 "wildcards-args", group_args
             ):
-                # Process the default arg of the wildcard
-                wildcards_args = self._processArgDefaults(wildcards_args)
-
-                # Check if the default is a string
-                if not isinstance(wildcards_args["default"], str):
-                    raise Exception(
-                        f"Wildcards default must be a string: {wildcards_args['default']}"
-                    )
-
                 # Assign argument wildcards, if not a formatted string
-                if (
-                    "{" not in wildcards_args["default"]
-                    and "}" not in wildcards_args["default"]
-                ):
-                    arg_wildcards[wildcard_name] = [wildcards_args["default"]]
+                if "{" not in wildcards_value and "}" not in wildcards_value:
+                    arg_wildcards[wildcard_name] = [wildcards_value]
 
                 # Assign the argument wildcards, if a formatted string
                 else:
                     arg_wildcards[wildcard_name] = re.findall(
-                        r"\{(.*?)\}", wildcards_args["default"]
+                        r"\{(.*?)\}", wildcards_value
                     )
 
                 # Add the argument to the args argument group
-                group_args["args"][wildcard_name] = wildcards_args
+                self._pipeline_arguments_dict[wildcard_name.replace("-", "_")] = (
+                    wildcards_value
+                )
 
             # Check if wildcards are present
             for pipeline_arg_name, arg_args in self._yeildGroup("args", group_args):
@@ -248,15 +241,10 @@ class PipelineParser:
 
         # Add the common optional arguments, but at the end of the list
         pipeline_arg_groups["optional"].add_argument(
-            "--workflow-prefix",
-            help="Assign the workflow prefix",
+            "--workflow-dir",
+            help="Assign the workflow directory. If not provided a default will be used.",
             type=str,
             default=f"Workflow_{jobTimeStamp()}_{jobRandomString()}",
-        )
-        pipeline_arg_groups["optional"].add_argument(
-            "--work-dir",
-            help="Assign the working directory for snakemake. If not provided, the current directory will be used.",
-            type=str,
         )
         pipeline_arg_groups["optional"].add_argument(
             "--scale-threads",
@@ -291,7 +279,9 @@ class PipelineParser:
         )
 
     def returnArgs(self):
-        return vars(self._pipeline_parser.parse_args())
+        parser_dict = vars(self._pipeline_parser.parse_args())
+        parser_dict.update(self._pipeline_arguments_dict)
+        return parser_dict
 
     @classmethod
     def create(cls, config_pipelines):

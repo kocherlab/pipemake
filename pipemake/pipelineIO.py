@@ -1,9 +1,9 @@
 import os
-import copy
+import re
 import yaml
 import logging
 
-from pipemake.processIO import standardizeInput, returnSamples, returnPaths
+from pipemake.processIO import processInput
 
 
 class ConfigPipelinesIO(dict):
@@ -72,12 +72,64 @@ class ConfigPipelineIO:
         config_dict.pop("setup")
 
         # Check if the pipeline snakefiles are provided
-        if "snakefiles" not in config_dict:
+        if "snakemake" not in config_dict:
+            raise Exception("No snakemake section provided in the configuration file")
+
+        # Check if the pipeline snakefiles are provided
+        if "modules" not in config_dict["snakemake"]:
             raise Exception("No snakefiles provided in the configuration file")
 
         # Set the pipeline snakefiles
-        self._snakefiles = set(config_dict["snakefiles"])
-        config_dict.pop("snakefiles")
+        self._snakefiles = set(config_dict["snakemake"]["modules"])
+        logging.info(f"Loaded the following snakefiles: {self._snakefiles}")
+
+        # Check if linked rules are provided
+        if "links" in config_dict["snakemake"]:
+            # Create a list to store the linked rules
+            self._snakelinks = []
+
+            # Create set to store the linked output
+            linked_output = set()
+
+            # Check the linked rule for error, and store the link
+            for link in config_dict["snakemake"]["links"]:
+                # Confirm both input and output are provided
+                if "input" not in link:
+                    raise Exception(f"Input not provided for the linked rule: {link}")
+                if "output" not in link:
+                    raise Exception(f"Output not provided for the linked rule: {link}")
+
+                # Check if the output is a list
+                if isinstance(link["output"], list):
+                    check_output = set(link["output"]).intersection(linked_output)
+                    if check_output:
+                        raise Exception(
+                            f"Output {check_output} already linked to another rule"
+                        )
+                    else:
+                        linked_output.update(link["output"])
+
+                # Check if the output is a string
+                elif isinstance(link["output"], str):
+                    if link["output"] in linked_output:
+                        raise Exception(
+                            f"Output {link['output']} already linked to another rule"
+                        )
+                    else:
+                        linked_output.add(link["output"])
+
+                # Raise an exception if the output is not a string or list
+                else:
+                    raise Exception(
+                        f"Output {link['output']} is not a string or list, please check the configuration file"
+                    )
+
+                # Append the rule to the linked rules
+                self._snakelinks.append(link)
+        else:
+            self._snakelinks = []
+
+        config_dict.pop("snakemake")
 
         # Record unused configuration parameters
         for key in config_dict:
@@ -85,11 +137,16 @@ class ConfigPipelineIO:
 
         # Assign the other configuration arguments
         self._singularity_bindings = set()
+        self._inputlinks = set()
         self.samples = {}
 
     @property
     def snakefiles(self):
         return list(self._snakefiles)
+
+    @property
+    def snakelinks(self):
+        return self._snakelinks
 
     @property
     def singularity_bindings(self):
@@ -102,118 +159,125 @@ class ConfigPipelineIO:
         return cls(config_dict)
 
     def helpMessage(self, pipeline_args):
+        if not pipeline_args["singularity_dir"]:
+            logging.warning(
+                "No singularity path specified, this may result in redundant singularity containers. Please consider specifying the singularity path by including the --singularity-dir argument or setting the PM_SINGULARITY_DIR environment variable."
+            )
+
         print(
-            "If running the pipeline using singularity containers, please use the following command:"
+            f"{self.name} version {self.version} has been configured, please use the following command within the {pipeline_args['workflow_dir']} directory:"
         )
         logging.info(
-            "If running the pipeline using singularity containers, please use the following command:"
+            f"{self.name} version {self.version} has been configured, please use the following command within the {pipeline_args['workflow_dir']} directory:"
         )
 
         if self.singularity_bindings:
             print(
-                f"snakemake -s {pipeline_args['workflow_prefix']}.smk --use-singularity --singularity-args '--bind {','.join(self.singularity_bindings)}'"
+                f"snakemake --use-singularity --singularity-args '--bind {','.join(self.singularity_bindings)}'"
             )
             logging.info(
-                f"snakemake -s {pipeline_args['workflow_prefix']}.smk --use-singularity --singularity-args '--bind {','.join(self.singularity_bindings)}'"
+                f"snakemake --use-singularity --singularity-args '--bind {','.join(self.singularity_bindings)}'"
             )
         else:
-            print(
-                f"snakemake -s {pipeline_args['workflow_prefix']}.smk --use-singularity"
-            )
-            logging.info(
-                f"snakemake -s {pipeline_args['workflow_prefix']}.smk --use-singularity"
-            )
+            print("snakemake --use-singularity")
+            logging.info("snakemake --use-singularity")
 
     def setupPipeline(self, pipeline_args):
+        def stringToArgs(arg_string):
+            return re.findall(r"\{(.*?)\}", arg_string.replace("-", "_"))
+
+        def processSetupArgs(arg_string):
+            for setup_value_arg in stringToArgs(arg_string):
+                # Confirm the setup value argument is specified
+                if setup_value_arg not in pipeline_args:
+                    raise Exception(
+                        f"Setup argument {setup_value_arg} not found among pipeline arguments"
+                    )
+
+            # Replace the setup value arguments with the pipeline arguments
+            return arg_string.replace("-", "_").format(**pipeline_args)
+
         # Confirm the workflow prefix is specified
-        if "workflow_prefix" not in pipeline_args:
+        if "workflow_dir" not in pipeline_args:
             raise Exception("Workflow prefix not found among pipeline arguments")
 
-        for setup_name, setup_methods in self._setup_dict.items():
-            # Create a string to store the assigned method
-            assigned_method = ""
+        for setup_name, setup_dict in self._setup_dict.items():
+            # Create a dict to store the setup arguments
+            setup_args = {
+                "method": "",
+                "args": {"workflow_dir": pipeline_args["workflow_dir"]},
+            }
 
-            for method_name, method_args in setup_methods.items():
-                # Assign the input args
-                input_args = method_args["input"]
+            # Confirm the setup method was assigned
+            for setup_method, assignment_arg_str in setup_dict["methods"].items():
+                assignment_arg = stringToArgs(assignment_arg_str)
 
-                # Check for missing arguments
-                for input_arg in input_args["args"]:
-                    if input_arg.replace("-", "_") not in pipeline_args:
-                        raise Exception(
-                            f"Setup argument {input_arg} not found among pipeline argument"
-                        )
-
-                # Confirm expected args were specified
-                method_missing_args = [
-                    _a
-                    for _a in input_args["args"]
-                    if not pipeline_args[_a.replace("-", "_")]
-                ]
-
-                # Skip if missing arguments
-                if method_missing_args:
-                    continue
-
-                # Check if the method was already assigned and report an error if so
-                if assigned_method:
+                # Confirm a single assignment argument is specified
+                if len(assignment_arg) != 1:
                     raise Exception(
-                        f"Setup {setup_name} already assigned to {assigned_method}, cannot assign {method_name}"
+                        f"Setup method {setup_method} has more than one assignment argument, please check the configuration file"
                     )
-                else:
-                    assigned_method = method_name
+                assignment_arg = assignment_arg[0]
 
-                if "standardize" in method_args:
-                    # Create a dict of the standardize args
-                    std_args = copy.deepcopy(method_args["standardize"])
+                # Confirm the assignment argument is specified
+                if assignment_arg not in pipeline_args:
+                    raise Exception(
+                        f"Setup method {assignment_arg} not found among pipeline arguments"
+                    )
 
-                    # Add the workflow prefix to the args
-                    std_args["args"]["workflow_prefix"] = "{workflow_prefix}"
-
-                    # Check if the work_dir is specified
-                    if "work_dir" in pipeline_args and pipeline_args["work_dir"]:
-                        std_args["args"]["work_dir"] = "{work_dir}"
-
-                    # Update the arguments
-                    for std_arg, arg_params in std_args["args"].items():
-                        if not isinstance(arg_params, str):
-                            continue
-                        std_args["args"][std_arg] = arg_params.replace("-", "_").format(
-                            **pipeline_args
+                # Confirm a single assignment argument was specified
+                if pipeline_args[assignment_arg] is not None:
+                    if setup_args["method"]:
+                        raise Exception(
+                            f"Setup ({setup_name}) already assigned to {setup_args['method']}, cannot assign {setup_method}"
+                        )
+                    else:
+                        setup_args["method"] = setup_method
+                        setup_args["args"][setup_method] = processSetupArgs(
+                            assignment_arg_str
                         )
 
-                    # Standardize the input
-                    standardizeInput(**std_args)
+            # Check if the method was assigned
+            if not setup_args["method"]:
+                logging.warning(
+                    f"Setup method not assigned for {setup_name}, skipping setup"
+                )
+                return
 
-                    # Assign the method paths
-                    method_paths = returnPaths(**std_args)
+            # Standardize the input arguments
+            for setup_arg, setup_value in setup_dict["args"].items():
+                if isinstance(setup_value, str):
+                    setup_value = processSetupArgs(setup_value)
 
-                    # Check for method paths, and update the singularity bindings if found
-                    if len(method_paths) > 0:
-                        self._singularity_bindings.update(method_paths)
+                elif isinstance(setup_value, list):
+                    setup_value = [processSetupArgs(_arg) for _arg in setup_value]
 
-                if "samples" in method_args:
-                    # Create a dict of the standardize args
-                    samples_args = copy.deepcopy(method_args["samples"])
+                # Assign the setup arguments
+                setup_args["args"][setup_arg] = setup_value
 
-                    # Update the arguments
-                    for samples_arg, arg_params in samples_args["args"].items():
-                        if not isinstance(arg_params, str):
-                            continue
-                        samples_args["args"][samples_arg] = arg_params.replace(
-                            "-", "_"
-                        ).format(**pipeline_args)
+            # Process the input
+            processed_input = processInput(**setup_args)
 
-                    # Assign the samples from the method
-                    method_samples = returnSamples(**samples_args)
+            # Standardize the input
+            processed_input.standardize()
 
-                    # Confirm the samples are not already assigned
-                    if method_samples and len(self.samples) > 0:
-                        raise Exception("Samples already assigned")
+            # Assign the input paths
+            input_paths = processed_input.returnPaths()
 
-                    # Store the samples
-                    self.samples = method_samples
+            # Check for method paths, and update the singularity bindings if found
+            if len(input_paths) > 0:
+                self._singularity_bindings.update(input_paths)
 
-                if "snakefiles" in method_args:
-                    # Add method snakefiles to the pipeline
-                    self._snakefiles.update(method_args["snakefiles"])
+            # Check if any sample keywords were provided
+            if "sample_keywords" in setup_dict["args"]:
+                input_samples = processed_input.returnSamples()
+
+                # Confirm the samples are not already assigned
+                if len(self.samples) > 0:
+                    raise Exception("Samples already assigned")
+
+                # Store the samples
+                self.samples = input_samples
+
+            if "snakefiles" in setup_dict:
+                self._snakefiles.update(setup_dict["snakefiles"])

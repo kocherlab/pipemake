@@ -1,33 +1,14 @@
 rule all:
     input:
-        expand(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["isoseq_sorted_bam_dir"],
-                "{sample}.sortedByCoord.bam",
-            ),
-            sample=config["samples"],
-        ),
+        expand("IsoSeq/BAM/Sorted/{sample}.sortedByCoord.bam", sample=config["samples"]),
 
 
 rule sort_bam_isoseq:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["isoseq_aligned_bam_dir"],
-            "{sample}.Aligned.bam",
-        ),
+        "IsoSeq/BAM/Aligned/{sample}.Aligned.bam",
     output:
-        bam=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["isoseq_sorted_bam_dir"],
-            "{sample}.sortedByCoord.bam",
-        ),
-        index=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["isoseq_sorted_bam_dir"],
-            "{sample}.sortedByCoord.bam.bai",
-        ),
+        bam="IsoSeq/BAM/Sorted/{sample}.sortedByCoord.bam",
+        index="IsoSeq/BAM/Sorted/{sample}.sortedByCoord.bam.bai",
     singularity:
         "docker://aewebb/samtools:v1.20"
     resources:

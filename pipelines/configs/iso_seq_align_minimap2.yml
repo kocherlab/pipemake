@@ -8,23 +8,19 @@ parser:
         input-parser:
           required: True
       wildcards-args:
-        isoseq-standardized-wildcard:
-          help: "Standardized wildcard statement used to store isoseq FASTQs"
-          type: str
-          default: 
-            str: "{samples}_{reads}.fq.gz"
+        isoseq-standardized-filename: "IsoSeq/FASTQ/{samples}_{reads}.fq.gz"
       args:
         isoseq-wildcard:
           help: "Wildcard statement to represent isoseq FASTQs"
           type: str
           mutually-exclusive: "input-parser"
-          wildcards: "isoseq-standardized-wildcard"
+          wildcards: "isoseq-standardized-filename"
         isoseq-table:
           help: "Table with sample and FASTQs filenames"
           type: str
           action: confirmFile
           mutually-exclusive: "input-parser"
-          wildcards: "isoseq-standardized-wildcard"
+          wildcards: "isoseq-standardized-filename"
         isoseq-copy-method:
           help: "Specifies if isoseq FASTQs should be copied or symbolically linked."
           choices:
@@ -60,98 +56,32 @@ parser:
           help: "Skip zero coverage regions"
           dest: "skip_zero"
           action: store_false
-    paths:
-      args:
-        assembly-dir:
-          help: "Directory to store assembly"
-          type: str
-          default: "Assembly"
-        index-dir:
-          help: "Directory to store indices"
-          type: str
-          default: "Indices"
-        isoseq-fastq-dir:
-          help: "Directory to store the FASTQs files"
-          type: str
-          default: "IsoSeq/Fastq"
-        isoseq-aligned-bam-dir:
-          help: "Directory to store sorted BAM files"
-          type: str
-          default: "IsoSeq/BAMs/Aligned"
-        isoseq-sorted-bam-dir:
-          help: "Directory to store sorted BAM files"
-          type: str
-          default: "IsoSeq/BAMs/Sorted"
-        plot-sorted-bam-dir:
-          help: "Directory of sorted BAM files to plot"
-          type: str
-          default: "IsoSeq/BAMs/Sorted"
-        bam-coverage-dir:
-          help: "Directory to store coverage files"
-          type: str
-          default: "IsoSeq/Coverage"
 setup:
   reseq_input:
-    wildcard-method:
-      input:
-        args:
-          - "isoseq-wildcard"
-          - "isoseq-standardized-wildcard"
-          - "isoseq-fastq-dir"
-      standardize:
-        method: "wildcard-str"
-        args:
-          wildcard_str: "{isoseq-wildcard}"
-          standardized_filename: "{isoseq-standardized-wildcard}"
-          out_dir: "{isoseq-fastq-dir}"
+    methods:
+      wildcard-str: "{isoseq-wildcard}"
+      table-file: "{isoseq-table}"
+      args:
+          standardized_filename: "{isoseq-standardized-filename}"
           copy_method: '{isoseq-copy-method}'
           gzipped: True
-      samples:
-        method: "wildcard-str"
-        args:
-          wildcard_str: "{isoseq-wildcard}"
-          sample_wildcards: 
+          sample_keywords:
             - 'samples'
-
-    table-method:
-      input:
-        args:
-          - "isoseq-table"
-          - "isoseq-standardized-wildcard"
-          - "isoseq-fastq-dir"
-      standardize:
-        method: "table-file"
-        args:
-          table_filename: "{isoseq-table}"
-          standardized_filename: "{isoseq-standardized-wildcard}"
-          out_dir: "{isoseq-fastq-dir}"
-          copy_method: '{isoseq-copy-method}'
-          sample_column: 'samples'
-          gzipped: True
-      samples:
-        method: "table-file"
-        args:
-          table_filename: "{fastq-table}"
-          sample_column: 'samples'
-  
   assembly_input:
-    file-method:
-      input:
-        args:
-          - "assembly-fasta"
-          - "assembly-dir"
-      standardize:
-        method: "file-str"
-        args:
-          input_filename: "{assembly-fasta}"
-          standardized_filename: "{species}_{assembly_version}.fa"
-          out_dir: "{assembly-dir}"
-          copy_method: "{assembly-copy-method}"
-          gzipped: False
-snakefiles:
-  - iso_seq_align_minimap2
-  - iso_seq_sort
-  - bam_plot_coverage
-  
+    methods:
+      file-str: "{assembly-fasta}"
+    args:
+      standardized_filename: "Assembly/{species}_{assembly_version}.fa"
+      copy_method: "{assembly-copy-method}"
+      gzipped: False
+
+snakemake:
+  modules:
+    - iso_seq_align_minimap2
+    - iso_seq_sort
+    - bam_plot_coverage
+  links:
+    - input: sort_bam_isoseq
+      output: plot_coverage_deeptools
 
 

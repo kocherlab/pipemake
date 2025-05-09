@@ -3,7 +3,7 @@ import pytest
 import tempfile
 import itertools
 
-from pipemake.processIO import ProcessIO, standardizeInput, returnPaths, returnSamples
+from pipemake.processIO import ProcessIO, processInput
 
 
 @pytest.mark.parametrize(
@@ -38,14 +38,15 @@ def test_processIO_fromWildcardStr_standardizeInput(
     wildcard_str, standardized_wildcard
 ):
     test_dir = tempfile.mkdtemp()
-    standardizeInput(
-        method="wildcard-str",
+    test_input = processInput(
+        method="wildcard_str",
         args={
             "wildcard_str": wildcard_str,
             "standardized_filename": standardized_wildcard,
             "out_dir": test_dir,
         },
     )
+    test_input.standardize()
 
     for sample, read in list(itertools.product(["test1", "test2"], ["R1", "R2"])):
         standardized_filename = f"{sample}_{read}.test.fq.gz"
@@ -57,14 +58,14 @@ def test_processIO_fromWildcardStr_standardizeInput(
     [("tests/files/wildcardIO/{samples}_{reads}.fq.gz")],
 )
 def test_processIO_fromWildcardStr(wildcard_str):
-    assert returnPaths(method="wildcard-str", args={"wildcard_str": wildcard_str}) == [
-        os.path.abspath(os.path.dirname(wildcard_str))
-    ]
-
-    samples_dict = returnSamples(
+    test_input = processInput(
         method="wildcard-str",
-        args={"wildcard_str": wildcard_str, "sample_wildcards": ["samples"]},
+        args={"wildcard_str": wildcard_str, "sample_keywords": ["samples"]},
     )
+
+    assert test_input.returnPaths() == [os.path.abspath(os.path.dirname(wildcard_str))]
+
+    samples_dict = test_input.returnSamples()
     assert "samples" in samples_dict
     assert set(samples_dict["samples"]) == set(["test1", "test2"])
 
@@ -97,14 +98,15 @@ def test_processIO_fromFileStr_standardizeInput_wo_error(
     file_str, standardized_filename
 ):
     test_dir = tempfile.mkdtemp()
-    standardizeInput(
-        method="file-str",
+    test_input = processInput(
+        method="file_str",
         args={
-            "input_filename": file_str,
+            "file_str": file_str,
             "standardized_filename": standardized_filename,
             "out_dir": test_dir,
         },
     )
+    test_input.standardize()
     assert os.path.isfile(os.path.join(test_dir, standardized_filename))
 
 
@@ -118,15 +120,16 @@ def test_processIO_fromFileStr_standardizeInput_wo_error(
 def test_processIO_fromFileStr_standardizeInput_w_error(
     file_str, standardized_filename
 ):
-    assert returnPaths(
+    test_input = processInput(
         method="file-str",
         args={
-            "input_filename": file_str,
+            "file_str": file_str,
             "standardized_filename": standardized_filename,
         },
-    ) == [os.path.abspath(os.path.dirname(file_str))]
+    )
+    assert test_input.returnPaths() == [os.path.abspath(os.path.dirname(file_str))]
     with pytest.raises(Exception):
-        returnSamples(method="file-str", args={"input_filename": file_str})
+        test_input.returnSamples()
 
 
 @pytest.mark.parametrize(
@@ -143,7 +146,7 @@ def test_processIO_fromTableFile_w_error(table_file):
     ["tests/files/fileIO/test_table.tsv"],
 )
 def test_processIO_fromTableFile_wo_error(table_file):
-    ProcessIO.fromTableFile(table_file, sample_column="samples")
+    ProcessIO.fromTableFile(table_file, sample_keywords=["samples"])
 
 
 @pytest.mark.parametrize(
@@ -154,15 +157,17 @@ def test_processIO_fromTableFile_wo_error(table_file):
 )
 def test_processIO_fromTableFile_standardizeInput(table_file, standardized_wildcard):
     test_dir = tempfile.mkdtemp()
-    standardizeInput(
+    test_input = processInput(
         method="table-file",
         args={
-            "table_filename": table_file,
+            "table_file": table_file,
             "standardized_filename": standardized_wildcard,
             "out_dir": test_dir,
-            "sample_column": "samples",
+            "sample_keywords": ["samples"],
         },
     )
+
+    test_input.standardize()
 
     for sample, read in list(itertools.product(["test1", "test2"], ["R1", "R2"])):
         standardized_filename = f"{sample}_{read}.test.fq.gz"
@@ -176,14 +181,14 @@ def test_processIO_fromTableFile_standardizeInput(table_file, standardized_wildc
     ],
 )
 def test_processIO_fromTableFile(table_file):
-    assert returnPaths(
+    test_input = processInput(
         method="table-file",
-        args={"table_filename": table_file, "sample_column": "samples"},
-    ) == [os.path.abspath(os.path.dirname(table_file))]
-    samples_dict = returnSamples(
-        method="table-file",
-        args={"table_filename": table_file, "sample_column": "samples"},
+        args={"table_file": table_file, "sample_keywords": ["samples"]},
     )
+
+    assert test_input.returnPaths() == [os.path.abspath(os.path.dirname(table_file))]
+
+    samples_dict = test_input.returnSamples()
     assert "samples" in samples_dict
     assert set(samples_dict["samples"]) == set(["test1", "test2"])
     assert "reads" in samples_dict

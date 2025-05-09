@@ -50,7 +50,7 @@ def test_WildcardIO_samples_w_error(wildcard_str):
     [("tests/files/wildcardIO/{sample}_{read}.fq.gz", ["sample", "read"])],
 )
 def test_WildcardIO_samples_wo_error(wildcard_str, sample_wildcards):
-    test_wildcard = WildcardIO.fromStr(wildcard_str, sample_wildcards=sample_wildcards)
+    test_wildcard = WildcardIO.fromStr(wildcard_str, sample_keywords=sample_wildcards)
     samples_dict = test_wildcard.samples
     assert "sample" in samples_dict
     assert set(samples_dict["sample"]) == set(["test1", "test2"])
