@@ -34,13 +34,6 @@ rule fasterq_dump_paired_end:
                 "{sample}_2.fastq",
             )
         ),
-        tmp_dir=temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["sra_download_dir"],
-                "{sample}_TMP",
-            )
-        ),
     params:
         sra_dir=os.path.join(
             config["paths"]["workflow_prefix"],
@@ -60,7 +53,9 @@ rule fasterq_dump_paired_end:
     shell:
         """
         fasterq-dump {wildcards.sample} -O {params.sra_dir} --temp {params.tmp_dir} --threads {threads}
+        sleep 30
         rm -f {params.sra_dir}/{wildcards.sample}.fastq
+        rm -rf {params.tmp_dir}
         """
     
 rule compress_r1_fastq:
