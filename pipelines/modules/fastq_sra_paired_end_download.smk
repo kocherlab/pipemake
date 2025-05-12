@@ -60,7 +60,7 @@ rule fasterq_dump_paired_end:
     shell:
         """
         fasterq-dump {wildcards.sample} -O {params.sra_dir} --temp {params.tmp_dir} --threads {threads}
-        rm -f {params/sra_dir}/{wildcards.sample}.fastq
+        rm -f {params.sra_dir}/{wildcards.sample}.fastq
         """
     
 rule compress_r1_fastq:
