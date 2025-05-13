@@ -20,6 +20,7 @@ rule all:
             f"{config['paths']['blobtools_dir']}_blobblurbout.tsv",
         ),
 
+
 rule hifi_align_minimap2:
     input:
         hifi_fastq=os.path.join(
@@ -44,7 +45,7 @@ rule hifi_align_minimap2:
         mem_mb=56000,
     threads: 16
     shell:
-        "minimap2 -ax map-hifi -t {threads} {input.assembly_fasta} {input.hifi_fastq} | samtools sort -@{threads} --threads {threads} -bh -o {output}"
+        "minimap2 -ax map-hifi -t {threads} {input.assembly_fasta} {input.hifi_fastq} | samtools sort -@{threads} --threads {threads} -O bam -o {output}"
 
 
 rule blastn_assembly_nt:
@@ -58,13 +59,13 @@ rule blastn_assembly_nt:
         os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["blast_dir"],
-            'blastn',
+            "blastn",
             f"{config['species']}_{config['assembly_version']}.out",
         ),
     params:
         ncbi_nt_db=config["ncbi_nt_db"],
     singularity:
-        "docker://aewebb/ncbi-blast:v2.16.0"
+        "docker://ncbi/blast:2.16.0"
     resources:
         mem_mb=56000,
     threads: 16
@@ -73,7 +74,7 @@ rule blastn_assembly_nt:
 
 
 rule short_assembly_records_for_blastx:
-    input: 
+    input:
         os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["assembly_dir"],
@@ -84,7 +85,7 @@ rule short_assembly_records_for_blastx:
             os.path.join(
                 config["paths"]["workflow_prefix"],
                 config["paths"]["blast_dir"],
-                'blastx',
+                "blastx",
                 f"{config['species']}_{config['assembly_version']}.short_records.fa",
             )
         ),
@@ -93,27 +94,29 @@ rule short_assembly_records_for_blastx:
     singularity:
         "docker://aewebb/seqkit:v2.10.0"
     resources:
-        mem_mb=56000,
-    threads: 16
+        mem_mb=16000,
+    threads: 1
     shell:
         """
         let "max_length={params.max_length} - 1"
         seqkit seq -M $max_length {input} > {output}
+        sleep 60
         """
+
 
 rule blastx_short_assembly_records_diamond:
     input:
         os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["blast_dir"],
-            'blastx',
+            "blastx",
             f"{config['species']}_{config['assembly_version']}.short_records.fa",
         ),
     output:
         os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["blast_dir"],
-            'blastx',
+            "blastx",
             f"{config['species']}_{config['assembly_version']}.out",
         ),
     params:
@@ -124,7 +127,8 @@ rule blastx_short_assembly_records_diamond:
         mem_mb=56000,
     threads: 16
     shell:
-        'diamond blastx --query {input} --db {params.uniprot_db} --outfmt 6 qseqid staxids bitscore qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore --sensitive --max-target-seqs 1 --evalue 1e-25 --threads {threads} > {output}'
+        "diamond blastx --query {input} --db {params.uniprot_db} --outfmt 6 qseqid staxids bitscore qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore --sensitive --max-target-seqs 1 --evalue 1e-25 --threads {threads} > {output}"
+
 
 rule blobtk_blobtools_create:
     input:
@@ -138,14 +142,14 @@ rule blobtk_blobtools_create:
             os.path.join(
                 config["paths"]["workflow_prefix"],
                 config["paths"]["blobtools_dir"],
-                '.create.chk'
+                ".create.chk",
             )
         ),
     params:
         blob_dir=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["blobtools_dir"],
-        )
+        ),
     singularity:
         "docker://genomehubs/blobtoolkit:4.4.5"
     resources:
@@ -153,6 +157,7 @@ rule blobtk_blobtools_create:
     threads: 1
     shell:
         "blobtools create --fasta {input} {params.blob_dir} && touch {output}"
+
 
 rule blobtk_blobtools_add_cov:
     input:
@@ -164,14 +169,14 @@ rule blobtk_blobtools_add_cov:
         create_chk=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["blobtools_dir"],
-            '.create.chk'
+            ".create.chk",
         ),
     output:
         temp(
             os.path.join(
                 config["paths"]["workflow_prefix"],
                 config["paths"]["blobtools_dir"],
-                '.cov.chk'
+                ".cov.chk",
             )
         ),
     params:
@@ -187,31 +192,32 @@ rule blobtk_blobtools_add_cov:
     shell:
         "blobtools add --cov {input.hifi_bam} {params.blob_dir} && touch {output}"
 
+
 rule blobtk_blobtools_add_hits:
     input:
         blastn_hits=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["blast_dir"],
-            'blastn',
+            "blastn",
             f"{config['species']}_{config['assembly_version']}.out",
         ),
         blastx_hits=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["blast_dir"],
-            'blastx',
+            "blastx",
             f"{config['species']}_{config['assembly_version']}.out",
         ),
         cov_check=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["blobtools_dir"],
-            '.cov.chk'
-        )
+            ".cov.chk",
+        ),
     output:
         temp(
             os.path.join(
                 config["paths"]["workflow_prefix"],
                 config["paths"]["blobtools_dir"],
-                '.hits.chk'
+                ".hits.chk",
             )
         ),
     params:
@@ -228,6 +234,7 @@ rule blobtk_blobtools_add_hits:
     shell:
         "blobtools add --hits {input.blastn_hits} --hits {input.blastx_hits} --taxrule bestsumorder --taxdump {params.ncbi_taxa_db} {params.blob_dir} && touch {output}"
 
+
 rule blobtk_blobtools_add_busco:
     input:
         busco_table=os.path.join(
@@ -238,15 +245,20 @@ rule blobtk_blobtools_add_busco:
         cov_check=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["blobtools_dir"],
-            '.cov.chk'
+            ".cov.chk",
         ),
     output:
         temp(
             os.path.join(
                 config["paths"]["workflow_prefix"],
                 config["paths"]["blobtools_dir"],
-                '.busco.chk'
+                ".busco.chk",
             )
+        ),
+    params:
+        blob_dir=os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["blobtools_dir"],
         ),
     singularity:
         "docker://genomehubs/blobtoolkit:4.4.5"
@@ -255,6 +267,7 @@ rule blobtk_blobtools_add_busco:
     threads: 1
     shell:
         "blobtools add --busco {input.busco_table} {params.blob_dir} && touch {output}"
+
 
 rule blobblurb:
     input:
@@ -266,18 +279,18 @@ rule blobblurb:
         hits_chk=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["blobtools_dir"],
-            '.hits.chk'
+            ".hits.chk",
         ),
         busco_chk=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["blobtools_dir"],
-            '.busco.chk'
-        )
+            ".busco.chk",
+        ),
     output:
         os.path.join(
             config["paths"]["workflow_prefix"],
             f"{config['paths']['blobtools_dir']}_blobblurbout.tsv",
-        )
+        ),
     params:
         blob_dir=os.path.join(
             config["paths"]["workflow_prefix"],
@@ -291,18 +304,19 @@ rule blobblurb:
     shell:
         "blobblurb {params.blob_dir} {input.busco_table}"
 
+
 rule blobbtk_plot:
     input:
         hits_chk=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["blobtools_dir"],
-            '.hits.chk'
+            ".hits.chk",
         ),
         busco_chk=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["blobtools_dir"],
-            '.busco.chk'
-        )
+            ".busco.chk",
+        ),
     output:
         snail_png=os.path.join(
             config["paths"]["workflow_prefix"],
