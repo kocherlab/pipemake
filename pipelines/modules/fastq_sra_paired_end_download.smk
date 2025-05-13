@@ -20,15 +20,19 @@ rule all:
 
 rule fasterq_dump_paired_end:
     output:
-        r1_reads=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["sra_download_dir"],
-            "{sample}_R1.fq.gz",
+        r1_reads=temp(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["sra_download_dir"],
+                "{sample}_1.fastq",
+            )
         ),
-        r2_reads=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["sra_download_dir"],
-            "{sample}_R2.fq.gz",
+        r2_reads=temp(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["sra_download_dir"],
+                "{sample}_2.fastq",
+            )
         ),
     params:
         sra_dir=os.path.join(
@@ -43,54 +47,61 @@ rule fasterq_dump_paired_end:
     singularity:
         "docker://ncbi/sra-tools:3.1.0"
     resources:
-        mem_mb=8000,
+        mem_mb=16000,
         shell_exec="sh",
-    threads: 1
+    threads: 4
     shell:
         """
-        fasterq-dump {wildcards.sample} -O {params.sra_dir} --temp {params.tmp_dir}
-        rm {params.sra_dir}/{wildcards.sample}.fastq
-        rm -r {params.tmp_dir}
-        gzip {params.sra_dir}/*.fastq
-        mv {params.sra_dir}/{wildcards.sample}_1.fastq.gz {output.r1_reads}
-        mv {params.sra_dir}/{wildcards.sample}_2.fastq.gz {output.r2_reads}
+        fasterq-dump {wildcards.sample} -O {params.sra_dir} --temp {params.tmp_dir} --threads {threads}
+        sleep 30
+        rm -f {params.sra_dir}/{wildcards.sample}.fastq
+        rm -rf {params.tmp_dir}
         """
-
-
-rule fastq_sra_process_reads:
+    
+rule compress_r1_fastq:
     input:
-        r1_reads=os.path.join(
+        os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["sra_download_dir"],
-            "{SRA}_R1.fq.gz",
-        ),
-        r2_reads=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["sra_download_dir"],
-            "{SRA}_R2.fq.gz",
+            "{sample}_1.fastq",
         ),
     output:
-        r1_reads=os.path.join(
+        os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["sra_processed_dir"],
-            "{SRA}_R1.fq.gz",
-        ),
-        r2_reads=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["sra_processed_dir"],
-            "{SRA}_R2.fq.gz",
+            "{sample}_R1.fq.gz",
         ),
     params:
         sra_dir=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["sra_download_dir"],
-            "{SRA}_DIR",
         ),
     resources:
-        mem_mb=1000,
+        mem_mb=8000,
     threads: 1
-    run:
-        import os
+    shell:
+        "gzip -c {input} > {output}"
 
-        os.symlink(os.path.abspath(input.r1_reads), os.path.abspath(output.r1_reads))
-        os.symlink(os.path.abspath(input.r2_reads), os.path.abspath(output.r2_reads))
+rule compress_r2_fastq:
+    input:
+        os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["sra_download_dir"],
+            "{sample}_2.fastq",
+        ),
+    output:
+        os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["sra_processed_dir"],
+            "{sample}_R2.fq.gz",
+        ),
+    params:
+        sra_dir=os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["sra_download_dir"],
+        ),
+    resources:
+        mem_mb=8000,
+    threads: 1
+    shell:
+        "gzip -c {input} > {output}"
