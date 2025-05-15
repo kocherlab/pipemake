@@ -1,30 +1,14 @@
 rule all:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_filtered_vcf_dir"],
-            f"{config['species']}_{config['assembly_version']}.filtered.vcf.gz",
-        ),
+        f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.filtered.vcf.gz",
 
 
 rule filter_model_vcf_bcftools:
     input:
-        vcf_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_unfiltered_vcf_dir"],
-            f"{config['species']}_{config['assembly_version']}.vcf.gz",
-        ),
-        ind_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["models_dir"],
-            f"{config['species']}.{config['model_name']}.ind.txt",
-        ),
+        vcf_file=f"reSEQ/VCF/Unfiltered/{config['species']}_{config['assembly_version']}.vcf.gz",
+        ind_file=f"Models/{config['species']}.{config['model_name']}.ind.txt",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_filtered_vcf_dir"],
-            f"{config['species']}_{config['assembly_version']}.filtered.vcf.gz",
-        ),
+        f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.filtered.vcf.gz",
     params:
         min_alleles=config["min_alleles"],
         max_alleles=config["max_alleles"],

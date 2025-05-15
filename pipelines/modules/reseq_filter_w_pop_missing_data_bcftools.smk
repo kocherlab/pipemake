@@ -1,38 +1,18 @@
 rule all:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_filtered_vcf_dir"],
-            f"{config['species']}_{config['assembly_version']}.filtered.vcf.gz",
-        ),
+        f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.filtered.vcf.gz",
 
 
 rule filter_basic_vcf_bcftools:
     input:
-        vcf_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_unfiltered_vcf_dir"],
-            f"{config['species']}_{config['assembly_version']}.vcf.gz",
-        ),
-        ind_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["models_dir"],
-            f"{config['species']}.{config['model_name']}.ind.txt",
-        ),
+        vcf_file=f"reSEQ/VCF/Unfiltered/{config['species']}_{config['assembly_version']}.vcf.gz",
+        ind_file=f"Models/{config['species']}.{config['model_name']}.ind.txt",
     output:
         vcf_file=temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_filtered_vcf_dir"],
-                f"{config['species']}_{config['assembly_version']}.filtered.woMD.vcf.gz",
-            )
+            f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.filtered.woMD.vcf.gz"
         ),
         idx_file=temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_filtered_vcf_dir"],
-                f"{config['species']}_{config['assembly_version']}.filtered.woMD.vcf.gz.csi",
-            )
+            f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.filtered.woMD.vcf.gz.csi"
         ),
     params:
         min_alleles=config["min_alleles"],
@@ -53,21 +33,9 @@ rule filter_basic_vcf_bcftools:
 
 checkpoint pop_ind_file:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["models_dir"],
-            f"{config['species']}.model",
-        ),
+        f"Models/{config['species']}.model",
     output:
-        temp(
-            directory(
-                os.path.join(
-                    config["paths"]["workflow_prefix"],
-                    config["paths"]["models_dir"],
-                    "BCFtools",
-                )
-            )
-        ),
+        temp(directory("Models/BCFtools")),
     params:
         model_name=config["model_name"],
     resources:
@@ -81,31 +49,14 @@ checkpoint pop_ind_file:
 
 rule pop_vcf_bcftools:
     input:
-        vcf_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_filtered_vcf_dir"],
-            f"{config['species']}_{config['assembly_version']}.filtered.woMD.vcf.gz",
-        ),
-        pop_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["models_dir"],
-            "BCFtools",
-            "{model_pop}.pop",
-        ),
+        vcf_file=f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.filtered.woMD.vcf.gz",
+        pop_file="Models/BCFtools/{model_pop}.pop",
     output:
         vcf_file=temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_filtered_vcf_dir"],
-                f"{config['species']}_{config['assembly_version']}.filtered.woMD.{{model_pop}}.vcf.gz",
-            )
+            f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.filtered.woMD.{{model_pop}}.vcf.gz"
         ),
         idx_file=temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_filtered_vcf_dir"],
-                f"{config['species']}_{config['assembly_version']}.filtered.woMD.{{model_pop}}.vcf.gz.csi",
-            )
+            f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.filtered.woMD.{{model_pop}}.vcf.gz.csi"
         ),
     params:
         missing_cutoff=config["missing_cutoff"],
@@ -125,11 +76,7 @@ def aggregate_pop_reseq(wildcards):
     checkpoint_output = checkpoints.pop_ind_file.get(**wildcards).output[0]
     return {
         "vcf_file": expand(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_filtered_vcf_dir"],
-                f"{config['species']}_{config['assembly_version']}.filtered.woMD.{{model_pop}}.vcf.gz",
-            ),
+            f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.filtered.woMD.{{model_pop}}.vcf.gz",
             model_pop=glob_wildcards(
                 os.path.join(
                     checkpoint_output,
@@ -138,11 +85,7 @@ def aggregate_pop_reseq(wildcards):
             ).model_pop,
         ),
         "idx_file": expand(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_filtered_vcf_dir"],
-                f"{config['species']}_{config['assembly_version']}.filtered.woMD.{{model_pop}}.vcf.gz.csi",
-            ),
+            f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.filtered.woMD.{{model_pop}}.vcf.gz.csi",
             model_pop=glob_wildcards(
                 os.path.join(
                     checkpoint_output,
@@ -158,11 +101,7 @@ rule isec_pop_vcfs_bcftools:
         unpack(aggregate_pop_reseq),
     output:
         temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_filtered_vcf_dir"],
-                f"{config['species']}_{config['assembly_version']}.filtered.missing_data.sites",
-            )
+            f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.filtered.missing_data.sites"
         ),
     params:
         pop_count=lambda wildcards, input: len(input) / 2,
@@ -177,27 +116,11 @@ rule isec_pop_vcfs_bcftools:
 
 rule filter_pops_missing_data_vcf_bcftools:
     input:
-        vcf_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_filtered_vcf_dir"],
-            f"{config['species']}_{config['assembly_version']}.filtered.woMD.vcf.gz",
-        ),
-        idx_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_filtered_vcf_dir"],
-            f"{config['species']}_{config['assembly_version']}.filtered.woMD.vcf.gz.csi",
-        ),
-        sites_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_filtered_vcf_dir"],
-            f"{config['species']}_{config['assembly_version']}.filtered.missing_data.sites",
-        ),
+        vcf_file=f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.filtered.woMD.vcf.gz",
+        idx_file=f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.filtered.woMD.vcf.gz.csi",
+        sites_file=f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.filtered.missing_data.sites",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_filtered_vcf_dir"],
-            f"{config['species']}_{config['assembly_version']}.filtered.vcf.gz",
-        ),
+        f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.filtered.vcf.gz",
     resources:
         mem_mb=8000,
     threads: 4

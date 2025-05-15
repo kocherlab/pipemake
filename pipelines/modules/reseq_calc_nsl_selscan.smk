@@ -1,48 +1,17 @@
 rule all:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "nSL",
-            f"{config['species']}_{config['assembly_version']}.nsl.manhattan.png",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "nSL",
-            f"{config['species']}_{config['assembly_version']}.abs_nsl.manhattan.png",
-        ),
+        f"reSEQ/PopGen/nSL/{config['species']}_{config['assembly_version']}.nsl.manhattan.png",
+        f"reSEQ/PopGen/nSL/{config['species']}_{config['assembly_version']}.abs_nsl.manhattan.png",
 
 
 checkpoint reseq_split_unphased_bcftools:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_filtered_vcf_dir"],
-            f"{config['species']}_{config['assembly_version']}.vcf.gz",
-        ),
+        f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.vcf.gz",
     output:
-        temp(
-            directory(
-                os.path.join(
-                    config["paths"]["workflow_prefix"],
-                    config["paths"]["reseq_filtered_vcf_dir"],
-                    "SplitByChrom",
-                )
-            )
-        ),
+        temp(directory("reSEQ/VCF/Filtered/SplitByChrom")),
     params:
-        out_dir=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_filtered_vcf_dir"],
-            "SplitByChrom",
-        ),
-        out_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_filtered_vcf_dir"],
-            "SplitByChrom",
-            "",
-        ),
+        out_dir="reSEQ/VCF/Filtered/SplitByChrom",
+        out_prefix="reSEQ/VCF/Filtered/SplitByChrom/",
     singularity:
         "docker://aewebb/bcftools:v1.20"
     resources:
@@ -58,19 +27,9 @@ checkpoint reseq_split_unphased_bcftools:
 
 rule reseq_index_unphased_bcftools:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_filtered_vcf_dir"],
-            "SplitByChrom",
-            "{chrom}.vcf.gz",
-        ),
+        "reSEQ/VCF/Filtered/SplitByChrom/{chrom}.vcf.gz",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_filtered_vcf_dir"],
-            "SplitByChrom",
-            "{chrom}.vcf.gz.csi",
-        ),
+        "reSEQ/VCF/Filtered/SplitByChrom/{chrom}.vcf.gz.csi",
     singularity:
         "docker://aewebb/bcftools:v1.20"
     resources:
@@ -82,27 +41,10 @@ rule reseq_index_unphased_bcftools:
 
 rule reseq_phase_chroms_shapeit4:
     input:
-        vcf=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_filtered_vcf_dir"],
-            "SplitByChrom",
-            "{chrom}.vcf.gz",
-        ),
-        index=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_filtered_vcf_dir"],
-            "SplitByChrom",
-            "{chrom}.vcf.gz.csi",
-        ),
+        vcf="reSEQ/VCF/Filtered/SplitByChrom/{chrom}.vcf.gz",
+        index="reSEQ/VCF/Filtered/SplitByChrom/{chrom}.vcf.gz.csi",
     output:
-        temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_phased_vcf_dir"],
-                "SplitByChrom",
-                "{chrom}.vcf.gz",
-            )
-        ),
+        temp("reSEQ/VCF/Phased/SplitByChrom/{chrom}.vcf.gz"),
     singularity:
         "docker://aewebb/shapeit4:v4.2.2"
     resources:
@@ -114,21 +56,9 @@ rule reseq_phase_chroms_shapeit4:
 
 rule reseq_prep_nsl_vcf_bcftools:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_phased_vcf_dir"],
-            "SplitByChrom",
-            "{chrom}.vcf.gz",
-        ),
+        "reSEQ/VCF/Phased/SplitByChrom/{chrom}.vcf.gz",
     output:
-        temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_phased_vcf_dir"],
-                "nSL",
-                "{chrom}.nsl.vcf.gz",
-            )
-        ),
+        temp("reSEQ/VCF/Phased/nSL/{chrom}.nsl.vcf.gz"),
     singularity:
         "docker://aewebb/bcftools:v1.20"
     resources:
@@ -140,36 +70,12 @@ rule reseq_prep_nsl_vcf_bcftools:
 
 rule reseq_nsl_selscan:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_phased_vcf_dir"],
-            "nSL",
-            "{chrom}.nsl.vcf.gz",
-        ),
+        "reSEQ/VCF/Phased/nSL/{chrom}.nsl.vcf.gz",
     output:
-        temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_popgen_dir"],
-                "nSL",
-                "{chrom}.nsl.out",
-            )
-        ),
-        temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_popgen_dir"],
-                "nSL",
-                "{chrom}.nsl.log",
-            )
-        ),
+        temp("reSEQ/PopGen/nSL/{chrom}.nsl.out"),
+        temp("reSEQ/PopGen/nSL/{chrom}.nsl.log"),
     params:
-        out_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "nSL",
-            "{chrom}",
-        ),
+        out_prefix="reSEQ/PopGen/nSL/{chrom}",
         maf=config["maf"],
     singularity:
         "docker://aewebb/selscan:v2.0.3"
@@ -182,44 +88,15 @@ rule reseq_nsl_selscan:
 
 rule reseq_normalize_nsl_norm:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "nSL",
-            "{chrom}.nsl.out",
-        ),
+        "reSEQ/PopGen/nSL/{chrom}.nsl.out",
     output:
-        norm_file=temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_popgen_dir"],
-                "nSL",
-                f"{{chrom}}.nsl.out.{config['bins']}bins.norm",
-            )
-        ),
+        norm_file=temp("reSEQ/PopGen/nSL/{{chrom}}.nsl.out.{config['bins']}bins.norm"),
         window_file=temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_popgen_dir"],
-                "nSL",
-                f"{{chrom}}.nsl.out.{config['bins']}bins.norm.{str(config['window_size'])[:-3]}kb.windows",
-            )
+            "reSEQ/PopGen/nSL/{{chrom}}.nsl.out.{config['bins']}bins.norm.{str(config['window_size'])[:-3]}kb.windows"
         ),
-        log_file=temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_popgen_dir"],
-                "nSL",
-                f"{{chrom}}.nsl.out.{config['bins']}bins.log",
-            )
-        ),
+        log_file=temp("reSEQ/PopGen/nSL/{{chrom}}.nsl.out.{config['bins']}bins.log"),
     params:
-        out_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "nSL",
-            "{chrom}.nsl.out",
-        ),
+        out_prefix="reSEQ/PopGen/nSL/{chrom}.nsl.out",
         bins=config["bins"],
         window_size=config["window_size"],
     singularity:
@@ -245,49 +122,18 @@ def aggregate_nsl_reseq(wildcards):
         )
     ).chrom
     return {
-        "scan_nsl": expand(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_popgen_dir"],
-                "nSL",
-                "{chrom}.nsl.out",
-            ),
-            chrom=chrom_wildcards,
-        ),
-        "scan_log": expand(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_popgen_dir"],
-                "nSL",
-                "{chrom}.nsl.log",
-            ),
-            chrom=chrom_wildcards,
-        ),
+        "scan_nsl": expand("reSEQ/PopGen/nSL/{chrom}.nsl.out", chrom=chrom_wildcards),
+        "scan_log": expand("reSEQ/PopGen/nSL/{chrom}.nsl.log", chrom=chrom_wildcards),
         "norm_nsl": expand(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_popgen_dir"],
-                "nSL",
-                f"{{chrom}}.nsl.out.{config['bins']}bins.norm",
-            ),
+            f"reSEQ/PopGen/nSL/{{chrom}}.nsl.out.{config['bins']}bins.norm",
             chrom=chrom_wildcards,
         ),
         "norm_windows": expand(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_popgen_dir"],
-                "nSL",
-                f"{{chrom}}.nsl.out.{config['bins']}bins.norm.{str(config['window_size'])[:-3]}kb.windows",
-            ),
+            f"reSEQ/PopGen/nSL/{{chrom}}.nsl.out.{config['bins']}bins.norm.{str(config['window_size'])[:-3]}kb.windows",
             chrom=chrom_wildcards,
         ),
         "norm_log": expand(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_popgen_dir"],
-                "nSL",
-                f"{{chrom}}.nsl.out.{config['bins']}bins.log",
-            ),
+            f"reSEQ/PopGen/nSL/{{chrom}}.nsl.out.{config['bins']}bins.log",
             chrom=chrom_wildcards,
         ),
     }
@@ -297,36 +143,11 @@ rule reseq_cat_nsl_bash:
     input:
         unpack(aggregate_nsl_reseq),
     output:
-        scan_nsl=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "nSL",
-            f"{config['species']}_{config['assembly_version']}.nsl.out",
-        ),
-        scan_log=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "nSL",
-            f"{config['species']}_{config['assembly_version']}.nsl.out.log",
-        ),
-        norm_nsl=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "nSL",
-            f"{config['species']}_{config['assembly_version']}.nsl.norm",
-        ),
-        norm_windows=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "nSL",
-            f"{config['species']}_{config['assembly_version']}.nsl.norm.windows",
-        ),
-        norm_log=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "nSL",
-            f"{config['species']}_{config['assembly_version']}.nsl.norm.log",
-        ),
+        scan_nsl=f"reSEQ/PopGen/nSL/{config['species']}_{config['assembly_version']}.nsl.out",
+        scan_log=f"reSEQ/PopGen/nSL/{config['species']}_{config['assembly_version']}.nsl.out.log",
+        norm_nsl=f"reSEQ/PopGen/nSL/{config['species']}_{config['assembly_version']}.nsl.norm",
+        norm_windows=f"reSEQ/PopGen/nSL/{config['species']}_{config['assembly_version']}.nsl.norm.windows",
+        norm_log=f"reSEQ/PopGen/nSL/{config['species']}_{config['assembly_version']}.nsl.norm.log",
     resources:
         mem_mb=2000,
     threads: 1
@@ -342,32 +163,12 @@ rule reseq_cat_nsl_bash:
 
 rule plot_norm_nsl_pipemake:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "nSL",
-            f"{config['species']}_{config['assembly_version']}.nsl.norm",
-        ),
+        f"reSEQ/PopGen/nSL/{config['species']}_{config['assembly_version']}.nsl.norm",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "nSL",
-            f"{config['species']}_{config['assembly_version']}.nsl.manhattan.png",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "nSL",
-            f"{config['species']}_{config['assembly_version']}.abs_nsl.manhattan.png",
-        ),
+        f"reSEQ/PopGen/nSL/{config['species']}_{config['assembly_version']}.nsl.manhattan.png",
+        f"reSEQ/PopGen/nSL/{config['species']}_{config['assembly_version']}.abs_nsl.manhattan.png",
     params:
-        out_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "nSL",
-            f"{config['species']}_{config['assembly_version']}",
-        ),
+        out_prefix=f"reSEQ/PopGen/nSL/{config['species']}_{config['assembly_version']}",
     singularity:
         "docker://aewebb/pipemake_utils:v1.2.1"
     resources:
