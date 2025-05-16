@@ -232,9 +232,9 @@ class ConfigPipelineIO:
                             f"Setup ({setup_name}) already assigned to {setup_args['method']}, cannot assign {setup_method}"
                         )
                     else:
-                        setup_args["method"] = setup_method
-                        setup_args["args"][setup_method] = processSetupArgs(
-                            assignment_arg_str
+                        setup_args["method"] = setup_method.replace("-", "_")
+                        setup_args["args"][setup_method.replace("-", "_")] = (
+                            processSetupArgs(assignment_arg_str)
                         )
 
             # Check if the method was assigned

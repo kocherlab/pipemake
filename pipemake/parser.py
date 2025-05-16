@@ -8,6 +8,7 @@ import argparse
 import datetime
 
 from pydoc import locate
+from collections import defaultdict
 
 
 def jobRandomString(num_chars=4):
@@ -88,7 +89,7 @@ class PipelineParser:
         self._pipeline_subparsers_dict = {}
 
         # Create a dictionary to store the pipeline unparsed arguments
-        self._pipeline_arguments_dict = {}
+        self._pipeline_arguments_dict = defaultdict(lambda: defaultdict(str))
 
         # Load the pipeline in sorted order
         for pipeline_name in sorted(config_pipelines.keys()):
@@ -192,9 +193,9 @@ class PipelineParser:
                     )
 
                 # Add the argument to the args argument group
-                self._pipeline_arguments_dict[wildcard_name.replace("-", "_")] = (
-                    wildcards_value
-                )
+                self._pipeline_arguments_dict[pipeline_name][
+                    wildcard_name.replace("-", "_")
+                ] = wildcards_value
 
             # Check if wildcards are present
             for pipeline_arg_name, arg_args in self._yeildGroup("args", group_args):
@@ -280,7 +281,7 @@ class PipelineParser:
 
     def returnArgs(self):
         parser_dict = vars(self._pipeline_parser.parse_args())
-        parser_dict.update(self._pipeline_arguments_dict)
+        parser_dict.update(self._pipeline_arguments_dict[parser_dict["pipeline"]])
         return parser_dict
 
     @classmethod

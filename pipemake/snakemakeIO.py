@@ -317,6 +317,19 @@ class SnakePipelineIO:
                 )
                 link_rule += f"{self._indent_style}{self._indent_style}{file_mapping['output']}={link_file}\n"
 
+            # Check if the output rule has additional arguments
+            mapped_output_files = [_f["output"] for _f in file_mappings]
+            unmapped_files = dict(
+                (_a, _f)
+                for _a, _f in self._pipeline_IO_attributes[output_rule]["input"].items()
+                if _a not in mapped_output_files
+            )
+
+            # Loop the unmapped files
+            for unmapped_arg, unmapped_file in unmapped_files.items():
+                unmapped_file_str = "\n".join(unmapped_file)
+                link_rule += f"{self._indent_style}{self._indent_style}{unmapped_arg}={unmapped_file_str}\n"
+
             # Save the linked rule to the list
             self._linked_rules[output_rule] = link_rule
 
