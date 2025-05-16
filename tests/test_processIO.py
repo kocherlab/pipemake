@@ -59,7 +59,7 @@ def test_processIO_fromWildcardStr_standardizeInput(
 )
 def test_processIO_fromWildcardStr(wildcard_str):
     test_input = processInput(
-        method="wildcard-str",
+        method="wildcard_str",
         args={"wildcard_str": wildcard_str, "sample_keywords": ["samples"]},
     )
 
@@ -121,7 +121,7 @@ def test_processIO_fromFileStr_standardizeInput_w_error(
     file_str, standardized_filename
 ):
     test_input = processInput(
-        method="file-str",
+        method="file_str",
         args={
             "file_str": file_str,
             "standardized_filename": standardized_filename,
@@ -158,7 +158,7 @@ def test_processIO_fromTableFile_wo_error(table_file):
 def test_processIO_fromTableFile_standardizeInput(table_file, standardized_wildcard):
     test_dir = tempfile.mkdtemp()
     test_input = processInput(
-        method="table-file",
+        method="table_file",
         args={
             "table_file": table_file,
             "standardized_filename": standardized_wildcard,
@@ -182,7 +182,7 @@ def test_processIO_fromTableFile_standardizeInput(table_file, standardized_wildc
 )
 def test_processIO_fromTableFile(table_file):
     test_input = processInput(
-        method="table-file",
+        method="table_file",
         args={"table_file": table_file, "sample_keywords": ["samples"]},
     )
 
