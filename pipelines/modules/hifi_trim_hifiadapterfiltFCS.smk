@@ -1,30 +1,13 @@
 rule all:
     input:
-        expand(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["filtered_fastq_dir"],
-                "{sample}_R1.fcsfilt.fastq.gz",
-            ),
-            sample=config["samples"],
-        ),
+        expand("FASTQ/Filtered/{sample}.fcsfilt.fastq.gz", sample=config["samples"]),
 
 
 rule pacbio_bam_to_fasta:
     input:
-        pacbio_bam=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["pacbio_bam_dir"],
-            "{sample}.bam",
-        ),
+        pacbio_bam="BAM/PacBio/{sample}.bam",
     output:
-        temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["unfiltered_fastq_dir"],
-                "{sample}_R1.fasta",
-            ),
-        ),
+        temp("FASTQ/Unfiltered/{sample}.fasta"),
     singularity:
         "docker://aewebb/bamtools:v2.5.2"
     resources:
@@ -36,26 +19,11 @@ rule pacbio_bam_to_fasta:
 
 rule hifi_reads_screen_fcs_adaptor:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["unfiltered_fastq_dir"],
-            "{sample}_R1.fasta",
-        ),
+        "FASTQ/Unfiltered/{sample}.fasta",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["unfiltered_fastq_dir"],
-            "fcs-adaptor",
-            "{sample}",
-            "fcs_adaptor_report.txt",
-        ),
+        "FASTQ/Unfiltered/fcs-adaptor/{sample}/fcs_adaptor_report.txt",
     params:
-        out_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["unfiltered_fastq_dir"],
-            "fcs-adaptor",
-            "{sample}",
-        ),
+        out_prefix="FASTQ/Unfiltered/fcs-adaptor/{sample}",
         prok="--prok" if config["prok"] else "",
         euk="--euk" if config["euk"] else "",
     singularity:
@@ -70,19 +38,9 @@ rule hifi_reads_screen_fcs_adaptor:
 
 rule link_fastq_hifiadapterfiltFCS:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["unfiltered_fastq_dir"],
-            "{sample}_R1.fastq.gz",
-        ),
+        "FASTQ/Unfiltered/{sample}.fastq.gz",
     output:
-        temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["filtered_fastq_dir"],
-                "{sample}_R1.fastq.gz",
-            )
-        ),
+        temp("FASTQ/Filtered/{sample}.fastq.gz"),
     run:
         import os
 
@@ -91,43 +49,14 @@ rule link_fastq_hifiadapterfiltFCS:
 
 rule hifi_screen_hifiadapterfiltFCS:
     input:
-        reads=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["filtered_fastq_dir"],
-            "{sample}_R1.fastq.gz",
-        ),
-        fcs_adaptor_report=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["unfiltered_fastq_dir"],
-            "fcs-adaptor",
-            "{sample}",
-            "fcs_adaptor_report.txt",
-        ),
+        reads="FASTQ/Filtered/{sample}.fastq.gz",
+        fcs_adaptor_report="FASTQ/Unfiltered/fcs-adaptor/{sample}/fcs_adaptor_report.txt",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["filtered_fastq_dir"],
-            "{sample}_R1.fcsfilt.fastq.gz",
-        ),
-        temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["filtered_fastq_dir"],
-                "{sample}_R1.blocklist",
-            )
-        ),
-        temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["filtered_fastq_dir"],
-                "{sample}_R1.fastq",
-            )
-        ),
+        "FASTQ/Filtered/{sample}.fcsfilt.fastq.gz",
+        temp("FASTQ/Filtered/{sample}.blocklist"),
+        temp("FASTQ/Filtered/{sample}.fastq"),
     params:
-        out_dir=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["filtered_fastq_dir"],
-        ),
+        out_dir="FASTQ/Filtered/",
     singularity:
         "docker://aewebb/hifiadapterfilt:v3.0.0"
     resources:

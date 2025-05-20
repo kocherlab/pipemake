@@ -5,7 +5,7 @@ rule all:
 
 rule plot_coverage_deeptools:
     input:
-        bam=expand("Plots/BAM{sample}.sortedByCoord.bam", sample=config["samples"]),
+        bam=expand("Plots/BAM/{sample}.sortedByCoord.bam", sample=config["samples"]),
         index=expand(
             "Plots/BAM/{sample}.sortedByCoord.bam.bai", sample=config["samples"]
         ),

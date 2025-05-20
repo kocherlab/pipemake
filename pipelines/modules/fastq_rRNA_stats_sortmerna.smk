@@ -1,4 +1,4 @@
-ruleorder: sortmerna_pair_end > sortmerna_single_end
+ruleorder: sortmerna_in_pair_end > sortmerna_in_single_end
 
 
 rule all:
@@ -6,7 +6,7 @@ rule all:
         "Statistics/filtered_fastq_stats.tsv",
 
 
-rule sortmerna_single_end:
+rule sortmerna_in_single_end:
     input:
         r1_reads="FASTQ/Unfiltered/{sample}_R1.fq.gz",
         index_chk="Indices/sortmerna/.idx.chk",
@@ -29,7 +29,7 @@ rule sortmerna_single_end:
         """
 
 
-rule sortmerna_pair_end:
+rule sortmerna_in_pair_end:
     input:
         r1_reads="FASTQ/Unfiltered/{sample}_R1.fq.gz",
         r2_reads="FASTQ/Unfiltered/{sample}_R2.fq.gz",

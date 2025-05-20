@@ -1,0 +1,48 @@
+pipeline: codon-alignments
+version: 1.0
+parser:
+  help: Create codon alignments from untransleted CDS multiple sequence files
+  arg-groups:
+    basic:
+      mutually-exclusive-args:
+        input-parser:
+          required: True
+      wildcards-args:
+        msf-standardized-filename: "{samples}.fasta"
+      args:
+        msf-wildcard:
+          help: "Wildcard statement to represent MSF files"
+          type: str
+          mutually-exclusive: "input-parser"
+          wildcards: "msf-standardized-filename"
+        msf-table:
+          help: "Table with sample and MSF filenames"
+          type: str
+          action: confirmFile
+          mutually-exclusive: "input-parser"
+          wildcards: "msf-standardized-filename"
+        msf-copy-method:
+          help: "Specifies if MSFs should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+setup:
+  msf_input:
+    methods:
+      wildcard-str: "{msf-wildcard}"
+      table-file: "{msf-table}"
+    args:
+      standardized_filename: "MSF/CDS/{msf-standardized-filename}"
+      copy_method: '{msf-copy-method}'
+      sample_keywords:
+        - "samples"
+
+snakemake:
+  modules:
+    - msa_align_codons
+    - msf_align_translated_mafft
+    - msf_translate
+  links:
+    - input: align_msa_mafft
+      output: create_codon_aligned_msa

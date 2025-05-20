@@ -41,47 +41,24 @@ parser:
             str: "Sp"
             suffix:
               - function: jobRandomString
-    paths:
-      args:
-        downloads-dir:
-          help: "Directory to store downloads"
-          type: str
-          default: "Downloads"
-        annotations-dir:
-          help: "Directory to store annotations"
-          type: str
-          default: 
-            str: "Annotations"
 setup:
   aa_transcript_input:
-    file-method:
-      input:
-        args:
-          - "aa-transcript-fasta"
-          - "annotations-dir"
-      standardize:
-        method: "file-str"
-        args:
-          input_filename: "{aa-transcript-fasta}"
-          standardized_filename: "{species}_{assembly-version}.{annotation-version}_pep.fa"
-          out_dir: "{annotations-dir}"
-          copy_method: "copy"
-          gzipped: False
+    methods: 
+      file-str: "{aa-transcript-fasta}"
+    args:
+      standardized_filename: "Annotations/{species}_{assembly-version}.{annotation-version}_pep.fa"
+      copy_method: "copy"
+      gzipped: False
+  
   eggnog_db:
-    dir-method:
-      input:
-        args:
-          - "eggnog-data-dir"
-          - "downloads-dir"
-      standardize:
-        method: "dir-str"
-        args:
-          path_name: "{eggnog-data-dir}"
-          standardized_directory: "EggNOG"
-          out_dir: "{downloads-dir}"
-          copy_method: "{eggnog-copy-method}"
-          gzipped: False
+    methods:
+      dir-str: "{eggnog-data-dir}"
+    args:
+      standardized_directory: "Annotations/EggNOG"
+      copy_method: "{eggnog-copy-method}"
+      gzipped: False
 
-snakefiles:
-  - download_eggnog_database
-  - annotations_eggnog_mapper
+snakemake:
+  modules:
+    - download_eggnog_database
+    - annotations_eggnog_mapper

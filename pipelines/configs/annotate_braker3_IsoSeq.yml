@@ -1,0 +1,111 @@
+pipeline: annotate-braker3-isoseq
+version: 1.0
+parser:
+  help: Annotate an assembly using BRAKER3 using IsoSeq data
+  arg-groups:
+    basic:
+      mutually-exclusive-args:
+        input-parser:
+          required: True
+      wildcards-args:
+        isoseq-standardized-filename: "{samples}.fq.gz"
+      args:
+        isoseq-wildcard:
+          help: "Wildcard statement to represent IsoSeq FASTQs"
+          type: str
+          mutually-exclusive: "input-parser"
+          wildcards: "isoseq-standardized-filename"
+        isoseq-table:
+          help: "Table with sample and FASTQ filenames"
+          type: str
+          action: confirmFile
+          mutually-exclusive: "input-parser"
+          wildcards: "isoseq-standardized-filename"
+        isoseq-copy-method:
+          help: "Specifies if IsoSeq FASTQs should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        assembly-fasta:
+          help: "Assembly file"
+          type: str
+          required: True
+          action: confirmFile
+        hints-fasta:
+          help: "Protein hints file"
+          type: str
+          required: True
+          action: confirmFile
+        fasta-copy-method:
+          help: "Specifies if assembly and hints files should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        busco-database:
+          help: "Name of BUSCO database"
+          type: str
+          required: True
+        assembly-version:
+          help: "Assembly Version"
+          type: str
+          default:
+            str: "v"
+            suffix:
+              - function: jobRandomString
+        annotation-version:
+          help: "Annotation Version"
+          type: str
+          default:
+            str: "v"
+            suffix:
+              - function: jobRandomString
+        species:
+          help: "Species name"
+          type: str
+          default:
+            str: "Sp"
+            suffix:
+              - function: jobRandomString
+
+setup:
+  isoseq_input:
+    methods:
+      wildcard-str: "{isoseq-wildcard}"
+      table-file: "{isoseq-table}"
+    args:
+      standardized_filename: "IsoSeq/BAM/{isoseq-standardized-filename}"
+      copy_method: '{isoseq-copy-method}'
+      index_ext: '{isoseq-index-ext}'
+      sample_keywords:
+        - 'samples'
+
+  assembly_input:
+    methods:
+      file-str: "{assembly-fasta}"
+    args:
+      standardized_filename: "Assembly/{species}_{assembly_version}.fa"
+      copy_method: "{fasta-copy-method}"
+      gzipped: False
+
+  hints_input:
+    methods: 
+      file-str: "{hints-fasta}"
+    args:
+      standardized_filename: "Homology/ProteinHints.fa"
+      copy_method: "{fasta-copy-method}"
+      gzipped: False
+
+snakemake:
+  modules:
+    - iso_seq_align_minimap2
+    - iso_seq_sort
+    - iso_seq_merge
+    - repeatmasking
+    - annotate_isoseq_braker3
+    - process_braker3
+    - download_compleasm
+    - assembly_compleasm
+    - annotations_busco
+    - download_augustus

@@ -6,7 +6,7 @@ rule all:
 rule isoseq_align_minimap2:
     input:
         fasta_file=f"Assembly/{config['species']}_{config['assembly_version']}.fa",
-        isoseq_fastqs="IsoSeq/FASTQ/{sample}_R1.fq.gz",
+        isoseq_fastqs="IsoSeq/FASTQ/{sample}.fq.gz",
     output:
         temp("IsoSeq/BAM/Aligned/{sample}.Aligned.bam"),
     singularity:

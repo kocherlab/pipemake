@@ -1,7 +1,7 @@
-pipeline: hic-scaffolds-yahs
+pipeline: hic-scaffold-hifi
 version: 1.0
 parser:
-  help: Scaffold an assembly with Hi-C data using YAHs
+  help: Assemble long reads using hifiasm and scaffold with Hi-C data using yahs
   arg-groups:
     basic:
       mutually-exclusive-args:
@@ -10,6 +10,17 @@ parser:
       wildcards-args:
         hic-standardized-suffix: "{reads}.fq.gz"
       args:
+        hifi-fastq:
+          help: "Wildcard statement to represent HiFi FASTQs"
+          type: str
+          required: True
+          action: confirmFile
+        hifi-copy-method:
+          help: "Specifies if HiFI FASTQs should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
         hic-wildcard:
           help: "Wildcard statement to represent the a single pair of HiC FASTQs"
           type: str
@@ -27,17 +38,29 @@ parser:
             - 'symbolic_link'
             - 'copy'
           default: 'symbolic_link'
-        assembly-fasta:
-          help: "Wildcard statement to represent assembly FASTAs"
+        assembly-version:
+          help: "Assembly Version"
           type: str
-          action: confirmFile
-        assembly-copy-method:
-          help: "Specifies if the assembly FASTA should be copied or symbolically linked."
-          choices:
-            - 'symbolic_link'
-            - 'copy'
-          default: 'symbolic_link'
+          default:
+            str: "v"
+            suffix:
+              - function: jobRandomString
+        species:
+          help: "Species name"
+          type: str
+          default:
+            str: "Sp"
+            suffix:
+              - function: jobRandomString
+
 setup:
+  hifi_input:
+    methods: 
+      file-str: "{hifi-fastq}"
+    args:
+      standardized_filename: "HiFi/FASTQ/{species}.fq.gz"
+      copy_method: "{hifi-copy-method}"
+
   hic_input:
     methods:
       wildcard-str: "{hic-wildcard}"
@@ -46,15 +69,8 @@ setup:
       standardized_filename: "HiC/FASTQ/{species}_HiC_{hic-standardized-suffix}"
       copy_method: '{hic-copy-method}'
       gzipped: True
-  
-  assembly_input:
-    methods:
-      file-str: "{assembly-fasta}"
-    args:
-      standardized_filename: "Assembly/{species}_{assembly_version}.fa"
-      copy_method: "{fasta-copy-method}"
-      gzipped: False
 
 snakemake:
   modules:
-  - hic_scaffolds_yahs
+    - hifi_reseq_assemble_hifiasm
+    - hic_scaffolds_yahs

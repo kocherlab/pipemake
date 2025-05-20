@@ -1,0 +1,93 @@
+pipeline: annotate-braker3-with-bam
+version: 1.0
+parser:
+  help: Annotate an assembly using BRAKER3 using a processed BAM file
+  arg-groups:
+    basic:
+      args:
+        rnaseq-bam:
+          help: "RNAseq BAM file"
+          type: str
+          required: True
+          action: confirmFile
+        rnaseq-copy-method:
+          help: "Specifies if RNAseq BAM should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        assembly-fasta:
+          help: "Assembly file"
+          type: str
+          required: True
+          action: confirmFile
+        hints-fasta:
+          help: "Protein hints file"
+          type: str
+          required: True
+          action: confirmFile
+        fasta-copy-method:
+          help: "Specifies if assembly and hints files should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        busco-database:
+          help: "Name of BUSCO database"
+          type: str
+          required: True
+        assembly-version:
+          help: "Assembly Version"
+          type: str
+          default:
+            str: "v"
+            suffix:
+              - function: jobRandomString
+        annotation-version:
+          help: "Annotation Version"
+          type: str
+          default:
+            str: "v"
+            suffix:
+              - function: jobRandomString
+        species:
+          help: "Species name"
+          type: str
+          default:
+            str: "Sp"
+            suffix:
+              - function: jobRandomString      
+setup:
+  rnaseq_input:
+    methods: 
+      file-str: "{rnaseq-bam}"
+    args:
+      standardized_filename: "RNAseq/BAM/{species}_{assembly_version}.bam"
+      copy_method: "{rnaseq-copy-method}"
+      gzipped: True
+  
+  assembly_input:
+    methods: 
+      file-str: "{assembly-fasta}"
+    args:
+      standardized_filename: "Assembly/{species}_{assembly_version}.fa"
+      copy_method: "{fasta-copy-method}"
+      gzipped: False
+
+  hints_input:
+    methods: 
+      file-str: "{hints-fasta}"
+    args:
+      standardized_filename: "Homology/ProteinHints.fa"
+      copy_method: "{fasta-copy-method}"
+      gzipped: False
+
+snakemake:
+  modules:
+    - repeatmasking
+    - annotate_rnaseq_braker3
+    - process_braker3
+    - download_compleasm
+    - assembly_compleasm
+    - annotations_busco
+    - download_augustus

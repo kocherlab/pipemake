@@ -1,31 +1,13 @@
 rule all:
     input:
-        expand(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_assembled_dir"],
-                f"{{sample}}_{config['species']}_{config['assembly_version']}.fa",
-            ),
-            sample=config["samples"],
-        ),
+        f"Assembly/purge_dups/{config['species']}_{config['assembly_version']}.p_ctg.purged.fa",
 
 
 rule create_fastq_list:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_fastq_dir"],
-            "{sample}_R1.fq.gz",
-        ),
+        f"HiFi/FASTQ/{config['species']}.fq.gz",
     output:
-        temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_assembled_dir"],
-                "purge_dups",
-                "{sample}.list",
-            ),
-        ),
+        temp("Assembly/purge_dups/{config['species']}.list"),
     resources:
         mem_mb=2000,
     threads: 1
@@ -35,34 +17,12 @@ rule create_fastq_list:
 
 rule build_config:
     input:
-        assembled_fasta=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_assembled_dir"],
-            "hifiasm",
-            "{sample}.p_ctg.fa",
-        ),
-        fastq_list=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_assembled_dir"],
-            "purge_dups",
-            "{sample}.list",
-        ),
+        assembled_fasta=f"Assembly/hifiasm/{config['species']}_{config['assembly_version']}.p_ctg.fa",
+        fastq_list=f"Assembly/purge_dups/{config['species']}.list",
     output:
-        temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_assembled_dir"],
-                "purge_dups",
-                "{sample}.tmp.json",
-            ),
-        ),
+        temp(f"Assembly/purge_dups/{config['species']}.tmp.json"),
     params:
-        output_dir=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_assembled_dir"],
-            "purge_dups",
-            "{sample}_tmp",
-        ),
+        output_dir=f"Assembly/purge_dups/{config['species']}_tmp",
     singularity:
         "docker://aewebb/purge_dups:v1.2.6"
     resources:
@@ -77,28 +37,11 @@ rule build_config:
 
 rule update_json:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_assembled_dir"],
-            "purge_dups",
-            "{sample}.tmp.json",
-        ),
+        f"Assembly/purge_dups/{config['species']}.tmp.json",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_assembled_dir"],
-            "purge_dups",
-            "{sample}.json",
-        ),
+        f"Assembly/purge_dups/{config['species']}.json",
     params:
-        out_dir=os.path.abspath(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_assembled_dir"],
-                "purge_dups",
-                "{sample}",
-            ),
-        ),
+        out_dir=os.path.abspath(f"Assembly/purge_dups/{config['species']}"),
         busco_db=config["busco_database"],
     resources:
         mem_mb=2000,
@@ -116,21 +59,9 @@ rule update_json:
 
 rule hifi_assembly_purge_dups:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_assembled_dir"],
-            "purge_dups",
-            "{sample}.json",
-        ),
+        f"Assembly/purge_dups/{config['species']}.json",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_assembled_dir"],
-            "purge_dups",
-            "{sample}",
-            "seqs",
-            "{sample}.p_ctg.purged.fa",
-        ),
+        f"Assembly/purge_dups/{config['species']}/seqs/{config['species']}_{config['assembly_version']}.p_ctg.purged.fa",
     params:
         species=config["species"],
     singularity:
@@ -144,27 +75,11 @@ rule hifi_assembly_purge_dups:
 
 rule collect_purged_fasta:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_assembled_dir"],
-            "purge_dups",
-            "{sample}",
-            "seqs",
-            "{sample}.p_ctg.purged.fa",
-        ),
+        f"Assembly/purge_dups/{config['species']}/seqs/{config['species']}_{config['assembly_version']}.p_ctg.purged.fa",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_assembled_dir"],
-            f"{{sample}}_{config['species']}_{config['assembly_version']}.fa",
-        ),
+        f"Assembly/purge_dups/{config['species']}_{config['assembly_version']}.p_ctg.purged.fa",
     params:
-        output_dir=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_assembled_dir"],
-            "purge_dups",
-            "{sample}_tmp",
-        ),
+        output_dir=f"Assembly/purge_dups/{config['species']}_tmp",
     shell:
         """
         cp {input} {output}
