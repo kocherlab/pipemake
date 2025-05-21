@@ -1,0 +1,62 @@
+pipeline: seperate-pop-vcfs
+version: 1.0
+parser:
+  help: Create separate VCF files for each population in a resequencing VCF file
+  arg-groups:
+    basic:
+      args:
+        reseq-vcf:
+          help: "Resequencing VCF file"
+          type: str
+          required: True
+          action: confirmFile
+        reseq-copy-method:
+          help: "Specifies if resequencing files should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        model-file:
+          help: "Model filename"
+          type: str
+          required: True
+          action: confirmFile
+        model-name:
+          help: "Model name"
+          type: str
+          required: True
+        species:
+          help: "Species name"
+          type: str
+          default:
+            str: "Sp"
+            suffix:
+              - function: jobRandomString
+        assembly-version:
+          help: "Assembly Version"
+          type: str
+          default:
+            str: "v"
+            suffix:
+              - function: jobRandomString
+
+setup:
+  reseq_vcf:
+    methods:
+      file-str": "{reseq-vcf}"
+    args:
+      standardized_filename: "reSEQ/VCF/Filtered/{species}_{assembly-version}.vcf.gz"
+      copy_method: '{reseq-copy-method}'
+      gzipped: True
+  
+  model_input:
+    methods:
+      file-str": "{model-file}"
+    args:
+      standardized_filename: "Models/{species}.model"
+      copy_method: 'copy'
+      gzipped: False
+
+snakemake:
+  modules:
+    - reseq_separate_pop_bcftools.smk

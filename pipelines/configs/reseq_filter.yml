@@ -61,38 +61,16 @@ parser:
             str: "v"
             suffix:
               - function: jobRandomString
-    paths:
-      args:
-        reseq-unfiltered-vcf-dir:
-          help: "Directory to store VCFs files"
-          type: str
-          default: "reSEQ/VCFs/Unfiltered"
-        reseq-filtered-vcf-dir:
-          help: "Directory to store VCFs files"
-          type: str
-          default: "reSEQ/VCFs/Filtered"
-        models-dir:
-          help: "Directory to store models"
-          type: str
-          default: "Models"
 
 setup:
   reseq_vcf:
-    file-method:
-      input:
-        args:
-          - "reseq-vcf"
-          - "species"
-          - "assembly-version"
-          - "reseq-unfiltered-vcf-dir"
-      standardize:
-        method: "file-str"
-        args:
-          input_filename: "{reseq-vcf}"
-          standardized_filename: "{species}_{assembly-version}.vcf.gz"
-          out_dir: "{reseq-unfiltered-vcf-dir}"
-          copy_method: '{reseq-copy-method}'
-          gzipped: True
+    methods:
+      file-str": "{reseq-vcf}"
+    args:
+      standardized_filename: "reSEQ/VCF/Unfiltered/{species}_{assembly-version}.vcf.gz"
+      copy_method: '{reseq-copy-method}'
+      gzipped: True
 
-snakefiles:
-  - reseq_filter_bcftools.smk
+snakemake:
+  modules:
+    - reseq_filter_bcftools.smk
