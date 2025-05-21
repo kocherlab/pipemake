@@ -75,7 +75,7 @@ setup:
       wildcard-str: "{rnaseq-wildcard}"
       table-filename: "{rnaseq-table}"
     args:
-      standardized_filename: "RNAseq/FASTQ/{rnaseq-standardized-wildcard}"
+      standardized_filename: "RNAseq/FASTQ/{rnaseq-standardized-filename}"
       copy_method: '{rnaseq-copy-method}'
       gzipped: True
       sample_keywords:
