@@ -78,6 +78,13 @@ class WildcardIO:
         # Create list of the wildcard name and values
         wildcard_names, wildcard_values = zip(*self.wildcard_dict.items())
 
+        standardized_names = glob_wildcards(standardized_wildcard)._fields
+
+        if set(wildcard_names) != set(standardized_names):
+            raise Exception(
+                f"Standardized wildcard ({standardized_wildcard}) does not match the sample wildcard ({self.wildcard_str}). Please confirm the same wildcards are used in both."
+            )
+
         # Format the wildcard str for the sample and standardized file
         for sample_wildcard_dict in [
             dict(zip(wildcard_names, v)) for v in itertools.product(*wildcard_values)

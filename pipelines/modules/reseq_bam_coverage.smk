@@ -22,7 +22,7 @@ rule ln_scale_coverage_wiggletools:
     input:
         "reSEQ/Coverage/{sample}.bw",
     output:
-        temp("reSEQ/Coverage/sample}.ln_scaled.wig"),
+        temp("reSEQ/Coverage/{sample}.ln_scaled.wig"),
     singularity:
         "docker://ensemblorg/wiggletools:1.2.11"
     resources:

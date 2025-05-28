@@ -63,7 +63,7 @@ parser:
               - function: jobRandomString
 setup:
   rnaseq_input:
-    methodS:
+    methods:
       wildcard-str: "{rnaseq-wildcard}"
       table-filename: "{rnaseq-table}"
     args:
@@ -73,14 +73,14 @@ setup:
       sample_keywords: 
         - 'samples' 
   assembly_input:
-    methodS:
+    methods:
       file-str: "{assembly-fasta}"
     args:
       standardized_filename: "Assembly/{species}_{assembly_version}.fa"
       copy_method: "{assembly-copy-method}"
       gzipped: False
   gtf_input:
-    methodS:
+    methods:
       file-str: "{assembly-gtf}"
     args:
       standardized_filename: "Assembly/{species}_{assembly_version}.gtf"

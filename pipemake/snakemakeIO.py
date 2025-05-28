@@ -7,6 +7,7 @@ import logging
 from pathlib import Path
 from collections import defaultdict
 
+from snakemake.io import glob_wildcards
 from pipemake.singularityIO import Singularity
 
 
@@ -315,7 +316,41 @@ class SnakePipelineIO:
                         file_mapping["input"]
                     ]
                 )
-                link_rule += f"{self._indent_style}{self._indent_style}{file_mapping['output']}={link_file}\n"
+
+                # Check if the linked file should be expanded
+                if _checkForExpand(
+                    self._pipeline_IO_attributes[output_rule]["input"][
+                        file_mapping["output"]
+                    ]
+                ):
+                    output_str = "".join(
+                        self._pipeline_IO_attributes[output_rule]["input"][
+                            file_mapping["output"]
+                        ]
+                    )
+
+                    expand_wildcards = []
+                    for output_wildcard in glob_wildcards(output_str)._fields:
+                        output_match = re.findall(
+                            rf"{output_wildcard}=([^,)]+)", output_str
+                        )
+                        if len(output_match) > 1:
+                            raise Exception(
+                                f"Multiple wildcards found for {output_wildcard} in {output_str}. Please confirm the wildcard is unique."
+                            )
+                        expand_wildcards.append(f"{output_wildcard}={output_match[0]}")
+
+                    if not link_file.endswith(","):
+                        link_file += ","
+                    link_file = f"expand({link_file} {', '.join(expand_wildcards)}),"
+
+                # Check if the linked file is a string or int
+                if isinstance(file_mapping["output"], str):
+                    link_rule += f"{self._indent_style}{self._indent_style}{file_mapping['output']}={link_file}\n"
+                elif isinstance(file_mapping["output"], int):
+                    link_rule += (
+                        f"{self._indent_style}{self._indent_style}{link_file}\n"
+                    )
 
             # Check if the output rule has additional arguments
             mapped_output_files = [_f["output"] for _f in file_mappings]
@@ -1099,7 +1134,7 @@ class SnakeRuleIO:
 
                     # Assign the attribute with a known name
                     elif "=" in rule_line_list[2]:
-                        attribute_name, attribute_str = rule_line_list[2].split("=")
+                        attribute_name, attribute_str = rule_line_list[2].split("=", 1)
                         self._rule_IO_attributes[attribute_group][
                             attribute_name
                         ].append(attribute_str)
@@ -1150,3 +1185,15 @@ def _convert_indent(source_str, source_indent_style, target_indent_style):
     indent_count = source_str.count(source_indent_style)
     # Return the converted indent style
     return f"{indent_count*target_indent_style}{source_str.strip()}"
+
+
+def _checkForExpand(file_data):
+    if isinstance(file_data, str):
+        file_str = file_data
+    elif isinstance(file_data, list):
+        file_str = "".join(file_data)
+
+    if "expand(" in file_str:
+        return True
+    else:
+        return False

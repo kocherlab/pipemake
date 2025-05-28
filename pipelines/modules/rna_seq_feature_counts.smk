@@ -27,7 +27,7 @@ rule feature_counts_pair_end:
 
 rule feature_counts_single_end:
     input:
-        gtf_file=f"Assembly{config['species']}_{config['assembly_version']}.gtf",
+        gtf_file=f"Assembly/{config['species']}_{config['assembly_version']}.gtf",
         r1_reads="RNAseq/FASTQ/{sample}_R1.fq.gz",
         sorted_bam="RNAseq/BAM/Sorted/{sample}.sortedByCoord.bam",
     output:
