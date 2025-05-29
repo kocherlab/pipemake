@@ -1,4 +1,4 @@
-pipeline: hic-scaffold-hifi
+pipeline: hifi-hic-assembly
 version: 1.0
 parser:
   help: Assemble long reads using hifiasm and scaffold with Hi-C data using yahs
@@ -15,12 +15,6 @@ parser:
           type: str
           required: True
           action: confirmFile
-        hifi-copy-method:
-          help: "Specifies if HiFI FASTQs should be copied or symbolically linked."
-          choices:
-            - 'symbolic_link'
-            - 'copy'
-          default: 'symbolic_link'
         hic-wildcard:
           help: "Wildcard statement to represent the a single pair of HiC FASTQs"
           type: str
@@ -32,8 +26,8 @@ parser:
           action: confirmFile
           mutually-exclusive: "hic-parser"
           wildcards: "hic-standardized-suffix"
-        hic-copy-method:
-          help: "Specifies if HiC FASTQs should be copied or symbolically linked."
+        fastq-copy-method:
+          help: "Specifies if FASTQs should be copied or symbolically linked."
           choices:
             - 'symbolic_link'
             - 'copy'
@@ -59,7 +53,7 @@ setup:
       file-str: "{hifi-fastq}"
     args:
       standardized_filename: "HiFi/FASTQ/{species}.fq.gz"
-      copy_method: "{hifi-copy-method}"
+      copy_method: "{fastq-copy-method}"
 
   hic_input:
     methods:
@@ -67,7 +61,7 @@ setup:
       table-filename: "{hic-table}"
     args:
       standardized_filename: "HiC/FASTQ/{species}_HiC_{hic-standardized-suffix}"
-      copy_method: '{hic-copy-method}'
+      copy_method: '{fastq-copy-method}'
       gzipped: True
 
 snakemake:

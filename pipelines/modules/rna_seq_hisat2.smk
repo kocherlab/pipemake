@@ -8,7 +8,7 @@ rule all:
 
 rule hisat2_build:
     input:
-        f"Assembly{config['species']}_{config['assembly_version']}.fa",
+        f"Assembly/{config['species']}_{config['assembly_version']}.fa",
     output:
         "Indices/hisat2/hisat2_index.1.ht2",
         "Indices/hisat2/hisat2_index.2.ht2",

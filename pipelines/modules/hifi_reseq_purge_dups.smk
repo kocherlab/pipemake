@@ -1,13 +1,13 @@
 rule all:
     input:
-        f"Assembly/purge_dups/{config['species']}_{config['assembly_version']}.p_ctg.purged.fa",
+        f"Assembly/purge_dups/{config['species']}_{config['assembly_version']}.fa",
 
 
 rule create_fastq_list:
     input:
         f"HiFi/FASTQ/{config['species']}.fq.gz",
     output:
-        temp("Assembly/purge_dups/{config['species']}.list"),
+        temp(f"Assembly/purge_dups/{config['species']}.list"),
     resources:
         mem_mb=2000,
     threads: 1
@@ -17,7 +17,7 @@ rule create_fastq_list:
 
 rule build_config:
     input:
-        assembled_fasta=f"Assembly/hifiasm/{config['species']}_{config['assembly_version']}.p_ctg.fa",
+        assembled_fasta=f"Assembly/hifiasm/{config['species']}_{config['assembly_version']}.fa",
         fastq_list=f"Assembly/purge_dups/{config['species']}.list",
     output:
         temp(f"Assembly/purge_dups/{config['species']}.tmp.json"),
@@ -61,7 +61,7 @@ rule hifi_assembly_purge_dups:
     input:
         f"Assembly/purge_dups/{config['species']}.json",
     output:
-        f"Assembly/purge_dups/{config['species']}/seqs/{config['species']}_{config['assembly_version']}.p_ctg.purged.fa",
+        f"Assembly/purge_dups/{config['species']}/seqs/{config['species']}_{config['assembly_version']}.purged.fa",
     params:
         species=config["species"],
     singularity:
@@ -75,9 +75,9 @@ rule hifi_assembly_purge_dups:
 
 rule collect_purged_fasta:
     input:
-        f"Assembly/purge_dups/{config['species']}/seqs/{config['species']}_{config['assembly_version']}.p_ctg.purged.fa",
+        f"Assembly/purge_dups/{config['species']}/seqs/{config['species']}_{config['assembly_version']}.purged.fa",
     output:
-        f"Assembly/purge_dups/{config['species']}_{config['assembly_version']}.p_ctg.purged.fa",
+        f"Assembly/purge_dups/{config['species']}_{config['assembly_version']}.fa",
     params:
         output_dir=f"Assembly/purge_dups/{config['species']}_tmp",
     shell:

@@ -80,15 +80,15 @@ parser:
 setup:
   reseq_vcf:
     methods:
-      file-str": "{reseq-vcf}"
+      file-str: "{reseq-vcf}"
     args:
-      standardized_filename: "reSEQ/VCF/Filtered/{species}_{assembly-version}.vcf.gz"
+      standardized_filename: "reSEQ/VCF/Filtered/{species}_{assembly-version}.filtered.vcf.gz"
       copy_method: '{reseq-copy-method}'
       gzipped: True
   
   model_input:
     methods:
-      file-str": "{model-file}"
+      file-str: "{model-file}"
     args:
       standardized_filename: "Models/{species}.model"
       copy_method: 'copy'

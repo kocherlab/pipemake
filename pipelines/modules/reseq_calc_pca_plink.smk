@@ -40,7 +40,7 @@ rule reseq_model_calc_pca_plink:
         bim_file=f"reSEQ/PLINK/Pruned/{config['species']}_{config['assembly_version']}.pruned.bim",
         fam_file=f"reSEQ/PLINK/Pruned/{config['species']}_{config['assembly_version']}.pruned.fam",
         ind_file=f"Models/{config['species']}.{{model}}.ind.txt",
-        freq_file=f"reSEQ/PopGen/PCA/{model}/{config['species']}_{config['assembly_version']}.pruned.afreq",
+        freq_file=f"reSEQ/PopGen/PCA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.afreq",
     output:
         f"reSEQ/PopGen/PCA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.pca.eigenvec",
         f"reSEQ/PopGen/PCA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.pca.eigenval",
@@ -64,7 +64,7 @@ rule reseq_model_plot_pca:
         eigenval_file=f"reSEQ/PopGen/PCA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.pca.eigenval",
         model_file=f"Models/{config['species']}.model",
     output:
-        f"reSEQ/PopGen/PCA/{model}/{config['species']}_{config['assembly_version']}.pruned.pca.pdf",
+        f"reSEQ/PopGen/PCA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.pca.pdf",
     params:
         pca_dir="reSEQ/PopGen/PCA/{model}/",
         out_prefix=f"reSEQ/PopGen/PCA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.pca",

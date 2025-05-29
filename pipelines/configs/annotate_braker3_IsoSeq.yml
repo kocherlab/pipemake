@@ -75,9 +75,8 @@ setup:
       wildcard-str: "{isoseq-wildcard}"
       table-file: "{isoseq-table}"
     args:
-      standardized_filename: "IsoSeq/BAM/{isoseq-standardized-filename}"
+      standardized_filename: "IsoSeq/FASTQ/{isoseq-standardized-filename}"
       copy_method: '{isoseq-copy-method}'
-      index_ext: '{isoseq-index-ext}'
       sample_keywords:
         - 'samples'
 

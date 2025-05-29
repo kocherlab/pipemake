@@ -57,7 +57,7 @@ setup:
     methods:
       file-str: "{hifi-fastq}"
     args:
-      standardized_filename: "{species}.fq.gz"
+      standardized_filename: "HiFi/FASTQ/{species}.fq.gz"
       copy_method: symbolic_link
       gzipped: True
 
@@ -65,17 +65,22 @@ setup:
     methods:
       file-str: "{assembly-fasta}"
     args:
-      standardized_filename: "{species}_{assembly_version}.fa"
+      standardized_filename: "Assembly/{species}_{assembly_version}.fa"
       copy_method: copy
       gzipped: False
 
   busco_input:
     methods:
-      file-str:  "{busco-table}"
+      file-str: "{busco-table}"
     args:
-      standardized_filename: "{species}_{assembly_version}.busco.full_table.tsv"
+      standardized_filename: "Assembly/{species}_{assembly_version}.busco.full_table.tsv"
       copy_method: copy
       gzipped: False
+
+paths:
+  - "{ncbi_nt_db}"
+  - "{ncbi_taxa_db}"
+  - "{uniprot_db}"
 
 snakemake:
   modules:

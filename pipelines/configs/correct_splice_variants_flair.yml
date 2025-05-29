@@ -64,7 +64,7 @@ setup:
       wildcard-str: "{reseq-wildcard}"
       table-file: "{reseq-table}"
     args:
-      standardized_filename: "IsoSeq/FASTQ/{reseq-standardized-wildcard}"
+      standardized_filename: "IsoSeq/FASTQ/{reseq-standardized-filename}"
       copy_method: '{reseq-copy-method}'
       gzipped: True
       sample_keywords:

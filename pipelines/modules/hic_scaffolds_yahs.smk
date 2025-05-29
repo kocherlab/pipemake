@@ -81,13 +81,15 @@ rule add_read_groups:
         f"HiC/BAM/Sorted/{config['species']}.sorted.bam",
     output:
         temp(f"HiC/BAM/Sorted/{config['species']}.sorted_groups.bam"),
+    params:
+        species=config["species"],
     singularity:
         "docker://aewebb/gatk4:v4.6.1.0"
     resources:
         mem_mb=8000,
     threads: 1
     shell:
-        "gatk AddOrReplaceReadGroups INPUT={input} OUTPUT={output} ID={wildcards.sample} LB={wildcards.sample} SM={wildcards.sample} PL=ILLUMINA PU=none"
+        "gatk AddOrReplaceReadGroups INPUT={input} OUTPUT={output} ID={params.species} LB={params.species} SM={params.species} PL=ILLUMINA PU=none"
 
 
 rule mark_duplicates:
@@ -171,14 +173,18 @@ rule yahs_noec:
 rule yahs_juicer_pre:
     input:
         reads_bin=f"Assembly/YaHS/{config['species']}_{config['assembly_version']}_yahsout_{{ec_type}}.bin",
-        assembly_agp=f"Assembly/YaHS/{config['species']}_yahsout_{{ec_type}}_scaffolds_final.agp",
-        assembly_index=f"Assembly/hifiasm/{config['species']}.fa.fai",
+        assembly_agp=f"Assembly/YaHS/{config['species']}_{config['assembly_version']}_yahsout_{{ec_type}}_scaffolds_final.agp",
+        assembly_index=f"Assembly/hifiasm/{config['species']}_{config['assembly_version']}.fa.fai",
     output:
-        txt=temp(f"Assembly/Juicebox/{config['species']}_{{ec_type}}.txt"),
-        agp=temp(f"Assembly/Juicebox/{config['species']}_{{ec_type}}.liftover.agp"),
-        log=f"Assembly/Juicebox/{config['species']}_{{ec_type}}_juicer_pre.log",
+        txt=temp(
+            f"Assembly/Juicebox/{config['species']}_{config['assembly_version']}_{{ec_type}}.txt"
+        ),
+        agp=temp(
+            f"Assembly/Juicebox/{config['species']}_{config['assembly_version']}_{{ec_type}}.liftover.agp"
+        ),
+        log=f"Assembly/Juicebox/{config['species']}_{config['assembly_version']}_{{ec_type}}_juicer_pre.log",
     params:
-        out_prefix=f"Assembly/Juicebox/{config['species']}_{{ec_type}}",
+        out_prefix=f"Assembly/Juicebox/{config['species']}_{config['assembly_version']}_{{ec_type}}",
     singularity:
         "docker://aewebb/yahs:v1.2.2"
     resources:
@@ -190,10 +196,10 @@ rule yahs_juicer_pre:
 
 rule juicer_tools_pre:
     input:
-        txt=f"Assembly/Juicebox/{config['species']}_{{ec_type}}.txt",
-        log=f"Assembly/Juicebox/{config['species']}_{{ec_type}}_juicer_pre.log",
+        txt=f"Assembly/Juicebox/{config['species']}_{config['assembly_version']}_{{ec_type}}.txt",
+        log=f"Assembly/Juicebox/{config['species']}_{config['assembly_version']}_{{ec_type}}_juicer_pre.log",
     output:
-        hic=f"Assembly/Juicebox/{config['species']}_{{ec_type}}.hic",
+        hic=f"Assembly/Juicebox/{config['species']}_{config['assembly_version']}_{{ec_type}}.hic",
     singularity:
         "docker://aewebb/juicer_tools:v1.19.02"
     resources:
@@ -208,11 +214,13 @@ rule juicer_tools_pre:
 
 rule create_converted_fasta:
     input:
-        agp=f"Assembly/Juicebox/{config['species']}_{{ec_type}}.liftover.agp",
-        fasta=f"Assembly/hifiasm/{config['species']}.fa",
+        agp=f"Assembly/Juicebox/{config['species']}_{config['assembly_version']}_{{ec_type}}.liftover.agp",
+        fasta=f"Assembly/hifiasm/{config['species']}_{config['assembly_version']}.fa",
     output:
-        bed=temp(f"Assembly/Juicebox/{config['species']}_{{ec_type}}.bed"),
-        fasta=f"Assembly/Juicebox/{config['species']}_{{ec_type}}_converted.fasta",
+        bed=temp(
+            f"Assembly/Juicebox/{config['species']}_{config['assembly_version']}_{{ec_type}}.bed"
+        ),
+        fasta=f"Assembly/Juicebox/{config['species']}_{config['assembly_version']}_{{ec_type}}_converted.fasta",
     singularity:
         "docker://aewebb/bedtools:v2.31.1"
     resources:

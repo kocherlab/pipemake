@@ -1,6 +1,6 @@
 rule all:
     input:
-        f"Assembly/hifiasm/{config['species']}_{config['assembly_version']}.p_ctg.fa",
+        f"Assembly/hifiasm/{config['species']}_{config['assembly_version']}.fa",
 
 
 rule hifi_wo_hic_reseq_assemble_hifiasm:
@@ -23,7 +23,7 @@ rule hifi_cvt_hifiasm_gfa_to_fasta:
     input:
         f"Assembly/hifiasm/{config['species']}_{config['assembly_version']}.p_ctg.gfa",
     output:
-        f"Assembly/hifiasm/{config['species']}_{config['assembly_version']}.p_ctg.fa",
+        f"Assembly/hifiasm/{config['species']}_{config['assembly_version']}.fa",
     shell:
         """
         awk '/^S/{{print ">"$2"\\n"$3}}' {input} | fold > {output}

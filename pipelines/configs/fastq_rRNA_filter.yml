@@ -1,4 +1,4 @@
-pipeline: fastq-filter-rRNA
+pipeline: fastq-rRNA-filter
 version: 1.0
 parser:
   help: Filter rRNA reads from FASTQ files using SortMeRNA
@@ -51,5 +51,5 @@ setup:
 
 snakemake:
   modules:
+    - index_sortmerna
     - fastq_filter_rRNA_sortmerna
-    - fastq_filter_rRNA_sortmerna_index

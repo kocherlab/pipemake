@@ -31,12 +31,27 @@ parser:
           help: "Wildcard statement to represent assembly FASTAs"
           type: str
           action: confirmFile
+          required: True
         assembly-copy-method:
           help: "Specifies if the assembly FASTA should be copied or symbolically linked."
           choices:
             - 'symbolic_link'
             - 'copy'
           default: 'symbolic_link'
+        species:
+          help: "Species name"
+          type: str
+          default:
+            str: "Sp"
+            suffix:
+              - function: jobRandomString
+        assembly-version:
+          help: "Assembly Version"
+          type: str
+          default:
+            str: "v"
+            suffix:
+              - function: jobRandomString
 setup:
   hic_input:
     methods:
@@ -51,8 +66,8 @@ setup:
     methods:
       file-str: "{assembly-fasta}"
     args:
-      standardized_filename: "Assembly/{species}_{assembly_version}.fa"
-      copy_method: "{fasta-copy-method}"
+      standardized_filename: "Assembly/hifiasm/{species}_{assembly_version}.fa"
+      copy_method: "{assembly-copy-method}"
       gzipped: False
 
 snakemake:

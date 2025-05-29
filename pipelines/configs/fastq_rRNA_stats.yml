@@ -50,5 +50,6 @@ setup:
 
 snakemake:
   modules:
-    - fastq_filter_rRNA_sortmerna_index
+    - index_sortmerna
     - fastq_rRNA_stats_sortmerna
+    

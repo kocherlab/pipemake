@@ -1,7 +1,7 @@
 pipeline: hifi-assemble-hifiasm
 version: 1.0
 parser:
-  help: Assemble long reads using hifiasm
+  help: Assemble long reads using hifiasm and purge-dups
   arg-groups:
     basic:
       args:

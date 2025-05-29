@@ -62,7 +62,7 @@ parser:
 setup:
   reseq_vcf:
     methods:
-      file-str": "{reseq-vcf}"
+      file-str: "{reseq-vcf}"
     args:
       standardized_filename: "reSEQ/VCF/Unfiltered/{species}_{assembly-version}.vcf.gz"
       copy_method: '{reseq-copy-method}'
@@ -70,7 +70,7 @@ setup:
   
   model_input:
     methods:
-      file-str": "{model-file}"
+      file-str: "{model-file}"
     args:
       standardized_filename: "Models/{species}.model"
       copy_method: 'copy'

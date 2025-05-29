@@ -1,6 +1,8 @@
 rule all:
     input:
-        f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.filtered.vcf.gz",
+        f"reSEQ/PLINK/Filtered/{config['species']}_{config['assembly_version']}.filtered.bed",
+        f"reSEQ/PLINK/Filtered/{config['species']}_{config['assembly_version']}.filtered.bim",
+        f"reSEQ/PLINK/Filtered/{config['species']}_{config['assembly_version']}.filtered.fam",
 
 
 rule convert_flitered_vcf_to_plink:

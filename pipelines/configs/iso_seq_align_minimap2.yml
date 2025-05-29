@@ -8,7 +8,7 @@ parser:
         input-parser:
           required: True
       wildcards-args:
-        isoseq-standardized-filename: "{samples}_{reads}.fq.gz"
+        isoseq-standardized-filename: "{samples}.fq.gz"
       args:
         isoseq-wildcard:
           help: "Wildcard statement to represent isoseq FASTQs"
@@ -61,12 +61,12 @@ setup:
     methods:
       wildcard-str: "{isoseq-wildcard}"
       table-file: "{isoseq-table}"
-      args:
-          standardized_filename: "IsoSeq/FASTQ/{isoseq-standardized-filename}"
-          copy_method: '{isoseq-copy-method}'
-          gzipped: True
-          sample_keywords:
-            - 'samples'
+    args:
+      standardized_filename: "IsoSeq/FASTQ/{isoseq-standardized-filename}"
+      copy_method: '{isoseq-copy-method}'
+      gzipped: True
+      sample_keywords:
+        - 'samples'
   assembly_input:
     methods:
       file-str: "{assembly-fasta}"
