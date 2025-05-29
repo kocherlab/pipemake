@@ -1,0 +1,54 @@
+pipeline: trim-hifi-fastqs
+version: 1.0
+parser:
+  help: Trim PacBio HiFi FASTQ files using HiFiAdapterFilt
+  arg-groups:
+    basic:
+      mutually-exclusive-args:
+        input-parser:
+          required: True
+      wildcards-args:
+        fastq-standardized-filename: "{samples}.fastq.gz"
+      args:
+        fastq-wildcard:
+          help: "Wildcard statement to represent FASTQs"
+          type: str
+          mutually-exclusive: "input-parser"
+          wildcards: "fastq-standardized-filename"
+        fastq-table:
+          help: "Table with sample and FASTQs filenames"
+          type: str
+          action: confirmFile
+          mutually-exclusive: "input-parser"
+          wildcards: "fastq-standardized-filename"
+        fastq-copy-method:
+          help: "Specifies if FASTQs should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        min-length:
+          help: "Minimum length of reads to keep"
+          type: int
+          default:
+            str: "44"
+        min-match:
+          help: "Minimum number of matches to keep"
+          type: int
+          default:
+            str: "97"
+setup:
+  fastq_input:
+    methods:
+      wildcard-str: "{fastq-wildcard}"
+      table-file: "{fastq-table}"
+    args:
+      standardized_filename: "FASTQ/Unfiltered/{fastq-standardized-filename}"
+      copy_method: '{fastq-copy-method}'
+      gzipped: True
+      sample_keywords:
+        - "samples"
+
+snakemake:
+  modules:
+    - hifi_trim_hifiadapterfilt

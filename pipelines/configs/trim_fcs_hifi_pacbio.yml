@@ -1,0 +1,56 @@
+pipeline: trim-fcs-hifi-pacbio
+version: 1.0
+parser:
+  help: Trim PacBio HiFi BAMs using HiFiAdapterFiltFSC
+  arg-groups:
+    basic:
+      mutually-exclusive-args:
+        input-parser:
+          required: True
+        taxa-type:
+          required: True
+      wildcards-args:
+        pacbio-standardized-filename: "{samples}.bam"
+      args:
+        pacbio-wildcard:
+          help: "Wildcard statement to represent PacBio BAM files"
+          type: str
+          mutually-exclusive: "input-parser"
+          wildcards: "pacbio-standardized-filename"
+        pacbio-table:
+          help: "Table with sample and PacBio BAM filenames"
+          type: str
+          action: confirmFile
+          mutually-exclusive: "input-parser"
+          wildcards: "pacbio-standardized-filename"
+        pacbio-copy-method:
+          help: "Specifies if PacBio BAMs should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        eukaryote-screen:
+          help: "Eukaryote assembly screen"
+          dest: "euk"
+          action: store_true
+          mutually-exclusive: "taxa-type"
+        prokaryote-screen:
+          help: "Prokaryote assembly screen"
+          dest: "prok"
+          action: store_true
+          mutually-exclusive: "taxa-type"
+setup:
+  pacbio_input:
+    methods:
+      wildcard-str: "{pacbio-wildcard}"
+      table-file: "{pacbio-table}"
+    args:
+      standardized_filename: "BAM/PacBio/{pacbio-standardized-filename}"
+      copy_method: '{pacbio-copy-method}'
+      gzipped: True
+      sample_keywords:
+        - "samples"
+snakemake:
+  modules:
+    - pacbio_to_fastq
+    - hifi_trim_hifiadapterfiltFCS

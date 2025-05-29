@@ -3,6 +3,9 @@ rule all:
         expand("FASTQ/Filtered/{sample}.fcsfilt.fastq.gz", sample=config["samples"]),
 
 
+ruleorder: pacbio_bam_to_fasta > hifi_fastq_to_fastq
+
+
 rule pacbio_bam_to_fasta:
     input:
         pacbio_bam="BAM/PacBio/{sample}.bam",
@@ -15,6 +18,20 @@ rule pacbio_bam_to_fasta:
     threads: 1
     shell:
         "bamtools convert -format fasta -in {input} -out {output}"
+
+
+rule hifi_fastq_to_fastq:
+    input:
+        "FASTQ/Unfiltered/{sample}.fastq.gz",
+    output:
+        temp("FASTQ/Unfiltered/{sample}.fasta"),
+    singularity:
+        "docker://aewebb/seqkit:v2.10.0"
+    resources:
+        mem_mb=16000,
+    threads: 1
+    shell:
+        "seqkit fq2fa {input} -o {output}"
 
 
 rule hifi_reads_screen_fcs_adaptor:
