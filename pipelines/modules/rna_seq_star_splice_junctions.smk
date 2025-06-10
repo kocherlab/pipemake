@@ -106,7 +106,7 @@ rule star_splice_junctions_pair_end:
             "SAindex",
         ),
     output:
-       temp(
+        temp(
             os.path.join(
                 config["paths"]["workflow_prefix"],
                 config["paths"]["rnaseq_splice_aligned_dir"],

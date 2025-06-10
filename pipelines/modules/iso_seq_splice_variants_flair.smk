@@ -1,3 +1,5 @@
+ruleorder: isoseq_correct_flair_w_rnaseq > isoseq_correct_flair_w_gtf
+
 rule all:
     input:
         os.path.join(
@@ -7,6 +9,27 @@ rule all:
         ),
 
 
+rule cat_iso_seq_reads:
+    input:
+        expand(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["reseq_fastq_dir"],
+                "{sample}_R1.fq.gz",
+            ),
+            sample=config["samples"],
+        ),
+    output:
+        temp(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["reseq_fastq_dir"],
+                f"{config['species']}_{config['assembly_version']}.fq.gz",
+            )
+        ),
+    shell:
+        "cat {input} > {output}"
+
 rule isoseq_align_flair:
     input:
         fasta_file=os.path.join(
@@ -14,13 +37,10 @@ rule isoseq_align_flair:
             config["paths"]["assembly_dir"],
             f"{config['species']}_{config['assembly_version']}.fa",
         ),
-        reseq_fastq=expand(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_fastq_dir"],
-                "{sample}_R1.fq.gz",
-            ),
-            sample=config["samples"],
+        reseq_fastq=os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["reseq_fastq_dir"],
+            f"{config['species']}_{config['assembly_version']}.fq.gz",
         ),
     output:
         os.path.join(
@@ -61,7 +81,7 @@ rule isoseq_align_flair:
         "flair align --threads {threads} --genome {input.fasta_file} --reads {input.reseq_fastq} --output {params.out_prefix}"
 
 
-rule isoseq_correct_flair:
+rule isoseq_correct_flair_w_gtf:
     input:
         fasta_file=os.path.join(
             config["paths"]["workflow_prefix"],
@@ -100,6 +120,46 @@ rule isoseq_correct_flair:
     threads: 4
     shell:
         "flair correct --threads {threads} --genome {input.fasta_file} --query {input.align_bed} --gtf {input.gtf_file} --output {params.out_prefix}"
+
+rule isoseq_correct_flair_w_rnaseq:
+    input:
+        fasta_file=os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["assembly_dir"],
+            f"{config['species']}_{config['assembly_version']}.fa",
+        ),
+        splice_junctions=os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["assembly_dir"],
+            f"{config['species']}_{config['assembly_version']}.SJ.tab",
+        ),
+        align_bed=os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["annotations_dir"],
+            "flair",
+            f"{config['species']}_{config['assembly_version']}.aligned.bed",
+        ),
+    output:
+        os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["annotations_dir"],
+            "flair",
+            f"{config['species']}_{config['assembly_version']}_all_corrected.bed",
+        ),
+    params:
+        out_prefix=os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["annotations_dir"],
+            "flair",
+            f"{config['species']}_{config['assembly_version']}",
+        ),
+    singularity:
+        "docker://aewebb/flair:v2.0.0"
+    resources:
+        mem_mb=16000,
+    threads: 4
+    shell:
+        "flair correct --threads {threads} --genome {input.fasta_file} --query {input.align_bed} --shortread {input.splice_junctions} --output {params.out_prefix}"
 
 
 checkpoint isoseq_split_bed_flair:
@@ -197,7 +257,7 @@ rule isoseq_collapse_flair:
         mem_mb=16000,
     threads: 4
     shell:
-        "flair collapse --threads {threads} --genome {input.fasta_file} --gtf {input.gtf_file} --reads {input.reseq_fastq} --annotation_reliant generate --check_splice --query {input.corrected_bed} --output {params.out_prefix}"
+        "flair collapse --threads {threads} --genome {input.fasta_file} --gtf {input.gtf_file} --reads {input.reseq_fastq} —no_gtf_end_adjustment --stringent --quality -1 --check_splice --query {input.corrected_bed} --output {params.out_prefix}"
 
 
 def aggregate_collapse(wildcards):

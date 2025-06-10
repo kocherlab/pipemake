@@ -41,6 +41,10 @@ parser:
           type: str
           required: True
           action: confirmFile
+        splice-junctions:
+          help: "Splice junctions file"
+          type: str
+          action: confirmFile
         species:
           help: "Species name"
           type: str
@@ -150,6 +154,21 @@ setup:
           input_filename: "{assembly-gtf}"
           standardized_filename: "{species}_{assembly-version}.{annotation-version}.gtf"
           out_dir: "{annotations-dir}"
+          copy_method: copy
+          gzipped: False
+  splice_junctions:
+    file-method:
+      input:
+        args:
+          - "splice-junctions"
+          - "assembly-dir"
+          - "assembly-version"
+      standardize:
+        method: "file-str"
+        args:
+          input_filename: "{splice-junctions}"
+          standardized_filename: "{species}_{assembly-version}.SJ.tab"
+          out_dir: "{assembly-dir}"
           copy_method: copy
           gzipped: False
 
