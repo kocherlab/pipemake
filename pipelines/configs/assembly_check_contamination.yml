@@ -38,10 +38,10 @@ parser:
             str: "v"
             suffix:
               - function: jobRandomString
-        blastx-max-length:
-          help: "Maximum length of the blastx output"
+        chunk-size:
+          help: "Chunk size for processing"
           type: int
-          default: 10000000
+          default: 250000
         ncbi-nt-db:
           help: "Path to the NCBI nt database"
           type: str

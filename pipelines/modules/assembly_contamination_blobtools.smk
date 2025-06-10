@@ -19,6 +19,15 @@ rule all:
             config["paths"]["workflow_prefix"],
             f"{config['paths']['blobtools_dir']}_blobblurbout.tsv",
         ),
+        expand(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["blast_dir"],
+                "{blast_type}",
+                f"{config['species']}_{config['assembly_version']}.out",
+            ),
+            blast_type=["blastn", "blastx"],
+        ),
 
 
 rule hifi_align_minimap2:
@@ -47,8 +56,7 @@ rule hifi_align_minimap2:
     shell:
         "minimap2 -ax map-hifi -t {threads} {input.assembly_fasta} {input.hifi_fastq} | samtools sort -@{threads} --threads {threads} -O bam -o {output}"
 
-
-rule blastn_assembly_nt:
+rule chunk_assembly:
     input:
         os.path.join(
             config["paths"]["workflow_prefix"],
@@ -58,9 +66,33 @@ rule blastn_assembly_nt:
     output:
         os.path.join(
             config["paths"]["workflow_prefix"],
+            config["paths"]["assembly_dir"],
+            f"{config['species']}_{config['assembly_version']}.chunked.fa",
+        ),
+    params:
+        chunk_size=config["chunk_size"],
+    singularity:
+        "docker://aewebb/pipemake_utils:v1.2.2"
+    resources:
+        mem_mb=4000,
+    threads: 1
+    shell:
+        "chunk-fasta --input-fasta {input} --chunk-size {params.chunk_size} --output-fasta {output}"
+
+
+rule blastn_chunked_assembly_nt:
+    input:
+        os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["assembly_dir"],
+            f"{config['species']}_{config['assembly_version']}.chunked.fa",
+        ),
+    output:
+        os.path.join(
+            config["paths"]["workflow_prefix"],
             config["paths"]["blast_dir"],
             "blastn",
-            f"{config['species']}_{config['assembly_version']}.out",
+            f"{config['species']}_{config['assembly_version']}.chunked.out",
         ),
     params:
         ncbi_nt_db=config["ncbi_nt_db"],
@@ -73,51 +105,19 @@ rule blastn_assembly_nt:
         'blastn -query {input} -db {params.ncbi_nt_db} -outfmt "6 qseqid staxids bitscore std" -max_target_seqs 10 -max_hsps 1 -evalue 1e-25 -num_threads {threads} -out {output}'
 
 
-rule short_assembly_records_for_blastx:
+rule blastx_chunked_assembly_records_diamond:
     input:
         os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["assembly_dir"],
-            f"{config['species']}_{config['assembly_version']}.fa",
-        ),
-    output:
-        temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["blast_dir"],
-                "blastx",
-                f"{config['species']}_{config['assembly_version']}.short_records.fa",
-            )
-        ),
-    params:
-        max_length=config["blastx_max_length"],
-    singularity:
-        "docker://aewebb/seqkit:v2.10.0"
-    resources:
-        mem_mb=16000,
-    threads: 1
-    shell:
-        """
-        let "max_length={params.max_length} - 1"
-        seqkit seq -M $max_length {input} > {output}
-        sleep 60
-        """
-
-
-rule blastx_short_assembly_records_diamond:
-    input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["blast_dir"],
-            "blastx",
-            f"{config['species']}_{config['assembly_version']}.short_records.fa",
+            f"{config['species']}_{config['assembly_version']}.chunked.fa",
         ),
     output:
         os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["blast_dir"],
             "blastx",
-            f"{config['species']}_{config['assembly_version']}.out",
+            f"{config['species']}_{config['assembly_version']}.chunked.out",
         ),
     params:
         uniprot_db=config["uniprot_db"],
@@ -128,6 +128,29 @@ rule blastx_short_assembly_records_diamond:
     threads: 16
     shell:
         "diamond blastx --query {input} --db {params.uniprot_db} --outfmt 6 qseqid staxids bitscore qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore --sensitive --max-target-seqs 1 --evalue 1e-25 --threads {threads} > {output}"
+
+rule unchunk_blast:
+    input:
+        os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["blast_dir"],
+            "{blast_type}",
+            f"{config['species']}_{config['assembly_version']}.chunked.out",
+        ),
+    output:
+        os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["blast_dir"],
+            "{blast_type}",
+            f"{config['species']}_{config['assembly_version']}.out",
+        ),
+    singularity:
+        "docker://aewebb/pipemake_utils:v1.2.2"
+    resources:
+        mem_mb=16000,
+    threads: 1
+    shell:
+        "unchunk-blast --chunked-blast {input} --unchunked-blast {output}"
 
 
 rule blobtk_blobtools_create:
@@ -151,7 +174,7 @@ rule blobtk_blobtools_create:
             config["paths"]["blobtools_dir"],
         ),
     singularity:
-        "docker://genomehubs/blobtoolkit:4.4.5"
+        "docker://genomehubs/blobtoolkit:4.4.6"
     resources:
         mem_mb=16000,
     threads: 1
@@ -185,7 +208,7 @@ rule blobtk_blobtools_add_cov:
             config["paths"]["blobtools_dir"],
         ),
     singularity:
-        "docker://genomehubs/blobtoolkit:4.4.5"
+        "docker://genomehubs/blobtoolkit:4.4.6"
     resources:
         mem_mb=16000,
     threads: 1
@@ -227,7 +250,7 @@ rule blobtk_blobtools_add_hits:
         ),
         ncbi_taxa_db=config["ncbi_taxa_db"],
     singularity:
-        "docker://genomehubs/blobtoolkit:4.4.5"
+        "docker://genomehubs/blobtoolkit:4.4.6"
     resources:
         mem_mb=16000,
     threads: 1
@@ -261,7 +284,7 @@ rule blobtk_blobtools_add_busco:
             config["paths"]["blobtools_dir"],
         ),
     singularity:
-        "docker://genomehubs/blobtoolkit:4.4.5"
+        "docker://genomehubs/blobtoolkit:4.4.6"
     resources:
         mem_mb=16000,
     threads: 1
@@ -339,7 +362,7 @@ rule blobbtk_plot:
             config["paths"]["blobtools_dir"],
         ),
     singularity:
-        "docker://genomehubs/blobtoolkit:4.4.5"
+        "docker://genomehubs/blobtoolkit:4.4.6"
     resources:
         mem_mb=16000,
     threads: 1
