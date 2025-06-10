@@ -50,6 +50,7 @@ rule star_splice_junctions_single_end:
             config["paths"]["rnaseq_fastq_dir"],
             "{sample}_R1.fq.gz",
         ),
+        
         index_file=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["index_dir"],
