@@ -21,28 +21,50 @@ Columns should be named based on the relevant standardized wildcard argument. Th
 
 .. code-block:: text
 
-    usage: pipemake fastq-filter (--fastq-wildcard FASTQ_WILDCARD | --fastq-table FASTQ_TABLE)
-                                 [--fastq-copy-method {symbolic_link,copy}] 
-                                 [--fastq-standardized-wildcard FASTQ_STANDARDIZED_WILDCARD] 
-                                 [--min-length MIN_LENGTH] 
-                                 [--unfiltered-fastq-dir UNFILTERED_FASTQ_DIR] 
-                                 [--filtered-fastq-dir FILTERED_FASTQ_DIR]
-                                 [--workflow-prefix WORKFLOW_PREFIX]
-                                 [--work-dir WORK_DIR]
-                                 [--scale-threads SCALE_THREADS]
-                                 [--scale-mem SCALE_MEM]
-                                 [--resource-yml]
-                                 [--singularity-dir SINGULARITY_DIR] 
-                                 [-h]
+    error: one of the arguments --fastq-wildcard --fastq-table --paired-end-sra --single-end-sra is required
 
-    fastq-filter required arguments:
+    usage: pipemake trim-fastqs (--fastq-wildcard FASTQ_WILDCARD | --fastq-table FASTQ_TABLE | --paired-end-sra PAIRED_END_SRA | --single-end-sra SINGLE_END_SRA) 
+                                [--fastq-copy-method {symbolic_link,copy}] 
+                                [--min-length MIN_LENGTH] 
+                                [--cut-front] 
+                                [--cut-tail] 
+                                [--cut-right] 
+                                [--workflow-dir WORKFLOW_DIR]
+                                [--scale-threads SCALE_THREADS] 
+                                [--scale-mem SCALE_MEM] 
+                                [--resource-yml] 
+                                [--singularity-dir SINGULARITY_DIR] 
+                                [--no-overwrite]
+                                [-h]
+
+    trim-fastqs required arguments:
     --fastq-wildcard FASTQ_WILDCARD
                             Wildcard statement to represent FASTQs (supported wildcards: samples, reads)
     --fastq-table FASTQ_TABLE
                             Table with sample and FASTQs filenames (supported wildcards: samples, reads)
+    --paired-end-sra PAIRED_END_SRA
+                            Table with SRA accession numbers for paired-end reads (supported wildcards: samples)
+    --single-end-sra SINGLE_END_SRA
+                            Table with SRA accession numbers for single-end reads (supported wildcards: samples)
 
-    ...
-
+    trim-fastqs optional arguments:
+    --fastq-copy-method {symbolic_link,copy}
+                            Specifies if FASTQs should be copied or symbolically linked. (default: symbolic_link)
+    --min-length MIN_LENGTH
+                            Minimum length of reads to keep (default: 50)
+    --cut-front           Trim from the front of the reads
+    --cut-tail            Trim from the tail of the reads
+    --cut-right           Trim the right side of the reads, starting from the 5' end
+    --workflow-dir WORKFLOW_DIR
+                            Assign the workflow directory. If not provided a default will be used.
+    --scale-threads SCALE_THREADS
+                            Scale the threads for each task
+    --scale-mem SCALE_MEM
+                            Scale the memory (RAM) for each task
+    --resource-yml        Create a seperate resource yaml
+    --singularity-dir SINGULARITY_DIR
+                            Assign different directory of singularity images
+    --no-overwrite        Do not overwrite existing files
     -h, --help            show this help message and exit
 
 In this example, a table file would contain the following columns: **samples** and **reads**. Let's look at an example table file:
