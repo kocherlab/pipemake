@@ -23,6 +23,12 @@ rule hifi_wo_hic_reseq_assemble_hifiasm:
             config["paths"]["workflow_prefix"],
             config["paths"]["reseq_assembled_dir"],
             "hifiasm",
+            "{sample}.a_ctg.gfa",
+        ),
+        os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["reseq_assembled_dir"],
+            "hifiasm",
             "{sample}.p_ctg.gfa",
         ),
     params:

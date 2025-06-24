@@ -48,7 +48,7 @@ rule hifi_cvt_cat_hifiasm_fasta:
         os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["reseq_assembled_dir"],
-            "hifiasm",
+            "hifiasm-cat",
             "{sample}.cat.fa",
         ),
     shell:
@@ -83,7 +83,7 @@ rule build_config:
         assembled_fasta=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["reseq_assembled_dir"],
-            "hifiasm",
+            "hifiasm-cat",
             "{sample}.cat.fa",
         ),
         fastq_list=os.path.join(
