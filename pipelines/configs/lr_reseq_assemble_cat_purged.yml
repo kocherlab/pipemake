@@ -1,4 +1,4 @@
-pipeline: lr-reseq-assemble-hifiasm
+pipeline: lr-reseq-assemble-cat-purged
 version: 1.0
 parser:
   help: Assemble long reads using hifiasm
