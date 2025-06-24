@@ -1,0 +1,108 @@
+pipeline: lr-reseq-assemble-hifiasm
+version: 1.0
+parser:
+  help: Assemble long reads using hifiasm
+  arg-groups:
+    basic:
+      mutually-exclusive-args:
+        input-parser:
+          required: True
+      wildcards-args:
+        reseq-standardized-wildcard:
+          help: "Standardized wildcard statement used to store reseq FASTQs"
+          type: str
+          default: 
+            str: "{samples}_{reads}.fq.gz"
+      args:
+        reseq-wildcard:
+          help: "Wildcard statement to represent reseq FASTQs"
+          type: str
+          mutually-exclusive: "input-parser"
+          wildcards: "reseq-standardized-wildcard"
+        reseq-table:
+          help: "Table with sample and FASTQs filenames"
+          type: str
+          action: confirmFile
+          mutually-exclusive: "input-parser"
+          wildcards: "reseq-standardized-wildcard"
+        reseq-copy-method:
+          help: "Specifies if reseq FASTQs should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        busco-database:
+          help: "Name of BUSCO database"
+          type: str
+          required: True
+        assembly-version:
+          help: "Assembly Version"
+          type: str
+          default:
+            str: "v"
+            suffix:
+              - function: jobRandomString
+        species:
+          help: "Species name"
+          type: str
+          default:
+            str: "Sp"
+            suffix:
+              - function: jobRandomString
+    paths:
+      args:
+        reseq-fastq-dir:
+          help: "Directory to store the FASTQs files"
+          type: str
+          default: "reseq/FASTQs"
+        reseq-assembled-dir:
+          help: "Directory to store assembled contigs"
+          type: str
+          default: "reseq/Assembled"
+setup:
+  reseq_input:
+    wildcard-method:
+      input:
+        args:
+          - "reseq-wildcard"
+          - "reseq-standardized-wildcard"
+          - "reseq-fastq-dir"
+      standardize:
+        method: "wildcard-str"
+        args:
+          wildcard_str: "{reseq-wildcard}"
+          standardized_filename: "{reseq-standardized-wildcard}"
+          out_dir: "{reseq-fastq-dir}"
+          copy_method: '{reseq-copy-method}'
+          gzipped: True
+      samples:
+        method: "wildcard-str"
+        args:
+          wildcard_str: "{reseq-wildcard}"
+          sample_wildcards: 
+            - 'samples'
+
+    table-method:
+      input:
+        args:
+          - "reseq-table"
+          - "reseq-standardized-wildcard"
+          - "reseq-fastq-dir"
+      standardize:
+        method: "table-file"
+        args:
+          table_filename: "{reseq-table}"
+          standardized_filename: "{reseq-standardized-wildcard}"
+          out_dir: "{reseq-fastq-dir}"
+          copy_method: '{reseq-copy-method}'
+          sample_column: 'samples'
+          gzipped: True
+      samples:
+        method: "table-file"
+        args:
+          table_filename: "{reseq-table}"
+          sample_column: 'samples'
+  
+snakefiles:
+  - hifi_cat_reseq_assemble_hifiasm
+  - hifi_reseq_purge_dups
