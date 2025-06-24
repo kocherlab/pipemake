@@ -104,5 +104,5 @@ setup:
           sample_column: 'samples'
   
 snakefiles:
-  - hifi_cat_reseq_assemble_hifiasm
-  - hifi_reseq_purge_dups
+  - hifi_reseq_assemble_hifiasm
+  - hifi_cat_reseq_purge_dups
