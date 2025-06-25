@@ -1,0 +1,82 @@
+pipeline: process-egapx-annotations
+version: 1.0
+parser:
+  help: Process eGAPx annotations
+  arg-groups:
+    basic:
+      args:
+        assembly-fasta:
+          help: "Assembly FASTA file"
+          type: str
+          required: True
+          action: confirmFile
+        annotations-gtf:
+          help: "Annotations GTF"
+          type: str
+          required: True
+          action: confirmFile
+        assembly-version:
+          help: "Assembly Version"
+          type: str
+          default:
+            str: "v"
+            suffix:
+              - function: jobRandomString
+        annotation-version:
+          help: "Annotation Version"
+          type: str
+          default:
+            str: ""
+            suffix:
+              - function: jobRandomString
+        species:
+          help: "Species name"
+          type: str
+          default:
+            str: "Sp"
+            suffix:
+              - function: jobRandomString
+    paths:
+      args:
+        assembly-dir:
+          help: "Directory to store BAM files"
+          type: str
+          default: "Assembly"
+        annotations-dir:
+          help: "Directory to store annotations"
+          type: str
+          default: 
+            str: "Annotations/epagx"
+setup:
+  fasta_input:
+    file-method:
+      input:
+        args:
+          - "assembly-fasta"
+          - "assembly-dir"
+      standardize:
+        method: "file-str"
+        args:
+          input_filename: "{assembly-fasta}"
+          standardized_filename: "{species}_genome_{assembly_version}.fasta"
+          out_dir: "{assembly-dir}"
+          copy_method: "copy"
+          gzipped: False
+
+  gff_input:
+    file-method:
+      input:
+        args:
+          - "annotations-gtf"
+          - "annotations-dir"
+      standardize:
+        method: "file-str"
+        args:
+          input_filename: "{annotations-gtf}"
+          standardized_filename: "epagx.gtf"
+          out_dir: "{annotations-dir}"
+          copy_method: "copy"
+          gzipped: False
+
+snakefiles:
+  - process_egapx
