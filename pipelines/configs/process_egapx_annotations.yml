@@ -47,6 +47,10 @@ parser:
           type: str
           default: 
             str: "Annotations/"
+        processed-dir:
+          help: "Directory to store processed files"
+          type: str
+          default: "Processed/"
 setup:
   fasta_input:
     file-method:
@@ -73,7 +77,7 @@ setup:
         method: "file-str"
         args:
           input_filename: "{annotations-gtf}"
-          standardized_filename: "epagx/epagx.gtf"
+          standardized_filename: "epagx.gtf"
           out_dir: "{annotations-dir}"
           copy_method: "copy"
           gzipped: False
