@@ -52,6 +52,13 @@ rule process_egapx_gtf:
                 f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.no_utrs.gff",
             ),
         ),
+        temp(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["processed_dir"],
+                f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.cvt.log",
+            ),
+        ),
     params:
         out_prefix=os.path.join(
             config["paths"]["workflow_prefix"],
@@ -115,6 +122,13 @@ rule gff_to_transcripts:
                 f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_trans.fa.tmp",
             )
         ),
+        temp(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["processed_dir"],
+                f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_trans.fa.log",
+            )
+        ),
     singularity:
         "docker://aewebb/gffread:v0.12.7"
     resources:
@@ -169,6 +183,13 @@ rule gff_to_proteins:
                 config["paths"]["workflow_prefix"],
                 config["paths"]["processed_dir"],
                 f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_pep.fa.tmp",
+            )
+        ),
+        temp(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["processed_dir"],
+                f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_pep.fa.log",
             )
         ),
     singularity:
