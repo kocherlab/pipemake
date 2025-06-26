@@ -23,6 +23,11 @@ rule all:
         os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["processed_dir"],
+            f"{config['species']}_genome_{config['assembly_version']}.assembly.stats",
+        ),
+        os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["processed_dir"],
             f"{config['species']}_genome_{config['assembly_version']}.fasta.gz.fai",
         ),
         os.path.join(
@@ -71,6 +76,28 @@ rule process_egapx_gtf:
         process-ncbi-annotations --gtf {input} --species-tag {params.species}_{params.assembly_version}.{params.annotation_version} --out-prefix {params.out_prefix}
         mv {params.out_prefix}.gff {params.out_prefix}.no_utrs.gff
         """
+
+
+rule assembly_stats_bbmap:
+    input:
+        os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["assembly_dir"],
+            f"{config['species']}_genome_{config['assembly_version']}.fasta",
+        ),
+    output:
+        os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["processed_dir"],
+            f"{config['species']}_genome_{config['assembly_version']}.assembly.stats",
+        ),
+    singularity:
+        "docker://biocontainers/bbmap:39.26--he5f24ec_0"
+    resources:
+        mem_mb=4000,
+    threads: 1
+    shell:
+        "stats.sh in={input} > {output}"
 
 
 rule add_utrs_to_gff:
