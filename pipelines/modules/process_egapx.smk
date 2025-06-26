@@ -63,7 +63,7 @@ rule process_egapx_gtf:
         assembly_version=config["assembly_version"],
         annotation_version=config["annotation_version"],
     singularity:
-        "docker://aewebb/pipemake_utils:v1.2.4"
+        "docker://aewebb/pipemake_utils:v1.2.5"
     resources:
         mem_mb=2000,
     threads: 1
