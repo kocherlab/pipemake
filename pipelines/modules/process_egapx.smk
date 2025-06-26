@@ -50,6 +50,8 @@ rule process_egapx_gtf:
             f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}",
         ),
         species=config["species"],
+        assembly_version=config["assembly_version"],
+        annotation_version=config["annotation_version"],
     singularity:
         "docker://aewebb/pipemake_utils:v1.2.4"
     resources:
@@ -57,9 +59,10 @@ rule process_egapx_gtf:
     threads: 1
     shell:
         """
-        process-ncbi-annotations --gtf {input} --species-tag {params.species} --out-prefix {params.out_prefix}
+        process-ncbi-annotations --gtf {input} --species-tag {params.species}_{params.assembly_version}.{params.annotation_version} --out-prefix {params.out_prefix}
         mv {params.out_prefix}.gff {params.out_prefix}.no_utrs.gff
         """
+
 
 rule add_utrs_to_gff:
     input:
@@ -83,12 +86,12 @@ rule add_utrs_to_gff:
         "add_utrs_to_gff.py {input} > {output}"
 
 
-rule gtf_to_transcripts:
+rule gff_to_transcripts:
     input:
-        gtf_file=os.path.join(
+        gff_file=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["annotations_dir"],
-            f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.gtf",
+            f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.gff",
         ),
         assembly_fasta=os.path.join(
             config["paths"]["workflow_prefix"],
@@ -107,14 +110,15 @@ rule gtf_to_transcripts:
         mem_mb=8000,
     threads: 1
     shell:
-        "gffread -x {output} -g {input.assembly_fasta} {input.gtf_file}"
+        "gffread -x {output} -g {input.assembly_fasta} {input.gff_file}"
 
-rule gtf_to_proteins:
+
+rule gff_to_proteins:
     input:
-        gtf_file=os.path.join(
+        gff_file=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["annotations_dir"],
-            f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.gtf",
+            f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.gff",
         ),
         assembly_fasta=os.path.join(
             config["paths"]["workflow_prefix"],
@@ -133,4 +137,4 @@ rule gtf_to_proteins:
         mem_mb=8000,
     threads: 1
     shell:
-        "gffread -y {output} -g {input.assembly_fasta} {input.gtf_file}"
+        "gffread -y {output} -g {input.assembly_fasta} {input.gff_file}"
