@@ -109,10 +109,12 @@ rule gff_to_transcripts:
             f"{config['species']}_genome_{config['assembly_version']}.fasta",
         ),
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["annotations_dir"],
-            f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_trans.fa.tmp",
+        temp(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["annotations_dir"],
+                f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_trans.fa.tmp",
+            )
         ),
     singularity:
         "docker://aewebb/gffread:v0.12.7"
@@ -163,10 +165,12 @@ rule gff_to_proteins:
             f"{config['species']}_genome_{config['assembly_version']}.fasta",
         ),
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["annotations_dir"],
-            f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_pep.fa.tmp",
+        temp(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["annotations_dir"],
+                f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_pep.fa.tmp",
+            )
         ),
     singularity:
         "docker://aewebb/gffread:v0.12.7"
