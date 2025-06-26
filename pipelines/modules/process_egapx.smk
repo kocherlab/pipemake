@@ -51,7 +51,7 @@ rule process_egapx_gtf:
         ),
         species=config["species"],
     singularity:
-        "docker://aewebb/pipemake_utils:v1.2.3"
+        "docker://aewebb/pipemake_utils:v1.2.4"
     resources:
         mem_mb=2000,
     threads: 1
