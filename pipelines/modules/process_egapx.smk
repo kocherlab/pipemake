@@ -67,7 +67,7 @@ rule process_egapx_gtf:
         assembly_version=config["assembly_version"],
         annotation_version=config["annotation_version"],
     singularity:
-        "docker://aewebb/pipemake_utils:v1.2.5"
+        "docker://aewebb/pipemake_utils:v1.2.6"
     resources:
         mem_mb=2000,
     threads: 1
@@ -170,12 +170,12 @@ rule update_transcripts:
             f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_trans.fa",
         ),
     singularity:
-        "docker://aewebb/pipemake_utils:v1.2.5"
+        "docker://aewebb/pipemake_utils:v1.2.6"
     resources:
         mem_mb=2000,
     threads: 1
     shell:
-        "update-fasta --gff-file {input.gff_file} --fasta-file {input.transcript_fasta} --out-file {output}"
+        "update-fasta --gff-file {input.gff_file} --fasta-file {input.transcript_fasta} --out-file {output} --seq-type nucleotide"
 
 
 rule gff_to_proteins:
@@ -226,12 +226,12 @@ rule update_proteins:
             f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_pep.fa",
         ),
     singularity:
-        "docker://aewebb/pipemake_utils:v1.2.5"
+        "docker://aewebb/pipemake_utils:v1.2.6"
     resources:
         mem_mb=2000,
     threads: 1
     shell:
-        "update-fasta --gff-file {input.gff_file} --fasta-file {input.protein_fasta} --out-file {output}"
+        "update-fasta --gff-file {input.gff_file} --fasta-file {input.protein_fasta} --out-file {output} --seq-type protein"
 
 
 rule gzip_assembly:
