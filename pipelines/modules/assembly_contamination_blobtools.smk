@@ -56,6 +56,8 @@ rule hifi_align_minimap2:
     shell:
         "minimap2 -ax map-hifi -t {threads} {input.assembly_fasta} {input.hifi_fastq} | samtools sort -@{threads} --threads {threads} -O bam -o {output}"
 
+
+
 rule chunk_assembly:
     input:
         os.path.join(
@@ -64,10 +66,45 @@ rule chunk_assembly:
             f"{config['species']}_{config['assembly_version']}.fa",
         ),
     output:
-        os.path.join(
+        temp(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["assembly_dir"],
+                "chucks",
+                "{chunk}.fa",
+            )
+        )
+    singularity:
+        "docker://aewebb/seqkit:v2.10.0"
+    params:
+        chunks=config["chunks"],
+        output_dir=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["assembly_dir"],
-            f"{config['species']}_{config['assembly_version']}.chunked.fa",
+            "chucks",
+        ),
+    resources:
+        mem_mb=4000,
+    threads: 1
+    shell:
+        "singularity exec seqkit_v2.10.0.sif seqkit split {input} -p {params.chunks} --by-part-prefix {params.output_dir}/ -O ."
+
+rule chunk_file:
+    input:
+        os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["assembly_dir"],
+                "chucks",
+                "{chunk}.fa",
+            )
+    output:
+        temp(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["assembly_dir"],
+                "chucks",
+                "{chunk}.chunked.fa",
+            )
         ),
     params:
         chunk_size=config["chunk_size"],
@@ -85,15 +122,19 @@ rule blastn_chunked_assembly_nt:
         os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["assembly_dir"],
-            f"{config['species']}_{config['assembly_version']}.chunked.fa",
-        ),
+            "chucks",
+            "{chunk}.chunked.fa",
+        )
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["blast_dir"],
-            "blastn",
-            f"{config['species']}_{config['assembly_version']}.chunked.out",
-        ),
+        temp(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["blast_dir"],
+                "blastn",
+                "chucks",
+                "{chunk}.chunked.out",
+            )
+        )
     params:
         ncbi_nt_db=config["ncbi_nt_db"],
     singularity:
@@ -104,21 +145,51 @@ rule blastn_chunked_assembly_nt:
     shell:
         'blastn -query {input} -db {params.ncbi_nt_db} -outfmt "6 qseqid staxids bitscore std" -max_target_seqs 10 -max_hsps 1 -evalue 1e-25 -num_threads {threads} -out {output}'
 
+rule cat_blastn_assembly_nt:
+    input:
+        expand(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["blast_dir"],
+                "blastn",
+                "chucks",
+                "{chunk}.chunked.out",
+            ),
+            chunk=[str(i).zfill(3) for i in range(1, config["chunks"] + 1)],
+        ),
+    output:
+        os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["blast_dir"],
+            "blastn",
+            f"{config['species']}_{config['assembly_version']}.chunked.out",
+        ),
+    singularity:
+        "docker://aewebb/pipemake_utils:v1.2.2"
+    resources:
+        mem_mb=16000,
+    threads: 1
+    shell:
+        "cat {input} > {output}"
 
 rule blastx_chunked_assembly_records_diamond:
     input:
         os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["assembly_dir"],
-            f"{config['species']}_{config['assembly_version']}.chunked.fa",
-        ),
+            "chucks",
+            "{chunk}.chunked.fa",
+        )
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["blast_dir"],
-            "blastx",
-            f"{config['species']}_{config['assembly_version']}.chunked.out",
-        ),
+        temp(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["blast_dir"],
+                "blastx",
+                "chucks",
+                "{chunk}.chunked.out",
+            )
+        )
     params:
         uniprot_db=config["uniprot_db"],
     singularity:
@@ -128,6 +199,29 @@ rule blastx_chunked_assembly_records_diamond:
     threads: 16
     shell:
         "diamond blastx --query {input} --db {params.uniprot_db} --outfmt 6 qseqid staxids bitscore qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore --sensitive --max-target-seqs 1 --evalue 1e-25 --threads {threads} > {output}"
+
+rule cat_blastx_assembly_records_diamond:
+    input:
+        expand(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["blast_dir"],
+                "blastx",
+                "chucks",
+                "{chunk}.chunked.out",
+            ),
+            chunk=[str(i).zfill(3) for i in range(1, config["chunks"] + 1)],
+        ),
+    output:
+        os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["blast_dir"],
+            "blastx",
+            f"{config['species']}_{config['assembly_version']}.chunked.out",
+        ),
+    threads: 1
+    shell:
+        "cat {input} > {output}"
 
 rule unchunk_blast:
     input:
