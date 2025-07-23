@@ -57,8 +57,7 @@ rule hifi_align_minimap2:
         "minimap2 -ax map-hifi -t {threads} {input.assembly_fasta} {input.hifi_fastq} | samtools sort -@{threads} --threads {threads} -O bam -o {output}"
 
 
-
-rule chunk_assembly:
+checkpoint split_assembly:
     input:
         os.path.join(
             config["paths"]["workflow_prefix"],
@@ -66,44 +65,36 @@ rule chunk_assembly:
             f"{config['species']}_{config['assembly_version']}.fa",
         ),
     output:
-        temp(
+        directory(
             os.path.join(
                 config["paths"]["workflow_prefix"],
                 config["paths"]["assembly_dir"],
-                "chucks",
-                "{chunk}.fa",
+                "split",
             )
-        )
-    singularity:
-        "docker://aewebb/seqkit:v2.10.0"
-    params:
-        chunks=config["chunks"],
-        output_dir=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            "chucks",
         ),
+    singularity:
+        "docker://aewebb/pipemake_utils:v1.2.7"
     resources:
         mem_mb=4000,
     threads: 1
     shell:
-        "seqkit split {input} -p {params.chunks} --by-part-prefix {params.output_dir}/ -O ."
+        "split-fasta --input-fasta {input} --output-dir {output}"
 
 rule chunk_file:
     input:
         os.path.join(
                 config["paths"]["workflow_prefix"],
                 config["paths"]["assembly_dir"],
-                "chucks",
-                "{chunk}.fa",
+                "split",
+                "{chrom}.fasta",
             )
     output:
         temp(
             os.path.join(
                 config["paths"]["workflow_prefix"],
                 config["paths"]["assembly_dir"],
-                "chucked",
-                "{chunk}.chunked.fa",
+                "chunked",
+                "{chrom}.chunked.fasta",
             )
         ),
     params:
@@ -122,8 +113,8 @@ rule blastn_chunked_assembly_nt:
         os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["assembly_dir"],
-            "chucked",
-            "{chunk}.chunked.fa",
+            "chunked",
+            "{chrom}.chunked.fasta",
         )
     output:
         temp(
@@ -132,7 +123,7 @@ rule blastn_chunked_assembly_nt:
                 config["paths"]["blast_dir"],
                 "blastn",
                 "chucked",
-                "{chunk}.chunked.out",
+                "{chrom}.chunked.out",
             )
         )
     params:
@@ -145,32 +136,6 @@ rule blastn_chunked_assembly_nt:
     shell:
         'blastn -query {input} -db {params.ncbi_nt_db} -outfmt "6 qseqid staxids bitscore std" -max_target_seqs 10 -max_hsps 1 -evalue 1e-25 -num_threads {threads} -out {output}'
 
-rule cat_blastn_assembly_nt:
-    input:
-        expand(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["blast_dir"],
-                "blastn",
-                "chucked",
-                "{chunk}.chunked.out",
-            ),
-            chunk=[str(i).zfill(3) for i in range(1, config["chunks"] + 1)],
-        ),
-    output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["blast_dir"],
-            "blastn",
-            f"{config['species']}_{config['assembly_version']}.chunked.out",
-        ),
-    singularity:
-        "docker://aewebb/pipemake_utils:v1.2.2"
-    resources:
-        mem_mb=16000,
-    threads: 1
-    shell:
-        "cat {input} > {output}"
 
 rule blastx_chunked_assembly_records_diamond:
     input:
@@ -200,20 +165,54 @@ rule blastx_chunked_assembly_records_diamond:
     shell:
         "diamond blastx --query {input} --db {params.uniprot_db} --outfmt 6 qseqid staxids bitscore qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore --sensitive --max-target-seqs 1 --evalue 1e-25 --threads {threads} > {output}"
 
-rule cat_blastx_assembly_records_diamond:
-    input:
-        expand(
+def aggregate_blast (wildcards):
+    checkpoint_output = checkpoints.split_assembly.get(
+        **wildcards
+    ).output[0]
+    return {
+        "blastn": expand(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["blast_dir"],
+                "blastn",
+                "chucked",
+                "{chrom}.chunked.out",
+            )
+            chrom=glob_wildcards(
+                os.path.join(
+                    checkpoint_output,
+                    "{chrom}.fasta",
+                )
+            ).chrom,
+        ),
+        "blastx": expand(
             os.path.join(
                 config["paths"]["workflow_prefix"],
                 config["paths"]["blast_dir"],
                 "blastx",
                 "chucked",
-                "{chunk}.chunked.out",
-            ),
-            chunk=[str(i).zfill(3) for i in range(1, config["chunks"] + 1)],
+                "{chrom}.chunked.out",
+            )
+            chrom=glob_wildcards(
+                os.path.join(
+                    checkpoint_output,
+                    "{chrom}.fasta",
+                )
+            ).chrom,
         ),
+    }
+
+rule cat_blast:
+    input:
+        unpack(aggregate_blast),
     output:
-        os.path.join(
+        blastn=os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["blast_dir"],
+            "blastn",
+            f"{config['species']}_{config['assembly_version']}.chunked.out",
+        ),
+        blastx=os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["blast_dir"],
             "blastx",
@@ -221,7 +220,10 @@ rule cat_blastx_assembly_records_diamond:
         ),
     threads: 1
     shell:
-        "cat {input} > {output}"
+        """
+        cat {input.blastn} > {output.blastn}
+        cat {input.blastx} > {output.blastx}
+        """
 
 rule unchunk_blast:
     input:
