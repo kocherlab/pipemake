@@ -102,7 +102,7 @@ rule chunk_file:
             os.path.join(
                 config["paths"]["workflow_prefix"],
                 config["paths"]["assembly_dir"],
-                "chucks",
+                "chucked",
                 "{chunk}.chunked.fa",
             )
         ),
@@ -122,7 +122,7 @@ rule blastn_chunked_assembly_nt:
         os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["assembly_dir"],
-            "chucks",
+            "chucked",
             "{chunk}.chunked.fa",
         )
     output:
@@ -131,7 +131,7 @@ rule blastn_chunked_assembly_nt:
                 config["paths"]["workflow_prefix"],
                 config["paths"]["blast_dir"],
                 "blastn",
-                "chucks",
+                "chucked",
                 "{chunk}.chunked.out",
             )
         )
@@ -152,7 +152,7 @@ rule cat_blastn_assembly_nt:
                 config["paths"]["workflow_prefix"],
                 config["paths"]["blast_dir"],
                 "blastn",
-                "chucks",
+                "chucked",
                 "{chunk}.chunked.out",
             ),
             chunk=[str(i).zfill(3) for i in range(1, config["chunks"] + 1)],
@@ -177,7 +177,7 @@ rule blastx_chunked_assembly_records_diamond:
         os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["assembly_dir"],
-            "chucks",
+            "chucked",
             "{chunk}.chunked.fa",
         )
     output:
@@ -186,7 +186,7 @@ rule blastx_chunked_assembly_records_diamond:
                 config["paths"]["workflow_prefix"],
                 config["paths"]["blast_dir"],
                 "blastx",
-                "chucks",
+                "chucked",
                 "{chunk}.chunked.out",
             )
         )
@@ -207,7 +207,7 @@ rule cat_blastx_assembly_records_diamond:
                 config["paths"]["workflow_prefix"],
                 config["paths"]["blast_dir"],
                 "blastx",
-                "chucks",
+                "chucked",
                 "{chunk}.chunked.out",
             ),
             chunk=[str(i).zfill(3) for i in range(1, config["chunks"] + 1)],
