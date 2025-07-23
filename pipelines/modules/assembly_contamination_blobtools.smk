@@ -122,7 +122,7 @@ rule blastn_chunked_assembly_nt:
                 config["paths"]["workflow_prefix"],
                 config["paths"]["blast_dir"],
                 "blastn",
-                "chucked",
+                "chunked",
                 "{chrom}.chunked.out",
             )
         )
@@ -142,8 +142,8 @@ rule blastx_chunked_assembly_records_diamond:
         os.path.join(
             config["paths"]["workflow_prefix"],
             config["paths"]["assembly_dir"],
-            "chucked",
-            "{chunk}.chunked.fa",
+            "chunked",
+            "{chunk}.chunked.fasta",
         )
     output:
         temp(
@@ -151,7 +151,7 @@ rule blastx_chunked_assembly_records_diamond:
                 config["paths"]["workflow_prefix"],
                 config["paths"]["blast_dir"],
                 "blastx",
-                "chucked",
+                "chunked",
                 "{chunk}.chunked.out",
             )
         )
@@ -175,7 +175,7 @@ def aggregate_blast (wildcards):
                 config["paths"]["workflow_prefix"],
                 config["paths"]["blast_dir"],
                 "blastn",
-                "chucked",
+                "chunked",
                 "{chrom}.chunked.out",
             ),
             chrom=glob_wildcards(
@@ -190,7 +190,7 @@ def aggregate_blast (wildcards):
                 config["paths"]["workflow_prefix"],
                 config["paths"]["blast_dir"],
                 "blastx",
-                "chucked",
+                "chunked",
                 "{chrom}.chunked.out",
             ),
             chrom=glob_wildcards(
