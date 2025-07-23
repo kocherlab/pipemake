@@ -87,7 +87,7 @@ rule chunk_assembly:
         mem_mb=4000,
     threads: 1
     shell:
-        "singularity exec seqkit_v2.10.0.sif seqkit split {input} -p {params.chunks} --by-part-prefix {params.output_dir}/ -O ."
+        "seqkit split {input} -p {params.chunks} --by-part-prefix {params.output_dir}/ -O ."
 
 rule chunk_file:
     input:
