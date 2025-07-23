@@ -177,7 +177,7 @@ def aggregate_blast (wildcards):
                 "blastn",
                 "chucked",
                 "{chrom}.chunked.out",
-            )
+            ),
             chrom=glob_wildcards(
                 os.path.join(
                     checkpoint_output,
@@ -192,7 +192,7 @@ def aggregate_blast (wildcards):
                 "blastx",
                 "chucked",
                 "{chrom}.chunked.out",
-            )
+            ),
             chrom=glob_wildcards(
                 os.path.join(
                     checkpoint_output,
