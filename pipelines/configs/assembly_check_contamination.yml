@@ -38,10 +38,6 @@ parser:
             str: "v"
             suffix:
               - function: jobRandomString
-        chunks:
-          help: "Number of chunks to split the assembly into"
-          type: int
-          default: 10
         chunk-size:
           help: "Chunk size for processing"
           type: int
