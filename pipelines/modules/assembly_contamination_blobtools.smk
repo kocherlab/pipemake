@@ -1,9 +1,37 @@
 rule all:
     input:
-        f"Figures/blobtools/{config['species']}_{config['assembly_version']}_scaff_snail.png",
-        f"Figures/blobtools/{config['species']}_{config['assembly_version']}_scaff_blob.png",
-        f"Figures/blobtools/{config['species']}_{config['assembly_version']}_scaff_cumulative.png",
-        f"Assembly/blobtools/{config['species']}_{config['assembly_version']}_blobblurbout.tsv",
+        os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["figures_dir"],
+            f"{config['species']}_{config['assembly_version']}_scaff_snail.png",
+        ),
+        os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["figures_dir"],
+            f"{config['species']}_{config['assembly_version']}_scaff_blob.png",
+        ),
+        os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["figures_dir"],
+            f"{config['species']}_{config['assembly_version']}_scaff_cumulative.png",
+        ),
+        os.path.join(
+            config["paths"]["workflow_prefix"],
+            f"{config['paths']['blobtools_dir']}_blobblurbout.tsv",
+        ),
+        expand(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["blast_dir"],
+                "{blast_type}",
+                f"{config['species']}_{config['assembly_version']}.out",
+            ),
+            blast_type=["blastn", "blastx"],
+        ),
+#        f"Figures/blobtools/{config['species']}_{config['assembly_version']}_scaff_snail.png",
+#        f"Figures/blobtools/{config['species']}_{config['assembly_version']}_scaff_blob.png",
+#        f"Figures/blobtools/{config['species']}_{config['assembly_version']}_scaff_cumulative.png",
+#        f"Assembly/blobtools/{config['species']}_{config['assembly_version']}_blobblurbout.tsv",
 
 
 rule hifi_align_minimap2:
@@ -21,11 +49,72 @@ rule hifi_align_minimap2:
         "minimap2 -ax map-hifi -t {threads} {input.assembly_fasta} {input.hifi_fastq} | samtools sort -@{threads} --threads {threads} -O bam -o {output}"
 
 
-rule blastn_assembly_nt:
+checkpoint split_assembly:
     input:
         f"Assembly/{config['species']}_{config['assembly_version']}.fa",
     output:
-        f"BLAST/Assembly/blastn/{config['species']}_{config['assembly_version']}.out",
+        directory(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["assembly_dir"],
+                "split",
+            )
+        ),
+    singularity:
+        "docker://aewebb/pipemake_utils:v1.2.7"
+    resources:
+        mem_mb=4000,
+    threads: 1
+    shell:
+        "split-fasta --input-fasta {input} --output-dir {output}"
+
+rule chunk_file:
+    input:
+        os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["assembly_dir"],
+                "split",
+                "{chrom}.fasta",
+            )
+    output:
+        temp(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["assembly_dir"],
+                "chunked",
+                "{chrom}.chunked.fasta",
+            )
+        ),
+#        f"BLAST/Assembly/blastn/{config['species']}_{config['assembly_version']}.out",
+    params:
+        chunk_size=config["chunk_size"],
+    singularity:
+        "docker://aewebb/pipemake_utils:v1.2.2"
+    resources:
+        mem_mb=4000,
+    threads: 1
+    shell:
+        "chunk-fasta --input-fasta {input} --chunk-size {params.chunk_size} --output-fasta {output}"
+
+
+rule blastn_chunked_assembly_nt:
+    input:
+        os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["assembly_dir"],
+            "chunked",
+            "{chrom}.chunked.fasta",
+        )
+    output:
+        temp(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["blast_dir"],
+                "blastn",
+                "chunked",
+                "{chrom}.chunked.out",
+            )
+        )
     params:
         ncbi_nt_db=config["ncbi_nt_db"],
     singularity:
@@ -37,33 +126,29 @@ rule blastn_assembly_nt:
         'blastn -query {input} -db {params.ncbi_nt_db} -outfmt "6 qseqid staxids bitscore std" -max_target_seqs 10 -max_hsps 1 -evalue 1e-25 -num_threads {threads} -out {output}'
 
 
-rule short_assembly_records_for_blastx:
+rule blastx_chunked_assembly_records_diamond:
     input:
-        f"Assembly/{config['species']}_{config['assembly_version']}.fa",
+        os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["assembly_dir"],
+            "chunked",
+            "{chunk}.chunked.fasta",
+        )
     output:
         temp(
-            f"BLAST/Assembly/blastx/{config['species']}_{config['assembly_version']}.short_records.fa"
-        ),
-    params:
-        max_length=config["blastx_max_length"],
-    singularity:
-        "docker://aewebb/seqkit:v2.10.0"
-    resources:
-        mem_mb=16000,
-    threads: 1
-    shell:
-        """
-        let "max_length={params.max_length} - 1"
-        seqkit seq -M $max_length {input} > {output}
-        sleep 60
-        """
-
-
-rule blastx_short_assembly_records_diamond:
-    input:
-        f"BLAST/Assembly/blastx/{config['species']}_{config['assembly_version']}.short_records.fa",
-    output:
-        f"BLAST/Assembly/blastx/{config['species']}_{config['assembly_version']}.out",
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["blast_dir"],
+                "blastx",
+                "chunked",
+                "{chunk}.chunked.out",
+            )
+        )
+#        f"Assembly/{config['species']}_{config['assembly_version']}.fa",
+#    output:
+#        temp(
+#            f"BLAST/Assembly/blastx/{config['species']}_{config['assembly_version']}.short_records.fa"
+#        ),
     params:
         uniprot_db=config["uniprot_db"],
     singularity:
@@ -74,6 +159,95 @@ rule blastx_short_assembly_records_diamond:
     shell:
         "diamond blastx --query {input} --db {params.uniprot_db} --outfmt 6 qseqid staxids bitscore qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore --sensitive --max-target-seqs 1 --evalue 1e-25 --threads {threads} > {output}"
 
+def aggregate_blast (wildcards):
+    checkpoint_output = checkpoints.split_assembly.get(
+        **wildcards
+    ).output[0]
+    return {
+        "blastn": expand(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["blast_dir"],
+                "blastn",
+                "chunked",
+                "{chrom}.chunked.out",
+            ),
+            chrom=glob_wildcards(
+                os.path.join(
+                    checkpoint_output,
+                    "{chrom}.fasta",
+                )
+            ).chrom,
+        ),
+        "blastx": expand(
+            os.path.join(
+                config["paths"]["workflow_prefix"],
+                config["paths"]["blast_dir"],
+                "blastx",
+                "chunked",
+                "{chrom}.chunked.out",
+            ),
+            chrom=glob_wildcards(
+                os.path.join(
+                    checkpoint_output,
+                    "{chrom}.fasta",
+                )
+            ).chrom,
+        ),
+    }
+
+rule cat_blast:
+    input:
+        unpack(aggregate_blast),
+    output:
+        blastn=os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["blast_dir"],
+            "blastn",
+            f"{config['species']}_{config['assembly_version']}.chunked.out",
+        ),
+        blastx=os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["blast_dir"],
+            "blastx",
+            f"{config['species']}_{config['assembly_version']}.chunked.out",
+        ),
+    threads: 1
+    shell:
+        """
+        cat {input.blastn} > {output.blastn}
+        cat {input.blastx} > {output.blastx}
+        """
+
+rule unchunk_blast:
+    input:
+        os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["blast_dir"],
+            "{blast_type}",
+            f"{config['species']}_{config['assembly_version']}.chunked.out",
+        ),
+    output:
+        os.path.join(
+            config["paths"]["workflow_prefix"],
+            config["paths"]["blast_dir"],
+            "{blast_type}",
+            f"{config['species']}_{config['assembly_version']}.out",
+        ),
+=======
+#        f"BLAST/Assembly/blastx/{config['species']}_{config['assembly_version']}.short_records.fa",
+#    output:
+#        f"BLAST/Assembly/blastx/{config['species']}_{config['assembly_version']}.out",
+#    params:
+#        uniprot_db=config["uniprot_db"],
+    singularity:
+        "docker://aewebb/pipemake_utils:v1.2.2"
+    resources:
+        mem_mb=16000,
+    threads: 1
+    shell:
+        "unchunk-blast --chunked-blast {input} --unchunked-blast {output}"
+
 
 rule blobtk_blobtools_create:
     input:
@@ -83,7 +257,7 @@ rule blobtk_blobtools_create:
     params:
         blob_dir=f"Assembly/blobtools/{config['species']}_{config['assembly_version']}",
     singularity:
-        "docker://genomehubs/blobtoolkit:4.4.5"
+        "docker://genomehubs/blobtoolkit:4.4.6"
     resources:
         mem_mb=16000,
     threads: 1
@@ -100,7 +274,7 @@ rule blobtk_blobtools_add_cov:
     params:
         blob_dir=f"Assembly/blobtools/{config['species']}_{config['assembly_version']}",
     singularity:
-        "docker://genomehubs/blobtoolkit:4.4.5"
+        "docker://genomehubs/blobtoolkit:4.4.6"
     resources:
         mem_mb=16000,
     threads: 1
@@ -119,7 +293,7 @@ rule blobtk_blobtools_add_hits:
         blob_dir=f"Assembly/blobtools/{config['species']}_{config['assembly_version']}",
         ncbi_taxa_db=config["ncbi_taxa_db"],
     singularity:
-        "docker://genomehubs/blobtoolkit:4.4.5"
+        "docker://genomehubs/blobtoolkit:4.4.6"
     resources:
         mem_mb=16000,
     threads: 1
@@ -136,7 +310,7 @@ rule blobtk_blobtools_add_busco:
     params:
         blob_dir=f"Assembly/blobtools/{config['species']}_{config['assembly_version']}",
     singularity:
-        "docker://genomehubs/blobtoolkit:4.4.5"
+        "docker://genomehubs/blobtoolkit:4.4.6"
     resources:
         mem_mb=16000,
     threads: 1
@@ -173,7 +347,7 @@ rule blobbtk_plot:
     params:
         blob_dir=f"Assembly/blobtools/{config['species']}_{config['assembly_version']}",
     singularity:
-        "docker://genomehubs/blobtoolkit:4.4.5"
+        "docker://genomehubs/blobtoolkit:4.4.6"
     resources:
         mem_mb=16000,
     threads: 1
