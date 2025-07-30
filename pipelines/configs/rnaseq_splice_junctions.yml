@@ -8,23 +8,19 @@ parser:
         input-parser:
           required: True
       wildcards-args:
-        rnaseq-standardized-wildcard:
-          help: "Standardized wildcard statement used to store RNAseq FASTQs"
-          type: str
-          default: 
-            str: "{samples}_{reads}.fq.gz"
+        rnaseq-standardized-filename: "{samples}_{reads}.fq.gz"
       args:
         rnaseq-wildcard:
           help: "Wildcard statement to represent RNAseq FASTQs"
           type: str
           mutually-exclusive: "input-parser"
-          wildcards: "rnaseq-standardized-wildcard"
+          wildcards: "rnaseq-standardized-filename"
         rnaseq-table:
           help: "Table with sample and FASTQs filenames"
           type: str
           action: confirmFile
           mutually-exclusive: "input-parser"
-          wildcards: "rnaseq-standardized-wildcard"
+          wildcards: "rnaseq-standardized-filename"
         rnaseq-copy-method:
           help: "Specifies if RNAseq FASTQs should be copied or symbolically linked."
           choices:

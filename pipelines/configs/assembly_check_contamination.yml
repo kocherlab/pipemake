@@ -56,32 +56,6 @@ parser:
           type: str
           required: True
           action: confirmDir
-    paths:
-      args:
-        assembly-dir:
-          help: "Directory to store assembly"
-          type: str
-          default: "Assembly"
-        hifi-fastq-dir:
-          help: "Directory to store the HIFI FASTQ files"
-          type: str
-          default: "HiFi/FASTQs"
-        hifi-bam-dir:
-          help: "Directory to store the sorted HiC BAM files"
-          type: str
-          default: "HiC/BAMs"
-        blast-dir:
-          help: "Directory to store the BLAST output"
-          type: str
-          default: "Assembly/BLAST"
-        blobtools-dir:
-          help: "Directory to store the BlobTools output"
-          type: str
-          default: "Assembly/blobtools"
-        figures-dir:
-          help: "Directory to store the BlobTools figures"
-          type: str
-          default: "Assembly/Figures"
 setup:
   hifi_input:
     methods:
