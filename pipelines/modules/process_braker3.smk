@@ -1,53 +1,19 @@
 rule all:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["annotations_dir"],
-            f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.gff3",
-        ),
+        f"Annotations/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.gff3",
 
 
 rule process_braker3:
     input:
-        braker3_gff=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["annotations_dir"],
-            "BRAKER3",
-            "braker.gff3",
-        ),
-        braker3_cds=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["annotations_dir"],
-            "BRAKER3",
-            "braker.codingseq",
-        ),
-        braker3_aa=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["annotations_dir"],
-            "BRAKER3",
-            "braker.aa",
-        ),
+        braker3_gff="Annotations/BRAKER3/braker.gff3",
+        braker3_cds="Annotations/BRAKER3/braker.codingseq",
+        braker3_aa="Annotations/BRAKER3/braker.aa",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["annotations_dir"],
-            f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.gff3",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["annotations_dir"],
-            f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_trans.fa",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["annotations_dir"],
-            f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_pep.fa",
-        ),
+        f"Annotations/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.gff3",
+        f"Annotations/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_trans.fa",
+        f"Annotations/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_pep.fa",
     params:
-        out_dir=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["annotations_dir"],
-        ),
+        out_dir="Annotations",
         species=config["species"],
         assembly_version=config["assembly_version"],
         annotation_version=config["annotation_version"],

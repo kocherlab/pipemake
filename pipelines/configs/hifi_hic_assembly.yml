@@ -1,0 +1,70 @@
+pipeline: hifi-hic-assembly
+version: 1.0
+parser:
+  help: Assemble long reads using hifiasm and scaffold with Hi-C data using yahs
+  arg-groups:
+    basic:
+      mutually-exclusive-args:
+        hic-parser:
+          required: True
+      wildcards-args:
+        hic-standardized-suffix: "{reads}.fq.gz"
+      args:
+        hifi-fastq:
+          help: "Wildcard statement to represent HiFi FASTQs"
+          type: str
+          required: True
+          action: confirmFile
+        hic-wildcard:
+          help: "Wildcard statement to represent the a single pair of HiC FASTQs"
+          type: str
+          mutually-exclusive: "hic-parser"
+          wildcards: "hic-standardized-suffix"
+        hic-table:
+          help: "Table with the filenames of a single pair of HiC FASTQs"
+          type: str
+          action: confirmFile
+          mutually-exclusive: "hic-parser"
+          wildcards: "hic-standardized-suffix"
+        fastq-copy-method:
+          help: "Specifies if FASTQs should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        assembly-version:
+          help: "Assembly Version"
+          type: str
+          default:
+            str: "v"
+            suffix:
+              - function: jobRandomString
+        species:
+          help: "Species name"
+          type: str
+          default:
+            str: "Sp"
+            suffix:
+              - function: jobRandomString
+
+setup:
+  hifi_input:
+    methods: 
+      file-str: "{hifi-fastq}"
+    args:
+      standardized_filename: "HiFi/FASTQ/{species}.fq.gz"
+      copy_method: "{fastq-copy-method}"
+
+  hic_input:
+    methods:
+      wildcard-str: "{hic-wildcard}"
+      table-filename: "{hic-table}"
+    args:
+      standardized_filename: "HiC/FASTQ/{species}_HiC_{hic-standardized-suffix}"
+      copy_method: '{fastq-copy-method}'
+      gzipped: True
+
+snakemake:
+  modules:
+    - hifi_reseq_assemble_hifiasm
+    - hic_scaffolds_yahs

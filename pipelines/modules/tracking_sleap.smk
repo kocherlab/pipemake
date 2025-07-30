@@ -1,39 +1,18 @@
 rule all:
     input:
         expand(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["tracking_sleap_dir"],
-                "{video_id}_sleap_tracked.slp",
-            ),
-            video_id=config["video_ids"],
+            "Tracking/SLEAP/{video_id}_sleap_tracked.slp", video_id=config["video_ids"]
         ),
 
 
 rule run_sleap:
     input:
-        input_video=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["tracking_videos_dir"],
-            "{video_id}.mp4",
-        ),
+        input_video="Tracking/Videos/{video_id}.mp4",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["tracking_sleap_dir"],
-            "{video_id}_sleap_tracked.slp",
-        ),
+        "Tracking/SLEAP/{video_id}_sleap_tracked.slp",
     params:
-        centroid_model=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["tracking_model_dir"],
-            "centroid_model",
-        ),
-        instance_model=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["tracking_model_dir"],
-            "instance_model",
-        ),
+        centroid_model="Tracking/Models/centroid_model",
+        instance_model="Tracking/Models/instance_model",
         tracking_batch_size=config["tracking_batch_size"],
         tracking_tracker=config["tracking_tracker"],
         tracking_similarity=(

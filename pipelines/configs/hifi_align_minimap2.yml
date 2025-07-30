@@ -1,0 +1,92 @@
+pipeline: hifi-align-minimap2
+version: 1.0
+parser:
+  help: Align hifi reseq reads to a genome assembly using minimap2
+  arg-groups:
+    basic:
+      mutually-exclusive-args:
+        input-parser:
+          required: True
+      wildcards-args:
+        reseq-standardized-filename: "{samples}.fq.gz"
+      args:
+        reseq-wildcard:
+          help: "Wildcard statement to represent reseq FASTQs"
+          type: str
+          mutually-exclusive: "input-parser"
+          wildcards: "reseq-standardized-filename"
+        reseq-table:
+          help: "Table with sample and FASTQs filenames"
+          type: str
+          action: confirmFile
+          mutually-exclusive: "input-parser"
+          wildcards: "reseq-standardized-filename"
+        reseq-copy-method:
+          help: "Specifies if reseq FASTQs should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        assembly-fasta:
+          help: "Assembly fasta"
+          type: str
+          required: True
+          action: confirmFile
+        assembly-copy-method:
+          help: "Specifies if assembly files should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        assembly-version:
+          help: "Assembly Version"
+          type: str
+          default:
+            str: "v"
+            suffix:
+              - function: jobRandomString
+        species:
+          help: "Species name"
+          type: str
+          default:
+            str: "Sp"
+            suffix:
+              - function: jobRandomString
+        skip-zero:
+          help: "Skip zero coverage regions"
+          action: store_true
+
+setup:
+  reseq_input:
+    methods:
+      wildcard-str: "{reseq-wildcard}"
+      table-file: "{reseq-table}"
+    args:
+      standardized_filename: "LR_reSEQ/FASTQ/{reseq-standardized-filename}"
+      copy_method: '{reseq-copy-method}'
+      gzipped: True
+      sample_keywords: 
+        - 'samples'
+  
+  assembly_input:
+    methods:
+      file-str: "{assembly-fasta}"
+    args:
+      standardized_filename: "Assembly/{species}_{assembly_version}.fa"
+      copy_method: "{assembly-copy-method}"
+      gzipped: False
+
+snakemake:
+  modules:
+    - lr_reseq_align_minimap2
+    - assembly_index
+    - reseq_sort
+    - reseq_bam_coverage
+    - bam_plot_coverage
+  links:
+    - input: longread_reseq_align_minimap2
+      output: sort_bam_reseq
+    - input: sort_bam_reseq
+      output: plot_coverage_deeptools
+
+

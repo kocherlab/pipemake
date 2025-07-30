@@ -1,0 +1,57 @@
+pipeline: process-egapx-annotations
+version: 1.0
+parser:
+  help: Process eGAPx annotations
+  arg-groups:
+    basic:
+      args:
+        assembly-fasta:
+          help: "Assembly FASTA file"
+          type: str
+          required: True
+          action: confirmFile
+        annotations-gtf:
+          help: "Annotations GTF"
+          type: str
+          required: True
+          action: confirmFile
+        assembly-version:
+          help: "Assembly Version"
+          type: str
+          default:
+            str: "v"
+            suffix:
+              - function: jobRandomString
+        annotation-version:
+          help: "Annotation Version"
+          type: str
+          default:
+            str: ""
+            suffix:
+              - function: jobRandomString
+        species:
+          help: "Species name"
+          type: str
+          default:
+            str: "Sp"
+            suffix:
+              - function: jobRandomString
+setup:
+  fasta_input:
+    methods:
+      file-str: "{assembly-fasta}"
+    args:
+      standardized_filename: "Assembly/{species}_{assembly-version}.fa"
+      copy_method: copy
+      gzipped: False
+  gtf_input:
+    methods:
+      file-str: "{annotations-gtf}"
+    args:
+      standardized_filename: "Annotations/{species}_{assembly-version}.{annotation-version}.gtf"
+      copy_method: copy
+      gzipped: False
+
+snakemake:
+  modules:
+    - process_egapx

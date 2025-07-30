@@ -8,28 +8,20 @@ parser:
         input-parser:
           required: True
       wildcards-args:
-        fastq-standardized-wildcard:
-          help: "Standardized wildcard statement used to store FASTQs"
-          type: str
-          default: 
-            str: "{samples}_{reads}.fq.gz"
-        sra-standardized-wildcard:
-          help: "Standardized wildcard used to store SRAs"
-          type: str
-          default:
-            str: "samples"
+        fastq-standardized-filename: "{samples}_{reads}.fq.gz"
+        sra-standardized-wildcard: "samples"
       args:
         fastq-wildcard:
           help: "Wildcard statement to represent FASTQs"
           type: str
           mutually-exclusive: "input-parser"
-          wildcards: "fastq-standardized-wildcard"
+          wildcards: "fastq-standardized-filename"
         fastq-table:
           help: "Table with sample and FASTQs filenames"
           type: str
           action: confirmFile
           mutually-exclusive: "input-parser"
-          wildcards: "fastq-standardized-wildcard"
+          wildcards: "fastq-standardized-filename"
         paired-end-sra:
           help: "Table with SRA accession numbers for paired-end reads"
           type: str
@@ -62,95 +54,30 @@ parser:
         cut-right:
           help: "Trim the right side of the reads, starting from the 5' end"
           action: store_true
-    paths:
-      args:
-        untrimmed-fastq-dir:
-          help: "Directory to store untrimmed FASTQ files"
-          type: str
-          default: 
-            str: "FASTQ/Untrimmed"
-        trimmed-fastq-dir:
-          help: "Directory to store trimmed FASTQ files"
-          type: str
-          default: 
-            str: "FASTQ/Trimmed"
-        sra-download-dir:
-          help: "Directory to store downloaded SRA files"
-          type: str
-          default: 
-            str: "FASTQ/SRA"
-        sra-processed-dir:
-          help: "Directory to store processed SRA files"
-          type: str
-          default: 
-            str: "FASTQ/Untrimmed"
 setup:
   fastq_input:
-    wildcard-method:
-      input:
-        args:
-          - "fastq-wildcard"
-          - "fastq-standardized-wildcard"
-          - "untrimmed-fastq-dir"
-      standardize:
-        method: "wildcard-str"
-        args:
-          wildcard_str: "{fastq-wildcard}"
-          standardized_filename: "{fastq-standardized-wildcard}"
-          out_dir: "{untrimmed-fastq-dir}"
-          copy_method: '{fastq-copy-method}'
-          gzipped: True
-      samples:
-        method: "wildcard-str"
-        args:
-          wildcard_str: "{fastq-wildcard}"
-          sample_wildcards: 
-            - 'samples'
+    methods:
+      wildcard_str: "{fastq-wildcard}"
+      table_file: "{fastq-table}"
+    args:
+      standardized_filename: "FASTQ/Input/{fastq-standardized-filename}"
+      copy_method: '{fastq-copy-method}'
+      sample_keywords:
+        - 'samples'
+      gzipped: True
+    snakefiles:
+      - fastq_process_wildcards
 
-    table-method:
-      input:
-        args:
-          - "fastq-table"
-          - "fastq-standardized-wildcard"
-          - "untrimmed-fastq-dir"
-      standardize:
-        method: "table-file"
-        args:
-          table_filename: "{fastq-table}"
-          standardized_filename: "{fastq-standardized-wildcard}"
-          out_dir: "{untrimmed-fastq-dir}"
-          copy_method: '{fastq-copy-method}'
-          sample_column: 'samples'
-          gzipped: True
-      samples:
-        method: "table-file"
-        args:
-          table_filename: "{fastq-table}"
-          sample_column: 'samples'
-    paired-end-sra-method:
-      input:
-        args:
-          - "paired-end-sra"
-          - "sra-download-dir"
-      samples:
-        method: "table-file"
-        args:
-          table_filename: "{paired-end-sra}"
-          sample_column: "{sra-standardized-wildcard}"
-      snakefiles: 
-        - "fastq_sra_paired_end_download"
-    single-end-sra-method:
-      input:
-        args:
-          - "single-end-sra"
-          - "sra-download-dir"
-      samples:
-        method: "table-file"
-        args:
-          table_filename: "{single-end-sra}"
-          sample_column: "{sra-standardized-wildcard}"
-      snakefiles: 
-        - "fastq_sra_single_end_download"
-
-snakefiles:
-  - fastq_trim_fastp
+snakemake:
+  modules:
+    - fastq_trim_fastp
+  links:
+    - input: fastq_process_single_end
+      output: fastp_single_end
+    - input: fastq_process_paired_end
+      output: fastp_pair_end
+      file_mappings:
+        - input: r1_reads
+          output: r1_reads
+        - input: r2_reads
+          output: r2_reads

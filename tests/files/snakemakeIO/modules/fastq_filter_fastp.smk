@@ -5,7 +5,6 @@ rule all:
     input:
         expand(
             os.path.join(
-                config["paths"]["workflow_prefix"],
                 config["paths"]["filtered_fastq_dir"],
                 "{sample}.json",
             ),
@@ -16,29 +15,24 @@ rule all:
 rule fastp_single_end:
     input:
         r1_reads=os.path.join(
-            config["paths"]["workflow_prefix"],
             config["paths"]["unfiltered_fastq_dir"],
             "{sample}_R1.fq.gz",
         ),
     output:
         r1_reads=os.path.join(
-            config["paths"]["workflow_prefix"],
             config["paths"]["filtered_fastq_dir"],
             "{sample}_R1.fq.gz",
         ),
         json=os.path.join(
-            config["paths"]["workflow_prefix"],
             config["paths"]["filtered_fastq_dir"],
             "{sample}.json",
         ),
         html=os.path.join(
-            config["paths"]["workflow_prefix"],
             config["paths"]["filtered_fastq_dir"],
             "{sample}.html",
         ),
     params:
         sample_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
             config["paths"]["filtered_fastq_dir"],
             "{sample}",
         ),
@@ -55,39 +49,32 @@ rule fastp_single_end:
 rule fastp_pair_end:
     input:
         r1_reads=os.path.join(
-            config["paths"]["workflow_prefix"],
             config["paths"]["unfiltered_fastq_dir"],
             "{sample}_R1.fq.gz",
         ),
         r2_reads=os.path.join(
-            config["paths"]["workflow_prefix"],
             config["paths"]["unfiltered_fastq_dir"],
             "{sample}_R2.fq.gz",
         ),
     output:
         r1_reads=os.path.join(
-            config["paths"]["workflow_prefix"],
             config["paths"]["filtered_fastq_dir"],
             "{sample}_R1.fq.gz",
         ),
         r2_reads=os.path.join(
-            config["paths"]["workflow_prefix"],
             config["paths"]["filtered_fastq_dir"],
             "{sample}_R2.fq.gz",
         ),
         json=os.path.join(
-            config["paths"]["workflow_prefix"],
             config["paths"]["filtered_fastq_dir"],
             "{sample}.json",
         ),
         html=os.path.join(
-            config["paths"]["workflow_prefix"],
             config["paths"]["filtered_fastq_dir"],
             "{sample}.html",
         ),
     params:
         sample_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
             config["paths"]["filtered_fastq_dir"],
             "{sample}",
         ),

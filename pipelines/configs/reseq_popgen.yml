@@ -76,67 +76,31 @@ parser:
             str: "Sp"
             suffix:
               - function: jobRandomString
-    paths:
-      args:
-        reseq-filtered-vcf-dir:
-          help: "Directory to store filtered resequencing VCF files"
-          type: str
-          default: "reSEQ/VCFs/Filtered"
-        reseq-filtered-plink-dir:
-          help: "Directory to store filtered resequencing PLINK files"
-          type: str
-          default: "reSEQ/PLINK/Filtered"
-        reseq-pruned-plink-dir:
-          help: "Directory to store pruned resequencing PLINK files"
-          type: str
-          default: "reSEQ/PLINK/Pruned"
-        models-dir:
-          help: "Directory to store models"
-          type: str
-          default: "Models"
-        reseq_popgen_dir:
-          help: "Directory to store resequencing population genetics analyses"
-          type: str
-          default: "reSEQ/PopGen"
+
 setup:
   reseq_vcf:
-    file-method:
-      input:
-        args:
-          - "reseq-vcf"
-          - "species"
-          - "assembly-version"
-          - "reseq-filtered-vcf-dir"
-      standardize:
-        method: "file-str"
-        args:
-          input_filename: "{reseq-vcf}"
-          standardized_filename: "{species}_{assembly-version}.filtered.vcf.gz"
-          out_dir: "{reseq-filtered-vcf-dir}"
-          gzipped: True
-          copy_method: '{reseq-copy-method}'
+    methods:
+      file-str: "{reseq-vcf}"
+    args:
+      standardized_filename: "reSEQ/VCF/Filtered/{species}_{assembly-version}.filtered.vcf.gz"
+      copy_method: '{reseq-copy-method}'
+      gzipped: True
   
   model_input:
-    file-method:
-      input:
-        args:
-          - "model-file"
-          - "models-dir"
-      standardize:
-        method: "file-str"
-        args:
-          input_filename: "{model-file}"
-          standardized_filename: "{species}.model"
-          out_dir: "{models-dir}"
-          copy_method: 'copy'
-          gzipped: False
+    methods:
+      file-str: "{model-file}"
+    args:
+      standardized_filename: "Models/{species}.model"
+      copy_method: 'copy'
+      gzipped: False
 
-snakefiles:
-  - reseq_filtered_vcf_to_plink.smk
-  - reseq_calc_fst_plink.smk
-  - reseq_calc_zfst_pipemake.smk
-  - reseq_calc_pca_plink.smk
-  - reseq_ld_prune_plink.smk
-  - reseq_model_ind_files.smk
-  - reseq_gwas_gemma.smk
+snakemake:
+  modules:
+    - reseq_filtered_vcf_to_plink.smk
+    - reseq_calc_fst_plink.smk
+    - reseq_calc_zfst_pipemake.smk
+    - reseq_calc_pca_plink.smk
+    - reseq_ld_prune_plink.smk
+    - reseq_model_ind_files.smk
+    - reseq_gwas_gemma.smk
 

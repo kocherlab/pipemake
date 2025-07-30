@@ -29,7 +29,8 @@ def test_DirIO_exists_w_error(path_name):
 def test_DirIO_standardize_wo_error(path_name):
     test_dir = tempfile.mkdtemp()
     test_Dir = DirIO.create(path_name)
-    test_Dir.standardize("new_dir", workflow_prefix=test_dir)
+    test_Dir.standardize("new_dir", workflow_dir=test_dir)
+
     assert os.path.isdir(os.path.join(test_dir, "new_dir"))
     assert os.path.isfile(os.path.join(test_dir, "new_dir", "fasta_table.tsv"))
 
@@ -50,7 +51,7 @@ def test_DirIO_standardize_wo_error(path_name):
 def test_DirIO_standardize_copy_wo_error(path_name):
     test_dir = tempfile.mkdtemp()
     test_Dir = DirIO.create(path_name)
-    test_Dir.standardize("new_dir", workflow_prefix=test_dir, copy_method="copy")
+    test_Dir.standardize("new_dir", workflow_dir=test_dir, copy_method="copy")
     assert os.path.isdir(os.path.join(test_dir, "new_dir"))
     assert os.path.isfile(os.path.join(test_dir, "new_dir", "fasta_table.tsv"))
 

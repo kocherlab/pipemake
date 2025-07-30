@@ -42,37 +42,16 @@ parser:
             str: "Sp"
             suffix:
               - function: jobRandomString
-    paths:
-      args:
-        reseq-filtered-vcf-dir:
-          help: "Directory to store filtered VCFs files"
-          type: str
-          default: "reSEQ/VCFs/Unphased"
-        reseq-phased-vcf-dir:
-          help: "Directory to store phased VCFs files"
-          type: str
-          default: "reSEQ/VCFs/Phased"
-        reseq-popgen-dir:
-          help: "Directory to store resequencing population genetics analyses"
-          type: str
-          default: "reSEQ/PopGen"
+
 setup:
   reseq_vcf:
-    file-method:
-      input:
-        args:
-          - "reseq-vcf"
-          - "species"
-          - "assembly-version"
-          - "reseq-filtered-vcf-dir"
-      standardize:
-        method: "file-str"
-        args:
-          input_filename: "{reseq-vcf}"
-          standardized_filename: "{species}_{assembly-version}.vcf.gz"
-          out_dir: "{reseq-filtered-vcf-dir}"
-          copy_method: '{reseq-copy-method}'
-          gzipped: True
+    methods:
+      file-str: "{reseq-vcf}"
+    args:
+      standardized_filename: "reSEQ/VCF/Filtered/{species}_{assembly-version}.vcf.gz"
+      copy_method: '{reseq-copy-method}'
+      gzipped: True
 
-snakefiles:
-  - reseq_calc_nsl_selscan
+snakemake:
+  modules:
+    - reseq_calc_nsl_selscan

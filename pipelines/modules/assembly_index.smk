@@ -1,25 +1,13 @@
 rule all:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            f"{config['species']}_{config['assembly_version']}.fa.fai",
-        ),
+        f"Assembly/{config['species']}_{config['assembly_version']}.fa.fai",
 
 
 rule index_assembly:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            f"{config['species']}_{config['assembly_version']}.fa",
-        ),
+        f"Assembly/{config['species']}_{config['assembly_version']}.fa",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            f"{config['species']}_{config['assembly_version']}.fa.fai",
-        ),
+        f"Assembly/{config['species']}_{config['assembly_version']}.fa.fai",
     singularity:
         "docker://aewebb/samtools:v1.20"
     resources:

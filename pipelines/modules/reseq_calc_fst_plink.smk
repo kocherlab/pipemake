@@ -1,47 +1,20 @@
 rule all:
     input:
         expand(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_popgen_dir"],
-                f"{config['species']}.{{model}}.report",
-            ),
+            f"reSEQ/PopGen/{config['species']}.{{model}}.report",
             model=config["models"],
         ),
 
 
 rule reseq_model_fst_phenotype_file:
     input:
-        fam_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_filtered_plink_dir"],
-            f"{config['species']}_{config['assembly_version']}.filtered.fam",
-        ),
-        model_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["models_dir"],
-            f"{config['species']}.model",
-        ),
+        fam_file=f"reSEQ/PLINK/Filtered/{config['species']}_{config['assembly_version']}.filtered.fam",
+        model_file=f"Models/{config['species']}.model",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["models_dir"],
-            "Fst",
-            f"{config['species']}.{{model}}.pheno.txt",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["models_dir"],
-            "Fst",
-            f"{config['species']}.{{model}}.pheno.log",
-        ),
+        f"Models/Fst/{config['species']}.{{model}}.pheno.txt",
+        f"Models/Fst/{config['species']}.{{model}}.pheno.log",
     params:
-        out_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["models_dir"],
-            "Fst",
-            f"{config['species']}.{{model}}",
-        ),
+        out_prefix="Models/Fst/{config['species']}.{{model}}",
     resources:
         mem_mb=2000,
     threads: 1
@@ -53,54 +26,16 @@ rule reseq_model_fst_phenotype_file:
 
 checkpoint reseq_model_calc_fst_plink:
     input:
-        bed_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_filtered_plink_dir"],
-            f"{config['species']}_{config['assembly_version']}.filtered.bed",
-        ),
-        bim_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_filtered_plink_dir"],
-            f"{config['species']}_{config['assembly_version']}.filtered.bim",
-        ),
-        fam_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_filtered_plink_dir"],
-            f"{config['species']}_{config['assembly_version']}.filtered.fam",
-        ),
-        pheno_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["models_dir"],
-            "Fst",
-            f"{config['species']}.{{model}}.pheno.txt",
-        ),
-        ind_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["models_dir"],
-            f"{config['species']}.{{model}}.ind.txt",
-        ),
+        bed_file=f"reSEQ/PLINK/Filtered/{config['species']}_{config['assembly_version']}.filtered.bed",
+        bim_file=f"reSEQ/PLINK/Filtered/{config['species']}_{config['assembly_version']}.filtered.bim",
+        fam_file=f"reSEQ/PLINK/Filtered/{config['species']}_{config['assembly_version']}.filtered.fam",
+        pheno_file=f"Models/Fst/{config['species']}.{{model}}.pheno.txt",
+        ind_file=f"Models/{config['species']}.{{model}}.ind.txt",
     output:
-        fst_dir=directory(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_popgen_dir"],
-                "Fst",
-                "{model}",
-            )
-        ),
+        fst_dir=directory("reSEQ/PopGen/Fst/{model}"),
     params:
-        bed_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_filtered_plink_dir"],
-            f"{config['species']}_{config['assembly_version']}.filtered",
-        ),
-        fst_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "Fst",
-            "{model}",
-            f"{config['species']}_{config['assembly_version']}.filtered",
-        ),
+        bed_prefix=f"reSEQ/PLINK/Filtered/{config['species']}_{config['assembly_version']}.filtered",
+        fst_prefix=f"reSEQ/PopGen/Fst/{{model}}/{config['species']}_{config['assembly_version']}.filtered",
         fst_method=config["fst_method"],
     resources:
         mem_mb=2000,
@@ -136,13 +71,7 @@ rule reseq_model_fst_tmp_report:
     input:
         get_fst_files,
     output:
-        temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_popgen_dir"],
-                f"{config['species']}.{{model}}.report",
-            )
-        ),
+        temp(f"reSEQ/PopGen/{config['species']}.{{model}}.report"),
     resources:
         mem_mb=2000,
     threads: 1

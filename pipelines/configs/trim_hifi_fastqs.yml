@@ -1,32 +1,26 @@
 pipeline: trim-hifi-fastqs
 version: 1.0
 parser:
-  help: Trim PacBio HiFi reads FASTQ files using HiFiAdapterFilt
+  help: Trim PacBio HiFi FASTQ files using HiFiAdapterFilt
   arg-groups:
     basic:
       mutually-exclusive-args:
         input-parser:
           required: True
-        taxa-type:
-          required: True
       wildcards-args:
-        fastq-standardized-wildcard:
-          help: "Standardized wildcard statement used to store FASTQs"
-          type: str
-          default: 
-            str: "{samples}_{reads}.fq.gz"
+        fastq-standardized-filename: "{samples}.fastq.gz"
       args:
         fastq-wildcard:
           help: "Wildcard statement to represent FASTQs"
           type: str
           mutually-exclusive: "input-parser"
-          wildcards: "fastq-standardized-wildcard"
+          wildcards: "fastq-standardized-filename"
         fastq-table:
           help: "Table with sample and FASTQs filenames"
           type: str
           action: confirmFile
           mutually-exclusive: "input-parser"
-          wildcards: "fastq-standardized-wildcard"
+          wildcards: "fastq-standardized-filename"
         fastq-copy-method:
           help: "Specifies if FASTQs should be copied or symbolically linked."
           choices:
@@ -43,71 +37,18 @@ parser:
           type: int
           default:
             str: "97"
-        eukaryote-screen:
-          help: "Eukaryote assembly screen"
-          dest: "euk"
-          action: store_true
-          mutually-exclusive: "taxa-type"
-        prokaryote-screen:
-          help: "Prokaryote assembly screen"
-          dest: "prok"
-          action: store_true
-          mutually-exclusive: "taxa-type"
-    paths:
-      args:
-        unfiltered-fastq-dir:
-          help: "Directory to store unfiltered FASTQ files"
-          type: str
-          default: 
-            str: "FASTQ/Unfiltered"
-        filtered-fastq-dir:
-          help: "Directory to store filtered FASTQ files"
-          type: str
-          default: 
-            str: "FASTQ/Filtered"
 setup:
   fastq_input:
-    wildcard-method:
-      input:
-        args:
-          - "fastq-wildcard"
-          - "fastq-standardized-wildcard"
-          - "unfiltered-fastq-dir"
-      standardize:
-        method: "wildcard-str"
-        args:
-          wildcard_str: "{fastq-wildcard}"
-          standardized_filename: "{fastq-standardized-wildcard}"
-          out_dir: "{unfiltered-fastq-dir}"
-          copy_method: '{fastq-copy-method}'
-          gzipped: True
-      samples:
-        method: "wildcard-str"
-        args:
-          wildcard_str: "{fastq-wildcard}"
-          sample_wildcards: 
-            - 'samples'
+    methods:
+      wildcard-str: "{fastq-wildcard}"
+      table-file: "{fastq-table}"
+    args:
+      standardized_filename: "FASTQ/Unfiltered/{fastq-standardized-filename}"
+      copy_method: '{fastq-copy-method}'
+      gzipped: True
+      sample_keywords:
+        - "samples"
 
-    table-method:
-      input:
-        args:
-          - "fastq-table"
-          - "fastq-standardized-wildcard"
-          - "unfiltered-fastq-dir"
-      standardize:
-        method: "table-file"
-        args:
-          table_filename: "{fastq-table}"
-          standardized_filename: "{fastq-standardized-wildcard}"
-          out_dir: "{unfiltered-fastq-dir}"
-          copy_method: '{fastq-copy-method}'
-          sample_column: 'samples'
-          gzipped: True
-      samples:
-        method: "table-file"
-        args:
-          table_filename: "{fastq-table}"
-          sample_column: 'samples'
-
-snakefiles:
-  - hifi_trim_hifiadapterfilt
+snakemake:
+  modules:
+    - hifi_trim_hifiadapterfilt

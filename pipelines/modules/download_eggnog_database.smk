@@ -1,39 +1,15 @@
 rule all:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["downloads_dir"],
-            "EggNOG",
-            f"eggnog.db",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["downloads_dir"],
-            "EggNOG",
-            f"eggnog.taxa.db",
-        ),
+        "Downloads/EggNOG/eggnog.db",
+        "Downloads/EggNOG/eggnog.taxa.db",
 
 
 rule download_eggnog_database:
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["downloads_dir"],
-            "EggNOG",
-            f"eggnog.db",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["downloads_dir"],
-            "EggNOG",
-            f"eggnog.taxa.db",
-        ),
+        "Downloads/EggNOG/eggnog.db",
+        "Downloads/EggNOG/eggnog.taxa.db",
     params:
-        data_dir=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["downloads_dir"],
-            "EggNOG",
-        ),
+        data_dir="Downloads/EggNOG",
     singularity:
         "docker://aewebb/eggnog-mappper:v2.1.12"
     resources:

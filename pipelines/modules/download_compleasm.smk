@@ -1,34 +1,16 @@
 rule all:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["downloads_dir"],
-            "compleasm",
-            f"{config['busco_database']}.done",
-        ),
+        f"Downloads/compleasm/{config['busco_database']}.done",
 
 
 rule download_compleasm_library:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            f"{config['species']}_{config['assembly_version']}.fa",
-        ),
+        f"Assembly/{config['species']}_{config['assembly_version']}.fa",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["downloads_dir"],
-            "compleasm",
-            f"{config['busco_database']}.done",
-        ),
+        f"Downloads/compleasm/{config['busco_database']}.done",
     params:
         busco_db=config["busco_database"],
-        downloads_dir=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["downloads_dir"],
-            "compleasm",
-        ),
+        downloads_dir="Downloads/compleasm",
     singularity:
         "docker://huangnengcsu/compleasm:v0.2.6"
     resources:

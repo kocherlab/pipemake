@@ -1,0 +1,50 @@
+pipeline: hifi-assemble-hifiasm
+version: 1.0
+parser:
+  help: Assemble long reads using hifiasm and purge-dups
+  arg-groups:
+    basic:
+      args:
+        hifi-fastq:
+          help: "Wildcard statement to represent HiFi FASTQs"
+          type: str
+          required: True
+          action: confirmFile
+        hifi-copy-method:
+          help: "Specifies if HiFi FASTQs should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        busco-database:
+          help: "Name of BUSCO database"
+          type: str
+          required: True
+        assembly-version:
+          help: "Assembly Version"
+          type: str
+          default:
+            str: "v"
+            suffix:
+              - function: jobRandomString
+        species:
+          help: "Species name"
+          type: str
+          default:
+            str: "Sp"
+            suffix:
+              - function: jobRandomString
+
+setup:
+  reseq_input:
+    methods: 
+      file-str: "{hifi-fastq}"
+    args:
+      standardized_filename: "HiFi/FASTQ/{species}.fq.gz"
+      copy_method: "{hifi-copy-method}"
+    
+  
+snakemake:
+  modules:
+    - hifi_reseq_assemble_hifiasm
+    - hifi_reseq_purge_dups

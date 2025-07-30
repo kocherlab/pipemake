@@ -8,23 +8,19 @@ parser:
         input-parser:
           required: True
       wildcards-args:
-        fastq-standardized-wildcard:
-          help: "Standardized wildcard statement used to store FASTQs"
-          type: str
-          default: 
-            str: "{samples}_{reads}.fq.gz"
+        fastq-standardized-filename: "{samples}_{reads}.fq.gz"
       args:
         fastq-wildcard:
           help: "Wildcard statement to represent FASTQs"
           type: str
           mutually-exclusive: "input-parser"
-          wildcards: "fastq-standardized-wildcard"
+          wildcards: "fastq-standardized-filename"
         fastq-table:
           help: "Table with sample and FASTQs filenames"
           type: str
           action: confirmFile
           mutually-exclusive: "input-parser"
-          wildcards: "fastq-standardized-wildcard"
+          wildcards: "fastq-standardized-filename"
         fastq-copy-method:
           help: "Specifies if FASTQs should be copied or symbolically linked."
           choices:
@@ -40,70 +36,20 @@ parser:
             - "smr_v4.3_sensitive_db.fasta"
             - "smr_v4.3_sensitive_db_rfam_seeds.fasta"
           default: "smr_v4.3_default_db.fasta"
-    paths:
-      args:
-        unfiltered-fastq-dir:
-          help: "Directory to store unfiltered FASTQ files"
-          type: str
-          default: 
-            str: "FASTQ/Unfiltered"
-        filtered-fastq-dir:
-          help: "Directory to store filtered FASTQ files"
-          type: str
-          default: 
-            str: "FASTQ/Filtered"
-        stats-dir:
-          help: "Directory to store statistics"
-          type: str
-          default: 
-            str: "Statistics"
-        index-dir:
-          help: "Directory to store indices"
-          type: str
-          default: "Indices"
 setup:
   fastq_input:
-    wildcard-method:
-      input:
-        args:
-          - "fastq-wildcard"
-          - "fastq-standardized-wildcard"
-          - "unfiltered-fastq-dir"
-      standardize:
-        method: "wildcard-str"
-        args:
-          wildcard_str: "{fastq-wildcard}"
-          standardized_filename: "{fastq-standardized-wildcard}"
-          out_dir: "{unfiltered-fastq-dir}"
-          copy_method: '{fastq-copy-method}'
-          gzipped: True
-      samples:
-        method: "wildcard-str"
-        args:
-          wildcard_str: "{fastq-wildcard}"
-          sample_wildcards: 
-            - 'samples'
+    methods: 
+      wildcard-str: "{fastq-wildcard}"
+      table-file: "{fastq-table}"
+    args:
+      standardized_filename: "FASTQ/Unfiltered/{fastq-standardized-filename}"
+      copy_method: '{fastq-copy-method}'
+      gzipped: True
+      sample_keywords:
+        - 'samples'
 
-    table-method:
-      input:
-        args:
-          - "fastq-table"
-          - "fastq-standardized-wildcard"
-          - "unfiltered-fastq-dir"
-      standardize:
-        method: "table-file"
-        args:
-          table_filename: "{fastq-table}"
-          standardized_filename: "{fastq-standardized-wildcard}"
-          out_dir: "{unfiltered-fastq-dir}"
-          copy_method: '{fastq-copy-method}'
-          sample_column: 'samples'
-          gzipped: True
-      samples:
-        method: "table-file"
-        args:
-          table_filename: "{fastq-table}"
-          sample_column: 'samples'
-
-snakefiles:
-  - fastq_rRNA_stats_sortmerna
+snakemake:
+  modules:
+    - index_sortmerna
+    - fastq_rRNA_stats_sortmerna
+    

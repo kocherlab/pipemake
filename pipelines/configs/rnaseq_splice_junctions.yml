@@ -1,0 +1,99 @@
+pipeline: rnaseq-splice-junctions
+version: 1.0
+parser:
+  help: Align RNAseq reads within a genome assembly using STAR and extract splice junctions
+  arg-groups:
+    basic:
+      mutually-exclusive-args:
+        input-parser:
+          required: True
+      wildcards-args:
+        rnaseq-standardized-wildcard:
+          help: "Standardized wildcard statement used to store RNAseq FASTQs"
+          type: str
+          default: 
+            str: "{samples}_{reads}.fq.gz"
+      args:
+        rnaseq-wildcard:
+          help: "Wildcard statement to represent RNAseq FASTQs"
+          type: str
+          mutually-exclusive: "input-parser"
+          wildcards: "rnaseq-standardized-wildcard"
+        rnaseq-table:
+          help: "Table with sample and FASTQs filenames"
+          type: str
+          action: confirmFile
+          mutually-exclusive: "input-parser"
+          wildcards: "rnaseq-standardized-wildcard"
+        rnaseq-copy-method:
+          help: "Specifies if RNAseq FASTQs should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        assembly-fasta:
+          help: "Assembly fasta"
+          type: str
+          required: True
+          action: confirmFile
+        assembly-copy-method:
+          help: "Specifies if assembly files should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        assembly-version:
+          help: "Assembly Version"
+          type: str
+          default:
+            str: "v"
+            suffix:
+              - function: jobRandomString
+        species:
+          help: "Species name"
+          type: str
+          default:
+            str: "Sp"
+            suffix:
+              - function: jobRandomString
+    paths:
+      args:
+        assembly-dir:
+          help: "Directory to store assembly"
+          type: str
+          default: "Assembly"
+        index-dir:
+          help: "Directory to store indices"
+          type: str
+          default: "Indices"
+        rnaseq-fastq-dir:
+          help: "Directory to store the FASTQs files"
+          type: str
+          default: "RNAseq/FASTQs"
+        rnaseq-splice-aligned-dir:
+          help: "Directory to store BAM files"
+          type: str
+          default: "RNAseq/SpliceJunctions/Aligned"
+setup:
+  rnaseq_input:
+    methods:
+      wildcard-str: "{rnaseq-wildcard}"
+      table-filename: "{rnaseq-table}"
+    args:
+      standardized_filename: "RNAseq/FASTQ/{rnaseq-standardized-filename}"
+      copy_method: '{rnaseq-copy-method}'
+      gzipped: True
+      sample_keywords: 
+        - 'samples' 
+  assembly_input:
+    methods:
+      file-str: "{assembly-fasta}"
+    args:
+      standardized_filename: "Assembly/{species}_{assembly_version}.fa"
+      copy_method: copy
+      gzipped: False
+  
+snakemake:
+  modules:
+    - rna_seq_star_splice_junctions
+

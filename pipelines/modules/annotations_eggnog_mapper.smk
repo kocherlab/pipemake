@@ -1,34 +1,15 @@
 rule all:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["annotations_dir"],
-            "EggNOG",
-            f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}.emapper.annotations.xlsx",
-        ),
+        f"Annotations/EggNOG/{config['species']}_{config['assembly_version']}.{config['annotation_version']}.emapper.annotations.xlsx",
 
 
 rule create_longest_aa_transcript:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["annotations_dir"],
-            f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}_pep.fa",
-        ),
+        f"Annotations/{config['species']}_{config['assembly_version']}.{config['annotation_version']}_pep.fa",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["annotations_dir"],
-            "EggNOG",
-            f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}_pep.fa",
-        ),
+        f"Annotations/EggNOG/{config['species']}_{config['assembly_version']}.{config['annotation_version']}_pep.fa",
     params:
-        out_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["annotations_dir"],
-            "EggNOG",
-            f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}_pep",
-        ),
+        out_prefix=f"Annotations/EggNOG/{config['species']}_{config['assembly_version']}.{config['annotation_version']}_pep",
     singularity:
         "docker://aewebb/pipemake_utils:v1.2.1"
     resources:
@@ -40,48 +21,15 @@ rule create_longest_aa_transcript:
 
 rule run_eggnog_mapper:
     input:
-        eggnog_db=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["downloads_dir"],
-            "EggNOG",
-            f"eggnog.db",
-        ),
-        taxa_db=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["downloads_dir"],
-            "EggNOG",
-            f"eggnog.taxa.db",
-        ),
-        transcripts=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["annotations_dir"],
-            "EggNOG",
-            f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}_pep.fa",
-        ),
+        eggnog_db="Downloads/EggNOG/eggnog.db",
+        taxa_db="Downloads/EggNOG/eggnog.taxa.db",
+        transcripts=f"Annotations/EggNOG/{config['species']}_{config['assembly_version']}.{config['annotation_version']}_pep.fa",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["annotations_dir"],
-            "EggNOG",
-            f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}.emapper.annotations.xlsx",
-        ),
+        f"Annotations/EggNOG/{config['species']}_{config['assembly_version']}.{config['annotation_version']}.emapper.annotations.xlsx",
     params:
-        out_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["annotations_dir"],
-            "EggNOG",
-            f"{config['species']}_{config['assembly_version']}.{config['annotation_version']}",
-        ),
-        eggnod_dir=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["annotations_dir"],
-            "EggNOG",
-        ),
-        data_dir=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["downloads_dir"],
-            "EggNOG",
-        ),
+        out_prefix=f"Annotations/EggNOG/{config['species']}_{config['assembly_version']}.{config['annotation_version']}",
+        eggnod_dir="Annotations/EggNOG/",
+        data_dir="Downloads/EggNOG/",
     singularity:
         "docker://aewebb/eggnog-mappper:v2.1.12"
     resources:

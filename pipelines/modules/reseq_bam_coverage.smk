@@ -1,33 +1,14 @@
 rule all:
     input:
-        expand(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_coverage_dir"],
-                "{sample}.ln_scaled.bw",
-            ),
-            sample=config["samples"],
-        ),
+        expand("reSEQ/Coverage/{sample}.ln_scaled.bw", sample=config["samples"]),
 
 
 rule reseq_bam_coverage_deeptools:
     input:
-        bam=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_sorted_bam_dir"],
-            "{sample}.sortedByCoord.bam",
-        ),
-        index=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_sorted_bam_dir"],
-            "{sample}.sortedByCoord.bam.bai",
-        ),
+        bam="reSEQ/BAM/Sorted/{sample}.sortedByCoord.bam",
+        index="reSEQ/BAM/Sorted/{sample}.sortedByCoord.bam.bai",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_coverage_dir"],
-            "{sample}.bw",
-        ),
+        "reSEQ/Coverage/{sample}.bw",
     singularity:
         "docker://aewebb/deeptools:v3.5.6"
     resources:
@@ -39,19 +20,9 @@ rule reseq_bam_coverage_deeptools:
 
 rule ln_scale_coverage_wiggletools:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_coverage_dir"],
-            "{sample}.bw",
-        ),
+        "reSEQ/Coverage/{sample}.bw",
     output:
-        temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_coverage_dir"],
-                "{sample}.ln_scaled.wig",
-            ),
-        ),
+        temp("reSEQ/Coverage/{sample}.ln_scaled.wig"),
     singularity:
         "docker://ensemblorg/wiggletools:1.2.11"
     resources:
@@ -63,22 +34,10 @@ rule ln_scale_coverage_wiggletools:
 
 rule ln_wig_to_bigwig:
     input:
-        wig_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_coverage_dir"],
-            "{sample}.ln_scaled.wig",
-        ),
-        assembly_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            f"{config['species']}_{config['assembly_version']}.fa.fai",
-        ),
+        wig_file="reSEQ/Coverage/{sample}.ln_scaled.wig",
+        assembly_file=f"Assembly/{config['species']}_{config['assembly_version']}.fa.fai",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_coverage_dir"],
-            "{sample}.ln_scaled.bw",
-        ),
+        "reSEQ/Coverage/{sample}.ln_scaled.bw",
     singularity:
         "docker://aewebb/wigtobigwig:v2.9"
     resources:

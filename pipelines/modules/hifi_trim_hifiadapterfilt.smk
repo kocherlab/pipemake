@@ -1,52 +1,18 @@
 rule all:
     input:
-        expand(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["filtered_fastq_dir"],
-                "{sample}_R1.filt.fastq.gz",
-            ),
-            sample=config["samples"],
-        ),
+        expand("FASTQ/Filtered/{sample}.filt.fastq.gz", sample=config["samples"]),
 
 
 rule hifi_reads_screen_hifiadapterfilt:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["unfiltered_fastq_dir"],
-            "{sample}_R1.fastq.gz",
-        ),
+        "FASTQ/Unfiltered/{sample}.fastq.gz",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["filtered_fastq_dir"],
-            "{sample}_R1.filt.fastq.gz",
-        ),
-        temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["filtered_fastq_dir"],
-                "{sample}_R1.blocklist",
-            )
-        ),
-        temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["filtered_fastq_dir"],
-                "{sample}_R1.contaminant.blastout",
-            )
-        ),
+        "FASTQ/Filtered/{sample}.filt.fastq.gz",
+        temp("FASTQ/Filtered/{sample}.blocklist"),
+        temp("FASTQ/Filtered/{sample}.contaminant.blastout"),
     params:
-        input_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["unfiltered_fastq_dir"],
-            "{sample}",
-        ),
-        output_dir=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["filtered_fastq_dir"],
-        ),
+        input_prefix="FASTQ/Unfiltered/{sample}",
+        output_dir="FASTQ/Filtered/",
         min_length=config["min_length"],
         min_match=config["min_match"],
     singularity:

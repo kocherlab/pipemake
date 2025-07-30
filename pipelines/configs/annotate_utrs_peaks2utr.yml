@@ -49,47 +49,24 @@ parser:
             str: "Sp"
             suffix:
               - function: jobRandomString
-    paths:
-      args:
-        rnaseq-bam-dir:
-          help: "Directory to store BAM files"
-          type: str
-          default: "RNAseq/BAMs"
-        annotations-dir:
-          help: "Directory to store annotations"
-          type: str
-          default: 
-            str: "Annotations"
+
 setup:
   rnaseq_input:
-    file-method:
-      input:
-        args:
-          - "rnaseq-bam"
-          - "rnaseq-bam-dir"
-      standardize:
-        method: "file-str"
-        args:
-          input_filename: "{rnaseq-bam}"
-          standardized_filename: "{species}_{assembly-version}.bam"
-          out_dir: "{rnaseq-bam-dir}"
-          copy_method: "{rnaseq-copy-method}"
-          gzipped: True
+    methods:
+      file-str: "{rnaseq-bam}"
+    args:
+      standardized_filename: "RNAseq/BAM/{species}_{assembly-version}.bam"
+      copy_method: "{rnaseq-copy-method}"
+      gzipped: True
 
   gff_input:
-    file-method:
-      input:
-        args:
-          - "annotations-gff"
-          - "annotations-dir"
-      standardize:
-        method: "file-str"
-        args:
-          input_filename: "{annotations-gff}"
-          standardized_filename: "{species}_{assembly-version}.{annotation-version}.gff3"
-          out_dir: "{annotations-dir}"
-          copy_method: "copy"
-          gzipped: False
+    methods: 
+      file-str: "{annotations-gff}"
+    args:
+      standardized_filename: "Annotations/{species}_{assembly-version}.{annotation-version}.gff3"
+      copy_method: "copy"
+      gzipped: False
 
-snakefiles:
-  - annotate_3primeUTRs_peaks2utr
+snakemake:
+  modules:
+    - annotate_3primeUTRs_peaks2utr

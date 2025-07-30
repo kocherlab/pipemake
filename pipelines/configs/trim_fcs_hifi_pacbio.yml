@@ -10,39 +10,25 @@ parser:
         taxa-type:
           required: True
       wildcards-args:
-        pacbio-standardized-wildcard:
-          help: "Standardized wildcard statement used to store PacBio BAM files"
-          type: str
-          default: 
-            str: "{samples}.bam"
+        pacbio-standardized-filename: "{samples}.bam"
       args:
         pacbio-wildcard:
           help: "Wildcard statement to represent PacBio BAM files"
           type: str
           mutually-exclusive: "input-parser"
-          wildcards: "pacbio-standardized-wildcard"
+          wildcards: "pacbio-standardized-filename"
         pacbio-table:
           help: "Table with sample and PacBio BAM filenames"
           type: str
           action: confirmFile
           mutually-exclusive: "input-parser"
-          wildcards: "pacbio-standardized-wildcard"
+          wildcards: "pacbio-standardized-filename"
         pacbio-copy-method:
           help: "Specifies if PacBio BAMs should be copied or symbolically linked."
           choices:
             - 'symbolic_link'
             - 'copy'
           default: 'symbolic_link'
-        min-length:
-          help: "Minimum length of reads to keep"
-          type: int
-          default:
-            str: "44"
-        min-match:
-          help: "Minimum number of matches to keep"
-          type: int
-          default:
-            str: "97"
         eukaryote-screen:
           help: "Eukaryote assembly screen"
           dest: "euk"
@@ -53,67 +39,18 @@ parser:
           dest: "prok"
           action: store_true
           mutually-exclusive: "taxa-type"
-    paths:
-      args:
-        pacbio-bam-dir:
-          help: "Directory to store PacBio BAM files"
-          type: str
-          default: 
-            str: "PacBio/"
-        unfiltered-fastq-dir:
-          help: "Directory to store unfiltered FASTQ files"
-          type: str
-          default: 
-            str: "FASTQ/Unfiltered"
-        filtered-fastq-dir:
-          help: "Directory to store filtered FASTQ files"
-          type: str
-          default: 
-            str: "FASTQ/Filtered"
 setup:
   pacbio_input:
-    wildcard-method:
-      input:
-        args:
-          - "pacbio-wildcard"
-          - "pacbio-standardized-wildcard"
-          - "pacbio-bam-dir"
-      standardize:
-        method: "wildcard-str"
-        args:
-          wildcard_str: "{pacbio-wildcard}"
-          standardized_filename: "{pacbio-standardized-wildcard}"
-          out_dir: "{pacbio-bam-dir}"
-          copy_method: '{pacbio-copy-method}'
-          gzipped: True
-      samples:
-        method: "wildcard-str"
-        args:
-          wildcard_str: "{pacbio-wildcard}"
-          sample_wildcards: 
-            - 'samples'
-
-    table-method:
-      input:
-        args:
-          - "pacbio-table"
-          - "pacbio-standardized-wildcard"
-          - "pacbio-bam-dir"
-      standardize:
-        method: "table-file"
-        args:
-          table_filename: "{pacbio-table}"
-          standardized_filename: "{pacbio-standardized-wildcard}"
-          out_dir: "{pacbio-bam-dir}"
-          copy_method: '{pacbio-copy-method}'
-          sample_column: 'samples'
-          gzipped: True
-      samples:
-        method: "table-file"
-        args:
-          table_filename: "{pacbio-table}"
-          sample_column: 'samples'
-
-snakefiles:
-  - pacbio_to_fastq
-  - hifi_trim_hifiadapterfiltFCS
+    methods:
+      wildcard-str: "{pacbio-wildcard}"
+      table-file: "{pacbio-table}"
+    args:
+      standardized_filename: "BAM/PacBio/{pacbio-standardized-filename}"
+      copy_method: '{pacbio-copy-method}'
+      gzipped: True
+      sample_keywords:
+        - "samples"
+snakemake:
+  modules:
+    - pacbio_to_fastq
+    - hifi_trim_hifiadapterfiltFCS
