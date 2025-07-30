@@ -36,51 +36,22 @@ parser:
             str: "Sp"
             suffix:
               - function: jobRandomString
-    paths:
-      args:
-        assembly-dir:
-          help: "Directory to store BAM files"
-          type: str
-          default: "Assembly"
-        annotations-dir:
-          help: "Directory to store annotations"
-          type: str
-          default: 
-            str: "Annotations/"
-        processed-dir:
-          help: "Directory to store processed files"
-          type: str
-          default: "Processed/"
 setup:
   fasta_input:
-    file-method:
-      input:
-        args:
-          - "assembly-fasta"
-          - "assembly-dir"
-      standardize:
-        method: "file-str"
-        args:
-          input_filename: "{assembly-fasta}"
-          standardized_filename: "{species}_genome_{assembly_version}.fasta"
-          out_dir: "{assembly-dir}"
-          copy_method: "copy"
-          gzipped: False
+    methods:
+      file-str: "{assembly-fasta}"
+    args:
+      standardized_filename: "Assembly/{species}_{assembly-version}.fa"
+      copy_method: copy
+      gzipped: False
+  gtf_input:
+    methods:
+      file-str: "{annotations-gtf}"
+    args:
+      standardized_filename: "Annotations/{species}_{assembly-version}.{annotation-version}.gtf"
+      copy_method: copy
+      gzipped: False
 
-  gff_input:
-    file-method:
-      input:
-        args:
-          - "annotations-gtf"
-          - "annotations-dir"
-      standardize:
-        method: "file-str"
-        args:
-          input_filename: "{annotations-gtf}"
-          standardized_filename: "epagx.gtf"
-          out_dir: "{annotations-dir}"
-          copy_method: "copy"
-          gzipped: False
-
-snakefiles:
-  - process_egapx
+snakemake:
+  modules:
+    - process_egapx

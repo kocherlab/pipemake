@@ -1,7 +1,7 @@
-pipeline: lr-reseq-align-minimap2
+pipeline: hifi-align-minimap2
 version: 1.0
 parser:
-  help: Align long reads to a genome assembly using minimap2
+  help: Align hifi reseq reads to a genome assembly using minimap2
   arg-groups:
     basic:
       mutually-exclusive-args:

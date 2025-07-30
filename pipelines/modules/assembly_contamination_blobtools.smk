@@ -1,37 +1,13 @@
 rule all:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["figures_dir"],
-            f"{config['species']}_{config['assembly_version']}_scaff_snail.png",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["figures_dir"],
-            f"{config['species']}_{config['assembly_version']}_scaff_blob.png",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["figures_dir"],
-            f"{config['species']}_{config['assembly_version']}_scaff_cumulative.png",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            f"{config['paths']['blobtools_dir']}_blobblurbout.tsv",
-        ),
+        f"Figures/blobtools/{config['species']}_{config['assembly_version']}_scaff_snail.png",
+        f"Figures/blobtools/{config['species']}_{config['assembly_version']}_scaff_blob.png",
+        f"Figures/blobtools/{config['species']}_{config['assembly_version']}_scaff_cumulative.png",
+        f"Tables/blobtools/{config['species']}_{config['assembly_version']}_blobblurbout.tsv",
         expand(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["blast_dir"],
-                "{blast_type}",
-                f"{config['species']}_{config['assembly_version']}.out",
-            ),
+            f"BLAST/Assembly/{{blast_type}}/{config['species']}_{config['assembly_version']}.out",
             blast_type=["blastn", "blastx"],
         ),
-#        f"Figures/blobtools/{config['species']}_{config['assembly_version']}_scaff_snail.png",
-#        f"Figures/blobtools/{config['species']}_{config['assembly_version']}_scaff_blob.png",
-#        f"Figures/blobtools/{config['species']}_{config['assembly_version']}_scaff_cumulative.png",
-#        f"Assembly/blobtools/{config['species']}_{config['assembly_version']}_blobblurbout.tsv",
 
 
 rule hifi_align_minimap2:
@@ -53,13 +29,7 @@ checkpoint split_assembly:
     input:
         f"Assembly/{config['species']}_{config['assembly_version']}.fa",
     output:
-        directory(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["assembly_dir"],
-                "split",
-            )
-        ),
+        directory("Assembly/split"),
     singularity:
         "docker://aewebb/pipemake_utils:v1.2.7"
     resources:
@@ -68,24 +38,12 @@ checkpoint split_assembly:
     shell:
         "split-fasta --input-fasta {input} --output-dir {output}"
 
+
 rule chunk_file:
     input:
-        os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["assembly_dir"],
-                "split",
-                "{chrom}.fasta",
-            )
+        "Assembly/split/{chrom}.fasta",
     output:
-        temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["assembly_dir"],
-                "chunked",
-                "{chrom}.chunked.fasta",
-            )
-        ),
-#        f"BLAST/Assembly/blastn/{config['species']}_{config['assembly_version']}.out",
+        temp("Assembly/chunked/{chrom}.chunked.fasta"),
     params:
         chunk_size=config["chunk_size"],
     singularity:
@@ -99,22 +57,9 @@ rule chunk_file:
 
 rule blastn_chunked_assembly_nt:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            "chunked",
-            "{chrom}.chunked.fasta",
-        )
+        "Assembly/chunked/{chrom}.chunked.fasta",
     output:
-        temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["blast_dir"],
-                "blastn",
-                "chunked",
-                "{chrom}.chunked.out",
-            )
-        )
+        temp("BLAST/Assembly/blastn/chunked/{chrom}.chunked.out"),
     params:
         ncbi_nt_db=config["ncbi_nt_db"],
     singularity:
@@ -128,27 +73,9 @@ rule blastn_chunked_assembly_nt:
 
 rule blastx_chunked_assembly_records_diamond:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            "chunked",
-            "{chunk}.chunked.fasta",
-        )
+        "Assembly/chunked/{chunk}.chunked.fasta",
     output:
-        temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["blast_dir"],
-                "blastx",
-                "chunked",
-                "{chunk}.chunked.out",
-            )
-        )
-#        f"Assembly/{config['species']}_{config['assembly_version']}.fa",
-#    output:
-#        temp(
-#            f"BLAST/Assembly/blastx/{config['species']}_{config['assembly_version']}.short_records.fa"
-#        ),
+        temp("BLAST/Assembly/blastx/chunked/{chunk}.chunked.out"),
     params:
         uniprot_db=config["uniprot_db"],
     singularity:
@@ -159,59 +86,27 @@ rule blastx_chunked_assembly_records_diamond:
     shell:
         "diamond blastx --query {input} --db {params.uniprot_db} --outfmt 6 qseqid staxids bitscore qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore --sensitive --max-target-seqs 1 --evalue 1e-25 --threads {threads} > {output}"
 
-def aggregate_blast (wildcards):
-    checkpoint_output = checkpoints.split_assembly.get(
-        **wildcards
-    ).output[0]
+
+def aggregate_blast(wildcards):
+    checkpoint_output = checkpoints.split_assembly.get(**wildcards).output[0]
     return {
         "blastn": expand(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["blast_dir"],
-                "blastn",
-                "chunked",
-                "{chrom}.chunked.out",
-            ),
-            chrom=glob_wildcards(
-                os.path.join(
-                    checkpoint_output,
-                    "{chrom}.fasta",
-                )
-            ).chrom,
+            "BLAST/Assembly/blastn/chunked/{chrom}.chunked.out",
+            chrom=glob_wildcards(f"{checkpoint_output}/{{chrom}}.fasta").chrom,
         ),
         "blastx": expand(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["blast_dir"],
-                "blastx",
-                "chunked",
-                "{chrom}.chunked.out",
-            ),
-            chrom=glob_wildcards(
-                os.path.join(
-                    checkpoint_output,
-                    "{chrom}.fasta",
-                )
-            ).chrom,
+            "BLAST/Assembly/blastx/chunked/{chrom}.chunked.out",
+            chrom=glob_wildcards(f"{checkpoint_output}/{{chrom}}.fasta").chrom,
         ),
     }
+
 
 rule cat_blast:
     input:
         unpack(aggregate_blast),
     output:
-        blastn=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["blast_dir"],
-            "blastn",
-            f"{config['species']}_{config['assembly_version']}.chunked.out",
-        ),
-        blastx=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["blast_dir"],
-            "blastx",
-            f"{config['species']}_{config['assembly_version']}.chunked.out",
-        ),
+        blastn=f"BLAST/Assembly/blastn/{config['species']}_{config['assembly_version']}.chunked.out",
+        blastx=f"BLAST/Assembly/blastx/{config['species']}_{config['assembly_version']}.chunked.out",
     threads: 1
     shell:
         """
@@ -219,27 +114,12 @@ rule cat_blast:
         cat {input.blastx} > {output.blastx}
         """
 
+
 rule unchunk_blast:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["blast_dir"],
-            "{blast_type}",
-            f"{config['species']}_{config['assembly_version']}.chunked.out",
-        ),
+        f"BLAST/Assembly/{{blast_type}}/{config['species']}_{config['assembly_version']}.chunked.out",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["blast_dir"],
-            "{blast_type}",
-            f"{config['species']}_{config['assembly_version']}.out",
-        ),
-=======
-#        f"BLAST/Assembly/blastx/{config['species']}_{config['assembly_version']}.short_records.fa",
-#    output:
-#        f"BLAST/Assembly/blastx/{config['species']}_{config['assembly_version']}.out",
-#    params:
-#        uniprot_db=config["uniprot_db"],
+        f"BLAST/Assembly/{{blast_type}}/{config['species']}_{config['assembly_version']}.out",
     singularity:
         "docker://aewebb/pipemake_utils:v1.2.2"
     resources:
@@ -324,9 +204,9 @@ rule blobblurb:
         hits_chk="Assembly/blobtools/.hits.chk",
         busco_chk="Assembly/blobtools/.busco.chk",
     output:
-        f"Assembly/blobtools/{config['species']}_{config['assembly_version']}_blobblurbout.tsv",
+        f"Tables/blobtools/{config['species']}_{config['assembly_version']}_blobblurbout.tsv",
     params:
-        blob_dir=f"Assembly/blobtools/{config['species']}_{config['assembly_version']}",
+        blob_dir=f"Tables/blobtools/{config['species']}_{config['assembly_version']}",
     singularity:
         "docker://aewebb/blobblurb:05152024"
     resources:

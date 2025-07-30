@@ -1,68 +1,25 @@
 rule all:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["processed_dir"],
-            f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.gtf",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["processed_dir"],
-            f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.gff",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["processed_dir"],
-            f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_trans.fa",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["processed_dir"],
-            f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_pep.fa",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["processed_dir"],
-            f"{config['species']}_genome_{config['assembly_version']}.assembly.stats",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["processed_dir"],
-            f"{config['species']}_genome_{config['assembly_version']}.fasta.gz.fai",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["processed_dir"],
-            f"{config['species']}_genome_{config['assembly_version']}.fasta.gz.gzi",
-        ),
+        f"Processed/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.gtf",
+        f"Processed/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.gff",
+        f"Processed/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_trans.fa",
+        f"Processed/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_pep.fa",
+        f"Processed/{config['species']}_genome_{config['assembly_version']}.fasta.gz",
+        f"Processed/{config['species']}_genome_{config['assembly_version']}.fasta.gz.fai",
+        f"Processed/{config['species']}_genome_{config['assembly_version']}.fasta.gz.gzi",
+        f"Processed/{config['species']}_genome_{config['assembly_version']}.assembly.stats",
 
 
 rule process_egapx_gtf:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["annotations_dir"],
-            "epagx.gtf",
-        ),
+        "Annotations/epagx.gtf",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["processed_dir"],
-            f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.gtf",
-        ),
+        f"Processed/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.gtf",
         temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["processed_dir"],
-                f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.no_utrs.gff",
-            ),
+            f"Processed/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.no_utrs.gff"
         ),
     params:
-        out_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["processed_dir"],
-            f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}",
-        ),
+        out_prefix=f"Processed/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}",
         species=config["species"],
         assembly_version=config["assembly_version"],
         annotation_version=config["annotation_version"],
@@ -78,41 +35,11 @@ rule process_egapx_gtf:
         """
 
 
-rule assembly_stats_bbmap:
-    input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            f"{config['species']}_genome_{config['assembly_version']}.fasta",
-        ),
-    output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["processed_dir"],
-            f"{config['species']}_genome_{config['assembly_version']}.assembly.stats",
-        ),
-    singularity:
-        "docker://biocontainers/bbmap:39.26--he5f24ec_0"
-    resources:
-        mem_mb=4000,
-    threads: 1
-    shell:
-        "stats.sh in={input} > {output}"
-
-
 rule add_utrs_to_gff:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["processed_dir"],
-            f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.no_utrs.gff",
-        ),
+        f"Processed/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.no_utrs.gff",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["processed_dir"],
-            f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.gff",
-        ),
+        f"Processed/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.gff",
     singularity:
         "docker://aewebb/ncbi-genome-tools:20250625"
     resources:
@@ -122,25 +49,27 @@ rule add_utrs_to_gff:
         "add_utrs_to_gff.py {input} > {output}"
 
 
+rule assembly_stats_bbmap:
+    input:
+        f"Assembly/{config['species']}_genome_{config['assembly_version']}.fasta",
+    output:
+        f"Processed/{config['species']}_genome_{config['assembly_version']}.assembly.stats",
+    singularity:
+        "docker://biocontainers/bbmap:39.26--he5f24ec_0"
+    resources:
+        mem_mb=4000,
+    threads: 1
+    shell:
+        "stats.sh in={input} > {output}"
+
+
 rule gff_to_transcripts:
     input:
-        gff_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["processed_dir"],
-            f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.gff",
-        ),
-        assembly_fasta=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            f"{config['species']}_genome_{config['assembly_version']}.fasta",
-        ),
+        gff_file=f"Processed/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.gff",
+        assembly_fasta=f"Assembly/{config['species']}_genome_{config['assembly_version']}.fasta",
     output:
         temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["processed_dir"],
-                f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_trans.fa.tmp",
-            )
+            f"Processed/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_trans.fa.tmp"
         ),
     singularity:
         "docker://aewebb/gffread:v0.12.7"
@@ -153,22 +82,10 @@ rule gff_to_transcripts:
 
 rule update_transcripts:
     input:
-        gff_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["processed_dir"],
-            f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.gff",
-        ),
-        transcript_fasta=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["processed_dir"],
-            f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_trans.fa.tmp",
-        ),
+        gff_file=f"Processed/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.gff",
+        transcript_fasta=f"Processed/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_trans.fa.tmp",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["processed_dir"],
-            f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_trans.fa",
-        ),
+        f"Processed/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_trans.fa",
     singularity:
         "docker://aewebb/pipemake_utils:v1.2.6"
     resources:
@@ -180,23 +97,11 @@ rule update_transcripts:
 
 rule gff_to_proteins:
     input:
-        gff_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["processed_dir"],
-            f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.gff",
-        ),
-        assembly_fasta=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            f"{config['species']}_genome_{config['assembly_version']}.fasta",
-        ),
+        gff_file=f"Processed/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.gff",
+        assembly_fasta=f"Assembly/{config['species']}_genome_{config['assembly_version']}.fasta",
     output:
         temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["processed_dir"],
-                f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_pep.fa.tmp",
-            )
+            f"Processed/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_pep.fa.tmp"
         ),
     singularity:
         "docker://aewebb/gffread:v0.12.7"
@@ -209,22 +114,10 @@ rule gff_to_proteins:
 
 rule update_proteins:
     input:
-        gff_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["processed_dir"],
-            f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.gff",
-        ),
-        protein_fasta=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["processed_dir"],
-            f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_pep.fa.tmp",
-        ),
+        gff_file=f"Processed/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.gff",
+        protein_fasta=f"Processed/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_pep.fa.tmp",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["processed_dir"],
-            f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_pep.fa",
-        ),
+        f"Processed/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_pep.fa",
     singularity:
         "docker://aewebb/pipemake_utils:v1.2.6"
     resources:
@@ -236,17 +129,9 @@ rule update_proteins:
 
 rule gzip_assembly:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            f"{config['species']}_genome_{config['assembly_version']}.fasta",
-        ),
+        f"Assembly/{config['species']}_genome_{config['assembly_version']}.fasta",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["processed_dir"],
-            f"{config['species']}_genome_{config['assembly_version']}.fasta.gz",
-        ),
+        f"Processed/{config['species']}_genome_{config['assembly_version']}.fasta.gz",
     singularity:
         "docker://aewebb/tabix:v1.11"
     resources:
@@ -258,22 +143,10 @@ rule gzip_assembly:
 
 rule index_assembly:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["processed_dir"],
-            f"{config['species']}_genome_{config['assembly_version']}.fasta.gz",
-        ),
+        f"Processed/{config['species']}_genome_{config['assembly_version']}.fasta.gz",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["processed_dir"],
-            f"{config['species']}_genome_{config['assembly_version']}.fasta.gz.fai",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["processed_dir"],
-            f"{config['species']}_genome_{config['assembly_version']}.fasta.gz.gzi",
-        ),
+        f"Processed/{config['species']}_genome_{config['assembly_version']}.fasta.gz.fai",
+        f"Processed/{config['species']}_genome_{config['assembly_version']}.fasta.gz.gzi",
     singularity:
         "docker://aewebb/samtools:v1.20"
     resources:

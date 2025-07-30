@@ -76,63 +76,24 @@ parser:
           default: "RNAseq/SpliceJunctions/Aligned"
 setup:
   rnaseq_input:
-    wildcard-method:
-      input:
-        args:
-          - "rnaseq-wildcard"
-          - "rnaseq-standardized-wildcard"
-          - "rnaseq-fastq-dir"
-      standardize:
-        method: "wildcard-str"
-        args:
-          wildcard_str: "{rnaseq-wildcard}"
-          standardized_filename: "{rnaseq-standardized-wildcard}"
-          out_dir: "{rnaseq-fastq-dir}"
-          copy_method: '{rnaseq-copy-method}'
-          gzipped: True
-      samples:
-        method: "wildcard-str"
-        args:
-          wildcard_str: "{rnaseq-wildcard}"
-          sample_wildcards: 
-            - 'samples'
-
-    table-method:
-      input:
-        args:
-          - "rnaseq-table"
-          - "rnaseq-standardized-wildcard"
-          - "rnaseq-fastq-dir"
-      standardize:
-        method: "table-file"
-        args:
-          table_filename: "{rnaseq-table}"
-          standardized_filename: "{rnaseq-standardized-wildcard}"
-          out_dir: "{rnaseq-fastq-dir}"
-          copy_method: '{rnaseq-copy-method}'
-          sample_column: 'samples'
-          gzipped: True
-      samples:
-        method: "table-file"
-        args:
-          table_filename: "{rnaseq-table}"
-          sample_column: 'samples'
-  
+    methods:
+      wildcard-str: "{rnaseq-wildcard}"
+      table-filename: "{rnaseq-table}"
+    args:
+      standardized_filename: "RNAseq/FASTQ/{rnaseq-standardized-filename}"
+      copy_method: '{rnaseq-copy-method}'
+      gzipped: True
+      sample_keywords: 
+        - 'samples' 
   assembly_input:
-    file-method:
-      input:
-        args:
-          - "assembly-fasta"
-          - "assembly-dir"
-      standardize:
-        method: "file-str"
-        args:
-          input_filename: "{assembly-fasta}"
-          standardized_filename: "{species}_{assembly_version}.fa"
-          out_dir: "{assembly-dir}"
-          copy_method: "{assembly-copy-method}"
-          gzipped: False
+    methods:
+      file-str: "{assembly-fasta}"
+    args:
+      standardized_filename: "Assembly/{species}_{assembly_version}.fa"
+      copy_method: copy
+      gzipped: False
   
-snakefiles:
-  - rna_seq_star_splice_junctions
+snakemake:
+  modules:
+    - rna_seq_star_splice_junctions
 
