@@ -34,8 +34,7 @@ class DirIO:
         self,
         standardized_directory,
         out_dir="",
-        workflow_prefix="",
-        work_dir="",
+        workflow_dir="",
         copy_method="symbolic_link",
         **kwargs,
     ):
@@ -45,10 +44,8 @@ class DirIO:
         # Create path as needed
         if out_dir:
             dest_directory = os.path.join(out_dir, dest_directory)
-        if workflow_prefix:
-            dest_directory = os.path.join(workflow_prefix, dest_directory)
-        if work_dir:
-            dest_directory = os.path.join(work_dir, dest_directory)
+        if workflow_dir:
+            dest_directory = os.path.join(workflow_dir, dest_directory)
 
         # Create the output directory, if needed
         if not os.path.exists(os.path.dirname(dest_directory)):

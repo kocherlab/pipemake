@@ -1,38 +1,16 @@
 rule all:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["annotations_dir"],
-            "BUSCO",
-            "summary.txt",
-        ),
+        "Annotations/BUSCO/summary.txt",
 
 
-rule annotations_compleasm:
+rule annotations_busco:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["annotations_dir"],
-            f"{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_pep.fa",
-        ),
+        f"Annotations/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_pep.fa",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["annotations_dir"],
-            "BUSCO",
-            "summary.txt",
-        ),
+        "Annotations/BUSCO/summary.txt",
     params:
-        download_dir=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["downloads_dir"],
-            "BUSCO",
-        ),
-        output_dir=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["annotations_dir"],
-            "BUSCO",
-        ),
+        download_dir="Downloads/BUSCO",
+        output_dir="Annotations/BUSCO",
         busco_db=config["busco_database"],
     singularity:
         "docker://ezlabgva/busco:v5.7.1_cv1"

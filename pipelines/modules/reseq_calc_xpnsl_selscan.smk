@@ -1,41 +1,16 @@
 rule all:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "XPnSL",
-            f"{config['species']}_{config['assembly_version']}.xpnsl.manhattan.png",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "XPnSL",
-            f"{config['species']}_{config['assembly_version']}.abs_xpnsl.manhattan.png",
-        ),
+        f"reSEQ/PopGen/XPnSL/{config['species']}_{config['assembly_version']}.xpnsl.manhattan.png",
+        f"reSEQ/PopGen/XPnSL/{config['species']}_{config['assembly_version']}.abs_xpnsl.manhattan.png",
 
 
 rule reseq_prep_xpnsl_vcf_bcftools:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_phased_vcf_dir"],
-            "SplitByChrom",
-            "{chrom}.vcf.gz",
-        ),
+        "reSEQ/VCF/Phased/SplitByChrom/{chrom}.vcf.gz",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_phased_vcf_dir"],
-            "SplitByChrom",
-            "{chrom}.xpnsl.vcf.gz",
-        ),
+        "reSEQ/VCF/Phased/SplitByChrom/{chrom}.xpnsl.vcf.gz",
     params:
-        out_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_phased_vcf_dir"],
-            "SplitByChrom",
-            "{chrom}",
-        ),
+        out_prefix="reSEQ/VCF/Phased/SplitByChrom/{chrom}",
     singularity:
         "docker://aewebb/bcftools:v1.20"
     resources:
@@ -47,31 +22,11 @@ rule reseq_prep_xpnsl_vcf_bcftools:
 
 rule reseq_create_pop_xpnsl_vcf_bcftools:
     input:
-        vcf=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_phased_vcf_dir"],
-            "SplitByChrom",
-            "{chrom}.xpnsl.vcf.gz",
-        ),
-        ref_inds=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["models_dir"],
-            config["model_name"],
-            f"{config['pop_name']}.pop",
-        ),
+        vcf="reSEQ/VCF/Phased/SplitByChrom/{chrom}.xpnsl.vcf.gz",
+        ref_inds=f"Models/{config['model_name']}/{config['pop_name']}.pop",
     output:
-        ref_vcf=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_phased_vcf_dir"],
-            "SplitByChrom",
-            "{chrom}.xpnsl.ref.vcf.gz",
-        ),
-        query_vcf=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_phased_vcf_dir"],
-            "SplitByChrom",
-            "{chrom}.xpnsl.query.vcf.gz",
-        ),
+        ref_vcf="reSEQ/VCF/Phased/SplitByChrom/{chrom}.xpnsl.ref.vcf.gz",
+        query_vcf="reSEQ/VCF/Phased/SplitByChrom/{chrom}.xpnsl.query.vcf.gz",
     singularity:
         "docker://aewebb/bcftools:v1.20"
     resources:
@@ -87,42 +42,13 @@ rule reseq_create_pop_xpnsl_vcf_bcftools:
 
 rule reseq_xpnsl_selscan:
     input:
-        ref_vcf=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_phased_vcf_dir"],
-            "SplitByChrom",
-            "{chrom}.xpnsl.ref.vcf.gz",
-        ),
-        query_vcf=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_phased_vcf_dir"],
-            "SplitByChrom",
-            "{chrom}.xpnsl.query.vcf.gz",
-        ),
+        ref_vcf="reSEQ/VCF/Phased/SplitByChrom/{chrom}.xpnsl.ref.vcf.gz",
+        query_vcf="reSEQ/VCF/Phased/SplitByChrom/{chrom}.xpnsl.query.vcf.gz",
     output:
-        temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_popgen_dir"],
-                "XPnSL",
-                "{chrom}.xpnsl.out",
-            )
-        ),
-        temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_popgen_dir"],
-                "XPnSL",
-                "{chrom}.xpnsl.log",
-            )
-        ),
+        temp("reSEQ/PopGen/XPnSL/{chrom}.xpnsl.out"),
+        temp("reSEQ/PopGen/XPnSL/{chrom}.xpnsl.log"),
     params:
-        out_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "XPnSL",
-            "{chrom}",
-        ),
+        out_prefix="reSEQ/PopGen/XPnSL/{chrom}",
         maf=config["maf"],
     singularity:
         "docker://aewebb/selscan:v2.0.3"
@@ -135,36 +61,12 @@ rule reseq_xpnsl_selscan:
 
 rule reseq_normalize_xpnsl_norm:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "XPnSL",
-            "{chrom}.xpnsl.out",
-        ),
+        "reSEQ/PopGen/XPnSL/{chrom}.xpnsl.out",
     output:
-        temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_popgen_dir"],
-                "XPnSL",
-                f"{{chrom}}.xpnsl.out.norm",
-            )
-        ),
-        temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_popgen_dir"],
-                "XPnSL",
-                f"{{chrom}}.xpnsl.norm.log",
-            )
-        ),
+        temp("reSEQ/PopGen/XPnSL/{{chrom}}.xpnsl.out.norm"),
+        temp("reSEQ/PopGen/XPnSL/{{chrom}}.xpnsl.norm.log"),
     params:
-        out_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "XPnSL",
-            "{chrom}.xpnsl",
-        ),
+        out_prefix="reSEQ/PopGen/XPnSL/{chrom}.xpnsl",
         bins=config["bins"],
     singularity:
         "docker://aewebb/selscan:v2.0.3"
@@ -181,12 +83,7 @@ def aggregate_xpnsl_reseq(wildcards):
     ).output[0]
     return {
         "scan_xpnsl": expand(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_popgen_dir"],
-                "XPnSL",
-                "{chrom}.xpnsl.out",
-            ),
+            "reSEQ/PopGen/XPnSL/{chrom}.xpnsl.out",
             chrom=glob_wildcards(
                 os.path.join(
                     checkpoint_output,
@@ -195,12 +92,7 @@ def aggregate_xpnsl_reseq(wildcards):
             ).chrom,
         ),
         "scan_log": expand(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_popgen_dir"],
-                "XPnSL",
-                "{chrom}.xpnsl.log",
-            ),
+            "reSEQ/PopGen/XPnSL/{chrom}.xpnsl.log",
             chrom=glob_wildcards(
                 os.path.join(
                     checkpoint_output,
@@ -209,12 +101,7 @@ def aggregate_xpnsl_reseq(wildcards):
             ).chrom,
         ),
         "norm_xpnsl": expand(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_popgen_dir"],
-                "XPnSL",
-                f"{{chrom}}.xpnsl.out.norm",
-            ),
+            "reSEQ/PopGen/XPnSL/{chrom}.xpnsl.out.norm",
             chrom=glob_wildcards(
                 os.path.join(
                     checkpoint_output,
@@ -223,12 +110,7 @@ def aggregate_xpnsl_reseq(wildcards):
             ).chrom,
         ),
         "norm_log": expand(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_popgen_dir"],
-                "XPnSL",
-                f"{{chrom}}.xpnsl.norm.log",
-            ),
+            "reSEQ/PopGen/XPnSL/{chrom}.xpnsl.norm.log",
             chrom=glob_wildcards(
                 os.path.join(
                     checkpoint_output,
@@ -243,30 +125,10 @@ rule reseq_cat_xpnsl_bash:
     input:
         unpack(aggregate_xpnsl_reseq),
     output:
-        scan_xpnsl=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "XPnSL",
-            f"{config['species']}_{config['assembly_version']}.xpnsl.out",
-        ),
-        scan_log=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "XPnSL",
-            f"{config['species']}_{config['assembly_version']}.xpnsl.out.log",
-        ),
-        norm_xpnsl=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "XPnSL",
-            f"{config['species']}_{config['assembly_version']}.xpnsl.norm",
-        ),
-        norm_log=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "XPnSL",
-            f"{config['species']}_{config['assembly_version']}.xpnsl.norm.log",
-        ),
+        scan_xpnsl=f"reSEQ/PopGen/XPnSL/{config['species']}_{config['assembly_version']}.xpnsl.out",
+        scan_log=f"reSEQ/PopGen/XPnSL/{config['species']}_{config['assembly_version']}.xpnsl.out.log",
+        norm_xpnsl=f"reSEQ/PopGen/XPnSL/{config['species']}_{config['assembly_version']}.xpnsl.norm",
+        norm_log=f"reSEQ/PopGen/XPnSL/{config['species']}_{config['assembly_version']}.xpnsl.norm.log",
     resources:
         mem_mb=2000,
     threads: 1
@@ -281,32 +143,12 @@ rule reseq_cat_xpnsl_bash:
 
 rule plot_norm_xpnsl_pipemake:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "XPnSL",
-            f"{config['species']}_{config['assembly_version']}.xpnsl.norm",
-        ),
+        f"reSEQ/PopGen/XPnSL/{config['species']}_{config['assembly_version']}.xpnsl.norm",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "XPnSL",
-            f"{config['species']}_{config['assembly_version']}.xpnsl.manhattan.png",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "XPnSL",
-            f"{config['species']}_{config['assembly_version']}.abs_xpnsl.manhattan.png",
-        ),
+        f"reSEQ/PopGen/XPnSL/{config['species']}_{config['assembly_version']}.xpnsl.manhattan.png",
+        f"reSEQ/PopGen/XPnSL/{config['species']}_{config['assembly_version']}.abs_xpnsl.manhattan.png",
     params:
-        out_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "XPnSL",
-            f"{config['species']}_{config['assembly_version']}",
-        ),
+        out_prefix=f"reSEQ/PopGen/XPnSL/{config['species']}_{config['assembly_version']}",
     singularity:
         "docker://aewebb/pipemake_utils:v1.2.1"
     resources:

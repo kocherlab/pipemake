@@ -38,34 +38,35 @@ def main():
     if not pipeline_args["pipeline"]:
         raise Exception("No pipeline specified")
 
-    # Check for a previous workflow directory
-
-    if os.path.exists(pipeline_args["workflow_prefix"]) and pipeline_args["overwrite"]:
-        shutil.rmtree(pipeline_args["workflow_prefix"])
-    elif os.path.exists(pipeline_args["workflow_prefix"]):
-        raise Exception(
-            f"Workflow directory already exists: {pipeline_args['workflow_prefix']}"
-        )
-
     # Assign the pipeline job directory
-    pipeline_args["pipeline_job_dir"] = os.path.join(
-        pipeline_args["workflow_prefix"], "pipemake"
-    )
+    pipeline_args["pipeline_job_dir"] = "pipemake"
 
-    # Check if the pipeline job directory should be updated
-    if pipeline_args[
-        "work_dir"
-    ]:  # and not os.path.exists(pipeline_args['work_dir']): os.makedirs(pipeline_args['work_dir'])
-        pipeline_args["pipeline_job_dir"] = os.path.join(
-            pipeline_args["work_dir"], pipeline_args["pipeline_job_dir"]
+    # Check for a previous workflow directory
+    if os.path.exists(pipeline_args["workflow_dir"]) and pipeline_args["overwrite"]:
+        shutil.rmtree(pipeline_args["workflow_dir"])
+    elif os.path.exists(pipeline_args["workflow_dir"]):
+        raise Exception(
+            f"Workflow directory already exists: {pipeline_args['workflow_dir']}"
         )
 
     # Create the pipeline job directory
-    if not os.path.exists(pipeline_args["pipeline_job_dir"]):
-        os.makedirs(pipeline_args["pipeline_job_dir"])
+    if not os.path.exists(
+        os.path.join(pipeline_args["workflow_dir"], pipeline_args["pipeline_job_dir"])
+    ):
+        os.makedirs(
+            os.path.join(
+                pipeline_args["workflow_dir"], pipeline_args["pipeline_job_dir"]
+            )
+        )
 
     # Start logger and log the arguments
-    startLogger(os.path.join(pipeline_args["pipeline_job_dir"], "pipeline.log"))
+    startLogger(
+        os.path.join(
+            pipeline_args["workflow_dir"],
+            pipeline_args["pipeline_job_dir"],
+            "pipeline.log",
+        )
+    )
     logArgDict(pipeline_args, omit=["pipeline_job_dir"])
 
     # Assign the pipeline config
@@ -83,6 +84,9 @@ def main():
     # Add the snakemake modules to the pipeline
     for smkm_filename in pipline_config.snakefiles:
         snakemake_pipeline.addModule(smkm_filename)
+
+    for smkl_filename in pipline_config.snakelinks:
+        snakemake_pipeline.addSnakeLink(smkl_filename)
 
     # Build the singularity containers
     snakemake_pipeline.buildSingularityContainers()

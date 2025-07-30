@@ -1,32 +1,14 @@
 rule all:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["downloads_dir"],
-            "augustus",
-            f".config.chk",
-        ),
+        f"Downloads/augustus/.config.chk",
 
 
 rule download_augustus_config:
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["downloads_dir"],
-            "augustus",
-            f".config.chk",
-        ),
+        "Downloads/augustus/.config.chk",
     params:
-        out_dir=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["downloads_dir"],
-            "augustus",
-        ),
-        tmp_dir=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["downloads_dir"],
-            "tmp_augustus",
-        ),
+        out_dir="Downloads/augustus",
+        tmp_dir="Downloads/tmp_augustus",
     singularity:
         "docker://aewebb/pipemake_utils:v1.2.1"
     resources:

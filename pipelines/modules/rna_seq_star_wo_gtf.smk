@@ -3,38 +3,16 @@ ruleorder: star_pair_end_rnaseq > star_single_end_rnaseq
 
 rule all:
     input:
-        expand(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["rnaseq_aligned_bam_dir"],
-                "{sample}.Aligned.bam",
-            ),
-            sample=config["samples"],
-        ),
+        expand("RNAseq/BAM/Aligned/{sample}.Aligned.bam", sample=config["samples"]),
 
 
 rule star_genome_generate_rnaseq:
     input:
-        fasta_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            f"{config['species']}_{config['assembly_version']}.fa",
-        ),
+        fasta_file=f"Assembly/{config['species']}_{config['assembly_version']}.fa",
     output:
-        index_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["index_dir"],
-            "STAR",
-            "SAindex",
-        ),
+        index_file="Indices/STAR/SAindex",
     params:
-        index_dir=directory(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["index_dir"],
-                "STAR",
-            )
-        ),
+        index_dir="Indices/STAR",
     singularity:
         "docker://aewebb/star:v2.7.11b"
     resources:
@@ -46,39 +24,17 @@ rule star_genome_generate_rnaseq:
         STAR --runThreadN {threads} --runMode genomeGenerate --genomeDir {params.index_dir} --genomeFastaFiles {input.fasta_file} --limitGenomeGenerateRAM $index_mem_b --genomeSAindexNbases 13
         """
 
+
 rule star_single_end_rnaseq:
     input:
-        r1_reads=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_fastq_dir"],
-            "{sample}_R1.fq.gz",
-        ),
-        index_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["index_dir"],
-            "STAR",
-            "SAindex",
-        ),
+        r1_reads="RNAseq/FASTQ/{sample}_R1.fq.gz",
+        index_file="Indices/STAR/SAindex",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_aligned_bam_dir"],
-            "{sample}.Aligned.bam",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_aligned_bam_dir"],
-            "{sample}.Log.final.out",
-        ),
+        "RNAseq/BAM/Aligned/{sample}.Aligned.bam",
+        "RNAseq/BAM/Aligned/{sample}.Log.final.out",
     params:
-        index_dir=os.path.join(
-            config["paths"]["workflow_prefix"], config["paths"]["index_dir"], "STAR"
-        ),
-        bam_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_aligned_bam_dir"],
-            "{sample}.",
-        ),
+        index_dir="Indices/STAR",
+        bam_prefix="RNAseq/BAM/Aligned/{sample}.",
     singularity:
         "docker://aewebb/star:v2.7.11b"
     resources:
@@ -93,42 +49,15 @@ rule star_single_end_rnaseq:
 
 rule star_pair_end_rnaseq:
     input:
-        r1_reads=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_fastq_dir"],
-            "{sample}_R1.fq.gz",
-        ),
-        r2_reads=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_fastq_dir"],
-            "{sample}_R2.fq.gz",
-        ),
-        index_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["index_dir"],
-            "STAR",
-            "SAindex",
-        ),
+        r1_reads="RNAseq/FASTQ/{sample}_R1.fq.gz",
+        r2_reads="RNAseq/FASTQ/{sample}_R2.fq.gz",
+        index_file="Indices/STAR/SAindex",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_aligned_bam_dir"],
-            "{sample}.Aligned.bam",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_aligned_bam_dir"],
-            "{sample}.Log.final.out",
-        ),
+        "RNAseq/BAM/Aligned/{sample}.Aligned.bam",
+        "RNAseq/BAM/Aligned/{sample}.Log.final.out",
     params:
-        index_dir=os.path.join(
-            config["paths"]["workflow_prefix"], config["paths"]["index_dir"], "STAR"
-        ),
-        bam_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["rnaseq_aligned_bam_dir"],
-            "{sample}.",
-        ),
+        index_dir="Indices/STAR",
+        bam_prefix="RNAseq/BAM/Aligned/{sample}.",
     singularity:
         "docker://aewebb/star:v2.7.11b"
     resources:

@@ -8,11 +8,7 @@ parser:
         input-parser:
           required: True
       wildcards-args:
-        fastq-standardized-wildcard:
-          help: "Standardized wildcard statement used to store FASTQs"
-          type: str
-          default: 
-            str: "{samples}_{reads}.fq.gz"
+        fastq-standardized-wildcard: "{samples}_{reads}.fq.gz"
       args:
         fastq-wildcard:
           help: "Wildcard statement to represent FASTQs"
@@ -57,66 +53,25 @@ parser:
               - function: jobRandomString
 setup:
   fastq_input:
-    wildcard-method:
-      input:
-        args:
-          - "workflow_prefix"
-          - "fastq-wildcard"
-          - "fastq-standardized-wildcard"
-          - "unfiltered-fastq-dir"
-      standardize:
-        method: "wildcard-str"
-        args:
-          wildcard_str: "{fastq-wildcard}"
-          standardized_filename: "{fastq-standardized-wildcard}"
-          out_dir: "{unfiltered-fastq-dir}"
-          workflow_prefix: "{workflow_prefix}"
-          copy_method: '{fastq-copy-method}'
-          gzipped: True
-      samples:
-        method: "wildcard-str"
-        args:
-          wildcard_str: "{fastq-wildcard}"
-          sample_wildcards: ['samples']
-
-    table-method:
-      input:
-        args:
-          - "workflow_prefix"
-          - "fastq-table"
-          - "fastq-standardized-wildcard"
-          - "unfiltered-fastq-dir"
-      standardize:
-        method: "table-file"
-        args:
-          table_filename: "{fastq-table}"
-          standardized_filename: "{fastq-standardized-wildcard}"
-          out_dir: "{unfiltered-fastq-dir}"
-          workflow_prefix: "{workflow_prefix}"
-          copy_method: '{fastq-copy-method}'
-          sample_column: 'samples'
-          gzipped: True
-      samples:
-        method: "table-file"
-        args:
-          table_filename: "{fastq-table}"
-          sample_column: 'samples'
-      snakefiles:
-        - test_script
-  
+    methods:
+      wildcard_str: "{fastq-wildcard}"
+      table_file: "{fastq-table}"
+    args:
+      standardized_filename: "{fastq-standardized-wildcard}"
+      out_dir: "{unfiltered-fastq-dir}"
+      copy_method: '{fastq-copy-method}'
+      gzipped: True
+      sample_keywords:
+        - 'samples'
   test_input:
-    dir-method:
-      input:
-        args:
-          - "workflow_prefix"
-          - "dir-test"
-      standardize:
-        method: "dir-str"
-        args:
-          path_name: "{dir-test}"
-          standardized_directory: "Test_Directory"
-          workflow_prefix: "{workflow_prefix}"
-          copy_method: 'symbolic_link'
+    methods:
+      dir_str: "{dir-test}"
+    args:
+      standardized_directory: "Test_Directory"
+      copy_method: 'symbolic_link'
+    snakefiles:
+      - test_script
 
-snakefiles:
-  - fastq_filter_fastp
+snakemake:
+  modules:
+    - fastq_filter_fastp

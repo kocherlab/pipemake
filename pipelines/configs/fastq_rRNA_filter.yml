@@ -1,0 +1,55 @@
+pipeline: fastq-rRNA-filter
+version: 1.0
+parser:
+  help: Filter rRNA reads from FASTQ files using SortMeRNA
+  arg-groups:
+    basic:
+      mutually-exclusive-args:
+        input-parser:
+          required: True
+      wildcards-args:
+        fastq-standardized-wildcard: "{samples}_{reads}.fq.gz"
+      args:
+        fastq-wildcard:
+          help: "Wildcard statement to represent FASTQs"
+          type: str
+          mutually-exclusive: "input-parser"
+          wildcards: "fastq-standardized-wildcard"
+        fastq-table:
+          help: "Table with sample and FASTQs filenames"
+          type: str
+          action: confirmFile
+          mutually-exclusive: "input-parser"
+          wildcards: "fastq-standardized-wildcard"
+        fastq-copy-method:
+          help: "Specifies if FASTQs should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        sortmerna-db:
+          help: "SortMeRNA database to use"
+          type: str
+          choices:
+            - "smr_v4.3_fast_db.fasta"
+            - "smr_v4.3_default_db.fasta"
+            - "smr_v4.3_sensitive_db.fasta"
+            - "smr_v4.3_sensitive_db_rfam_seeds.fasta"
+          default: "smr_v4.3_default_db.fasta"
+
+setup:
+  fastq_input:
+    methods:
+      wildcard_str: "{fastq-wildcard}"
+      table-file: "{fastq-table}"
+    args:
+      standardized_filename: "FASTQ/Unfiltered/{fastq-standardized-wildcard}"
+      copy_method: '{fastq-copy-method}'
+      gzipped: True
+      sample_keywords:
+        - 'samples'
+
+snakemake:
+  modules:
+    - index_sortmerna
+    - fastq_filter_rRNA_sortmerna

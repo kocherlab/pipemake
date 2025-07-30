@@ -1,46 +1,21 @@
 rule all:
     input:
         expand(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["hic_juicebox_dir"],
-                "{sample}_{ec_type}_converted.fasta",
-            ),
-            sample=config["samples"],
+            f"Assembly/Juicebox/{config['species']}_{config['assembly_version']}_{{ec_type}}_converted.fasta",
             ec_type=["ec", "noec"],
         ),
         expand(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["hic_juicebox_dir"],
-                "{sample}_{ec_type}.hic",
-            ),
-            sample=config["samples"],
+            f"Assembly/Juicebox/{config['species']}_{config['assembly_version']}_{{ec_type}}.hic",
             ec_type=["ec", "noec"],
         ),
 
 
 rule index_hifi_assembly:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            "hifiasm",
-            "{sample}.fa",
-        ),
+        f"Assembly/hifiasm/{config['species']}_{config['assembly_version']}.fa",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            "hifiasm",
-            "{sample}.fa.fai",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            "hifiasm",
-            "{sample}.fa.bwt.2bit.64",
-        ),
+        f"Assembly/hifiasm/{config['species']}_{config['assembly_version']}.fa.fai",
+        f"Assembly/hifiasm/{config['species']}_{config['assembly_version']}.fa.bwt.2bit.64",
     singularity:
         "docker://aewebb/bwa-mem2:v2.2.1"
     resources:
@@ -55,31 +30,11 @@ rule index_hifi_assembly:
 
 rule align_hic_reads_bwa:
     input:
-        read_fastq=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["hic_fastq_dir"],
-            "HiC_{read}.fq.gz",
-        ),
-        assembly_fasta=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            "hifiasm",
-            "{sample}.fa",
-        ),
-        index_fasta=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            "hifiasm",
-            "{sample}.fa.fai",
-        ),
+        read_fastq=f"HiC/FASTQ/{config['species']}_HiC_{{read}}.fq.gz",
+        assembly_fasta=f"Assembly/hifiasm/{config['species']}_{config['assembly_version']}.fa",
+        index_fasta=f"Assembly/hifiasm/{config['species']}_{config['assembly_version']}.fa.fai",
     output:
-        temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["hic_aligned_bam_dir"],
-                "{sample}_{read}.aligned.bam",
-            )
-        ),
+        temp(f"HiC/BAM/Aligned/{config['species']}_{{read}}.aligned.bam"),
     singularity:
         "docker://aewebb/bwa-mem2:v2.2.1"
     resources:
@@ -91,19 +46,9 @@ rule align_hic_reads_bwa:
 
 rule filter_hic_reads:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["hic_aligned_bam_dir"],
-            "{sample}_{read}.aligned.bam",
-        ),
+        f"HiC/BAM/Aligned/{config['species']}_{{read}}.aligned.bam",
     output:
-        temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["hic_aligned_bam_dir"],
-                "{sample}_{read}.filtered.bam",
-            )
-        ),
+        temp(f"HiC/BAM/Aligned/{config['species']}_{{read}}.filtered.bam"),
     singularity:
         "docker://aewebb/arima_mapping:05222024"
     resources:
@@ -115,30 +60,11 @@ rule filter_hic_reads:
 
 rule combine_hic_reads:
     input:
-        r1_bam=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["hic_aligned_bam_dir"],
-            "{sample}_R1.filtered.bam",
-        ),
-        r2_bam=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["hic_aligned_bam_dir"],
-            "{sample}_R2.filtered.bam",
-        ),
-        index_fasta=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            "hifiasm",
-            "{sample}.fa",
-        ),
+        r1_bam=f"HiC/BAM/Aligned/{config['species']}_R1.filtered.bam",
+        r2_bam=f"HiC/BAM/Aligned/{config['species']}_R2.filtered.bam",
+        index_fasta=f"Assembly/hifiasm/{config['species']}_{config['assembly_version']}.fa",
     output:
-        temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["hic_sorted_bam_dir"],
-                "{sample}.sorted.bam",
-            )
-        ),
+        temp(f"HiC/BAM/Sorted/{config['species']}.sorted.bam"),
     params:
         mapq_filter="10",
     singularity:
@@ -152,53 +78,28 @@ rule combine_hic_reads:
 
 rule add_read_groups:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["hic_sorted_bam_dir"],
-            "{sample}.sorted.bam",
-        ),
+        f"HiC/BAM/Sorted/{config['species']}.sorted.bam",
     output:
-        temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["hic_sorted_bam_dir"],
-                "{sample}.sorted_groups.bam",
-            )
-        ),
+        temp(f"HiC/BAM/Sorted/{config['species']}.sorted_groups.bam"),
     params:
-        mapq_filter="10",
+        species=config["species"],
     singularity:
         "docker://aewebb/gatk4:v4.6.1.0"
     resources:
         mem_mb=8000,
     threads: 1
     shell:
-        "gatk AddOrReplaceReadGroups INPUT={input} OUTPUT={output} ID={wildcards.sample} LB={wildcards.sample} SM={wildcards.sample} PL=ILLUMINA PU=none"
+        "gatk AddOrReplaceReadGroups INPUT={input} OUTPUT={output} ID={params.species} LB={params.species} SM={params.species} PL=ILLUMINA PU=none"
 
 
 rule mark_duplicates:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["hic_sorted_bam_dir"],
-            "{sample}.sorted_groups.bam",
-        ),
+        f"HiC/BAM/Sorted/{config['species']}.sorted_groups.bam",
     output:
-        bam=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["hic_sorted_bam_dir"],
-            "{sample}.dedup.bam",
-        ),
-        metrics=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["hic_sorted_bam_dir"],
-            "{sample}.dedup.metrics.txt",
-        ),
+        bam=f"HiC/BAM/Sorted/{config['species']}.dedup.bam",
+        metrics=f"HiC/BAM/Sorted/{config['species']}.dedup.metrics.txt",
     params:
-        tmp_dir=os.path.join(
-            config["paths"]["workflow_prefix"],
-            ".tmp",
-        ),
+        tmp_dir=".tmp",
     singularity:
         "docker://aewebb/gatk4:v4.6.1.0"
     resources:
@@ -213,17 +114,9 @@ rule mark_duplicates:
 
 rule dedup_bam_stats:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["hic_sorted_bam_dir"],
-            "{sample}.dedup.bam",
-        ),
+        f"HiC/BAM/Sorted/{config['species']}.dedup.bam",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["hic_sorted_bam_dir"],
-            "{sample}.dedup.stats.txt",
-        ),
+        f"HiC/BAM/Sorted/{config['species']}.dedup.stats.txt",
     singularity:
         "docker://aewebb/arima_mapping:05222024"
     resources:
@@ -235,34 +128,17 @@ rule dedup_bam_stats:
 
 rule yahs_ec:
     input:
-        dedup_bam=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["hic_sorted_bam_dir"],
-            "{sample}.dedup.bam",
-        ),
-        index_fasta=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            "hifiasm",
-            "{sample}.fa",
-        ),
+        dedup_bam=f"HiC/BAM/Sorted/{config['species']}.dedup.bam",
+        index_fasta=f"Assembly/hifiasm/{config['species']}_{config['assembly_version']}.fa",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["hic_yahs_dir"],
-            "{sample}_yahsout_ec.bin",
+        temp(
+            f"Assembly/YaHS/{config['species']}_{config['assembly_version']}_yahsout_ec.bin"
         ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["hic_yahs_dir"],
-            "{sample}_yahsout_ec_scaffolds_final.agp",
+        temp(
+            f"Assembly/YaHS/{config['species']}_{config['assembly_version']}_yahsout_ec_scaffolds_final.agp"
         ),
     params:
-        out_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["hic_yahs_dir"],
-            "{sample}_yahsout_ec",
-        ),
+        out_prefix=f"Assembly/YaHS/{config['species']}_yahsout_ec",
     singularity:
         "docker://aewebb/yahs:v1.2.2"
     resources:
@@ -274,38 +150,17 @@ rule yahs_ec:
 
 rule yahs_noec:
     input:
-        dedup_bam=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["hic_sorted_bam_dir"],
-            "{sample}.dedup.bam",
-        ),
-        index_fasta=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            "hifiasm",
-            "{sample}.fa",
-        ),
+        dedup_bam=f"HiC/BAM/Sorted/{config['species']}.dedup.bam",
+        index_fasta=f"Assembly/hifiasm/{config['species']}_{config['assembly_version']}.fa",
     output:
         temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["hic_yahs_dir"],
-                "{sample}_yahsout_noec.bin",
-            )
+            f"Assembly/YaHS/{config['species']}_{config['assembly_version']}_yahsout_noec.bin"
         ),
         temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["hic_yahs_dir"],
-                "{sample}_yahsout_noec_scaffolds_final.agp",
-            )
+            f"Assembly/YaHS/{config['species']}_{config['assembly_version']}_yahsout_noec_scaffolds_final.agp"
         ),
     params:
-        out_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["hic_yahs_dir"],
-            "{sample}_yahsout_noec",
-        ),
+        out_prefix=f"Assembly/YaHS/{config['species']}_yahsout_noec",
     singularity:
         "docker://aewebb/yahs:v1.2.2"
     resources:
@@ -315,50 +170,21 @@ rule yahs_noec:
         "yahs --no-contig-ec {input.index_fasta} {input.dedup_bam} -o {params.out_prefix}"
 
 
-rule yahs_juicer_pre_noec:
+rule yahs_juicer_pre:
     input:
-        reads_bin=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["hic_yahs_dir"],
-            "{sample}_yahsout_noec.bin",
-        ),
-        assembly_agp=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["hic_yahs_dir"],
-            "{sample}_yahsout_{ec_type}_scaffolds_final.agp",
-        ),
-        assembly_index=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            "hifiasm",
-            "{sample}.fa.fai",
-        ),
+        reads_bin=f"Assembly/YaHS/{config['species']}_{config['assembly_version']}_yahsout_{{ec_type}}.bin",
+        assembly_agp=f"Assembly/YaHS/{config['species']}_{config['assembly_version']}_yahsout_{{ec_type}}_scaffolds_final.agp",
+        assembly_index=f"Assembly/hifiasm/{config['species']}_{config['assembly_version']}.fa.fai",
     output:
         txt=temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["hic_juicebox_dir"],
-                "{sample}_{ec_type}.txt",
-            )
+            f"Assembly/Juicebox/{config['species']}_{config['assembly_version']}_{{ec_type}}.txt"
         ),
         agp=temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["hic_juicebox_dir"],
-                "{sample}_{ec_type}.liftover.agp",
-            )
+            f"Assembly/Juicebox/{config['species']}_{config['assembly_version']}_{{ec_type}}.liftover.agp"
         ),
-        log=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["hic_juicebox_dir"],
-            "{sample}_{ec_type}_juicer_pre.log",
-        ),
+        log=f"Assembly/Juicebox/{config['species']}_{config['assembly_version']}_{{ec_type}}_juicer_pre.log",
     params:
-        out_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["hic_juicebox_dir"],
-            "{sample}_{ec_type}",
-        ),
+        out_prefix=f"Assembly/Juicebox/{config['species']}_{config['assembly_version']}_{{ec_type}}",
     singularity:
         "docker://aewebb/yahs:v1.2.2"
     resources:
@@ -370,22 +196,10 @@ rule yahs_juicer_pre_noec:
 
 rule juicer_tools_pre:
     input:
-        txt=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["hic_juicebox_dir"],
-            "{sample}_{ec_type}.txt",
-        ),
-        log=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["hic_juicebox_dir"],
-            "{sample}_{ec_type}_juicer_pre.log",
-        ),
+        txt=f"Assembly/Juicebox/{config['species']}_{config['assembly_version']}_{{ec_type}}.txt",
+        log=f"Assembly/Juicebox/{config['species']}_{config['assembly_version']}_{{ec_type}}_juicer_pre.log",
     output:
-        hic=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["hic_juicebox_dir"],
-            "{sample}_{ec_type}.hic",
-        ),
+        hic=f"Assembly/Juicebox/{config['species']}_{config['assembly_version']}_{{ec_type}}.hic",
     singularity:
         "docker://aewebb/juicer_tools:v1.19.02"
     resources:
@@ -400,30 +214,13 @@ rule juicer_tools_pre:
 
 rule create_converted_fasta:
     input:
-        agp=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["hic_juicebox_dir"],
-            "{sample}_{ec_type}.liftover.agp",
-        ),
-        fasta=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            "hifiasm",
-            "{sample}.fa",
-        ),
+        agp=f"Assembly/Juicebox/{config['species']}_{config['assembly_version']}_{{ec_type}}.liftover.agp",
+        fasta=f"Assembly/hifiasm/{config['species']}_{config['assembly_version']}.fa",
     output:
         bed=temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["hic_juicebox_dir"],
-                "{sample}_{ec_type}.bed",
-            )
+            f"Assembly/Juicebox/{config['species']}_{config['assembly_version']}_{{ec_type}}.bed"
         ),
-        fasta=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["hic_juicebox_dir"],
-            "{sample}_{ec_type}_converted.fasta",
-        ),
+        fasta=f"Assembly/Juicebox/{config['species']}_{config['assembly_version']}_{{ec_type}}_converted.fasta",
     singularity:
         "docker://aewebb/bedtools:v2.31.1"
     resources:

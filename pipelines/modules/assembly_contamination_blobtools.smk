@@ -28,26 +28,18 @@ rule all:
             ),
             blast_type=["blastn", "blastx"],
         ),
+#        f"Figures/blobtools/{config['species']}_{config['assembly_version']}_scaff_snail.png",
+#        f"Figures/blobtools/{config['species']}_{config['assembly_version']}_scaff_blob.png",
+#        f"Figures/blobtools/{config['species']}_{config['assembly_version']}_scaff_cumulative.png",
+#        f"Assembly/blobtools/{config['species']}_{config['assembly_version']}_blobblurbout.tsv",
 
 
 rule hifi_align_minimap2:
     input:
-        hifi_fastq=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["hifi_fastq_dir"],
-            f"{config['hifi_sample']}.fq.gz",
-        ),
-        assembly_fasta=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            f"{config['species']}_{config['assembly_version']}.fa",
-        ),
+        hifi_fastq=f"HiFi/FASTQ/{config['species']}.fq.gz",
+        assembly_fasta=f"Assembly/{config['species']}_{config['assembly_version']}.fa",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["hifi_bam_dir"],
-            f"{config['hifi_sample']}.reads.bam",
-        ),
+        f"HiFi/BAM/Aligned/{config['species']}.reads.bam",
     singularity:
         "docker://aewebb/minimap2:v2.28"
     resources:
@@ -59,11 +51,7 @@ rule hifi_align_minimap2:
 
 checkpoint split_assembly:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            f"{config['species']}_{config['assembly_version']}.fa",
-        ),
+        f"Assembly/{config['species']}_{config['assembly_version']}.fa",
     output:
         directory(
             os.path.join(
@@ -97,6 +85,7 @@ rule chunk_file:
                 "{chrom}.chunked.fasta",
             )
         ),
+#        f"BLAST/Assembly/blastn/{config['species']}_{config['assembly_version']}.out",
     params:
         chunk_size=config["chunk_size"],
     singularity:
@@ -155,6 +144,11 @@ rule blastx_chunked_assembly_records_diamond:
                 "{chunk}.chunked.out",
             )
         )
+#        f"Assembly/{config['species']}_{config['assembly_version']}.fa",
+#    output:
+#        temp(
+#            f"BLAST/Assembly/blastx/{config['species']}_{config['assembly_version']}.short_records.fa"
+#        ),
     params:
         uniprot_db=config["uniprot_db"],
     singularity:
@@ -240,6 +234,12 @@ rule unchunk_blast:
             "{blast_type}",
             f"{config['species']}_{config['assembly_version']}.out",
         ),
+=======
+#        f"BLAST/Assembly/blastx/{config['species']}_{config['assembly_version']}.short_records.fa",
+#    output:
+#        f"BLAST/Assembly/blastx/{config['species']}_{config['assembly_version']}.out",
+#    params:
+#        uniprot_db=config["uniprot_db"],
     singularity:
         "docker://aewebb/pipemake_utils:v1.2.2"
     resources:
@@ -251,24 +251,11 @@ rule unchunk_blast:
 
 rule blobtk_blobtools_create:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            f"{config['species']}_{config['assembly_version']}.fa",
-        ),
+        f"Assembly/{config['species']}_{config['assembly_version']}.fa",
     output:
-        temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["blobtools_dir"],
-                ".create.chk",
-            )
-        ),
+        temp("Assembly/blobtools/.create.chk"),
     params:
-        blob_dir=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["blobtools_dir"],
-        ),
+        blob_dir=f"Assembly/blobtools/{config['species']}_{config['assembly_version']}",
     singularity:
         "docker://genomehubs/blobtoolkit:4.4.6"
     resources:
@@ -280,29 +267,12 @@ rule blobtk_blobtools_create:
 
 rule blobtk_blobtools_add_cov:
     input:
-        hifi_bam=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["hifi_bam_dir"],
-            f"{config['hifi_sample']}.reads.bam",
-        ),
-        create_chk=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["blobtools_dir"],
-            ".create.chk",
-        ),
+        hifi_bam=f"HiFi/BAM/Aligned/{config['species']}.reads.bam",
+        create_chk="Assembly/blobtools/.create.chk",
     output:
-        temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["blobtools_dir"],
-                ".cov.chk",
-            )
-        ),
+        temp("Assembly/blobtools/.cov.chk"),
     params:
-        blob_dir=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["blobtools_dir"],
-        ),
+        blob_dir=f"Assembly/blobtools/{config['species']}_{config['assembly_version']}",
     singularity:
         "docker://genomehubs/blobtoolkit:4.4.6"
     resources:
@@ -314,36 +284,13 @@ rule blobtk_blobtools_add_cov:
 
 rule blobtk_blobtools_add_hits:
     input:
-        blastn_hits=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["blast_dir"],
-            "blastn",
-            f"{config['species']}_{config['assembly_version']}.out",
-        ),
-        blastx_hits=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["blast_dir"],
-            "blastx",
-            f"{config['species']}_{config['assembly_version']}.out",
-        ),
-        cov_check=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["blobtools_dir"],
-            ".cov.chk",
-        ),
+        blastn_hits=f"BLAST/Assembly/blastn/{config['species']}_{config['assembly_version']}.out",
+        blastx_hits=f"BLAST/Assembly/blastx/{config['species']}_{config['assembly_version']}.out",
+        cov_check="Assembly/blobtools/.cov.chk",
     output:
-        temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["blobtools_dir"],
-                ".hits.chk",
-            )
-        ),
+        temp("Assembly/blobtools/.hits.chk"),
     params:
-        blob_dir=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["blobtools_dir"],
-        ),
+        blob_dir=f"Assembly/blobtools/{config['species']}_{config['assembly_version']}",
         ncbi_taxa_db=config["ncbi_taxa_db"],
     singularity:
         "docker://genomehubs/blobtoolkit:4.4.6"
@@ -356,29 +303,12 @@ rule blobtk_blobtools_add_hits:
 
 rule blobtk_blobtools_add_busco:
     input:
-        busco_table=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            f"{config['species']}_{config['assembly_version']}.busco.full_table.tsv",
-        ),
-        cov_check=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["blobtools_dir"],
-            ".cov.chk",
-        ),
+        busco_table=f"Assembly/{config['species']}_{config['assembly_version']}.busco.full_table.tsv",
+        cov_check="Assembly/blobtools/.cov.chk",
     output:
-        temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["blobtools_dir"],
-                ".busco.chk",
-            )
-        ),
+        temp("Assembly/blobtools/.busco.chk"),
     params:
-        blob_dir=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["blobtools_dir"],
-        ),
+        blob_dir=f"Assembly/blobtools/{config['species']}_{config['assembly_version']}",
     singularity:
         "docker://genomehubs/blobtoolkit:4.4.6"
     resources:
@@ -390,31 +320,13 @@ rule blobtk_blobtools_add_busco:
 
 rule blobblurb:
     input:
-        busco_table=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            f"{config['species']}_{config['assembly_version']}.busco.full_table.tsv",
-        ),
-        hits_chk=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["blobtools_dir"],
-            ".hits.chk",
-        ),
-        busco_chk=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["blobtools_dir"],
-            ".busco.chk",
-        ),
+        busco_table=f"Assembly/{config['species']}_{config['assembly_version']}.busco.full_table.tsv",
+        hits_chk="Assembly/blobtools/.hits.chk",
+        busco_chk="Assembly/blobtools/.busco.chk",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            f"{config['paths']['blobtools_dir']}_blobblurbout.tsv",
-        ),
+        f"Assembly/blobtools/{config['species']}_{config['assembly_version']}_blobblurbout.tsv",
     params:
-        blob_dir=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["blobtools_dir"],
-        ),
+        blob_dir=f"Assembly/blobtools/{config['species']}_{config['assembly_version']}",
     singularity:
         "docker://aewebb/blobblurb:05152024"
     resources:
@@ -426,37 +338,14 @@ rule blobblurb:
 
 rule blobbtk_plot:
     input:
-        hits_chk=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["blobtools_dir"],
-            ".hits.chk",
-        ),
-        busco_chk=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["blobtools_dir"],
-            ".busco.chk",
-        ),
+        hits_chk="Assembly/blobtools/.hits.chk",
+        busco_chk="Assembly/blobtools/.busco.chk",
     output:
-        snail_png=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["figures_dir"],
-            f"{config['species']}_{config['assembly_version']}_scaff_snail.png",
-        ),
-        blob_png=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["figures_dir"],
-            f"{config['species']}_{config['assembly_version']}_scaff_blob.png",
-        ),
-        cumulative_png=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["figures_dir"],
-            f"{config['species']}_{config['assembly_version']}_scaff_cumulative.png",
-        ),
+        snail_png=f"Figures/blobtools/{config['species']}_{config['assembly_version']}_scaff_snail.png",
+        blob_png=f"Figures/blobtools/{config['species']}_{config['assembly_version']}_scaff_blob.png",
+        cumulative_png=f"Figures/blobtools/{config['species']}_{config['assembly_version']}_scaff_cumulative.png",
     params:
-        blob_dir=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["blobtools_dir"],
-        ),
+        blob_dir=f"Assembly/blobtools/{config['species']}_{config['assembly_version']}",
     singularity:
         "docker://genomehubs/blobtoolkit:4.4.6"
     resources:

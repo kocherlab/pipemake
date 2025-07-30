@@ -8,90 +8,41 @@ parser:
         input-parser:
           required: True
       wildcards-args:
-        msf-standardized-wildcard:
-          help: "Standardized wildcard statement used to store multiple sequence files"
-          type: str
-          default: 
-            str: "{samples}.fasta"
+        msf-standardized-filename: "{samples}.fasta"
       args:
         msf-wildcard:
           help: "Wildcard statement to represent MSF files"
           type: str
           mutually-exclusive: "input-parser"
-          wildcards: "msf-standardized-wildcard"
+          wildcards: "msf-standardized-filename"
         msf-table:
           help: "Table with sample and MSF filenames"
           type: str
           action: confirmFile
           mutually-exclusive: "input-parser"
-          wildcards: "msf-standardized-wildcard"
+          wildcards: "msf-standardized-filename"
         msf-copy-method:
           help: "Specifies if MSFs should be copied or symbolically linked."
           choices:
             - 'symbolic_link'
             - 'copy'
           default: 'symbolic_link'
-    paths:
-      args:
-        msf-untranslated-dir:
-          help: "Directory to store MSF files"
-          type: str
-          default: "MSF/CDSs"
-        msf-unaligned-dir:
-          help: "Directory to store unaligned MSF files"
-          type: str
-          default: "MSF/AAs"
-        msa-aligned-dir:
-          help: "Directory to store translated MSAs"
-          type: str
-          default: "MSAs/AAs"
-        msa-codon-aligned-dir:
-          help: "Directory to store codon-aligned MSAs"
-          type: str
-          default: "MSAs/Codons"
-
 setup:
   msf_input:
-    wildcard-method:
-      input:
-        args:
-          - "msf-wildcard"
-          - "msf-standardized-wildcard"
-          - "msf-untranslated-dir"
-      standardize:
-        method: "wildcard-str"
-        args:
-          wildcard_str: "{msf-wildcard}"
-          standardized_filename: "{msf-standardized-wildcard}"
-          out_dir: "{msf-untranslated-dir}"
-          copy_method: '{msf-copy-method}'
-      samples:
-        method: "wildcard-str"
-        args:
-          wildcard_str: "{msf-wildcard}"
-          sample_wildcards: 
-            - 'samples'
+    methods:
+      wildcard-str: "{msf-wildcard}"
+      table-file: "{msf-table}"
+    args:
+      standardized_filename: "MSF/CDS/{msf-standardized-filename}"
+      copy_method: '{msf-copy-method}'
+      sample_keywords:
+        - "samples"
 
-    table-method:
-      input:
-        args:
-          - "msf-table"
-          - "msf-standardized-wildcard"
-          - "msf-untranslated-dir"
-      standardize:
-        method: "table-file"
-        args:
-          table_filename: "{msf-table}"
-          standardized_filename: "{msf-standardized-wildcard}"
-          out_dir: "{msf-untranslated-dir}"
-          copy_method: '{msf-copy-method}'
-          sample_column: 'samples'
-      samples:
-        method: "table-file"
-        args:
-          table_filename: "{msf-table}"
-          sample_column: 'samples'
-snakefiles:
-  - msa_align_codons.smk
-  - msa_align_mafft.smk
-  - msa_translate.smk
+snakemake:
+  modules:
+    - msa_align_codons
+    - msf_align_translated_mafft
+    - msf_translate
+  links:
+    - input: align_msa_mafft
+      output: create_codon_aligned_msa

@@ -1,30 +1,13 @@
 rule all:
     input:
-        expand(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["unfiltered_fastq_dir"],
-                "{sample}_R1.fastq.gz",
-            ),
-            sample=config["samples"],
-        ),
+        expand("FASTQ/Unfiltered/{sample}.fastq.gz", sample=config["samples"]),
 
 
 rule pacbio_bam_to_fastq:
     input:
-        pacbio_bam=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["pacbio_bam_dir"],
-            "{sample}.bam",
-        ),
+        "BAM/PacBio/{sample}.bam",
     output:
-        temp(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["unfiltered_fastq_dir"],
-                "{sample}_R1.fastq.gz",
-            ),
-        ),
+        temp("FASTQ/Unfiltered/{sample}.fastq.gz"),
     singularity:
         "docker://aewebb/bamtools:v2.5.2"
     resources:

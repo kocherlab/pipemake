@@ -9,7 +9,7 @@ from pipemake.fileIO import FileIO
 
 
 class WildcardIO:
-    def __init__(self, wildcard_str, wildcard_dict, sample_wildcards=[], **kwargs):
+    def __init__(self, wildcard_str, wildcard_dict, sample_keywords=[], **kwargs):
         # Confirm wildcards were assigned
         if not list(wildcard_dict):
             raise Exception(f"Unable to find wildcards within: {wildcard_str}")
@@ -35,10 +35,10 @@ class WildcardIO:
                     f"Unable to find wildcard values for: {', '.join(missing_wildcards)}"
                 )
 
-        if not sample_wildcards:
+        if not sample_keywords:
             self.samples = {}
         else:
-            self.samples = {_col: wildcard_dict[_col] for _col in sample_wildcards}
+            self.samples = {_col: wildcard_dict[_col] for _col in sample_keywords}
 
     @classmethod
     def fromStr(cls, wildcard_str, **kwargs):
@@ -77,6 +77,13 @@ class WildcardIO:
     def standardizedFiles(self, standardized_wildcard, **kwargs):
         # Create list of the wildcard name and values
         wildcard_names, wildcard_values = zip(*self.wildcard_dict.items())
+
+        standardized_names = glob_wildcards(standardized_wildcard)._fields
+
+        if set(wildcard_names) != set(standardized_names):
+            raise Exception(
+                f"Standardized wildcard ({standardized_wildcard}) does not match the sample wildcard ({self.wildcard_str}). Please confirm the same wildcards are used in both."
+            )
 
         # Format the wildcard str for the sample and standardized file
         for sample_wildcard_dict in [

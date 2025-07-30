@@ -1,13 +1,11 @@
 rule shell_call:
     input:
         r1_reads=os.path.join(
-            config["paths"]["workflow_prefix"],
             config["paths"]["unfiltered_fastq_dir"],
             "{sample}_R1.fq.gz",
         ),
     output:
         r1_reads=os.path.join(
-            config["paths"]["workflow_prefix"],
             config["paths"]["filtered_fastq_dir"],
             "{sample}_R1.fq.gz",
         ),

@@ -1,33 +1,29 @@
 rule all:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_filtered_vcf_dir"],
-            f"{config['species']}_{config['assembly_version']}.filtered.vcf.gz",
-        ),
+        f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.filtered.vcf.gz",
 
 
 rule filter_basic_vcf_bcftools:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_unfiltered_vcf_dir"],
-            f"{config['species']}_{config['assembly_version']}.vcf.gz",
-        ),
+        f"reSEQ/VCF/Unfiltered/{config['species']}_{config['assembly_version']}.vcf.gz",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_filtered_vcf_dir"],
-            f"{config['species']}_{config['assembly_version']}.filtered.vcf.gz",
-        ),
+        f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.filtered.vcf.gz",
     params:
         min_alleles=config["min_alleles"],
         max_alleles=config["max_alleles"],
         maf=config["maf_cutoff"],
         qual=config["qual_cutoff"],
         missing_cutoff=config["missing_cutoff"],
-        include_regions=f'--targets {config["include_regions"]}' if 'include_regions' in config else '',
-        exclude_regions=f'--targets ^{config["exclude_regions"]}' if 'exclude_regions' in config else '',
+        include_regions=(
+            f'--targets {config["include_regions"]}'
+            if "include_regions" in config
+            else ""
+        ),
+        exclude_regions=(
+            f'--targets ^{config["exclude_regions"]}'
+            if "exclude_regions" in config
+            else ""
+        ),
     resources:
         mem_mb=16000,
     threads: 4

@@ -7,16 +7,16 @@ import logging
 from pathlib import Path
 from collections import defaultdict
 
+from snakemake.io import glob_wildcards
 from pipemake.singularityIO import Singularity
 
 
 class SnakePipelineIO:
     def __init__(
         self,
-        workflow_prefix="",
+        workflow_dir="",
         pipeline_storage_dir="",
         pipeline_job_dir="",
-        work_dir="",
         singularity_dir="",
         resource_yml=None,
         scale_threads=0,
@@ -26,22 +26,24 @@ class SnakePipelineIO:
         **kwargs,
     ):
         # Assign the basic arguments
-        self._workflow_prefix = workflow_prefix
+        self._workflow_dir = workflow_dir
 
-        # Assign the snakemake pipeline filename
-        if workflow_prefix.endswith(".smk"):
-            self.smkp_filename = workflow_prefix
-        else:
-            self.smkp_filename = f"{workflow_prefix}.smk"
+        # Assign the workflow filenames
+        self.smkp_filename = "Snakefile"
+        self.smkp_config_yml = "config.yml"
+        self.smkp_resource_yml = "resources.yml"
 
         # Check if the overwrite is a bool or None
         if not isinstance(overwrite, bool):
             raise Exception(f"Invalid overwrite type: {overwrite}")
 
         # Confirm the file exists
-        if os.path.isfile(self.smkp_filename) and not overwrite:
+        if (
+            os.path.isfile(os.path.join(self._workflow_dir, self.smkp_filename))
+            and not overwrite
+        ):
             raise IOError(
-                f"SnakePipeline file already exists: {self.smkp_filename}. Please rename the SnakePipeline file or overwrite"
+                f"SnakePipeline file already exists: {os.path.join(self._workflow_dir, self.smkp_filename)}. Please rename the SnakePipeline file or overwrite"
             )
 
         # Confirm the resource yml is bool or None
@@ -59,7 +61,9 @@ class SnakePipelineIO:
             raise Exception(f"Specified indent style not supported: {indent_style}")
 
         # Assign the basic arguments
-        self._pipe_file = open(self.smkp_filename, "w")
+        self._pipe_file = open(
+            os.path.join(self._workflow_dir, self.smkp_filename), "w"
+        )
         self._resource_yml = resource_yml
         self._scale_threads = scale_threads
         self._scale_mem = scale_mem
@@ -93,28 +97,33 @@ class SnakePipelineIO:
             )
 
         # Assign the module config directory
-        self._module_job_dir = os.path.join(pipeline_job_dir, "modules")
+        self._internal_module_job_dir = os.path.join(pipeline_job_dir, "modules")
+        self._module_job_dir = os.path.join(
+            self._workflow_dir, self._internal_module_job_dir
+        )
         if not os.path.exists(self._module_job_dir):
             os.makedirs(self._module_job_dir)
 
         # Assign the script config directory
-        self._script_job_dir = os.path.join(pipeline_job_dir, "scripts")
+        self._script_job_dir = os.path.join(
+            self._workflow_dir, pipeline_job_dir, "scripts"
+        )
 
         # Assign the backup directory
-        self._backup_dir = os.path.join(pipeline_job_dir, "backups")
+        self._backup_dir = os.path.join(self._workflow_dir, pipeline_job_dir, "backups")
         if not os.path.exists(self._backup_dir):
             os.makedirs(self._backup_dir)
 
-        # Assign the work directory
-        self._work_dir = work_dir
-
         # Create arguments to populate
         self._module_filenames = []
+        self._linked_rules = {}
         self._output_list = []
         self._config_params = set()
         self._resource_params = defaultdict(lambda: defaultdict(int))
         self._singularity_dir = singularity_dir
         self._pipeline_singularity_dict = {}
+        self._pipeline_IO_attributes = {}
+        self._pipeline_rule_orders = []
 
     def __enter__(self):
         return self
@@ -193,6 +202,18 @@ class SnakePipelineIO:
         # Add the module filename to the list
         self._module_filenames.append(module_filename)
 
+        # Assign the snakefile IO attributes to the pipeline
+        for rule, rule_io_attributes in smk_module._file_IO_attributes.items():
+            if rule not in self._pipeline_IO_attributes:
+                self._pipeline_IO_attributes[rule] = rule_io_attributes
+            else:
+                raise Exception(f"Duplicate rule found in pipeline: {rule}")
+
+        # Assign the rule orders to the pipeline
+        for rule_order in smk_module._rule_order_list:
+            if rule_order not in self._pipeline_rule_orders:
+                self._pipeline_rule_orders.append(rule_order)
+
         # Store the singularity containers from the module
         for (
             singularity_path,
@@ -211,6 +232,141 @@ class SnakePipelineIO:
             logging.info(f"Script added to pipeline: {script_file}")
 
         logging.info(f"Module added to pipeline: {module_filename}")
+
+    def addSnakeLink(self, link_statement):
+        # Assign the input and output rules from the link statement
+        input_rule = link_statement["input"]
+        output_block = link_statement["output"]
+
+        # Create list to store the linked files
+        file_mappings = []
+
+        # Assign input and output rules if specified
+        if "files" in link_statement:
+            for files in link_statement["file_mappings"]:
+                file_mappings.append(files)
+
+        # Convert the output block to a list for consistency
+        if isinstance(output_block, str):
+            output_block = [output_block]
+
+        # Loop the output rule(s) in the output block
+        for output_rule in output_block:
+            # Confirm the rules are not the same
+            if input_rule == output_rule:
+                raise Exception(f"Input and output rules are the same: {input_rule}")
+
+            # Check if the input rule is in the pipeline IO attributes
+            if input_rule not in self._pipeline_IO_attributes:
+                raise Exception(
+                    f"Input rule not found in pipeline IO attributes: {input_rule}"
+                )
+
+            # Check if the output rule is in the pipeline IO attributes
+            if output_rule not in self._pipeline_IO_attributes:
+                raise Exception(
+                    f"Output rule not found in pipeline IO attributes: {output_rule}"
+                )
+
+            # Check if the rules have linked files
+            if not file_mappings:
+                # Confirm the rules have the same attribute names
+                if not (
+                    set(self._pipeline_IO_attributes[input_rule]["output"])
+                    <= set(self._pipeline_IO_attributes[output_rule]["input"])
+                ):
+                    raise Exception(
+                        f"Input and output rules have different attribute names: {input_rule}, {output_rule}"
+                    )
+
+                # Create the linked files from the input and output rules
+                file_mappings = [
+                    {"input": _f, "output": _f}
+                    for _f in set(self._pipeline_IO_attributes[input_rule]["output"])
+                    & set(self._pipeline_IO_attributes[output_rule]["input"])
+                ]
+
+            else:
+                for file_mapping in file_mappings:
+                    # Check if the linked file is in the input rule
+                    if (
+                        file_mapping["input"]
+                        not in self._pipeline_IO_attributes[input_rule]["output"]
+                    ):
+                        raise Exception(
+                            f"Linked file not found in input rule: {file_mapping}"
+                        )
+
+                    # Check if the linked file is in the output rule
+                    if (
+                        file_mapping["output"]
+                        not in self._pipeline_IO_attributes[output_rule]["input"]
+                    ):
+                        raise Exception(
+                            f"Linked file not found in output rule: {file_mapping}"
+                        )
+
+            # Create the link rule
+            link_rule = f"use rule {output_rule} as link_{output_rule} with:\n{self._indent_style}input:\n"
+
+            # Add the linked attributes to the link rule
+            for file_mapping in file_mappings:
+                link_file = "\n".join(
+                    self._pipeline_IO_attributes[input_rule]["output"][
+                        file_mapping["input"]
+                    ]
+                )
+
+                # Check if the linked file should be expanded
+                if _checkForExpand(
+                    self._pipeline_IO_attributes[output_rule]["input"][
+                        file_mapping["output"]
+                    ]
+                ):
+                    output_str = "".join(
+                        self._pipeline_IO_attributes[output_rule]["input"][
+                            file_mapping["output"]
+                        ]
+                    )
+
+                    expand_wildcards = []
+                    for output_wildcard in glob_wildcards(output_str)._fields:
+                        output_match = re.findall(
+                            rf"{output_wildcard}=([^,)]+)", output_str
+                        )
+                        if len(output_match) > 1:
+                            raise Exception(
+                                f"Multiple wildcards found for {output_wildcard} in {output_str}. Please confirm the wildcard is unique."
+                            )
+                        expand_wildcards.append(f"{output_wildcard}={output_match[0]}")
+
+                    if not link_file.endswith(","):
+                        link_file += ","
+                    link_file = f"expand({link_file} {', '.join(expand_wildcards)}),"
+
+                # Check if the linked file is a string or int
+                if isinstance(file_mapping["output"], str):
+                    link_rule += f"{self._indent_style}{self._indent_style}{file_mapping['output']}={link_file}\n"
+                elif isinstance(file_mapping["output"], int):
+                    link_rule += (
+                        f"{self._indent_style}{self._indent_style}{link_file}\n"
+                    )
+
+            # Check if the output rule has additional arguments
+            mapped_output_files = [_f["output"] for _f in file_mappings]
+            unmapped_files = dict(
+                (_a, _f)
+                for _a, _f in self._pipeline_IO_attributes[output_rule]["input"].items()
+                if _a not in mapped_output_files
+            )
+
+            # Loop the unmapped files
+            for unmapped_arg, unmapped_file in unmapped_files.items():
+                unmapped_file_str = "\n".join(unmapped_file)
+                link_rule += f"{self._indent_style}{self._indent_style}{unmapped_arg}={unmapped_file_str}\n"
+
+            # Save the linked rule to the list
+            self._linked_rules[output_rule] = link_rule
 
     def buildSingularityContainers(self):
         # Loop the singularity containers
@@ -241,10 +397,6 @@ class SnakePipelineIO:
         # Create yml dicts
         yml_config_dict = {}
         yml_resource_dict = {"resources": {}}
-
-        # Check if the workdir is in the pipeline args
-        if self._work_dir:
-            yml_config_dict["workdir"] = self._work_dir
 
         # Create a list of config params to sort by length
         config_params_list = list(self._config_params)
@@ -299,22 +451,25 @@ class SnakePipelineIO:
         if not self._resource_yml:
             yml_config_dict.update(yml_resource_dict)
         else:
-            self._createYml(yml_resource_dict, f"{self._workflow_prefix}.resources.yml")
+            self._createYml(
+                yml_resource_dict,
+                os.path.join(self._workflow_dir, self.smkp_resource_yml),
+            )
+            logging.info("Resource file written successfully")
 
-        self._createYml(yml_config_dict, f"{self._workflow_prefix}.yml")
+        self._createYml(
+            yml_config_dict, os.path.join(self._workflow_dir, self.smkp_config_yml)
+        )
+        logging.info("Config file written successfully")
 
     def writePipeline(self):
         # Assign the config file(s) and working directory
-        self._pipe_file.write(f"configfile: '{self._workflow_prefix}.yml'\n")
+        self._pipe_file.write(f"configfile: '{self.smkp_config_yml}'\n")
         if self._resource_yml:
-            self._pipe_file.write(
-                f"configfile: '{self._workflow_prefix}.resources.yml'\n"
-            )
-        if self._work_dir:
-            self._pipe_file.write("\nworkdir: config['workdir']\n\n")
+            self._pipe_file.write(f"configfile: '{self.smkp_resource_yml}'\n")
 
         # Create the rule all block
-        self._pipe_file.write("rule all:\n")
+        self._pipe_file.write("\nrule all:\n")
         self._pipe_file.write(f"{self._indent_style}input:\n")
 
         # Add the rule all input
@@ -324,8 +479,33 @@ class SnakePipelineIO:
         # Create the input block of modules
         for module_filename in self._module_filenames:
             self._pipe_file.write(
-                f'include: "{os.path.join(self._module_job_dir, module_filename)}"\n'
+                f'include: "{os.path.join(self._internal_module_job_dir, module_filename)}"\n'
             )
+
+        logging.info(f"Module files written successfully: {self._module_filenames}")
+
+        # Skip rule linking if no linked rules
+        if not self._linked_rules.values():
+            logging.info("Pipeline written successfully")
+            return
+
+        # Assign linked rule orders
+        linked_rule_orders = self._orderLinkedRules(
+            self._pipeline_rule_orders, self._linked_rules.keys()
+        )
+
+        if linked_rule_orders:
+            self._pipe_file.write("\n")
+
+        # Assign the rule orders for the linked rules
+        for linked_order in linked_rule_orders:
+            self._pipe_file.write(linked_order)
+
+        self._pipe_file.write("\n")
+
+        # Create the linked rules
+        for linked_rule in self._linked_rules.values():
+            self._pipe_file.write(linked_rule + "\n")
 
         logging.info("Pipeline written successfully")
 
@@ -336,27 +516,95 @@ class SnakePipelineIO:
         if self._pipeline_singularity_dict:
             self.buildSingularityURLTable()
 
-        # Assign the basename of the workflow prefix
-        workflow_basename = os.path.basename(self._workflow_prefix)
-
         # Create backups of the pipeline files
         shutil.copy(
-            f"{self._workflow_prefix}.smk",
-            os.path.join(self._backup_dir, f"{workflow_basename}.smk.bkp"),
+            os.path.join(self._workflow_dir, self.smkp_filename),
+            os.path.join(self._backup_dir, f"{self.smkp_filename}.bkp"),
         )
         shutil.copy(
-            f"{self._workflow_prefix}.yml",
-            os.path.join(self._backup_dir, f"{workflow_basename}.yml.bkp"),
+            os.path.join(self._workflow_dir, self.smkp_config_yml),
+            os.path.join(self._backup_dir, f"{self.smkp_config_yml}.bkp"),
         )
-        if os.path.isfile(f"{self._workflow_prefix}.resources.yml"):
+        if os.path.isfile(os.path.join(self._workflow_dir, self.smkp_resource_yml)):
             shutil.copy(
-                f"{self._workflow_prefix}.resources.yml",
-                os.path.join(
-                    self._backup_dir, f"{workflow_basename}.resources.yml.bkp"
-                ),
+                f"{os.path.join(self._workflow_dir, self.smkp_resource_yml)}",
+                os.path.join(self._backup_dir, f"{self.smkp_resource_yml}.bkp"),
             )
 
         logging.info("Pipeline backups created successfully")
+
+    @staticmethod
+    def _orderLinkedRules(rule_orders, rules_to_link):
+        """
+        Create a linked rule order string from the given rule orders and rules to link.
+        """
+
+        # Create list to store the linked rule orders
+        link_rule_order_list = []
+
+        # Create a dictionary to store the rule orders that contain rules being linked
+        rule_orders_w_links = defaultdict(list)
+
+        # Assign the order index of the rule string in the rule_orders
+        for index, rule_order in enumerate(rule_orders):
+            for rule in rules_to_link:
+                if rule in rule_order:
+                    rule_orders_w_links[index].append(rule)
+
+        # Remove rule orders with fewer than 2 rules
+        for rule_order_index in list(rule_orders_w_links):
+            if len(rule_orders_w_links[rule_order_index]) < 2:
+                del rule_orders_w_links[rule_order_index]
+
+        # Loop through the rule orders to create the linked rule orders
+        for rule_order_index, rules in rule_orders_w_links.items():
+            # Assign the position of each rule in the rule_order str
+            rule_order_str = rule_orders[rule_order_index]
+
+            # Check if the order symbols are ambiguous
+            if ">" in rule_order_str and "<" in rule_order_str:
+                raise ValueError(
+                    "Order symbols are ambiguous. Please use only one order symbol in the rule order string."
+                )
+
+            # Check if the order symbols are missing
+            if ">" not in rule_order_str and "<" not in rule_order_str:
+                raise ValueError(
+                    "Order symbols are missing. Please use either '>' or '<' in the rule order string."
+                )
+
+            # Assign the order symbol based on the rule order string
+            if ">" in rule_order_str:
+                order_symbol = ">"
+            elif "<" in rule_order_str:
+                order_symbol = "<"
+            else:
+                raise Exception(f"Unexpected error: {rule_order_str}")
+
+            # Create a string to store the linked rule order
+            link_rule_order_str = "ruleorder: "
+
+            # Create a sorted list of (rule_position, rule)
+            link_rule_order = [
+                (re.search(r"\b" + _r + r"\b", rule_order_str).start(), _r)
+                for _r in rules
+            ]
+            link_rule_order.sort(key=lambda x: x[0])
+
+            # Create the linked rule order string
+            for link_rule_pos, link_rule_group in enumerate(link_rule_order):
+                # Assign the first rule in the order
+                if link_rule_pos == 0:
+                    link_rule_order_str += f"link_{link_rule_group[1]}"
+                    continue
+
+                # Add the rule to the rule order string
+                link_rule_order_str += f" {order_symbol} link_{link_rule_group[1]}"
+
+            # Save the linked rule order string to the list
+            link_rule_order_list.append(link_rule_order_str + "\n")
+
+        return link_rule_order_list
 
     @staticmethod
     def _scaler(value, scaler, value_type=float, output_type=int, **kwargs):
@@ -407,6 +655,24 @@ class SnakeFileIO:
 
         # Parse the snakefile
         self._parseFile()
+
+    @property
+    def _rule_order_list(self):
+        rule_order = []
+        for text in self._non_rule_text.splitlines():
+            if text.startswith("ruleorder:"):
+                rule_order.append(text.split("ruleorder:")[1].strip())
+        return rule_order
+
+    @property
+    def _file_IO_attributes(self):
+        file_io_attributes = {}
+        for rule in self._file_rules:
+            if rule.rule_name == self._output_rule:
+                continue
+
+            file_io_attributes[rule.rule_name] = rule._rule_IO_attributes
+        return file_io_attributes
 
     @property
     def _file_singularity_dict(self):
@@ -562,7 +828,7 @@ class SnakeFileIO:
             # Loop the file rules
             for rule in self._file_rules:
                 # Write the rule, if included in the output
-                if rule._output_rule:
+                if not rule._output_rule:
                     smk_file.write(f"\n\n{rule}")
 
     @classmethod
@@ -578,7 +844,7 @@ class SnakeRuleIO:
         self._original_text = rule_str
         self._original_text_list = self._original_text.splitlines()
         self.rule_name = self._original_text_list[0].split()[1][:-1]
-        self._output_rule = False if self.rule_name == output_rule else True
+        self._output_rule = self.rule_name == output_rule
         self._singularity_dir = singularity_dir
         self._indent_style = indent_style
         self._rule_config_params = set()
@@ -587,19 +853,23 @@ class SnakeRuleIO:
         self._rule_resource_params = {}
         self._rule_text = self._original_text_list[0] + "\n"
         self._rule_output_list = []
+        self._rule_IO_attributes = defaultdict(
+            list, {k: defaultdict(list) for k in ("input", "output")}
+        )
 
         # Assign the fixed arguments
         self._resource_attributes = ["threads", "resources"]
 
         # Update and assign the rule parameters
         if self._output_rule:
-            self._updateRule(self._original_text_list[1:])
+            self._setOutput()
             self._setParams()
 
         # Set the output list
         elif not self._output_rule:
-            self._setOutput(self._original_text_list[1:])
+            self._updateRule()
             self._setParams()
+            self._assignIOAttributes()
 
     def __str__(self):
         return self._rule_text
@@ -739,8 +1009,8 @@ class SnakeRuleIO:
             # Add the config assignment to the set
             self._rule_config_params.add(tuple(config_list))
 
-    def _updateRule(self, rule_list):
-        for rule_line in rule_list:
+    def _updateRule(self):
+        for rule_line in self._original_text_list[1:]:
             if not rule_line.strip():
                 continue
 
@@ -784,8 +1054,8 @@ class SnakeRuleIO:
             # Update the rule text
             self._rule_text += rule_line + "\n"
 
-    def _setOutput(self, rule_list):
-        for rule_line in rule_list:
+    def _setOutput(self):
+        for rule_line in self._original_text_list[1:]:
             if not rule_line.strip():
                 continue
 
@@ -807,6 +1077,93 @@ class SnakeRuleIO:
         if not self._rule_output_list:
             raise Exception("Output list not populated for rule")
 
+    def _assignIOAttributes(self):
+        def _removeTempStatement(link_statement):
+            if len(link_statement) == 1 and isinstance(link_statement[0], int):
+                return link_statement
+            elif "temp(" not in link_statement[0]:
+                return link_statement
+            elif len(link_statement) == 1:
+                temp_end_pos = link_statement[0].rfind(")")
+                link_statement[0] = (
+                    link_statement[0][:temp_end_pos]
+                    + link_statement[0][temp_end_pos + 1 :]
+                )
+                link_statement[0] = link_statement[0].replace("temp(", "")
+                return link_statement
+            elif len(link_statement) > 1:
+                link_statement = link_statement[1:-1]
+                if not link_statement[-1].endswith(","):
+                    link_statement[-1] = link_statement[-1] + ","
+                link_statement = [
+                    _s[len(self._indent_style) :] for _s in link_statement
+                ]
+                link_statement[0] = link_statement[0].strip()
+                return link_statement
+
+        # Create string to store the attribute id, as it be on multiple lines
+        attribute_name = ""
+
+        # Loop through the rule list
+        for rule_line in self._original_text_list[1:]:
+            if not rule_line.strip():
+                continue
+
+            # Split the line by the indent style
+            rule_line_list = rule_line.rstrip().split(self._indent_style)
+
+            # Assign the attribute level
+            attribute_level = _attributeLevel(rule_line_list)
+
+            # Check if the line is a rule attribute
+            if attribute_level == 1 and rule_line.rstrip().endswith(":"):
+                attribute_group = rule_line_list[1][:-1]
+
+            # Check if the rule is output, confirm the attribute is input, and update the rule output
+            elif attribute_group in ["input", "output"]:
+                if attribute_level == 2:
+                    # Check if any alphanumeric characters, if not just append the attribute text (multi-line attributes)
+                    if not any(_c.isalnum() for _c in rule_line_list[2]):
+                        self._rule_IO_attributes[attribute_group][
+                            attribute_name
+                        ].append(
+                            _attributeStr(
+                                rule_line_list[2], attribute_level, self._indent_style
+                            )
+                        )
+
+                    # Assign the attribute with a known name
+                    elif "=" in rule_line_list[2]:
+                        attribute_name, attribute_str = rule_line_list[2].split("=", 1)
+                        self._rule_IO_attributes[attribute_group][
+                            attribute_name
+                        ].append(attribute_str)
+
+                    # Assign the attribute by order, as name is not known
+                    else:
+                        attribute_name = len(self._rule_IO_attributes[attribute_group])
+                        attribute_str = rule_line_list[2]
+
+                        self._rule_IO_attributes[attribute_group][
+                            attribute_name
+                        ].append(attribute_str)
+
+                # Append attribute text to the current attribute name (multi-line attributes)
+                elif attribute_level > 2:
+                    self._rule_IO_attributes[attribute_group][attribute_name].append(
+                        _attributeStr(
+                            rule_line_list[attribute_level],
+                            attribute_level,
+                            self._indent_style,
+                        )
+                    )
+
+        for io_group, group_attribute_dict in self._rule_IO_attributes.items():
+            for group_attribute, group_value in group_attribute_dict.items():
+                self._rule_IO_attributes[io_group][group_attribute] = (
+                    _removeTempStatement(group_value)
+                )
+
 
 def _attributeLevel(attribute_list):
     for attribute_level, attribute_item in enumerate(attribute_list):
@@ -815,8 +1172,28 @@ def _attributeLevel(attribute_list):
         return attribute_level
 
 
+def _attributeStr(attribute_str, attribute_level, indent_style):
+    # Check if the attribute level is valid
+    if attribute_level < 0:
+        raise ValueError("Invalid attribute level. Must be greater than or equal to 0.")
+
+    return (indent_style * attribute_level) + attribute_str
+
+
 def _convert_indent(source_str, source_indent_style, target_indent_style):
     # Get the count of the source indent style
     indent_count = source_str.count(source_indent_style)
     # Return the converted indent style
     return f"{indent_count*target_indent_style}{source_str.strip()}"
+
+
+def _checkForExpand(file_data):
+    if isinstance(file_data, str):
+        file_str = file_data
+    elif isinstance(file_data, list):
+        file_str = "".join(file_data)
+
+    if "expand(" in file_str:
+        return True
+    else:
+        return False

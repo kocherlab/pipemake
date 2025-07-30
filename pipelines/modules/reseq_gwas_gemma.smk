@@ -1,84 +1,28 @@
 rule all:
     input:
         expand(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_popgen_dir"],
-                "GEMMA",
-                "{model}",
-                f"{config['species']}_{config['assembly_version']}.pruned.lmm.filtered.assoc.txt",
-            ),
+            f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.lmm.filtered.assoc.txt",
             model=config["models"],
         ),
         expand(
-            os.path.join(
-                config["paths"]["workflow_prefix"],
-                config["paths"]["reseq_popgen_dir"],
-                "GEMMA",
-                "{model}",
-                f"{config['species']}_{config['assembly_version']}.pruned.lmm.manhattan.png",
-            ),
+            f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.lmm.manhattan.png",
             model=config["models"],
         ),
 
 
 rule gemma_model_bed:
     input:
-        bed_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_pruned_plink_dir"],
-            f"{config['species']}_{config['assembly_version']}.pruned.bed",
-        ),
-        bim_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_pruned_plink_dir"],
-            f"{config['species']}_{config['assembly_version']}.pruned.bim",
-        ),
-        fam_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_pruned_plink_dir"],
-            f"{config['species']}_{config['assembly_version']}.pruned.fam",
-        ),
-        ind_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["models_dir"],
-            f"{config['species']}.{{model}}.ind.txt",
-        ),
+        bed_file=f"reSEQ/PLINK/Pruned/{config['species']}_{config['assembly_version']}.pruned.bed",
+        bim_file=f"reSEQ/PLINK/Pruned/{config['species']}_{config['assembly_version']}.pruned.bim",
+        fam_file=f"reSEQ/PLINK/Pruned/{config['species']}_{config['assembly_version']}.pruned.fam",
+        ind_file=f"Models/{config['species']}.{{model}}.ind.txt",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "GEMMA",
-            "{model}",
-            f"{config['species']}_{config['assembly_version']}.pruned.bed",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "GEMMA",
-            "{model}",
-            f"{config['species']}_{config['assembly_version']}.pruned.bim",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "GEMMA",
-            "{model}",
-            f"{config['species']}_{config['assembly_version']}.pruned.fam",
-        ),
+        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.bed",
+        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.bim",
+        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.fam",
     params:
-        bed_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_pruned_plink_dir"],
-            f"{config['species']}_{config['assembly_version']}.pruned",
-        ),
-        out_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "GEMMA",
-            "{model}",
-            f"{config['species']}_{config['assembly_version']}.pruned",
-        ),
+        bed_prefix=f"reSEQ/PLINK/Pruned/{config['species']}_{config['assembly_version']}.pruned",
+        out_prefix=f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned",
     resources:
         mem_mb=8000,
     threads: 1
@@ -90,38 +34,13 @@ rule gemma_model_bed:
 
 rule gemma_model_phenotype_file:
     input:
-        fam_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "GEMMA",
-            "{model}",
-            f"{config['species']}_{config['assembly_version']}.pruned.fam",
-        ),
-        model_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["models_dir"],
-            f"{config['species']}.model",
-        ),
+        fam_file=f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.fam",
+        model_file=f"Models/{config['species']}.model",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["models_dir"],
-            "GEMMA",
-            f"{config['species']}.{{model}}.pheno.txt",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["models_dir"],
-            "GEMMA",
-            f"{config['species']}.{{model}}.pheno.log",
-        ),
+        f"Models/GEMMA/{config['species']}.{{model}}.pheno.txt",
+        f"Models/GEMMA/{config['species']}.{{model}}.pheno.log",
     params:
-        out_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["models_dir"],
-            "GEMMA",
-            f"{config['species']}.{{model}}",
-        ),
+        out_prefix=f"Models/GEMMA/{config['species']}.{{model}}",
     resources:
         mem_mb=2000,
     threads: 1
@@ -133,63 +52,17 @@ rule gemma_model_phenotype_file:
 
 rule run_gemma_gk:
     input:
-        bed_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "GEMMA",
-            "{model}",
-            f"{config['species']}_{config['assembly_version']}.pruned.bed",
-        ),
-        bim_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "GEMMA",
-            "{model}",
-            f"{config['species']}_{config['assembly_version']}.pruned.bim",
-        ),
-        fam_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "GEMMA",
-            "{model}",
-            f"{config['species']}_{config['assembly_version']}.pruned.fam",
-        ),
-        pheno_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["models_dir"],
-            "GEMMA",
-            f"{config['species']}.{{model}}.pheno.txt",
-        ),
+        bed_file=f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.bed",
+        bim_file=f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.bim",
+        fam_file=f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.fam",
+        pheno_file=f"Models/GEMMA/{config['species']}.{{model}}.pheno.txt",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "GEMMA",
-            "{model}",
-            f"{config['species']}_{config['assembly_version']}.pruned.gk.cXX.txt",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "GEMMA",
-            "{model}",
-            f"{config['species']}_{config['assembly_version']}.pruned.gk.log.txt",
-        ),
+        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.gk.cXX.txt",
+        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.gk.log.txt",
     params:
-        bed_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "GEMMA",
-            "{model}",
-            f"{config['species']}_{config['assembly_version']}.pruned",
-        ),
+        bed_prefix="reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned",
         out_prefix=f"{config['species']}_{config['assembly_version']}.pruned.gk",
-        out_dir=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "GEMMA",
-            "{model}",
-        ),
+        out_dir=f"reSEQ/PopGen/GEMMA/{{model}}",
         kinship_matrix=config["kinship_matrix"],
     resources:
         mem_mb=8000,
@@ -202,70 +75,18 @@ rule run_gemma_gk:
 
 rule run_gemma_lmm:
     input:
-        bed_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "GEMMA",
-            "{model}",
-            f"{config['species']}_{config['assembly_version']}.pruned.bed",
-        ),
-        bim_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "GEMMA",
-            "{model}",
-            f"{config['species']}_{config['assembly_version']}.pruned.bim",
-        ),
-        fam_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "GEMMA",
-            "{model}",
-            f"{config['species']}_{config['assembly_version']}.pruned.fam",
-        ),
-        pheno_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["models_dir"],
-            "GEMMA",
-            f"{config['species']}.{{model}}.pheno.txt",
-        ),
-        gk_file=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "GEMMA",
-            "{model}",
-            f"{config['species']}_{config['assembly_version']}.pruned.gk.cXX.txt",
-        ),
+        bed_file=f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.bed",
+        bim_file=f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.bim",
+        fam_file=f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.fam",
+        pheno_file=f"Models/GEMMA/{config['species']}.{{model}}.pheno.txt",
+        gk_file=f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.gk.cXX.txt",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "GEMMA",
-            "{model}",
-            f"{config['species']}_{config['assembly_version']}.pruned.lmm.assoc.txt",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "GEMMA",
-            "{model}",
-            f"{config['species']}_{config['assembly_version']}.pruned.lmm.log.txt",
-        ),
+        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.lmm.assoc.txt",
+        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.lmm.log.txt",
     params:
-        bed_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "GEMMA",
-            "{model}",
-            f"{config['species']}_{config['assembly_version']}.pruned",
-        ),
+        bed_prefix=f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned",
         out_prefix=f"{config['species']}_{config['assembly_version']}.pruned.lmm",
-        out_dir=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "GEMMA",
-            "{model}",
-        ),
+        out_dir="reSEQ/PopGen/GEMMA/{model}",
         linear_model=config["linear_model"],
         maf=config["maf"],
     resources:
@@ -279,36 +100,12 @@ rule run_gemma_lmm:
 
 rule filter_gemma:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "GEMMA",
-            "{model}",
-            f"{config['species']}_{config['assembly_version']}.pruned.lmm.assoc.txt",
-        ),
+        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.lmm.assoc.txt",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "GEMMA",
-            "{model}",
-            f"{config['species']}_{config['assembly_version']}.pruned.lmm.filtered.assoc.txt",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "GEMMA",
-            "{model}",
-            f"{config['species']}_{config['assembly_version']}.pruned.lmm.filtered.log",
-        ),
+        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.lmm.filtered.assoc.txt",
+        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.lmm.filtered.log",
     params:
-        out_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "GEMMA",
-            "{model}",
-            f"{config['species']}_{config['assembly_version']}.pruned.lmm",
-        ),
+        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.lmm",
         min_log_pvalue=config["min_log_pvalue"],
     resources:
         mem_mb=2000,
@@ -321,29 +118,11 @@ rule filter_gemma:
 
 rule plot_gemma:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "GEMMA",
-            "{model}",
-            f"{config['species']}_{config['assembly_version']}.pruned.lmm.assoc.txt",
-        ),
+        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.lmm.assoc.txt",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "GEMMA",
-            "{model}",
-            f"{config['species']}_{config['assembly_version']}.pruned.lmm.manhattan.png",
-        ),
+        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.lmm.manhattan.png",
     params:
-        out_prefix=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_popgen_dir"],
-            "GEMMA",
-            "{model}",
-            f"{config['species']}_{config['assembly_version']}.pruned.lmm",
-        ),
+        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.lmm",
     resources:
         mem_mb=2000,
     threads: 1

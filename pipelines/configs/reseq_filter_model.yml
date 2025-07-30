@@ -59,54 +59,25 @@ parser:
             str: "v"
             suffix:
               - function: jobRandomString
-    paths:
-      args:
-        reseq-unfiltered-vcf-dir:
-          help: "Directory to store VCFs files"
-          type: str
-          default: "reSEQ/VCFs/Unfiltered"
-        reseq-filtered-vcf-dir:
-          help: "Directory to store VCFs files"
-          type: str
-          default: "reSEQ/VCFs/Filtered"
-        models-dir:
-          help: "Directory to store models"
-          type: str
-          default: "Models"
 
 setup:
   reseq_vcf:
-    file-method:
-      input:
-        args:
-          - "reseq-vcf"
-          - "species"
-          - "assembly-version"
-          - "reseq-unfiltered-vcf-dir"
-      standardize:
-        method: "file-str"
-        args:
-          input_filename: "{reseq-vcf}"
-          standardized_filename: "{species}_{assembly-version}.vcf.gz"
-          out_dir: "{reseq-unfiltered-vcf-dir}"
-          copy_method: "{reseq-copy-method}"
-          gzipped: True
-
+    methods:
+      file-str: "{reseq-vcf}"
+    args:
+      standardized_filename: "reSEQ/VCF/Unfiltered/{species}_{assembly-version}.vcf.gz"
+      copy_method: '{reseq-copy-method}'
+      gzipped: True
+  
   model_input:
-    file-method:
-      input:
-        args:
-          - "model-file"
-          - "models-dir"
-      standardize:
-        method: "file-str"
-        args:
-          input_filename: "{model-file}"
-          standardized_filename: "{species}.model"
-          out_dir: "{models-dir}"
-          copy_method: "copy"
-          gzipped: False
+    methods:
+      file-str: "{model-file}"
+    args:
+      standardized_filename: "Models/{species}.model"
+      copy_method: 'copy'
+      gzipped: False
 
-snakefiles:
-  - reseq_filter_w_model_bcftools.smk
-  - reseq_model_ind_file.smk
+snakemake:
+  modules:
+    - reseq_filter_w_model_bcftools.smk
+    - reseq_model_ind_file.smk

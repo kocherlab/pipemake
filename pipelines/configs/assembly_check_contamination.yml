@@ -130,3 +130,36 @@ setup:
 
 snakefiles:
   - assembly_contamination_blobtools
+#setup:
+#  hifi_input:
+#    methods:
+#      file-str: "{hifi-fastq}"
+#    args:
+#      standardized_filename: "HiFi/FASTQ/{species}.fq.gz"
+#      copy_method: symbolic_link
+#      gzipped: True
+#
+#  assembly_input:
+#    methods:
+#      file-str: "{assembly-fasta}"
+#    args:
+#      standardized_filename: "Assembly/{species}_{assembly_version}.fa"
+#      copy_method: copy
+#      gzipped: False
+#
+#  busco_input:
+#    methods:
+#      file-str: "{busco-table}"
+#    args:
+#      standardized_filename: "Assembly/{species}_{assembly_version}.busco.full_table.tsv"
+#      copy_method: copy
+#      gzipped: False
+#
+#paths:
+#  - "{ncbi_nt_db}"
+#  - "{ncbi_taxa_db}"
+#  - "{uniprot_db}"
+#
+#snakemake:
+#  modules:
+#    - assembly_contamination_blobtools

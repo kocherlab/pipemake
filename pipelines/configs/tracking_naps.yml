@@ -8,23 +8,19 @@ parser:
         input-parser:
           required: True
       wildcards-args:
-        video-standardized-wildcard:
-          help: "Standardized wildcard statement used to store videos"
-          type: str
-          default: 
-            str: "{video_ids}.mp4"
+        video-standardized-filename: "{video_ids}.mp4"
       args:
         video-wildcard:
           help: "Wildcard statement to represent videos to track"
           type: str
           mutually-exclusive: "input-parser"
-          wildcards: "video-standardized-wildcard"
+          wildcards: "video-standardized-filename"
         video-table:
           help: "Table with video IDs and filenames"
           type: str
           action: confirmFile
           mutually-exclusive: "input-parser"
-          wildcards: "video-standardized-wildcard"
+          wildcards: "video-standardized-filename"
         video-copy-method:
           help: "Specifies if videos should be copied or symbolically linked."
           choices:
@@ -147,97 +143,30 @@ parser:
           help: "Minimum adaptive threshold window size for Aruco markers"
           type: int
           default: 3
-        
-    paths:
-      args:
-        tracking-model-dir:
-          help: "Directory to store models"
-          type: str
-          default: "Models/SLEAP"
-        tracking-videos-dir:
-          help: "Directory to tracking videos"
-          type: str
-          default: "Tracking/Videos"
-        tracking-sleap-dir:
-          help: "Directory to store SLEAP tracking output"
-          type: str
-          default: "Tracking/SLEAP"
-        tracking-naps-dir:
-          help: "Directory to store NAPS tracking output"
-          type: str
-          default: "Tracking/NAPS"
 setup:
   video_input:
-    wildcard-method:
-      input:
-        args:
-          - "video-wildcard"
-          - "video-standardized-wildcard"
-          - "video-copy-method"
-          - "tracking-videos-dir"
-      standardize:
-        method: "wildcard-str"
-        args:
-          wildcard_str: "{video-wildcard}"
-          standardized_filename: "{video-standardized-wildcard}"
-          out_dir: "{tracking-videos-dir}"
-          copy_method: '{video-copy-method}'
-      samples:
-        method: "wildcard-str"
-        args:
-          wildcard_str: "{video-wildcard}"
-          sample_wildcards: 
-            - 'video_ids'
-
-    table-method:
-      input:
-        args:
-          - "video-table"
-          - "video-standardized-wildcard"
-          - "video-copy-method"
-          - "tracking-videos-dir"
-      standardize:
-        method: "table-file"
-        args:
-          table_filename: "{video-table}"
-          standardized_filename: "{video-standardized-wildcard}"
-          out_dir: "{video-fastq-dir}"
-          copy_method: '{video-copy-method}'
-          sample_column: 'video_ids'
-      samples:
-        method: "table-file"
-        args:
-          table_filename: "{video-table}"
-          sample_column: 'video_ids'
-  
+    methods:
+      wildcard-str: "{video-wildcard}"
+      table-file: "{video-table}"
+    args:
+      standardized_filename: "Tracking/Videos/{video-standardized-filename}"
+      copy_method: '{video-copy-method}'
+      sample_keywords: 
+        - 'video_ids'
   centroid_model:
-    dir-method:
-      input:
-        args:
-          - "centroid-model"
-          - "tracking-model-dir"
-      standardize:
-        method: "dir-str"
-        args:
-          path_name: "{centroid-model}"
-          standardized_directory: "centroid_model"
-          out_dir: "{tracking-model-dir}"
-          copy_method: "{model-copy-method}"
-
+    methods:
+      dir-str: "{centroid-model}"
+    args:
+      standardized_directory: "Tracking/Models/centroid_model"
+      copy_method: "{model-copy-method}"
   instance_model:
-    dir-method:
-      input:
-        args:
-          - "instance-model"
-          - "tracking-model-dir"
-      standardize:
-        method: "dir-str"
-        args:
-          path_name: "{instance-model}"
-          standardized_directory: "instance_model"
-          out_dir: "{tracking-model-dir}"
-          copy_method: "{model-copy-method}"
+    methods:
+      dir-str: "{instance-model}"
+    args:
+      standardized_directory: "Tracking/Models/instance_model"
+      copy_method: "{model-copy-method}"
 
-snakefiles:
-  - tracking_sleap
-  - tracking_naps
+snakemake:
+  modules:
+    - tracking_sleap
+    - tracking_naps

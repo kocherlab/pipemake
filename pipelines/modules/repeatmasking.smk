@@ -1,47 +1,17 @@
 rule all:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            f"{config['species']}_{config['assembly_version']}.fa.masked",
-        ),
+        f"Assembly/{config['species']}_{config['assembly_version']}.fa.masked",
 
 
-rule repeat_modeler_r1:
+rule repeat_modeler:
     input:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            f"{config['species']}_{config['assembly_version']}.fa",
-        ),
+        f"Assembly/{config['species']}_{config['assembly_version']}.fa",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["repeatmodeler_dir"],
-            "R1",
-            "Families",
-            f"{config['species']}_{config['assembly_version']}-families.fa",
-        ),
+        f"Assembly/RepeatModeler/Families/{config['species']}_{config['assembly_version']}-families.fa",
     params:
-        repeatmodeler_db=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["repeatmodeler_dir"],
-            "R1",
-            "DB",
-            f"{config['species']}_{config['assembly_version']}_DB",
-        ),
-        db_dir=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["repeatmodeler_dir"],
-            "R1",
-            "DB",
-        ),
-        wd_dir=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["repeatmodeler_dir"],
-            "R1",
-            "WorkingDirectory",
-        ),
+        repeatmodeler_db=f"Assembly/RepeatModeler/DB/{config['species']}_{config['assembly_version']}_DB",
+        db_dir="Assembly/RepeatModeler/DB",
+        wd_dir="Assembly/RepeatModeler/WorkingDirectory",
     resources:
         mem_mb=40000,
     threads: 20
@@ -62,35 +32,16 @@ rule repeat_modeler_r1:
         """
 
 
-rule repeat_masker_r1:
+rule repeat_masker:
     input:
-        assembly=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            f"{config['species']}_{config['assembly_version']}.fa",
-        ),
-        families=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["repeatmodeler_dir"],
-            "R1",
-            "Families",
-            f"{config['species']}_{config['assembly_version']}-families.fa",
-        ),
+        assembly=f"Assembly/{config['species']}_{config['assembly_version']}.fa",
+        families=f"Assembly/RepeatModeler/Families/{config['species']}_{config['assembly_version']}-families.fa",
     output:
         os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["repeatmodeler_dir"],
-            "R1",
-            "MaskedAssembly",
-            f"{config['species']}_{config['assembly_version']}.fa.masked",
+            f"Assembly/RepeatModeler/MaskedAssembly/{config['species']}_{config['assembly_version']}.fa.masked",
         ),
     params:
-        mask_dir=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["repeatmodeler_dir"],
-            "R1",
-            "MaskedAssembly",
-        ),
+        mask_dir="Assembly/RepeatModeler/MaskedAssembly",
     resources:
         mem_mb=24000,
     threads: 12
@@ -100,26 +51,12 @@ rule repeat_masker_r1:
         "RepeatMasker -par {threads} -dir {params.mask_dir} -lib {input.families} {input.assembly}"
 
 
-rule softmask_r1:
+rule softmask:
     input:
-        assembly=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            f"{config['species']}_{config['assembly_version']}.fa",
-        ),
-        masked_assembly=os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["repeatmodeler_dir"],
-            "R1",
-            "MaskedAssembly",
-            f"{config['species']}_{config['assembly_version']}.fa.masked",
-        ),
+        assembly=f"Assembly/{config['species']}_{config['assembly_version']}.fa",
+        masked_assembly=f"Assembly/RepeatModeler/MaskedAssembly/{config['species']}_{config['assembly_version']}.fa.masked",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["assembly_dir"],
-            f"{config['species']}_{config['assembly_version']}.fa.masked",
-        ),
+        f"Assembly/{config['species']}_{config['assembly_version']}.fa.masked",
     singularity:
         "docker://aewebb/pipemake_utils:v1.2.1"
     resources:
