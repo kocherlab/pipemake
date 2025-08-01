@@ -8,20 +8,20 @@ parser:
         input-parser:
           required: True
       wildcards-args:
-        fastq-standardized-filename: "{samples}_{reads}.fq.gz"
+        fastq-standardized-wildcard: "{samples}_{reads}.fq.gz"
         sra-standardized-wildcard: "samples"
       args:
         fastq-wildcard:
           help: "Wildcard statement to represent FASTQs"
           type: str
           mutually-exclusive: "input-parser"
-          wildcards: "fastq-standardized-filename"
+          wildcards: "fastq-standardized-wildcard"
         fastq-table:
           help: "Table with sample and FASTQs filenames"
           type: str
           action: confirmFile
           mutually-exclusive: "input-parser"
-          wildcards: "fastq-standardized-filename"
+          wildcards: "fastq-standardized-wildcard"
         paired-end-sra:
           help: "Table with SRA accession numbers for paired-end reads"
           type: str
@@ -55,18 +55,34 @@ parser:
           help: "Trim the right side of the reads, starting from the 5' end"
           action: store_true
 setup:
-  fastq_input:
+  fastq_file_input:
     methods:
       wildcard_str: "{fastq-wildcard}"
       table_file: "{fastq-table}"
     args:
-      standardized_filename: "FASTQ/Input/{fastq-standardized-filename}"
+      standardized_filename: "FASTQ/Input/{fastq-standardized-wildcard}"
       copy_method: '{fastq-copy-method}'
       sample_keywords:
         - 'samples'
       gzipped: True
     snakefiles:
       - fastq_process_wildcards
+  paired_end_sra_input:
+    methods:
+      table_file: "{paired-end-sra}"
+    args:
+      sample_keywords:
+        - 'samples'
+    snakefiles:
+      - fastq_process_sra_paired_end
+  single_end_sra_input:
+    methods:
+      table_file: "{single-end-sra}"
+    args:
+      sample_keywords:
+        - 'samples'
+    snakefiles:
+      - fastq_process_sra_single_end
 
 snakemake:
   modules:

@@ -53,7 +53,7 @@ parser:
             suffix:
               - function: jobRandomString
 setup:
-  rnaseq_input:
+  fastq_file_input:
     methods:
       wildcard-str: "{rnaseq-wildcard}"
       table-filename: "{rnaseq-table}"
@@ -62,7 +62,9 @@ setup:
       copy_method: '{rnaseq-copy-method}'
       gzipped: True
       sample_keywords: 
-        - 'samples' 
+        - 'samples'
+    snakefiles:
+      - fastq_process_wildcards
   assembly_input:
     methods:
       file-str: "{assembly-fasta}"
@@ -75,4 +77,10 @@ snakemake:
   modules:
     - rna_seq_star_wo_gtf
     - rna_seq_sort
+  links:
+    - input: fastq_process_single_end
+      output: star_single_end_rnaseq
+    - input: fastq_process_paired_end
+      output: star_pair_end_rnaseq
+  
 

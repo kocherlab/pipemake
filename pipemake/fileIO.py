@@ -50,6 +50,9 @@ class FileIO:
         # Stores path if using a link
         self.link_path = ""
 
+        # Assign an empty pipeline argument
+        self.pipeline_arg = None
+
     @classmethod
     def create(cls, *args, **kwargs):
         return cls(*args, **kwargs)
@@ -108,6 +111,9 @@ class FileIO:
             f"Standardized: {self.filename} to {dest_filename}. Method: {copy_method}"
         )
 
+        # Assign the pipeline argument
+        self.pipeline_arg = dest_filename
+
     def returnPaths(self, copy_method="symbolic_link", **kwargs):
         if copy_method == "copy":
             return []
@@ -131,6 +137,7 @@ class TableIO:
         self._file_columns = set()
         self._table_columns = set(self._sample_keywords)
         self.samples = defaultdict(list)
+        self.pipeline_arg = None
 
         if set(self._sample_keywords).isdisjoint(set(self._table_dataframe.columns)):
             raise Exception(
@@ -175,7 +182,7 @@ class TableIO:
         )
 
     def standardizedFiles(self, standardized_wildcard, **kwargs):
-        # Skip if nn file columns
+        # Skip if no file columns
         if not list(self._file_columns):
             return
 
@@ -195,6 +202,9 @@ class TableIO:
             raise Exception(
                 f"Not all wildcards found in table: {', '.join(list(standardized_wildcard_names))}"
             )
+
+        # Create the standardized filename
+        self.pipeline_arg = standardized_wildcard
 
         # Loop the dataframe by row
         for _, row_dict in self._table_dataframe.iterrows():

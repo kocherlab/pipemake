@@ -5,11 +5,11 @@ rule all:
 
 rule fastq_Unprocessed_Wildcards:
     input:
-        config["fastq-standardized-filename"],
+        config["fastq_file_input"],
     output:
         temp(
             "FASTQ/Unprocessed_Wildcards/"
-            + os.path.basename(config["fastq-standardized-filename"])
+            + os.path.basename(config["fastq_file_input"])
         ),
     run:
         import os

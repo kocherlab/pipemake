@@ -601,6 +601,11 @@ class SnakePipelineIO:
                 # Add the rule to the rule order string
                 link_rule_order_str += f" {order_symbol} link_{link_rule_group[1]}"
 
+            # Add the original rule order string to the linked rule order
+            for link_rule_pos, link_rule_group in enumerate(link_rule_order):
+                # Add the rule to the rule order string
+                link_rule_order_str += f" {order_symbol} {link_rule_group[1]}"
+
             # Save the linked rule order string to the list
             link_rule_order_list.append(link_rule_order_str + "\n")
 

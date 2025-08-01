@@ -146,6 +146,7 @@ class ConfigPipelineIO:
         self._singularity_bindings = set()
         self._inputlinks = set()
         self.samples = {}
+        self.setup_pipeline_args = {}
 
     @property
     def snakefiles(self):
@@ -208,7 +209,7 @@ class ConfigPipelineIO:
         if "workflow_dir" not in pipeline_args:
             raise Exception("Workflow prefix not found among pipeline arguments")
 
-        for setup_name, setup_dict in self._setup_dict.items():
+        for setup_arg_name, setup_dict in self._setup_dict.items():
             # Create a dict to store the setup arguments
             setup_args = {
                 "method": "",
@@ -236,7 +237,7 @@ class ConfigPipelineIO:
                 if pipeline_args[assignment_arg] is not None:
                     if setup_args["method"]:
                         raise Exception(
-                            f"Setup ({setup_name}) already assigned to {setup_args['method']}, cannot assign {setup_method}"
+                            f"Setup ({setup_arg_name}) already assigned to {setup_args['method']}, cannot assign {setup_method}"
                         )
                     else:
                         setup_args["method"] = setup_method.replace("-", "_")
@@ -247,7 +248,7 @@ class ConfigPipelineIO:
             # Check if the method was assigned
             if not setup_args["method"]:
                 logging.warning(
-                    f"Setup method not assigned for {setup_name}, skipping setup"
+                    f"Setup method not assigned for {setup_arg_name}, skipping setup"
                 )
                 return
 
@@ -268,12 +269,13 @@ class ConfigPipelineIO:
             # Standardize the input
             processed_input.standardize()
 
-            # Assign the input paths
-            input_paths = processed_input.returnPaths()
+            # Assign the pipeline argument
+            self.setup_pipeline_args[setup_arg_name] = (
+                processed_input.returnPipelineArg()
+            )
 
-            # Check for method paths, and update the singularity bindings if found
-            if len(input_paths) > 0:
-                self._singularity_bindings.update(input_paths)
+            # Update the singularity bindings
+            self._singularity_bindings.update(processed_input.returnPaths())
 
             # Check if any sample keywords were provided
             if "sample_keywords" in setup_dict["args"]:
