@@ -26,6 +26,9 @@ class DirIO:
         # Stores path if using a link
         self.link_path = ""
 
+        # Assign an empty pipeline argument
+        self.pipeline_arg = None
+
     @classmethod
     def create(cls, *args, **kwargs):
         return cls(*args, **kwargs)
@@ -50,6 +53,9 @@ class DirIO:
         # Create the output directory, if needed
         if not os.path.exists(os.path.dirname(dest_directory)):
             os.makedirs(os.path.dirname(dest_directory))
+
+        # Add the path to the pipeline argument
+        self.pipeline_arg = dest_directory
 
         # Copy the directory
         if copy_method == "symbolic_link":
