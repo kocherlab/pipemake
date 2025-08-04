@@ -38,7 +38,7 @@ parser:
           default: "smr_v4.3_default_db.fasta"
 
 setup:
-  fastq_input:
+  fastq_file_input:
     methods:
       wildcard_str: "{fastq-wildcard}"
       table-file: "{fastq-table}"
@@ -48,8 +48,15 @@ setup:
       gzipped: True
       sample_keywords:
         - 'samples'
+    snakefiles:
+      - fastq_process_wildcards
 
 snakemake:
   modules:
     - index_sortmerna
     - fastq_filter_rRNA_sortmerna
+  links:
+    - input: fastq_process_single_end
+      output: sortmerna_out_single_end
+    - input: fastq_process_paired_end
+      output: sortmerna_out_pair_end

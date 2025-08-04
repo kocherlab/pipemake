@@ -8,9 +8,9 @@ rule all:
 
 rule cat_iso_seq_reads:
     input:
-        expand("IsoSeq/{sample}.fq.gz", sample=config["samples"]),
+        expand("IsoSeq/FASTQ/{sample}.fq.gz", sample=config["samples"]),
     output:
-        temp(f"IsoSeq/{config['species']}_{config['assembly_version']}.fq.gz"),
+        temp(f"IsoSeq/FASTQ/{config['species']}_{config['assembly_version']}.fq.gz"),
     shell:
         "cat {input} > {output}"
 
@@ -18,8 +18,11 @@ rule cat_iso_seq_reads:
 rule isoseq_align_flair:
     input:
         fasta_file=f"Assembly/{config['species']}_{config['assembly_version']}.fa",
-        reseq_fastq=f"IsoSeq/{config['species']}_{config['assembly_version']}.fq.gz",
+        reseq_fastq=f"IsoSeq/FASTQ/{config['species']}_{config['assembly_version']}.fq.gz",
     output:
+        temp(
+            f"Annotations/flair/{config['species']}_{config['assembly_version']}.aligned.bed"
+        ),
         temp(
             f"Annotations/flair/{config['species']}_{config['assembly_version']}.aligned.bam"
         ),
@@ -77,7 +80,7 @@ rule isoseq_collapse_flair:
     input:
         fasta_file=f"Assembly/{config['species']}_{config['assembly_version']}.fa",
         gtf_file=f"Annotations/{config['species']}_{config['assembly_version']}.{config['annotation_version']}.gtf",
-        reseq_fastq=expand("IsoSeq/{sample}.fq.gz", sample=config["samples"]),
+        reseq_fastq=f"IsoSeq/FASTQ/{config['species']}_{config['assembly_version']}.fq.gz",
         corrected_bed=f"Annotations/flair/{config['species']}_{config['assembly_version']}_all_corrected.bed",
     output:
         f"Annotations/flair/{config['species']}_{config['assembly_version']}.{config['annotation_version']}.isoforms.gtf",

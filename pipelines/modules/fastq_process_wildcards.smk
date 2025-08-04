@@ -9,7 +9,7 @@ rule fastq_Unprocessed_Wildcards:
     output:
         temp(
             "FASTQ/Unprocessed_Wildcards/"
-            + os.path.basename(config["fastq_file_input"])
+            + os.path.basename(config["fastq_file_input"]).replace(".fastq", ".fq")
         ),
     run:
         import os

@@ -37,7 +37,7 @@ parser:
             suffix:
               - function: jobRandomString
 setup:
-  fasta_input:
+  assembly_fasta:
     methods:
       file-str: "{assembly-fasta}"
     args:
