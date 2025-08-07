@@ -1,4 +1,4 @@
-.. filetypes:
+.. _create:
 
 ##################
 Creating Pipelines
