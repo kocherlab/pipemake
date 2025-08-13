@@ -36,7 +36,6 @@ class DirIO:
     def standardize(
         self,
         standardized_directory,
-        out_dir="",
         workflow_dir="",
         copy_method="symbolic_link",
         **kwargs,
@@ -45,8 +44,6 @@ class DirIO:
         dest_directory = standardized_directory
 
         # Create path as needed
-        if out_dir:
-            dest_directory = os.path.join(out_dir, dest_directory)
         if workflow_dir:
             dest_directory = os.path.join(workflow_dir, dest_directory)
 
