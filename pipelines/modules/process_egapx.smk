@@ -12,7 +12,7 @@ rule all:
 
 rule process_egapx_gtf:
     input:
-        f"Annotations/{config['species']}_{config['assembly_version']}.{config['annotation_version']}.gtf",
+        config["gtf_input"],
     output:
         f"Processed/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.gtf",
         temp(
@@ -51,7 +51,7 @@ rule add_utrs_to_gff:
 
 rule assembly_stats_bbmap:
     input:
-        f"Assembly/{config['species']}_genome_{config['assembly_version']}.fasta",
+        config["assembly_fasta"],
     output:
         f"Processed/{config['species']}_genome_{config['assembly_version']}.assembly.stats",
     singularity:
@@ -98,7 +98,7 @@ rule update_transcripts:
 rule gff_to_proteins:
     input:
         gff_file=f"Processed/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.gff",
-        assembly_fasta=f"Assembly/{config['species']}_genome_{config['assembly_version']}.fasta",
+        assembly_fasta=config["assembly_fasta"],
     output:
         temp(
             f"Processed/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_pep.fa.tmp"
@@ -129,7 +129,7 @@ rule update_proteins:
 
 rule gzip_assembly:
     input:
-        f"Assembly/{config['species']}_genome_{config['assembly_version']}.fasta",
+        config["assembly_fasta"],
     output:
         f"Processed/{config['species']}_genome_{config['assembly_version']}.fasta.gz",
     singularity:
