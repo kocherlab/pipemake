@@ -60,7 +60,6 @@ class FileIO:
     def standardize(
         self,
         standardized_filename,
-        out_dir="",
         workflow_dir="",
         gzipped=None,
         copy_method="symbolic_link",
@@ -69,9 +68,10 @@ class FileIO:
         # Assign the destination filename
         dest_filename = standardized_filename
 
+        # Assign the pipeline argument
+        self.pipeline_arg = dest_filename
+
         # Create path as needed
-        if out_dir:
-            dest_filename = os.path.join(out_dir, dest_filename)
         if workflow_dir:
             dest_filename = os.path.join(workflow_dir, dest_filename)
 
@@ -110,9 +110,6 @@ class FileIO:
         logging.info(
             f"Standardized: {self.filename} to {dest_filename}. Method: {copy_method}"
         )
-
-        # Assign the pipeline argument
-        self.pipeline_arg = dest_filename
 
     def returnPaths(self, copy_method="symbolic_link", **kwargs):
         if copy_method == "copy":
