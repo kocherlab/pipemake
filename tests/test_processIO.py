@@ -43,7 +43,7 @@ def test_processIO_fromWildcardStr_standardizeInput(
         args={
             "wildcard_str": wildcard_str,
             "standardized_filename": standardized_wildcard,
-            "out_dir": test_dir,
+            "workflow_dir": test_dir,
         },
     )
     test_input.standardize()
@@ -103,7 +103,7 @@ def test_processIO_fromFileStr_standardizeInput_wo_error(
         args={
             "file_str": file_str,
             "standardized_filename": standardized_filename,
-            "out_dir": test_dir,
+            "workflow_dir": test_dir,
         },
     )
     test_input.standardize()
@@ -162,7 +162,7 @@ def test_processIO_fromTableFile_standardizeInput(table_file, standardized_wildc
         args={
             "table_file": table_file,
             "standardized_filename": standardized_wildcard,
-            "out_dir": test_dir,
+            "workflow_dir": test_dir,
             "sample_keywords": ["samples"],
         },
     )

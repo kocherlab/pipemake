@@ -57,8 +57,7 @@ setup:
       wildcard_str: "{fastq-wildcard}"
       table_file: "{fastq-table}"
     args:
-      standardized_filename: "{fastq-standardized-wildcard}"
-      out_dir: "{unfiltered-fastq-dir}"
+      standardized_filename: "{unfiltered-fastq-dir}/{fastq-standardized-wildcard}"
       copy_method: '{fastq-copy-method}'
       gzipped: True
       sample_keywords:

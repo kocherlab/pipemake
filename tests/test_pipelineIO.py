@@ -94,7 +94,6 @@ def test_ConfigPipelineIO_fromYAML_setup_dict(config_yaml):
     assert set(
         [
             "standardized_filename",
-            "out_dir",
             "copy_method",
             "sample_keywords",
             "gzipped",

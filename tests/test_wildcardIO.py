@@ -69,7 +69,7 @@ def test_WildcardIO_standardizedFiles(wildcard_str, sample_wildcard, copy_method
     test_dir = tempfile.mkdtemp()
     test_wildcard = WildcardIO.fromStr(wildcard_str, sample_wildcard=sample_wildcard)
     test_wildcard.standardizedFiles(
-        "{sample}_{read}.test.fq.gz", out_dir=test_dir, copy_method=copy_method
+        "{sample}_{read}.test.fq.gz", workflow_dir=test_dir, copy_method=copy_method
     )
 
     for sample, read in list(itertools.product(["test1", "test2"], ["R1", "R2"])):
