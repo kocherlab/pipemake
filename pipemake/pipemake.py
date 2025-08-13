@@ -78,8 +78,6 @@ def main():
     # Add the samples to the pipeline args
     pipeline_args.update(pipline_config.samples)
 
-    print(pipline_config.setup_pipeline_args)
-
     # Add the setup pipeline args to the pipeline args
     pipeline_args.update(pipline_config.setup_pipeline_args)
 
