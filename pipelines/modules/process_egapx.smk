@@ -12,7 +12,7 @@ rule all:
 
 rule process_egapx_gtf:
     input:
-        "Annotations/epagx.gtf",
+        "Annotations/{config['species']}_{config['assembly_version']}.{config['annotation_version']}.gtf",
     output:
         f"Processed/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.gtf",
         temp(
