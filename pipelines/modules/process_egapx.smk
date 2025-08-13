@@ -66,7 +66,7 @@ rule assembly_stats_bbmap:
 rule gff_to_transcripts:
     input:
         gff_file=f"Processed/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.gff",
-        assembly_fasta=f"Assembly/{config['species']}_genome_{config['assembly_version']}.fasta",
+        assembly_fasta=config["assembly_fasta"],
     output:
         temp(
             f"Processed/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_trans.fa.tmp"
