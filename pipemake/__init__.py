@@ -1,6 +1,6 @@
 # Basic Information
 __name__ = "pipemake"
-__version__ = "1.3.0"
+__version__ = "1.3.1"
 __summary__ = "Pipemake: A pipeline creation tool using Snakemake"
 __url__ = "https://github.com/kocherlab/pipemake"
 __code__ = "https://github.com/kocherlab/pipemake"
