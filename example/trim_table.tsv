@@ -1,0 +1,3 @@
+samples	reads:R1	reads:R2
+test1	example/trim-fastqs/test1_R1.fq.gz	example/trim-fastqs/test1_R2.fq.gz
+test2	example/trim-fastqs/test1_R2.fq.gz
