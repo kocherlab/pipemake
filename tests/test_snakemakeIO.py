@@ -59,6 +59,7 @@ def test_SnakePipelineIO_w_error(
 def test_SnakePipelineIO_wo_error(
     job_prefix,
     pipeline_storage_dir,
+    resource_yml,
     scale_threads,
     scale_mem,
     indent_style,
