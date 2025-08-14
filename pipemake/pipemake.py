@@ -70,26 +70,27 @@ def main():
     logArgDict(pipeline_args, omit=["pipeline_job_dir"])
 
     # Assign the pipeline config
-    pipline_config = pipeline_configs[pipeline_args["pipeline"]]
+    pipeline_config = pipeline_configs[pipeline_args["pipeline"]]
 
     # Process the pipeline setup
-    pipline_config.setupPipeline(pipeline_args)
+    pipeline_config.setupPipeline(pipeline_args)
 
     # Add the samples to the pipeline args
-    pipeline_args.update(pipline_config.samples)
+    pipeline_args.update(pipeline_config.samples)
 
     # Add the setup pipeline args to the pipeline args
-    pipeline_args.update(pipline_config.setup_pipeline_args)
+    pipeline_args.update(pipeline_config.setup_pipeline_args)
 
     # Create the snakemake pipeline
     snakemake_pipeline = SnakePipelineIO.open(**pipeline_args)
 
     # Add the snakemake modules to the pipeline
-    for smkm_filename in pipline_config.snakefiles:
+    for smkm_filename in pipeline_config.snakefiles:
         snakemake_pipeline.addModule(smkm_filename)
 
-    for smkl_filename in pipline_config.snakelinks:
-        snakemake_pipeline.addSnakeLink(smkl_filename)
+    # Add the snakemake links to the pipeline
+    for smkm_links in pipeline_config.snakelinks:
+        snakemake_pipeline.addSnakeLink(smkm_links)
 
     # Build the singularity containers
     snakemake_pipeline.buildSingularityContainers()
@@ -104,7 +105,7 @@ def main():
     snakemake_pipeline.close()
 
     # Print the singularity help message
-    pipline_config.helpMessage(pipeline_args)
+    pipeline_config.helpMessage(pipeline_args)
 
 
 if __name__ == "__main__":
