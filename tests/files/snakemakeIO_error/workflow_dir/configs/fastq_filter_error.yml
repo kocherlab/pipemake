@@ -36,10 +36,6 @@ parser:
           type: int
           default:
             str: "50"
-        path-test:
-          help: "Path to the test directory"
-          type: str
-          action: confirmDir
     paths:
       args:
         unfiltered-fastq-dir:
@@ -62,6 +58,7 @@ setup:
       table_file: "{fastq-table}"
     args:
       standardized_filename: "{unfiltered-fastq-dir}/{fastq-standardized-wildcard}"
+      workflow_dir: '{unfiltered-fastq-dir}'
       copy_method: '{fastq-copy-method}'
       gzipped: True
       sample_keywords:
@@ -74,8 +71,7 @@ setup:
       copy_method: 'symbolic_link'
     snakefiles:
       - test_script
+
 snakemake:
   modules:
     - fastq_filter_fastp
-paths:
- - "{path-test}"

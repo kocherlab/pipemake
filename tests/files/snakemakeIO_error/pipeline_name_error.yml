@@ -1,4 +1,3 @@
-pipeline: fastq-filter
 version: 1.0
 parser:
   help: Filter FASTQ files using fastp
@@ -36,10 +35,6 @@ parser:
           type: int
           default:
             str: "50"
-        path-test:
-          help: "Path to the test directory"
-          type: str
-          action: confirmDir
     paths:
       args:
         unfiltered-fastq-dir:
@@ -77,5 +72,3 @@ setup:
 snakemake:
   modules:
     - fastq_filter_fastp
-paths:
- - "{path-test}"

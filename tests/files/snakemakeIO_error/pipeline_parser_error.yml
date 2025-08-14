@@ -1,0 +1,24 @@
+pipeline: fastq-filter
+version: 1.0
+setup:
+  fastq_input:
+    methods:
+      wildcard_str: "{fastq-wildcard}"
+      table_file: "{fastq-table}"
+    args:
+      standardized_filename: "{unfiltered-fastq-dir}/{fastq-standardized-wildcard}"
+      copy_method: '{fastq-copy-method}'
+      gzipped: True
+      sample_keywords:
+        - 'samples'
+  test_input:
+    methods:
+      dir_str: "{dir-test}"
+    args:
+      standardized_directory: "Test_Directory"
+      copy_method: 'symbolic_link'
+    snakefiles:
+      - test_script
+snakemake:
+  modules:
+    - fastq_filter_fastp

@@ -20,6 +20,10 @@ def test_pipemake_main_wildcard_wo_error(wildcard_str):
     # Assign the workflor prefix
     workflow_prefix = os.path.join(test_dir, "test_workflow")
 
+    # Create the test path
+    test_prefix = os.path.join(test_dir, "test_dir")
+    os.makedirs(test_prefix, exist_ok=True)
+
     # Assign the command line arguments
     test_cmd = [
         "",
@@ -29,6 +33,8 @@ def test_pipemake_main_wildcard_wo_error(wildcard_str):
         "--workflow-dir",
         workflow_prefix,
         "--resource-yml",
+        "--path-test",
+        test_prefix,
     ]
 
     # Run pipemake with the test command
@@ -62,8 +68,12 @@ def test_pipemake_main_table_wo_error(table_str):
     test_dir = tempfile.mkdtemp()
     os.environ["PM_SNAKEMAKE_DIR"] = "tests/files/snakemakeIO"
 
-    # Assign the workflor prefix
+    # Assign the workflow prefix
     workflow_prefix = os.path.join(test_dir, "test_workflow")
+
+    # Create the test path
+    test_prefix = os.path.join(test_dir, "test_dir")
+    os.makedirs(test_prefix, exist_ok=True)
 
     # Assign the command line arguments
     test_cmd = [
@@ -76,6 +86,8 @@ def test_pipemake_main_table_wo_error(table_str):
         "--resource-yml",
         "--dir-test",
         "tests/files/fileIO",
+        "--path-test",
+        test_prefix,
     ]
 
     # Run pipemake with the test command

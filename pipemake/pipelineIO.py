@@ -89,6 +89,9 @@ class ConfigPipelineIO:
             config_dict.pop("paths")
         else:
             self._setup_paths = {}
+        print()
+        print(self._setup_paths)
+        print()
 
         # Check if linked rules are provided
         if "links" in config_dict["snakemake"]:
@@ -209,6 +212,10 @@ class ConfigPipelineIO:
         if "workflow_dir" not in pipeline_args:
             raise Exception("Workflow prefix not found among pipeline arguments")
 
+        print()
+        print(f"Setup before paths: {self._setup_paths}")
+        print()
+
         for setup_arg_name, setup_dict in self._setup_dict.items():
             # Create a dict to store the setup arguments
             setup_args = {
@@ -250,10 +257,14 @@ class ConfigPipelineIO:
                 logging.warning(
                     f"Setup method not assigned for {setup_arg_name}, skipping setup"
                 )
-                return
+                break
 
             # Standardize the input arguments
             for setup_arg, setup_value in setup_dict["args"].items():
+                # Raise error if the user is trying to assign workflow_dir in the setup block
+                if setup_arg == "workflow_dir":
+                    raise Exception("Cannot assign workflow_dir in the setup block")
+
                 if isinstance(setup_value, str):
                     setup_value = processSetupArgs(setup_value)
 
@@ -291,7 +302,14 @@ class ConfigPipelineIO:
             if "snakefiles" in setup_dict:
                 self._snakefiles.update(setup_dict["snakefiles"])
 
+        print()
+        print(f"Setup paths: {self._setup_paths}")
+        print()
+
         for setup_path in self._setup_paths:
+            print()
+            print(processSetupArgs(setup_path))
+            print()
             # Get absolute path for the setup path
             setup_abs_path = os.path.abspath(processSetupArgs(setup_path))
 
