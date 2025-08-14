@@ -161,3 +161,58 @@ def test_pipemake_main_help_wo_error():
         with pytest.raises(SystemExit) as excinfo:
             main()
             excinfo.value.code == 2
+
+
+@pytest.mark.parametrize(
+    "wildcard_str",
+    [
+        "tests/files/wildcardIO/{samples}_{reads}.fq.gz",
+    ],
+)
+def test_pipemake_main_links_wo_error(wildcard_str):
+    test_dir = tempfile.mkdtemp()
+    os.environ["PM_SNAKEMAKE_DIR"] = "tests/files/snakemakeIO_links"
+
+    # Assign the workflor prefix
+    workflow_prefix = os.path.join(test_dir, "test_workflow")
+
+    # Create the test path
+    test_prefix = os.path.join(test_dir, "test_dir")
+    os.makedirs(test_prefix, exist_ok=True)
+
+    # Assign the command line arguments
+    test_cmd = [
+        "",
+        "trim-fastqs",
+        "--fastq-wildcard",
+        wildcard_str,
+        "--workflow-dir",
+        workflow_prefix,
+    ]
+
+    # Run pipemake with the test command
+    with unittest.mock.patch("sys.argv", test_cmd):
+        main()
+
+    # Check if the workflow files were created
+    assert os.path.isfile(f"{workflow_prefix}/Snakefile")
+    assert os.path.isfile(f"{workflow_prefix}/config.yml")
+    assert os.path.isdir(f"{workflow_prefix}")
+    assert os.path.isfile(f"{workflow_prefix}/pipemake/pipeline.log")
+    assert os.path.isdir(f"{workflow_prefix}/pipemake")
+    assert os.path.isdir(f"{workflow_prefix}/pipemake/backups")
+    assert os.path.isfile(f"{workflow_prefix}/pipemake/backups/Snakefile.bkp")
+    assert os.path.isfile(f"{workflow_prefix}/pipemake/backups/config.yml.bkp")
+    assert os.path.isdir(f"{workflow_prefix}/pipemake/modules")
+    assert os.path.isfile(
+        f"{workflow_prefix}/pipemake/modules/fastq_process_wildcards.smk"
+    )
+    assert os.path.isfile(f"{workflow_prefix}/pipemake/modules/fastq_trim_fastp.smk")
+    assert not os.path.isfile(
+        f"{workflow_prefix}/pipemake/modules/fastq_sra_paired_end_download.smk"
+    )
+    assert not os.path.isfile(
+        f"{workflow_prefix}/pipemake/modules/fastq_sra_single_end_download.smk"
+    )
+    assert os.path.isdir(f"{workflow_prefix}/pipemake/modules")
+    assert os.path.isdir(f"{workflow_prefix}/FASTQ/Input")

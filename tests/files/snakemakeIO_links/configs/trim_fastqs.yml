@@ -1,0 +1,99 @@
+pipeline: trim-fastqs
+version: 1.0
+parser:
+  help: Trim short reads FASTQ files using fastp
+  arg-groups:
+    basic:
+      mutually-exclusive-args:
+        input-parser:
+          required: True
+      wildcards-args:
+        fastq-standardized-wildcard: "{samples}_{reads}.fq.gz"
+        sra-standardized-wildcard: "samples"
+      args:
+        fastq-wildcard:
+          help: "Wildcard statement to represent FASTQs"
+          type: str
+          mutually-exclusive: "input-parser"
+          wildcards: "fastq-standardized-wildcard"
+        fastq-table:
+          help: "Table with sample and FASTQs filenames"
+          type: str
+          action: confirmFile
+          mutually-exclusive: "input-parser"
+          wildcards: "fastq-standardized-wildcard"
+        paired-end-sra:
+          help: "Table with SRA accession numbers for paired-end reads"
+          type: str
+          action: confirmFile
+          mutually-exclusive: "input-parser"
+          wildcards: "sra-standardized-wildcard"
+        single-end-sra:
+          help: "Table with SRA accession numbers for single-end reads"
+          type: str
+          action: confirmFile
+          mutually-exclusive: "input-parser"
+          wildcards: "sra-standardized-wildcard"
+        fastq-copy-method:
+          help: "Specifies if FASTQs should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        min-length:
+          help: "Minimum length of reads to keep"
+          type: int
+          default:
+            str: "50"
+        cut-front:
+          help: "Trim from the front of the reads"
+          action: store_true
+        cut-tail:
+          help: "Trim from the tail of the reads"
+          action: store_true
+        cut-right:
+          help: "Trim the right side of the reads, starting from the 5' end"
+          action: store_true
+setup:
+  fastq_file_input:
+    methods:
+      wildcard_str: "{fastq-wildcard}"
+      table_file: "{fastq-table}"
+    args:
+      standardized_filename: "FASTQ/Input/{fastq-standardized-wildcard}"
+      copy_method: '{fastq-copy-method}'
+      sample_keywords:
+        - 'samples'
+      gzipped: True
+    snakefiles:
+      - fastq_process_wildcards
+  paired_end_sra_input:
+    methods:
+      table_file: "{paired-end-sra}"
+    args:
+      sample_keywords:
+        - 'samples'
+    snakefiles:
+      - fastq_process_sra_paired_end
+  single_end_sra_input:
+    methods:
+      table_file: "{single-end-sra}"
+    args:
+      sample_keywords:
+        - 'samples'
+    snakefiles:
+      - fastq_process_sra_single_end
+
+snakemake:
+  modules:
+    - fastq_trim_fastp
+  links:
+    - input: fastq_process_single_end
+      output: fastp_single_end
+    - input: fastq_process_paired_end
+      output: fastp_pair_end
+      file_mappings:
+        - input: r1_reads
+          output: r1_reads
+        - input: r2_reads
+          output: r2_reads

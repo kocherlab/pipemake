@@ -59,7 +59,6 @@ def test_SnakePipelineIO_w_error(
 def test_SnakePipelineIO_wo_error(
     job_prefix,
     pipeline_storage_dir,
-    resource_yml,
     scale_threads,
     scale_mem,
     indent_style,
@@ -74,11 +73,8 @@ def test_SnakePipelineIO_wo_error(
 
     # Create a test pipeline
     test_pipeline = SnakePipelineIO.open(
-        # snakemake_job_prefix=snakemake_job_prefix,
         workflow_dir=snakemake_job_prefix,
         pipeline_storage_dir=pipeline_storage_dir,
-        # pipeline_job_dir=test_dir,
-        # resource_yml=resource_yml,
         scale_threads=scale_threads,
         scale_mem=scale_mem,
         singularity_dir=singularity_dir,
