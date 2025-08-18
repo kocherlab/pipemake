@@ -36,4 +36,4 @@ rule run_eggnog_mapper:
         mem_mb=12000,
     threads: 12
     shell:
-        "emapper.py --data_dir {params.data_dir} -i {input.transcripts} -o {params.out_prefix} --cpu {threads} --excel --temp_dir {params.eggnod_dir}"
+        "emapper.py --override --data_dir {params.data_dir} -i {input.transcripts} -o {params.out_prefix} --cpu {threads} --excel --temp_dir {params.eggnod_dir}"
