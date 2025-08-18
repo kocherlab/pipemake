@@ -74,11 +74,8 @@ def test_SnakePipelineIO_wo_error(
 
     # Create a test pipeline
     test_pipeline = SnakePipelineIO.open(
-        # snakemake_job_prefix=snakemake_job_prefix,
         workflow_dir=snakemake_job_prefix,
         pipeline_storage_dir=pipeline_storage_dir,
-        # pipeline_job_dir=test_dir,
-        # resource_yml=resource_yml,
         scale_threads=scale_threads,
         scale_mem=scale_mem,
         singularity_dir=singularity_dir,
@@ -293,3 +290,124 @@ def test_SnakeRuleIO_w_shell_exec(rule_filename):
         "mem_mb": 16000,
         "shell_exec": "sh",
     }
+
+
+@pytest.mark.parametrize(
+    "job_prefix, pipeline_storage_dir, scale_threads, scale_mem, indent_style, overwrite",
+    [("test", "tests/files/snakemakeIO_links", 1.0, 1.0, "\t", True)],
+)
+def test_SnakeLinks_wo_error(
+    job_prefix,
+    pipeline_storage_dir,
+    scale_threads,
+    scale_mem,
+    indent_style,
+    overwrite,
+):
+    test_dir = tempfile.mkdtemp()
+    singularity_dir = tempfile.mkdtemp()
+
+    snakemake_job_prefix = os.path.join(test_dir, job_prefix)
+
+    os.makedirs(snakemake_job_prefix)
+
+    # Create a test pipeline
+    test_pipeline = SnakePipelineIO.open(
+        workflow_dir=snakemake_job_prefix,
+        pipeline_storage_dir=pipeline_storage_dir,
+        scale_threads=scale_threads,
+        scale_mem=scale_mem,
+        singularity_dir=singularity_dir,
+        indent_style=indent_style,
+        overwrite=overwrite,
+    )
+
+    # Add a module to the pipeline
+    test_pipeline.addModule("fastq_process_wildcards.smk")
+    test_pipeline.addModule("fastq_trim_fastp.smk")
+
+    test_pipeline.addSnakeLink(
+        {"input": "fastq_process_single_end", "output": "fastp_single_end"}
+    )
+    test_pipeline.addSnakeLink(
+        {
+            "input": "fastq_process_paired_end",
+            "output": "fastp_pair_end",
+            "file_mappings": [
+                {"input": "r1_reads", "output": "r1_reads"},
+                {"input": "r2_reads", "output": "r2_reads"},
+            ],
+        }
+    )
+
+    # Create the output directories
+    unfiltered_fastq_dir = os.path.join(test_dir, "fastq")
+    filtered_fastq_dir = os.path.join(test_dir, "fastq_filtered")
+
+    # Write the pipeline config
+    test_pipeline.writeConfig(
+        {
+            "min_length": 100,
+            "samples": ["sample1", "sample2"],
+            "unfiltered_fastq_dir": unfiltered_fastq_dir,
+            "filtered_fastq_dir": filtered_fastq_dir,
+            "workflow_dir": snakemake_job_prefix,
+            "fastq_file_input": "FASTQ/Input/{samples}_{reads}.fq.gz",
+            "cut_front": None,
+            "cut_tail": None,
+            "cut_right": None,
+        }
+    )
+
+    # Write the pipeline
+    test_pipeline.writePipeline()
+
+    # Build the singularity containers
+    test_pipeline.buildSingularityContainers()
+
+    test_pipeline.close()
+
+    # Check if the pipeline was written
+    assert os.path.exists(os.path.join(test_dir, job_prefix, "Snakefile"))
+    assert os.path.exists(os.path.join(test_dir, job_prefix, "config.yml"))
+
+    # Check if the module was written
+    assert os.path.exists(
+        os.path.join(test_dir, job_prefix, "modules", "fastq_process_wildcards.smk")
+    )
+    assert os.path.exists(
+        os.path.join(test_dir, job_prefix, "modules", "fastq_trim_fastp.smk")
+    )
+
+    assert os.path.exists("tests/files/snakemakeIO_links/output/test_snakefile")
+    assert os.path.exists(os.path.join(test_dir, job_prefix, "Snakefile"))
+
+    assert filecmp.cmp(
+        os.path.join(test_dir, job_prefix, "Snakefile"),
+        "tests/files/snakemakeIO_links/output/test_snakefile",
+    )
+
+    # Check if the config file was written
+    assert os.path.exists(os.path.join(test_dir, job_prefix, "config.yml"))
+
+    # Check if the singularity containers were built
+    assert os.path.isfile(os.path.join(singularity_dir, "fastp.v0.23.4.sif"))
+
+    # Read the config yaml
+    with open(os.path.join(test_dir, job_prefix, "config.yml"), "r") as yaml_file:
+        config_dict = yaml.safe_load(yaml_file)
+        assert "fastq_file_input" in config_dict
+        assert "FASTQ/Input/{samples}_{reads}.fq.gz" == config_dict["fastq_file_input"]
+        assert "samples" in config_dict
+        assert ["sample1", "sample2"] == config_dict["samples"]
+        assert "min_length" in config_dict
+        assert 100 == config_dict["min_length"]
+        assert "fastp_single_end" in config_dict["resources"]
+        assert "mem_mb" in config_dict["resources"]["fastp_single_end"]
+        assert 16000 == config_dict["resources"]["fastp_single_end"]["mem_mb"]
+        assert 4 == config_dict["resources"]["fastp_single_end"]["threads"]
+        assert "fastp_pair_end" in config_dict["resources"]
+        assert "mem_mb" in config_dict["resources"]["fastp_pair_end"]
+        assert 16000 == config_dict["resources"]["fastp_pair_end"]["mem_mb"]
+        assert "threads" in config_dict["resources"]["fastp_pair_end"]
+        assert 4 == config_dict["resources"]["fastp_pair_end"]["threads"]

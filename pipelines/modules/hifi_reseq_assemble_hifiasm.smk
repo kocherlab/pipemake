@@ -7,19 +7,8 @@ rule hifi_wo_hic_reseq_assemble_hifiasm:
     input:
         f"HiFi/FASTQ/{config['species']}.fq.gz",
     output:
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_assembled_dir"],
-            "hifiasm",
-            "{sample}.a_ctg.gfa",
-        ),
-        os.path.join(
-            config["paths"]["workflow_prefix"],
-            config["paths"]["reseq_assembled_dir"],
-            "hifiasm",
-            "{sample}.p_ctg.gfa",
-        ),
-#        f"Assembly/hifiasm/{config['species']}_{config['assembly_version']}.p_ctg.gfa",
+        f"Assembly/hifiasm/{config['species']}_{config['assembly_version']}.a_ctg.gfa",
+        f"Assembly/hifiasm/{config['species']}_{config['assembly_version']}.p_ctg.gfa",
     params:
         output_prefix=f"Assembly/hifiasm/{config['species']}",
     singularity:

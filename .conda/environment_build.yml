@@ -2,6 +2,6 @@ name: pipemake
 
 dependencies:
   - python=3.9
-  - conda-forge:numpy=1.26.4
+  - conda-forge:numpy
   - conda-forge:conda-build
   - anaconda:anaconda-client

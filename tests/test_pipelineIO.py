@@ -4,6 +4,21 @@ from pipemake.pipelineIO import ConfigPipelinesIO, ConfigPipelineIO
 
 
 @pytest.mark.parametrize(
+    "config_yaml",
+    [
+        "tests/files/snakemakeIO_error/pipeline_version_error.yml",
+        "tests/files/snakemakeIO_error/pipeline_parser_error.yml",
+        "tests/files/snakemakeIO_error/pipeline_setup_error.yml",
+        "tests/files/snakemakeIO_error/pipeline_snakemake_error.yml",
+        "tests/files/snakemakeIO_error/pipeline_smk_modules_error.yml",
+    ],
+)
+def test_ConfigPipelineIO_w_error(config_yaml):
+    with pytest.raises(Exception):
+        ConfigPipelineIO.fromYAML(config_yaml)
+
+
+@pytest.mark.parametrize(
     "config_path",
     ["tests/files/snakemakeIO/"],
 )
@@ -94,7 +109,6 @@ def test_ConfigPipelineIO_fromYAML_setup_dict(config_yaml):
     assert set(
         [
             "standardized_filename",
-            "out_dir",
             "copy_method",
             "sample_keywords",
             "gzipped",

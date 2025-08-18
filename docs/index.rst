@@ -50,11 +50,13 @@ pipemake is a lightweight, flexible, and easy-to-use tool for creating and manag
     :hidden:
     :caption: pipemake Documentation
 
+    about
     installation
     pipelines
     usage
-    filetypes
     create
+    filetypes
+    
     contact
 
 ================

@@ -1,4 +1,4 @@
-.. _other_files:
+.. _filetypes:
 
 ###################
 Pipeline File Types

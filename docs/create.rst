@@ -1,4 +1,4 @@
-.. filetypes:
+.. _create:
 
 ##################
 Creating Pipelines
@@ -126,19 +126,19 @@ The following is an example of a **Pipeline** configuration file:
             input-parser:
               required: True
           wildcards-args:
-            rnaseq-standardized-filename: "{sample}_{read}.fq.gz"
+            rnaseq-standardized-wildcard: "{sample}_{read}.fq.gz"
           args:
             rnaseq-wildcard:
               help: "Wildcard statement to represent RNAseq FASTQs"
               type: str
               mutually-exclusive: 'input-parser'
-              wildcards: rnaseq-standardized-filename
+              wildcards: rnaseq-standardized-wildcard
             rnaseq-table:
               help: "Table with sample and FASTQs filenames"
               type: str
               action: confirmFile
               mutually-exclusive: 'input-parser'
-              wildcards: rnaseq-standardized-filename
+              wildcards: rnaseq-standardized-wildcard
             rnaseq-copy-method:
               help: "Specifies if RNAseq FASTQs should be copied or symbolically linked."
               choices:
@@ -179,7 +179,7 @@ The following is an example of a **Pipeline** configuration file:
           wildcard-str: "{rnaseq-wildcard}"
           table-file: "{rnaseq-table}"
         args:
-          standardized_filename: "RNAseq/FASTQ/{rnaseq-standardized-filename}"
+          standardized_filename: "RNAseq/FASTQ/{rnaseq-standardized-wildcard}"
           copy_method: '{rnaseq-copy-method}'
           gzipped: True
           sample_keywords:
@@ -265,19 +265,19 @@ The `arg-groups` sub-section is used by pipemake to define command-line argument
             input-parser:
               required: True
           wildcards-args:
-            rnaseq-standardized-filename: "{sample}_{read}.fq.gz"
+            rnaseq-standardized-wildcard: "{sample}_{read}.fq.gz"
           args:
             rnaseq-wildcard:
               help: "Wildcard statement to represent RNAseq FASTQs"
               type: str
               mutually-exclusive: 'input-parser'
-              wildcards: rnaseq-standardized-filename
+              wildcards: rnaseq-standardized-wildcard
             rnaseq-table:
               help: "Table with sample and FASTQs filenames"
               type: str
               action: confirmFile
               mutually-exclusive: 'input-parser'
-              wildcards: rnaseq-standardized-filename
+              wildcards: rnaseq-standardized-wildcard
             rnaseq-copy-method:
               help: "Specifies if RNAseq FASTQs should be copied or symbolically linked."
               choices:
@@ -351,9 +351,9 @@ The `wildcards-args` keyword is used to define a wildcard statement that may the
       arg-groups:
         basic:
           wildcards-args:
-            rnaseq-standardized-filename: "{sample}_{read}.fq.gz"
+            rnaseq-standardized-wildcard: "{sample}_{read}.fq.gz"
 
-In this example, we defined a wildcard statement called `rnaseq-standardized-filename`. This wildcard statement is used to standardize the naming of RNAseq FASTQ files. The wildcard statement is defined as `"{sample}_{read}.fq.gz"`, where `{sample}` represents the sample name and `{read}` represents the read type (e.g. R1, R2).
+In this example, we defined a wildcard statement called `rnaseq-standardized-wildcard`. This wildcard statement is used to standardize the naming of RNAseq FASTQ files. The wildcard statement is defined as `"{sample}_{read}.fq.gz"`, where `{sample}` represents the sample name and `{read}` represents the read type (e.g. R1, R2).
 
 
 args:
@@ -413,7 +413,7 @@ In the above example, the `assembly-version` argument has a default value of `v`
 setup:
 ######
 
-The `setup` section is used to define the steps needed to standardize an input type for the pipeline. The `setup` section is divided into the following sub-sections: `methods`, `args`, and `snakefiles`:
+The `setup` section is used to define arguments that require input standardization. Each standardization argument includes the following keywords: `methods`, `args`, and optionally `snakefiles`.
 
 .. code-block::
 
@@ -423,26 +423,26 @@ The `setup` section is used to define the steps needed to standardize an input t
           wildcard-str: "{rnaseq-wildcard}"
           table-file: "{rnaseq-table}"
         args:
-          standardized_filename: "RNAseq/FASTQ/{rnaseq-standardized-filename}"
+          standardized_filename: "RNAseq/FASTQ/{rnaseq-standardized-wildcard}"
           copy_method: '{rnaseq-copy-method}'
           gzipped: True
           sample_keywords:
             'samples'
 
-In the above example, the `setup` section includes a sub-section called `rnaseq_input` to standardize RNAseq input files. The name of a sub-section is arbitrary and may be named as desired. `rnaseq_input` includes two methods to standardize input files: `wildcard-str` and `table-file`. 
+In the above example, the `setup` section includes a single argument called `rnaseq_input`, which includes two methods to standardize input files: `wildcard-str` and `table-file`. 
 
 Standardization methods are defined by the following required keywords:
 
-* `methods`: The supported methods and their assoicated command-line argument
+* `methods`: The supported methods and their associated command-line argument
 
-    * `wildcard-str`: Standardize input file(s) using the specified wildcard statement - `"{rnaseq-wildcard}""`
+    * `wildcard-str`: Standardize input file(s) using the specified wildcard statement - `"{rnaseq-wildcard}"`
     * `table-file`: Standardize input files within the specified table file - `"{rnaseq-table}"`
     * `file-str`: Standardize the specified file - `"{assembly-fasta}"`
     * `dir-str`: Standardize the specified directory - e.g. `"{index-dir}"`
   
 * `args`: Contains the command-line arguments needed for the methods standardize the input file(s)
 
-    * `standardized_filename`: The standardized filename(s). This may be a string with or without a wildcard statements. Should result in a filename(s) specified in a `snakemake` module
+    * `standardized_filename` or `standardized_directory`: The standardized filename(s) or directory. This may be a string with or without a wildcard statements. Should result in a filename(s) specified in a `snakemake` module
     * `copy_method`: The method used to copy (`copy`) or symbolically link (`symbolic_link`) the input file(s)
     * `gzipped`: If the standardized file(s) should be gzipped (`True`, `False`) or keep the gzipped status of the input file(s) (`None`)
     * `sample_keywords`: A list of keywords that should be treated as samples (optional)

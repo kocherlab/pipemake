@@ -1,0 +1,21 @@
+configfile: 'config.yml'
+
+rule all:
+	input:
+		expand("FASTQ/Processed_Wildcard/{sample}_R1.fq.gz", sample=config["samples"]),
+		expand("FASTQ/Trimmed/{sample}.json", sample=config["samples"]),
+
+include: "modules/fastq_process_wildcards.smk"
+include: "modules/fastq_trim_fastp.smk"
+
+ruleorder: link_fastp_pair_end > link_fastp_single_end > fastp_pair_end > fastp_single_end
+
+use rule fastp_single_end as link_fastp_single_end with:
+	input:
+		r1_reads="FASTQ/Processed_Wildcard/{sample}_R1.fq.gz",
+
+use rule fastp_pair_end as link_fastp_pair_end with:
+	input:
+		r1_reads="FASTQ/Processed_Wildcard/{sample}_R1.fq.gz",
+		r2_reads="FASTQ/Processed_Wildcard/{sample}_R2.fq.gz",
+

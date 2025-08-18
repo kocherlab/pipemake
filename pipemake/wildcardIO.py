@@ -17,6 +17,7 @@ class WildcardIO:
         # Assign the basic arguments
         self.wildcard_str = wildcard_str
         self.wildcard_dict = wildcard_dict
+        self.pipeline_arg = None
 
         # Check if the wildcard dict is empty
         missing_wildcards = [
@@ -84,6 +85,8 @@ class WildcardIO:
             raise Exception(
                 f"Standardized wildcard ({standardized_wildcard}) does not match the sample wildcard ({self.wildcard_str}). Please confirm the same wildcards are used in both."
             )
+
+        self.pipeline_arg = standardized_wildcard
 
         # Format the wildcard str for the sample and standardized file
         for sample_wildcard_dict in [

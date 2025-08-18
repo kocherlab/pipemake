@@ -1,0 +1,56 @@
+pipeline: fastq-filter
+version: 1.0
+parser:
+  help: Filter FASTQ files using fastp
+  arg-groups:
+    basic:
+      mutually-exclusive-args:
+        input-parser:
+          required: True
+      wildcards-args:
+        fastq-standardized-wildcard: "{samples}_{reads}.fq.gz"
+      args:
+        fastq-wildcard:
+          help: "Wildcard statement to represent FASTQs"
+          type: str
+          mutually-exclusive: "input-parser"
+          wildcards: "fastq-standardized-wildcard"
+        fastq-table:
+          help: "Table with sample and FASTQs filenames"
+          type: str
+          action: confirmFile
+          mutually-exclusive: "input-parser"
+          wildcards: "fastq-standardized-wildcard"
+        fastq-copy-method:
+          help: "Specifies if FASTQs should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        dir-test:
+          help: "Testing directory"
+          type: str
+          action: confirmDir
+        min-length:
+          help: "Minimum length of reads to keep"
+          type: int
+          default:
+            str: "50"
+    paths:
+      args:
+        unfiltered-fastq-dir:
+          help: "Directory to store unfiltered FASTQ files"
+          type: str
+          default: 
+            str: "FASTQ/Unfiltered"
+        filtered-fastq-dir:
+          help: "Directory to store filtered FASTQ files"
+          type: str
+          default: 
+            str: "FASTQ/Filtered"
+            suffix:
+              - function: jobTimeStamp
+              - function: jobRandomString
+snakemake:
+  modules:
+    - fastq_filter_fastp

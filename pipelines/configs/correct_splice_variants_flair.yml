@@ -8,20 +8,20 @@ parser:
         input-parser:
           required: True
       wildcards-args:
-        reseq-standardized-filename: "{samples}_{reads}.fq.gz"
+        isoseq-standardized-wildcard: "{samples}.fq.gz"
       args:
-        reseq-wildcard:
+        isoseq-wildcard:
           help: "Wildcard statement to represent reseq FASTQs"
           type: str
           mutually-exclusive: "input-parser"
-          wildcards: "reseq-standardized-filename"
-        reseq-table:
+          wildcards: "isoseq-standardized-wildcard"
+        isoseq-table:
           help: "Table with sample and FASTQs filenames"
           type: str
           action: confirmFile
           mutually-exclusive: "input-parser"
-          wildcards: "reseq-standardized-filename"
-        reseq-copy-method:
+          wildcards: "isoseq-standardized-wildcard"
+        isoseq-copy-method:
           help: "Specifies if reseq FASTQs should be copied or symbolically linked."
           choices:
             - 'symbolic_link'
@@ -65,11 +65,11 @@ parser:
 setup:
   reseq_input:
     methods:
-      wildcard-str: "{reseq-wildcard}"
-      table-file: "{reseq-table}"
+      wildcard-str: "{isoseq-wildcard}"
+      table-file: "{isoseq-table}"
     args:
-      standardized_filename: "IsoSeq/FASTQ/{reseq-standardized-filename}"
-      copy_method: '{reseq-copy-method}'
+      standardized_filename: "IsoSeq/FASTQ/{isoseq-standardized-wildcard}"
+      copy_method: '{isoseq-copy-method}'
       gzipped: True
       sample_keywords:
         - "samples"
@@ -83,42 +83,20 @@ setup:
       gzipped: False
   
   assembly_gtf:
-    file-method:
-      input:
-        args:
-          - "assembly-gtf"
-          - "annotations-dir"
-          - "assembly-version"
-          - "annotation-version"
-      standardize:
-        method: "file-str"
-        args:
-          input_filename: "{assembly-gtf}"
-          standardized_filename: "{species}_{assembly-version}.{annotation-version}.gtf"
-          out_dir: "{annotations-dir}"
-          copy_method: copy
-          gzipped: False
+    methods:
+      file-str: "{assembly-gtf}"
+    args:
+      standardized_filename: "Annotations/{species}_{assembly-version}.{annotation-version}.gtf"
+      copy_method: copy
+      gzipped: False
+      
   splice_junctions:
-    file-method:
-      input:
-        args:
-          - "splice-junctions"
-          - "assembly-dir"
-          - "assembly-version"
-      standardize:
-        method: "file-str"
-        args:
-          input_filename: "{splice-junctions}"
-          standardized_filename: "{species}_{assembly-version}.SJ.tab"
-          out_dir: "{assembly-dir}"
-          copy_method: copy
-          gzipped: False
-#    methods:
-#      file-str: "{assembly-gtf}"
-#    args:
-#      standardized_filename: "Annotations/{species}_{assembly-version}.{annotation-version}.gtf"
-#      copy_method: copy
-#      gzipped: False
+    methods:
+      file-str: "{splice-junctions}"
+    args:
+      standardized_filename: "Assembly/{species}_{assembly-version}.SJ.tab"
+      copy_method: copy
+      gzipped: False
 
 snakemake:
   modules:

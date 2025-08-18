@@ -306,6 +306,9 @@ class SnakePipelineIO:
                             f"Linked file not found in output rule: {file_mapping}"
                         )
 
+            # Order the file mappings by output
+            file_mappings = sorted(file_mappings, key=lambda d: d["output"])
+
             # Create the link rule
             link_rule = f"use rule {output_rule} as link_{output_rule} with:\n{self._indent_style}input:\n"
 
@@ -600,6 +603,11 @@ class SnakePipelineIO:
 
                 # Add the rule to the rule order string
                 link_rule_order_str += f" {order_symbol} link_{link_rule_group[1]}"
+
+            # Add the original rule order string to the linked rule order
+            for link_rule_pos, link_rule_group in enumerate(link_rule_order):
+                # Add the rule to the rule order string
+                link_rule_order_str += f" {order_symbol} {link_rule_group[1]}"
 
             # Save the linked rule order string to the list
             link_rule_order_list.append(link_rule_order_str + "\n")

@@ -26,6 +26,9 @@ class DirIO:
         # Stores path if using a link
         self.link_path = ""
 
+        # Assign an empty pipeline argument
+        self.pipeline_arg = None
+
     @classmethod
     def create(cls, *args, **kwargs):
         return cls(*args, **kwargs)
@@ -33,7 +36,6 @@ class DirIO:
     def standardize(
         self,
         standardized_directory,
-        out_dir="",
         workflow_dir="",
         copy_method="symbolic_link",
         **kwargs,
@@ -42,14 +44,15 @@ class DirIO:
         dest_directory = standardized_directory
 
         # Create path as needed
-        if out_dir:
-            dest_directory = os.path.join(out_dir, dest_directory)
         if workflow_dir:
             dest_directory = os.path.join(workflow_dir, dest_directory)
 
         # Create the output directory, if needed
         if not os.path.exists(os.path.dirname(dest_directory)):
             os.makedirs(os.path.dirname(dest_directory))
+
+        # Add the path to the pipeline argument
+        self.pipeline_arg = dest_directory
 
         # Copy the directory
         if copy_method == "symbolic_link":

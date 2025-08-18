@@ -8,19 +8,19 @@ parser:
         input-parser:
           required: True
       wildcards-args:
-        isoseq-standardized-filename: "{samples}.fq.gz"
+        isoseq-standardized-wildcard: "{samples}.fq.gz"
       args:
         isoseq-wildcard:
           help: "Wildcard statement to represent isoseq FASTQs"
           type: str
           mutually-exclusive: "input-parser"
-          wildcards: "isoseq-standardized-filename"
+          wildcards: "isoseq-standardized-wildcard"
         isoseq-table:
           help: "Table with sample and FASTQs filenames"
           type: str
           action: confirmFile
           mutually-exclusive: "input-parser"
-          wildcards: "isoseq-standardized-filename"
+          wildcards: "isoseq-standardized-wildcard"
         isoseq-copy-method:
           help: "Specifies if isoseq FASTQs should be copied or symbolically linked."
           choices:
@@ -62,7 +62,7 @@ setup:
       wildcard-str: "{isoseq-wildcard}"
       table-file: "{isoseq-table}"
     args:
-      standardized_filename: "IsoSeq/FASTQ/{isoseq-standardized-filename}"
+      standardized_filename: "IsoSeq/FASTQ/{isoseq-standardized-wildcard}"
       copy_method: '{isoseq-copy-method}'
       gzipped: True
       sample_keywords:

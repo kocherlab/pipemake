@@ -8,19 +8,19 @@ parser:
         input-parser:
           required: True
       wildcards-args:
-        atacseq-standardized-filename: "{samples}_{reads}.fastq.gz"
+        atacseq-standardized-wildcard: "{samples}_{reads}.fastq.gz"
       args:
         atacseq-wildcard:
           help: "Wildcard statement to represent ATACseq FASTQs"
           type: str
           mutually-exclusive: "input-parser"
-          wildcards: "atacseq-standardized-filename"
+          wildcards: "atacseq-standardized-wildcard"
         atacseq-table:
           help: "Table with sample and FASTQs filenames"
           type: str
           action: confirmFile
           mutually-exclusive: "input-parser"
-          wildcards: "atacseq-standardized-filename"
+          wildcards: "atacseq-standardized-wildcard"
         atacseq-copy-method:
           help: "Specifies if ATACseq FASTQs should be copied or symbolically linked."
           choices:
@@ -51,16 +51,19 @@ parser:
             suffix:
               - function: jobRandomString
 setup:
-  atacseq_input:
+  fastq_file_input:
     methods:
       wildcard-str: "{atacseq-wildcard}"
       table-file: "{atacseq-table}"
     args:  
-      standardized_filename: "ATAC_seq/FASTQ/{atacseq-standardized-filename}"
+      standardized_filename: "ATAC_seq/FASTQ/{atacseq-standardized-wildcard}"
       copy_method: '{atacseq_copy_method}'
       gzipped: True
       sample_keywords: 
         - 'samples'
+    snakefiles:
+      - fastq_process_wildcards
+
   assembly_input:
     methods:
       file-str: "{assembly-fasta}"
@@ -74,3 +77,8 @@ snakemake:
     - atac_seq_sort_samtools
     - atac_seq_dedup_sambamba
     - atac_seq_peaks_MACS3
+  links:
+    - input: fastq_process_single_end
+      output: bwa_mem_single_end_atac_seq
+    - input: fastq_process_paired_end
+      output: bwa_mem_pair_end_atac_seq

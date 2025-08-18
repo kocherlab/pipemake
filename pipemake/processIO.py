@@ -68,6 +68,9 @@ class ProcessIO:
     def returnPaths(self):
         return self.processIO.returnPaths(**self._kwargs)
 
+    def returnPipelineArg(self):
+        return self.processIO.pipeline_arg
+
 
 def processInput(method="", args={}):
     # Create the standardization call

@@ -8,19 +8,19 @@ parser:
         input-parser:
           required: True
       wildcards-args: 
-        rnaseq-standardized-filename: "{samples}_{reads}.fq.gz"
+        rnaseq-standardized-wildcard: "{samples}_{reads}.fq.gz"
       args:
         rnaseq-wildcard:
           help: "Wildcard statement to represent RNAseq FASTQs"
           type: str
           mutually-exclusive: "input-parser"
-          wildcards: "rnaseq-standardized-filename"
+          wildcards: "rnaseq-standardized-wildcard"
         rnaseq-table:
           help: "Table with sample and FASTQs filenames"
           type: str
           action: confirmFile
           mutually-exclusive: "input-parser"
-          wildcards: "rnaseq-standardized-filename"
+          wildcards: "rnaseq-standardized-wildcard"
         rnaseq-copy-method:
           help: "Specifies if RNAseq FASTQs should be copied or symbolically linked."
           choices:
@@ -70,16 +70,18 @@ parser:
               - function: jobRandomString
              
 setup:
-  rnaseq_input:
+  fastq_file_input:
     methods:
       wildcard-str: "{rnaseq-wildcard}"
       table-filename: "{rnaseq-table}"
     args:
-      standardized_filename: "RNAseq/FASTQ/{rnaseq-standardized-filename}"
+      standardized_filename: "RNAseq/FASTQ/{rnaseq-standardized-wildcard}"
       copy_method: '{rnaseq-copy-method}'
       gzipped: True
       sample_keywords:
         - 'samples'
+    snakefiles:
+      - fastq_process_wildcards
 
   assembly_input:
     methods: 
@@ -109,3 +111,8 @@ snakemake:
     - assembly_compleasm
     - annotations_busco
     - download_augustus
+  links:
+    - input: fastq_process_single_end
+      output: hisat2_single_end
+    - input: fastq_process_paired_end
+      output: hisat2_pair_end

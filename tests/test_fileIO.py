@@ -83,7 +83,7 @@ def test_FileIO_standardize(
     test_File = FileIO.create(filename)
     test_File.standardize(
         standardized_filename,
-        out_dir=test_dir,
+        workflow_dir=test_dir,
         gzipped=gzipped,
         copy_method=copy_method,
     )
@@ -170,7 +170,7 @@ def test_TableIO_unique_column(filename):
     assert test_seqtable._table_columns == {"genomes"}
 
     test_seqtable.standardizedFiles(
-        "{genomes}.fa", out_dir=test_dir, copy_method="symbolic_link"
+        "{genomes}.fa", workflow_dir=test_dir, copy_method="symbolic_link"
     )
     assert os.path.islink(os.path.join(test_dir, "genome1.fa"))
     assert os.path.islink(os.path.join(test_dir, "genome2.fa"))
@@ -209,7 +209,7 @@ def test_TableIO_standardizedFiles(filename, copy_method):
     test_dir = tempfile.mkdtemp()
     test_seqtable = TableIO.fromFilenameStr(filename, sample_keywords=["samples"])
     test_seqtable.standardizedFiles(
-        "{samples}_{reads}.test.fq.gz", out_dir=test_dir, copy_method=copy_method
+        "{samples}_{reads}.test.fq.gz", workflow_dir=test_dir, copy_method=copy_method
     )
 
     for samples, reads in list(itertools.product(["test1", "test2"], ["R1", "R2"])):

@@ -8,19 +8,19 @@ parser:
         input-parser:
           required: True
       wildcards-args:
-        fastq-standardized-filename: "{samples}_{reads}.fq.gz"
+        fastq-standardized-wildcard: "{samples}_{reads}.fq.gz"
       args:
         fastq-wildcard:
           help: "Wildcard statement to represent FASTQs"
           type: str
           mutually-exclusive: "input-parser"
-          wildcards: "fastq-standardized-filename"
+          wildcards: "fastq-standardized-wildcard"
         fastq-table:
           help: "Table with sample and FASTQs filenames"
           type: str
           action: confirmFile
           mutually-exclusive: "input-parser"
-          wildcards: "fastq-standardized-filename"
+          wildcards: "fastq-standardized-wildcard"
         fastq-copy-method:
           help: "Specifies if FASTQs should be copied or symbolically linked."
           choices:
@@ -37,19 +37,25 @@ parser:
             - "smr_v4.3_sensitive_db_rfam_seeds.fasta"
           default: "smr_v4.3_default_db.fasta"
 setup:
-  fastq_input:
+  fastq_file_input:
     methods: 
       wildcard-str: "{fastq-wildcard}"
       table-file: "{fastq-table}"
     args:
-      standardized_filename: "FASTQ/Unfiltered/{fastq-standardized-filename}"
+      standardized_filename: "FASTQ/Unfiltered/{fastq-standardized-wildcard}"
       copy_method: '{fastq-copy-method}'
       gzipped: True
       sample_keywords:
         - 'samples'
+    snakefiles:
+      - fastq_process_wildcards
 
 snakemake:
   modules:
     - index_sortmerna
     - fastq_rRNA_stats_sortmerna
-    
+  links:
+    - input: fastq_process_single_end
+      output: sortmerna_in_single_end
+    - input: fastq_process_paired_end
+      output: sortmerna_in_pair_end

@@ -56,110 +56,36 @@ parser:
           type: str
           required: True
           action: confirmDir
-    paths:
-      args:
-        assembly-dir:
-          help: "Directory to store assembly"
-          type: str
-          default: "Assembly"
-        hifi-fastq-dir:
-          help: "Directory to store the HIFI FASTQ files"
-          type: str
-          default: "HiFi/FASTQs"
-        hifi-bam-dir:
-          help: "Directory to store the sorted HiC BAM files"
-          type: str
-          default: "HiC/BAMs"
-        blast-dir:
-          help: "Directory to store the BLAST output"
-          type: str
-          default: "Assembly/BLAST"
-        blobtools-dir:
-          help: "Directory to store the BlobTools output"
-          type: str
-          default: "Assembly/blobtools"
-        figures-dir:
-          help: "Directory to store the BlobTools figures"
-          type: str
-          default: "Assembly/Figures"
 setup:
   hifi_input:
-    file-method:
-      input:
-        args:
-          - "hifi-fastq"
-          - "hifi-fastq-dir"
-      standardize:
-        method: "file-str"
-        args:
-          input_filename: "{hifi-fastq}"
-          standardized_filename: "{hifi_sample}.fq.gz"
-          out_dir: "{hifi-fastq-dir}"
-          copy_method: symbolic_link
-          gzipped: True
+    methods:
+      file-str: "{hifi-fastq}"
+    args:
+      standardized_filename: "HiFi/FASTQ/{species}.fq.gz"
+      copy_method: symbolic_link
+      gzipped: True
 
   assembly_input:
-    file-method:
-      input:
-        args:
-          - "assembly-fasta"
-          - "assembly-dir"
-      standardize:
-        method: "file-str"
-        args:
-          input_filename: "{assembly-fasta}"
-          standardized_filename: "{species}_{assembly_version}.fa"
-          out_dir: "{assembly-dir}"
-          copy_method: copy
-          gzipped: False
+    methods:
+      file-str: "{assembly-fasta}"
+    args:
+      standardized_filename: "Assembly/{species}_{assembly_version}.fa"
+      copy_method: copy
+      gzipped: False
 
   busco_input:
-    file-method:
-      input:
-        args:
-          - "busco-table"
-          - "assembly-dir"
-      standardize:
-        method: "file-str"
-        args:
-          input_filename: "{busco-table}"
-          standardized_filename: "{species}_{assembly_version}.busco.full_table.tsv"
-          out_dir: "{assembly-dir}"
-          copy_method: copy
-          gzipped: False
+    methods:
+      file-str: "{busco-table}"
+    args:
+      standardized_filename: "Assembly/{species}_{assembly_version}.busco.full_table.tsv"
+      copy_method: copy
+      gzipped: False
 
-snakefiles:
-  - assembly_contamination_blobtools
-#setup:
-#  hifi_input:
-#    methods:
-#      file-str: "{hifi-fastq}"
-#    args:
-#      standardized_filename: "HiFi/FASTQ/{species}.fq.gz"
-#      copy_method: symbolic_link
-#      gzipped: True
-#
-#  assembly_input:
-#    methods:
-#      file-str: "{assembly-fasta}"
-#    args:
-#      standardized_filename: "Assembly/{species}_{assembly_version}.fa"
-#      copy_method: copy
-#      gzipped: False
-#
-#  busco_input:
-#    methods:
-#      file-str: "{busco-table}"
-#    args:
-#      standardized_filename: "Assembly/{species}_{assembly_version}.busco.full_table.tsv"
-#      copy_method: copy
-#      gzipped: False
-#
-#paths:
-#  - "{ncbi_nt_db}"
-#  - "{ncbi_taxa_db}"
-#  - "{uniprot_db}"
-#
-#snakemake:
-#  modules:
-#    - assembly_contamination_blobtools
+paths:
+  - "{ncbi_nt_db}"
+  - "{ncbi_taxa_db}"
+  - "{uniprot_db}"
+
+snakemake:
+  modules:
+    - assembly_contamination_blobtools
