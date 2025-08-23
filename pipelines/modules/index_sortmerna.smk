@@ -11,7 +11,7 @@ rule sortmerna_index:
         index_dir="Indices/sortmerna",
         sortmerna_db=config["sortmerna_db"],
     singularity:
-        "docker://aewebb/sortmerna:v4.3.6"
+        "docker://aewebb/sortmerna:v4.3.7"
     resources:
         mem_mb=16000,
     threads: 1
