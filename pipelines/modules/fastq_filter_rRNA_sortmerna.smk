@@ -18,7 +18,7 @@ rule sortmerna_out_single_end:
         index_dir="Indices/sortmerna",
         sortmerna_db=config["sortmerna_db"],
     singularity:
-        "docker://aewebb/sortmerna:v4.3.6"
+        "docker://aewebb/sortmerna:v4.3.7"
     resources:
         mem_mb=48000,
     threads: 8
@@ -43,7 +43,7 @@ rule sortmerna_out_pair_end:
         index_dir="Indices/sortmerna",
         sortmerna_db=config["sortmerna_db"],
     singularity:
-        "docker://aewebb/sortmerna:v4.3.6"
+        "docker://aewebb/sortmerna:v4.3.7"
     resources:
         mem_mb=48000,
     threads: 8
