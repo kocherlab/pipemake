@@ -7,8 +7,6 @@ parser:
       mutually-exclusive-args:
         input-parser:
           required: True
-        alignment-type:
-          required: False
       wildcards-args:
         msf-standardized-filename: "{samples}.fa"
       args:
