@@ -19,7 +19,7 @@ rule index_hifi_assembly:
     singularity:
         "docker://aewebb/bwa-mem2:v2.2.1"
     resources:
-        mem_mb=16000,
+        mem_mb=32000,
     threads: 1
     shell:
         """
