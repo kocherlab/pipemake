@@ -136,10 +136,16 @@ class TableIO:
         self.samples = defaultdict(list)
         self.pipeline_arg = None
 
-        if set(self._sample_keywords).isdisjoint(set(self._table_dataframe.columns)):
+        if self._sample_keywords and set(self._sample_keywords).isdisjoint(
+            set(self._table_dataframe.columns)
+        ):
             raise Exception(
                 f"Unable to assign sample column ({list(set(self._sample_keywords) - set(self._table_dataframe.columns))}) in DataFrame columns: {self._table_dataframe.columns}"
             )
+
+        # If no sample column is given, confirm there is a single row
+        if not self._sample_keywords and len(self._table_dataframe) != 1:
+            raise Exception("No sample column found and multiple rows present")
 
         # Assign arguments from the columns of the dataframe
         for col in self._table_dataframe.columns:
@@ -161,7 +167,7 @@ class TableIO:
                 raise Exception("Sample names are not unique")
 
         if len(self._file_columns) > 1:
-            raise Exception("Files may exist within a single column")
+            raise Exception("Files may only exist within a single column")
 
     @property
     def _file_column(self):
