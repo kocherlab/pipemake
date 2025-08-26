@@ -58,7 +58,7 @@ setup:
   hic_input:
     methods:
       wildcard-str: "{hic-wildcard}"
-      table-filename: "{hic-table}"
+      table-file: "{hic-table}"
     args:
       standardized_filename: "HiC/FASTQ/{species}_HiC_{hic-standardized-suffix}"
       copy_method: '{fastq-copy-method}'

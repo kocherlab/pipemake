@@ -65,7 +65,7 @@ setup:
   fastq_file_input:
     methods:
       wildcard-str: "{rnaseq-wildcard}"
-      table-filename: "{rnaseq-table}"
+      table-file: "{rnaseq-table}"
     args:
       standardized_filename: "RNAseq/FASTQ/{rnaseq-standardized-wildcard}"
       copy_method: '{rnaseq-copy-method}'
