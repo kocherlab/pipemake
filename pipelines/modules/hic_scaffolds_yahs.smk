@@ -203,7 +203,7 @@ rule juicer_tools_pre:
     singularity:
         "docker://aewebb/juicer_tools:v1.19.02"
     resources:
-        mem_mb=16000,
+        mem_mb=32000,
     threads: 1
     shell:
         """
