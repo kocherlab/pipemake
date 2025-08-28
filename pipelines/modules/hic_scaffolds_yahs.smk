@@ -138,7 +138,7 @@ rule yahs_ec:
             f"Assembly/YaHS/{config['species']}_{config['assembly_version']}_yahsout_ec_scaffolds_final.agp"
         ),
     params:
-        out_prefix=f"Assembly/YaHS/{config['species']}_yahsout_ec",
+        out_prefix=f"Assembly/YaHS/{config['species']}_{config['assembly_version']}_yahsout_ec",
     singularity:
         "docker://aewebb/yahs:v1.2.2"
     resources:
@@ -160,7 +160,7 @@ rule yahs_noec:
             f"Assembly/YaHS/{config['species']}_{config['assembly_version']}_yahsout_noec_scaffolds_final.agp"
         ),
     params:
-        out_prefix=f"Assembly/YaHS/{config['species']}_yahsout_noec",
+        out_prefix=f"Assembly/YaHS/{config['species']}_{config['assembly_version']}_yahsout_noec",
     singularity:
         "docker://aewebb/yahs:v1.2.2"
     resources:
