@@ -13,8 +13,8 @@ rule msf_align_codons_prank:
     singularity:
         "docker://aewebb/prank:170427"
     resources:
-        mem_mb=8000,
-    threads: 4
+        mem_mb=16000,
+    threads: 1
     shell:
         """
         prank -codon -F -d={input} -o={params.out_prefix}
