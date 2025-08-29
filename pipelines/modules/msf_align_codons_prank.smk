@@ -11,7 +11,7 @@ rule msf_align_codons_prank:
     params:
         out_prefix="MSA/PRANK/{sample}",
     singularity:
-        "docker://aewebb/prank:170427"
+        "docker://aewebb/prank:170703"
     resources:
         mem_mb=16000,
     threads: 1
