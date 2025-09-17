@@ -125,6 +125,6 @@ rule filter_pops_missing_data_vcf_bcftools:
         mem_mb=8000,
     threads: 4
     singularity:
-        "/Genomics/kocherlab/lab/Pipelines/images/kocherPOP.sif"
+        "docker://aewebb/bcftools:v1.20"
     shell:
         "bcftools view -R {input.sites_file} --output-type z --output-file {output} --threads {threads} {input.vcf_file}"
