@@ -14,7 +14,7 @@ rule reseq_model_fst_phenotype_file:
         f"Models/Fst/{config['species']}.{{model}}.pheno.txt",
         f"Models/Fst/{config['species']}.{{model}}.pheno.log",
     params:
-        out_prefix="Models/Fst/{config['species']}.{{model}}",
+        out_prefix=f"Models/Fst/{config['species']}.{{model}}",
     resources:
         mem_mb=2000,
     threads: 1
