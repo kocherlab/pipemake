@@ -122,7 +122,7 @@ rule plot_gemma:
     output:
         f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.lmm.manhattan.png",
     params:
-        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.lmm",
+        out_prefix=f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.lmm",
     resources:
         mem_mb=2000,
     threads: 1
