@@ -60,7 +60,7 @@ rule run_gemma_gk:
         f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.gk.cXX.txt",
         f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.gk.log.txt",
     params:
-        bed_prefix="reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned",
+        bed_prefix=f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned",
         out_prefix=f"{config['species']}_{config['assembly_version']}.pruned.gk",
         out_dir=f"reSEQ/PopGen/GEMMA/{{model}}",
         kinship_matrix=config["kinship_matrix"],

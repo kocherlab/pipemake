@@ -17,7 +17,7 @@ rule reseq_model_calc_zfst_pipemake:
     singularity:
         "docker://aewebb/pipemake_utils:v1.2.1"
     resources:
-        mem_mb=2000,
+        mem_mb=8000,
     threads: 1
     shell:
         """
