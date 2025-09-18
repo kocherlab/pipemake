@@ -86,6 +86,7 @@ snakemake:
   modules:
     - reseq_filtered_vcf_to_plink.smk
     - reseq_ld_prune_plink.smk
+    - reseq_model_ind_files.smk
     - reseq_calc_fst_plink.smk
     - reseq_calc_zfst_pipemake.smk
     - reseq_calc_pca_plink.smk
