@@ -105,7 +105,7 @@ rule filter_gemma:
         f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.lmm.filtered.assoc.txt",
         f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.lmm.filtered.log",
     params:
-        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.lmm",
+        out_prefix=f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.lmm",
         min_log_pvalue=config["min_log_pvalue"],
     resources:
         mem_mb=2000,

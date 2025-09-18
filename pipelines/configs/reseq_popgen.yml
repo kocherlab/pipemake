@@ -62,6 +62,10 @@ parser:
           help: "Minimum log10 p-values to keep"
           type: float
           default: 0.5
+        not-chr:
+          help: "List of chromosomes to exclude from analysis"
+          type: str
+          nargs: '+'
         assembly-version:
           help: "Assembly Version"
           type: str
