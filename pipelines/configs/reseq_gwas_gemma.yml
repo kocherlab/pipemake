@@ -1,4 +1,4 @@
-pipeline: reseq-popgen
+pipeline: reseq-gemma
 version: 1.0
 parser:
   help: Run basic PopGen analyses on resequencing data
