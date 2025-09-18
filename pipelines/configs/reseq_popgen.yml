@@ -46,22 +46,6 @@ parser:
           help: "FST method"
           type: str
           default: "hudson"
-        kinship-matrix:
-          help: "Kinship matrix type"
-          type: int
-          default: 1
-        linear-model:
-          help: "Linear model type"
-          type: int
-          default: 1
-        maf:
-          help: "MAF cutoff"
-          type: float
-          default: 0.05
-        min-log-pvalue:
-          help: "Minimum log10 p-values to keep"
-          type: float
-          default: 0.5
         not-chr:
           help: "List of chromosomes to exclude from analysis"
           type: str
@@ -101,10 +85,8 @@ setup:
 snakemake:
   modules:
     - reseq_filtered_vcf_to_plink.smk
+    - reseq_ld_prune_plink.smk
     - reseq_calc_fst_plink.smk
     - reseq_calc_zfst_pipemake.smk
     - reseq_calc_pca_plink.smk
-    - reseq_ld_prune_plink.smk
-    - reseq_model_ind_files.smk
-    - reseq_gwas_gemma.smk
-
+    
