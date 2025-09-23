@@ -4,6 +4,26 @@ rule all:
         f"reSEQ/PopGen/nSL/{config['species']}_{config['assembly_version']}.abs_nsl.manhattan.png",
 
 
+rule reseq_filter_vcf_bcftools:
+    input:
+        f"reSEQ/VCF/Unfiltered/{config['species']}_{config['assembly_version']}.vcf.gz",
+    output:
+        f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.vcf.gz",
+    params:
+        exclude_chr=(
+            f"-t ^{','.join(config['exclude_chr'])}"
+            if "exclude_chr" in config and config["exclude_chr"]
+            else ""
+        ),
+    singularity:
+        "docker://aewebb/bcftools:v1.20"
+    resources:
+        mem_mb=8000,
+    threads: 1
+    shell:
+        "bcftools view --min-alleles 2 --max-alleles 2 {params.exclude_chr} -O z -o {output} {input}"
+
+
 checkpoint reseq_split_unphased_bcftools:
     input:
         f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.vcf.gz",
@@ -15,7 +35,7 @@ checkpoint reseq_split_unphased_bcftools:
     singularity:
         "docker://aewebb/bcftools:v1.20"
     resources:
-        mem_mb=2000,
+        mem_mb=4000,
     threads: 1
     shell:
         """
@@ -33,8 +53,8 @@ rule reseq_index_unphased_bcftools:
     singularity:
         "docker://aewebb/bcftools:v1.20"
     resources:
-        mem_mb=24000,
-    threads: 12
+        mem_mb=8000,
+    threads: 1
     shell:
         "bcftools index -f {input}"
 
@@ -90,9 +110,9 @@ rule reseq_normalize_nsl_norm:
     input:
         "reSEQ/PopGen/nSL/{chrom}.nsl.out",
     output:
-        norm_file=temp("reSEQ/PopGen/nSL/{{chrom}}.nsl.out.{config['bins']}bins.norm"),
+        norm_file=temp(f"reSEQ/PopGen/nSL/{{chrom}}.nsl.out.{config['bins']}bins.norm"),
         window_file=temp(
-            "reSEQ/PopGen/nSL/{{chrom}}.nsl.out.{config['bins']}bins.norm.{str(config['window_size'])[:-3]}kb.windows"
+            f"reSEQ/PopGen/nSL/{{chrom}}.nsl.out.{config['bins']}bins.norm.{str(config['window_size'])[:-3]}kb.windows"
         ),
         log_file=temp("reSEQ/PopGen/nSL/{{chrom}}.nsl.out.{config['bins']}bins.log"),
     params:
@@ -172,7 +192,7 @@ rule plot_norm_nsl_pipemake:
     singularity:
         "docker://aewebb/pipemake_utils:v1.2.1"
     resources:
-        mem_mb=2000,
+        mem_mb=16000,
     threads: 1
     shell:
         """

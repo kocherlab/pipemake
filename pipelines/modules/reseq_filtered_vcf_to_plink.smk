@@ -15,8 +15,8 @@ rule convert_flitered_vcf_to_plink:
     params:
         out_prefix=f"reSEQ/PLINK/Filtered/{config['species']}_{config['assembly_version']}.filtered",
         not_chr=(
-            f"--not-chr {','.join(config['not_chr'])}"
-            if config["not_chr"] is not None
+            f"--not-chr {','.join(config['exclude_chr'])}"
+            if "exclude_chr" in config and config["exclude_chr"]
             else ""
         ),
     resources:

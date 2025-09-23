@@ -28,6 +28,10 @@ parser:
           help: "Number of bins for normalization"
           type: int
           default: 100
+        exclude-chr:
+          help: "List of chromosomes to exclude from analysis"
+          type: str
+          nargs: '+'
         assembly-version:
           help: "Assembly Version"
           type: str
@@ -48,7 +52,7 @@ setup:
     methods:
       file-str: "{reseq-vcf}"
     args:
-      standardized_filename: "reSEQ/VCF/Filtered/{species}_{assembly-version}.vcf.gz"
+      standardized_filename: "reSEQ/VCF/Unfiltered/{species}_{assembly-version}.vcf.gz"
       copy_method: '{reseq-copy-method}'
       gzipped: True
 

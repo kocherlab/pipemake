@@ -133,9 +133,9 @@ rule blobtk_blobtools_create:
     input:
         f"Assembly/{config['species']}_{config['assembly_version']}.fa",
     output:
-        temp("Assembly/blobtools/.create.chk"),
+        temp("Tables/blobtools/.create.chk"),
     params:
-        blob_dir=f"Assembly/blobtools/{config['species']}_{config['assembly_version']}",
+        blob_dir=f"Tables/blobtools/{config['species']}_{config['assembly_version']}",
     singularity:
         "docker://genomehubs/blobtoolkit:4.4.6"
     resources:
@@ -148,11 +148,11 @@ rule blobtk_blobtools_create:
 rule blobtk_blobtools_add_cov:
     input:
         hifi_bam=f"HiFi/BAM/Aligned/{config['species']}.reads.bam",
-        create_chk="Assembly/blobtools/.create.chk",
+        create_chk="Tables/blobtools/.create.chk",
     output:
-        temp("Assembly/blobtools/.cov.chk"),
+        temp("Tables/blobtools/.cov.chk"),
     params:
-        blob_dir=f"Assembly/blobtools/{config['species']}_{config['assembly_version']}",
+        blob_dir=f"Tables/blobtools/{config['species']}_{config['assembly_version']}",
     singularity:
         "docker://genomehubs/blobtoolkit:4.4.6"
     resources:
@@ -166,11 +166,11 @@ rule blobtk_blobtools_add_hits:
     input:
         blastn_hits=f"BLAST/Assembly/blastn/{config['species']}_{config['assembly_version']}.out",
         blastx_hits=f"BLAST/Assembly/blastx/{config['species']}_{config['assembly_version']}.out",
-        cov_check="Assembly/blobtools/.cov.chk",
+        cov_check="Tables/blobtools/.cov.chk",
     output:
-        temp("Assembly/blobtools/.hits.chk"),
+        temp("Tables/blobtools/.hits.chk"),
     params:
-        blob_dir=f"Assembly/blobtools/{config['species']}_{config['assembly_version']}",
+        blob_dir=f"Tables/blobtools/{config['species']}_{config['assembly_version']}",
         ncbi_taxa_db=config["ncbi_taxa_db"],
     singularity:
         "docker://genomehubs/blobtoolkit:4.4.6"
@@ -184,11 +184,11 @@ rule blobtk_blobtools_add_hits:
 rule blobtk_blobtools_add_busco:
     input:
         busco_table=f"Assembly/{config['species']}_{config['assembly_version']}.busco.full_table.tsv",
-        cov_check="Assembly/blobtools/.cov.chk",
+        cov_check="Tables/blobtools/.cov.chk",
     output:
-        temp("Assembly/blobtools/.busco.chk"),
+        temp("Tables/blobtools/.busco.chk"),
     params:
-        blob_dir=f"Assembly/blobtools/{config['species']}_{config['assembly_version']}",
+        blob_dir=f"Tables/blobtools/{config['species']}_{config['assembly_version']}",
     singularity:
         "docker://genomehubs/blobtoolkit:4.4.6"
     resources:
@@ -201,8 +201,8 @@ rule blobtk_blobtools_add_busco:
 rule blobblurb:
     input:
         busco_table=f"Assembly/{config['species']}_{config['assembly_version']}.busco.full_table.tsv",
-        hits_chk="Assembly/blobtools/.hits.chk",
-        busco_chk="Assembly/blobtools/.busco.chk",
+        hits_chk="Tables/blobtools/.hits.chk",
+        busco_chk="Tables/blobtools/.busco.chk",
     output:
         f"Tables/blobtools/{config['species']}_{config['assembly_version']}_blobblurbout.tsv",
     params:
@@ -218,14 +218,14 @@ rule blobblurb:
 
 rule blobbtk_plot:
     input:
-        hits_chk="Assembly/blobtools/.hits.chk",
-        busco_chk="Assembly/blobtools/.busco.chk",
+        hits_chk="Tables/blobtools/.hits.chk",
+        busco_chk="Tables/blobtools/.busco.chk",
     output:
         snail_png=f"Figures/blobtools/{config['species']}_{config['assembly_version']}_scaff_snail.png",
         blob_png=f"Figures/blobtools/{config['species']}_{config['assembly_version']}_scaff_blob.png",
         cumulative_png=f"Figures/blobtools/{config['species']}_{config['assembly_version']}_scaff_cumulative.png",
     params:
-        blob_dir=f"Assembly/blobtools/{config['species']}_{config['assembly_version']}",
+        blob_dir=f"Tables/blobtools/{config['species']}_{config['assembly_version']}",
     singularity:
         "docker://genomehubs/blobtoolkit:4.4.6"
     resources:

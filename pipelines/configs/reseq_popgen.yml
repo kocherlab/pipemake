@@ -46,7 +46,7 @@ parser:
           help: "FST method"
           type: str
           default: "hudson"
-        not-chr:
+        exclude-chr:
           help: "List of chromosomes to exclude from analysis"
           type: str
           nargs: '+'
