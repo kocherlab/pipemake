@@ -8,7 +8,9 @@ rule reseq_filter_vcf_bcftools:
     input:
         f"reSEQ/VCF/Unfiltered/{config['species']}_{config['assembly_version']}.vcf.gz",
     output:
-        f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.vcf.gz",
+        temp(
+            f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.vcf.gz"
+        ),
     params:
         exclude_chr=(
             f"-t ^{','.join(config['exclude_chr'])}"
@@ -21,7 +23,7 @@ rule reseq_filter_vcf_bcftools:
         mem_mb=8000,
     threads: 1
     shell:
-        "bcftools view --min-alleles 2 --max-alleles 2 {params.exclude_chr} -O z -o {output} {input}"
+        "bcftools view -i 'F_MISSING=0.0' --min-alleles 2 --max-alleles 2 {params.exclude_chr} {input} | bcftools annotate --set-id '%CHROM\_%POS' -O z -o {output}"
 
 
 checkpoint reseq_split_unphased_bcftools:
@@ -74,23 +76,9 @@ rule reseq_phase_chroms_shapeit4:
         "shapeit4 --input {input.vcf} --region {wildcards.chrom} --output {output} --thread {threads}"
 
 
-rule reseq_prep_nsl_vcf_bcftools:
-    input:
-        "reSEQ/VCF/Phased/SplitByChrom/{chrom}.vcf.gz",
-    output:
-        temp("reSEQ/VCF/Phased/nSL/{chrom}.nsl.vcf.gz"),
-    singularity:
-        "docker://aewebb/bcftools:v1.20"
-    resources:
-        mem_mb=2000,
-    threads: 1
-    shell:
-        "bcftools view -i 'F_MISSING=0.0' {input} | bcftools annotate --set-id '%CHROM\_%POS' -O z -o {output}"
-
-
 rule reseq_nsl_selscan:
     input:
-        "reSEQ/VCF/Phased/nSL/{chrom}.nsl.vcf.gz",
+        "reSEQ/VCF/Phased/SplitByChrom/{chrom}.vcf.gz",
     output:
         temp("reSEQ/PopGen/nSL/{chrom}.nsl.out"),
         temp("reSEQ/PopGen/nSL/{chrom}.nsl.log"),
@@ -114,7 +102,7 @@ rule reseq_normalize_nsl_norm:
         window_file=temp(
             f"reSEQ/PopGen/nSL/{{chrom}}.nsl.out.{config['bins']}bins.norm.{str(config['window_size'])[:-3]}kb.windows"
         ),
-        log_file=temp("reSEQ/PopGen/nSL/{{chrom}}.nsl.out.{config['bins']}bins.log"),
+        log_file=temp(f"reSEQ/PopGen/nSL/{{chrom}}.nsl.out.{config['bins']}bins.log"),
     params:
         out_prefix="reSEQ/PopGen/nSL/{chrom}.nsl.out",
         bins=config["bins"],
