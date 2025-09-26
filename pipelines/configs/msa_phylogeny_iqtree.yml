@@ -1,0 +1,43 @@
+pipeline: msa-phylogeny
+version: 1.0
+parser:
+  help: Create a phylogenetic tree from multiple sequence alignments using IQ-TREE
+  arg-groups:
+    basic:
+      mutually-exclusive-args:
+        input-parser:
+          required: True
+      wildcards-args:
+        msa-standardized-filename: "{samples}.fa"
+      args:
+        msa-wildcard:
+          help: "Wildcard statement to represent MSA files"
+          type: str
+          mutually-exclusive: "input-parser"
+          wildcards: "msa-standardized-filename"
+        msa-table:
+          help: "Table with sample and MSA filenames"
+          type: str
+          action: confirmFile
+          mutually-exclusive: "input-parser"
+          wildcards: "msa-standardized-filename"
+        msa-copy-method:
+          help: "Specifies if msas should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+setup:
+  msa_input:
+    methods:
+      wildcard-str: "{msa-wildcard}"
+      table-file: "{msa-table}"
+    args:
+      standardized_filename: "iqtree/{msa-standardized-filename}"
+      copy_method: '{msa-copy-method}'
+      sample_keywords:
+        - "samples"
+
+snakemake:
+  modules:
+    - msa_phylogeny_iqtree
