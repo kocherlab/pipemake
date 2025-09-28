@@ -40,4 +40,4 @@ setup:
 
 snakemake:
   modules:
-    - msa_phylogeny_iqtree
+    - msa_tree_iqtree
