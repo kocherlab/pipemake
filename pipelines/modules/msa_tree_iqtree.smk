@@ -7,7 +7,7 @@ rule run_iqtree:
     input:
         "iqtree/{sample}.fa",
     output:
-        "iqtree/{sample}.contree",
+        "iqtree/{sample}.fa.contree",
     singularity:
         "docker://aewebb/iqtree:v3.0.1"
     resources:
