@@ -1,6 +1,6 @@
 rule all:
     input:
-        expand("iqtree/{sample}.contree", sample=config["samples"]),
+        expand("iqtree/{sample}.fa.contree", sample=config["samples"]),
 
 
 rule run_iqtree:
