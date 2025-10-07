@@ -16,13 +16,13 @@ rule repeat_modeler:
         mem_mb=40000,
     threads: 20
     singularity:
-        "docker://dfam/tetools:1.90"
+        "docker://dfam/tetools:1.94"
     shell:
         r"""
         mkdir -p {params.db_dir}
         mkdir -p {params.wd_dir}
         BuildDatabase -name {params.repeatmodeler_db} {input}
-        RepeatModeler -database {params.repeatmodeler_db} -threads {threads}
+        RepeatModeler -database {params.repeatmodeler_db} -threads {threads} -LTRStruct
         rm_working_dir=$(grep 'Using output directory' {params.repeatmodeler_db}-rmod.log | grep -o '[^/]*$')
         tar -czf {params.wd_dir}/RepeatModeler_R1_WD.tar.gz $rm_working_dir
         rm -rf $rm_working_dir
