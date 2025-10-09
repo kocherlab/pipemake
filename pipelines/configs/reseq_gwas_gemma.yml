@@ -1,7 +1,7 @@
 pipeline: reseq-gemma
 version: 1.0
 parser:
-  help: Run GEMMA GWAS on resequencing data
+  help: Perform GWAS on resequencing data using GEMMA
   arg-groups:
     basic:
       args:

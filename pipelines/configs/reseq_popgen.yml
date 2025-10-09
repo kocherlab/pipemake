@@ -1,7 +1,7 @@
 pipeline: reseq-popgen
 version: 1.0
 parser:
-  help: Run basic PopGen analyses on resequencing data
+  help: Calculate Fst and perform a PCA on resequencing data using PLINK
   arg-groups:
     basic:
       args:
