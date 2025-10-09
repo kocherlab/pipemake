@@ -54,7 +54,7 @@ setup:
     methods:
       dir-str: "{eggnog-data-dir}"
     args:
-      standardized_directory: "Annotations/EggNOG"
+      standardized_directory: "Downloads/EggNOG"
       copy_method: "{eggnog-copy-method}"
       gzipped: False
 
