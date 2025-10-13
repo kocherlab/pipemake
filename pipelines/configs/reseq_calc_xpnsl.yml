@@ -37,6 +37,10 @@ parser:
           help: "Number of bins for normalization"
           type: int
           default: 100
+        exclude-chr:
+          help: "List of chromosomes to exclude from analysis"
+          type: str
+          nargs: '+'
         assembly-version:
           help: "Assembly Version"
           type: str
@@ -71,6 +75,5 @@ setup:
 
 snakemake:
   modules:
-    - reseq_phase_shapeit4.smk
-    - reseq_pop_ind_file.smk
-    - reseq_calc_xpnsl_selscan.smk
+    - reseq_filter_vcf_selscan
+    - reseq_calc_xpnsl_selscan

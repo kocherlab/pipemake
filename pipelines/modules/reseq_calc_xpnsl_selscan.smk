@@ -4,29 +4,63 @@ rule all:
         f"reSEQ/PopGen/XPnSL/{config['species']}_{config['assembly_version']}.abs_xpnsl.manhattan.png",
 
 
-rule reseq_prep_xpnsl_vcf_bcftools:
+checkpoint reseq_split_unphased_bcftools:
     input:
-        "reSEQ/VCF/Phased/SplitByChrom/{chrom}.vcf.gz",
+        f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.vcf.gz",
     output:
-        "reSEQ/VCF/Phased/SplitByChrom/{chrom}.xpnsl.vcf.gz",
+        temp(directory("reSEQ/VCF/Filtered/SplitByChrom")),
     params:
-        out_prefix="reSEQ/VCF/Phased/SplitByChrom/{chrom}",
+        out_dir="reSEQ/VCF/Filtered/SplitByChrom",
+        out_prefix="reSEQ/VCF/Filtered/SplitByChrom/",
     singularity:
         "docker://aewebb/bcftools:v1.20"
     resources:
-        mem_mb=2000,
+        mem_mb=4000,
     threads: 1
     shell:
-        "bcftools view -i 'F_MISSING=0.0' {input} | bcftools annotate --set-id '%CHROM\_%POS' -O z -o {output}"
+        """
+        mkdir {params.out_dir}
+        bcftools index -f {input}
+        bcftools index -s {input} | cut -f 1 | while read chrom; do bcftools view --regions $chrom -O z -o {params.out_prefix}${{chrom}}.vcf.gz {input}; done
+        """
+
+
+rule reseq_index_unphased_bcftools:
+    input:
+        "reSEQ/VCF/Filtered/SplitByChrom/{chrom}.vcf.gz",
+    output:
+        "reSEQ/VCF/Filtered/SplitByChrom/{chrom}.vcf.gz.csi",
+    singularity:
+        "docker://aewebb/bcftools:v1.20"
+    resources:
+        mem_mb=4000,
+    threads: 1
+    shell:
+        "bcftools index -f {input}"
+
+
+rule reseq_phase_chroms_shapeit4:
+    input:
+        vcf="reSEQ/VCF/Filtered/SplitByChrom/{chrom}.vcf.gz",
+        index="reSEQ/VCF/Filtered/SplitByChrom/{chrom}.vcf.gz.csi",
+    output:
+        temp("reSEQ/VCF/Phased/SplitByChrom/{chrom}.vcf.gz"),
+    singularity:
+        "docker://aewebb/shapeit4:v4.2.2"
+    resources:
+        mem_mb=24000,
+    threads: 12
+    shell:
+        "shapeit4 --input {input.vcf} --region {wildcards.chrom} --output {output} --thread {threads}"
 
 
 rule reseq_create_pop_xpnsl_vcf_bcftools:
     input:
-        vcf="reSEQ/VCF/Phased/SplitByChrom/{chrom}.xpnsl.vcf.gz",
+        vcf="reSEQ/VCF/Phased/SplitByChrom/{chrom}.vcf.gz",
         ref_inds=f"Models/{config['model_name']}/{config['pop_name']}.pop",
     output:
-        ref_vcf="reSEQ/VCF/Phased/SplitByChrom/{chrom}.xpnsl.ref.vcf.gz",
-        query_vcf="reSEQ/VCF/Phased/SplitByChrom/{chrom}.xpnsl.query.vcf.gz",
+        ref_vcf="reSEQ/VCF/Phased/SplitByChrom/{chrom}.ref.vcf.gz",
+        query_vcf="reSEQ/VCF/Phased/SplitByChrom/{chrom}.query.vcf.gz",
     singularity:
         "docker://aewebb/bcftools:v1.20"
     resources:
@@ -42,8 +76,8 @@ rule reseq_create_pop_xpnsl_vcf_bcftools:
 
 rule reseq_xpnsl_selscan:
     input:
-        ref_vcf="reSEQ/VCF/Phased/SplitByChrom/{chrom}.xpnsl.ref.vcf.gz",
-        query_vcf="reSEQ/VCF/Phased/SplitByChrom/{chrom}.xpnsl.query.vcf.gz",
+        ref_vcf="reSEQ/VCF/Phased/SplitByChrom/{chrom}.ref.vcf.gz",
+        query_vcf="reSEQ/VCF/Phased/SplitByChrom/{chrom}.query.vcf.gz",
     output:
         temp("reSEQ/PopGen/XPnSL/{chrom}.xpnsl.out"),
         temp("reSEQ/PopGen/XPnSL/{chrom}.xpnsl.log"),
@@ -152,7 +186,7 @@ rule plot_norm_xpnsl_pipemake:
     singularity:
         "docker://aewebb/pipemake_utils:v1.2.1"
     resources:
-        mem_mb=2000,
+        mem_mb=16000,
     threads: 1
     shell:
         """
