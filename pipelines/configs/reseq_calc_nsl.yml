@@ -16,6 +16,15 @@ parser:
             - 'symbolic_link'
             - 'copy'
           default: 'symbolic_link'
+        model-file:
+          help: "Model filename"
+          type: str
+          required: True
+          action: confirmFile
+        model-name:
+          help: "Model name"
+          type: str
+          required: True
         maf:
           help: "Minor allele frequency"
           type: float
@@ -55,8 +64,16 @@ setup:
       standardized_filename: "reSEQ/VCF/Unfiltered/{species}_{assembly-version}.vcf.gz"
       copy_method: '{reseq-copy-method}'
       gzipped: True
+  
+  model_input:
+    methods:
+      file-str: "{model-file}"
+    args:
+      standardized_filename: "Models/{species}.model"
+      copy_method: 'copy'
+      gzipped: False
 
 snakemake:
   modules:
-    - reseq_filter_selscan
+    - reseq_model_ind_file
     - reseq_calc_nsl_selscan
