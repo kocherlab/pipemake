@@ -75,5 +75,5 @@ setup:
 
 snakemake:
   modules:
-    - reseq_filter_vcf_selscan
+    - reseq_filter_selscan
     - reseq_calc_xpnsl_selscan
