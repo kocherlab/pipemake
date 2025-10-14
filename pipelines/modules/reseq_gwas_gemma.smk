@@ -12,9 +12,9 @@ rule all:
 
 rule gemma_model_bed:
     input:
-        bed_file=f"reSEQ/PLINK/Pruned/{config['species']}_{config['assembly_version']}.pruned.bed",
-        bim_file=f"reSEQ/PLINK/Pruned/{config['species']}_{config['assembly_version']}.pruned.bim",
-        fam_file=f"reSEQ/PLINK/Pruned/{config['species']}_{config['assembly_version']}.pruned.fam",
+        bed_file=f"reSEQ/PLINK/GEMMA/{config['species']}_{config['assembly_version']}.pruned.bed",
+        bim_file=f"reSEQ/PLINK/GEMMA/{config['species']}_{config['assembly_version']}.pruned.bim",
+        fam_file=f"reSEQ/PLINK/GEMMA/{config['species']}_{config['assembly_version']}.pruned.fam",
         ind_file=f"Models/{config['species']}.{{model}}.ind.txt",
     output:
         f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.bed",

@@ -20,18 +20,29 @@ rule create_models_ind_file:
         "models-ind --model-file {input} --models {params.models} --out-prefix {params.out_prefix}"
 
 
-rule reseq_filter_model_inds_bcftools:
+rule reseq_model_inds_pruned_plink:
     input:
-        vcf=f"reSEQ/VCF/Unfiltered/{config['species']}_{config['assembly_version']}.vcf.gz",
+        bed=f"reSEQ/PLINK/Pruned/{config['species']}_{config['assembly_version']}.pruned.bed",
+        bim=f"reSEQ/PLINK/Pruned/{config['species']}_{config['assembly_version']}.pruned.bim",
+        fam=f"reSEQ/PLINK/Pruned/{config['species']}_{config['assembly_version']}.pruned.fam",
         ind_file=f"Models/{config['species']}.ind.txt",
     output:
         temp(
-            f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.filtered.vcf.gz"
+            f"reSEQ/PLINK/GEMMA/{config['species']}_{config['assembly_version']}.pruned.bed"
         ),
+        temp(
+            f"reSEQ/PLINK/GEMMA/{config['species']}_{config['assembly_version']}.pruned.bim"
+        ),
+        temp(
+            f"reSEQ/PLINK/GEMMA/{config['species']}_{config['assembly_version']}.pruned.fam"
+        ),
+    params:
+        input_prefix=f"reSEQ/PLINK/Pruned/{config['species']}_{config['assembly_version']}.pruned",
+        output_prefix=f"reSEQ/PLINK/GEMMA/{config['species']}_{config['assembly_version']}.pruned",
     singularity:
-        "docker://aewebb/bcftools:v1.20"
+        "docker://aewebb/plink2:20240418"
     resources:
-        mem_mb=8000,
+        mem_mb=2000,
     threads: 1
     shell:
-        "bcftools view --samples-file {input.ind_file} {input.vcf} | bcftools view --min-alleles 2 -O z -o {output}"
+        "plink2 --bfile {params.input_prefix} --keep {input.ind_file} --make-bed --out {params.output_prefix} --allow-extra-chr --threads {threads}"
