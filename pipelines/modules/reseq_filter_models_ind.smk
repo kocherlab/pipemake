@@ -1,6 +1,6 @@
 rule all:
     input:
-        f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.vcf.gz",
+        f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.filtered.vcf.gz",
 
 
 rule create_models_ind_file:
