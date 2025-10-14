@@ -92,7 +92,6 @@ setup:
 
 snakemake:
   modules:
-    - reseq_filter_models_ind
     - reseq_filtered_vcf_to_plink
     - reseq_ld_prune_plink
     - reseq_model_ind_files
