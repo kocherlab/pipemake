@@ -3,7 +3,7 @@ rule all:
         f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.vcf.gz",
 
 
-rule reseq_filter_vcf_bcftools:
+rule reseq_filter_selscan_bcftools:
     input:
         f"reSEQ/VCF/Unfiltered/{config['species']}_{config['assembly_version']}.vcf.gz",
     output:

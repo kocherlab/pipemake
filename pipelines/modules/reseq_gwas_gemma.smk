@@ -29,7 +29,7 @@ rule gemma_model_bed:
     singularity:
         "docker://aewebb/plink2:20240418"
     shell:
-        "plink2 --bfile {params.bed_prefix} --keep {input.ind_file} --min-alleles 2 --allow-extra-chr --make-bed --out {params.out_prefix}"
+        "plink2 --bfile {params.bed_prefix} --keep {input.ind_file} --allow-extra-chr --make-bed --out {params.out_prefix}"
 
 
 rule gemma_model_phenotype_file:

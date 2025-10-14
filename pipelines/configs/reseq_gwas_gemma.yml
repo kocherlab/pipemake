@@ -92,8 +92,9 @@ setup:
 
 snakemake:
   modules:
-    - reseq_filtered_vcf_to_plink.smk
-    - reseq_ld_prune_plink.smk
-    - reseq_model_ind_files.smk
-    - reseq_gwas_gemma.smk
+    - reseq_filter_models_ind
+    - reseq_filtered_vcf_to_plink
+    - reseq_ld_prune_plink
+    - reseq_model_ind_files
+    - reseq_gwas_gemma
 
