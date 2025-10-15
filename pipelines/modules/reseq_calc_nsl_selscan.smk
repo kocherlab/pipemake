@@ -72,7 +72,7 @@ rule reseq_nsl_phase_chroms_bcftools:
         mem_mb=8000,
     threads: 1
     shell:
-        "bcftools view --keep {input.ind_file} {params.exclude_chr} {input.vcf} | bcftools view -i 'F_MISSING=0.0' | bcftools annotate --set-id '%CHROM\_%POS' -O z -o {output}"
+        "bcftools view --samples-file {input.ind_file} {params.exclude_chr} {input.vcf} | bcftools view -i 'F_MISSING=0.0' | bcftools annotate --set-id '%CHROM\_%POS' -O z -o {output}"
 
 
 rule reseq_nsl_selscan:
