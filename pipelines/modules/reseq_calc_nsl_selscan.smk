@@ -54,25 +54,18 @@ rule reseq_phase_chroms_shapeit4:
         "shapeit4 --input {input.vcf} --region {wildcards.chrom} --output {output} --thread {threads}"
 
 
-rule reseq_nsl_phase_chroms_bcftools:
+rule reseq_remove_missing_data_chroms_bcftools:
     input:
-        vcf="reSEQ/VCF/Phased/SplitByChrom/{chrom}.vcf.gz",
-        ind_file=f"Models/{config['species']}.{config['model_name']}.ind.txt",
+        "reSEQ/VCF/Phased/SplitByChrom/{chrom}.vcf.gz",
     output:
         temp("reSEQ/VCF/nSL/SplitByChrom/{chrom}.vcf.gz"),
-    params:
-        exclude_chr=(
-            f"-t ^{','.join(config['exclude_chr'])}"
-            if "exclude_chr" in config and config["exclude_chr"]
-            else ""
-        ),
     singularity:
         "docker://aewebb/bcftools:v1.20"
     resources:
         mem_mb=8000,
     threads: 1
     shell:
-        "bcftools view --samples-file {input.ind_file} {params.exclude_chr} {input.vcf} | bcftools view -i 'F_MISSING=0.0' | bcftools annotate --set-id '%CHROM\_%POS' -O z -o {output}"
+        "bcftools view -i 'F_MISSING=0.0' {input} -O z -o {output}"
 
 
 rule reseq_nsl_selscan:

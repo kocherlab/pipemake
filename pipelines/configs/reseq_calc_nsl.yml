@@ -61,7 +61,7 @@ setup:
     methods:
       file-str: "{reseq-vcf}"
     args:
-      standardized_filename: "reSEQ/VCF/Filtered/{species}_{assembly-version}.vcf.gz"
+      standardized_filename: "reSEQ/VCF/Unfiltered/{species}_{assembly-version}.vcf.gz"
       copy_method: '{reseq-copy-method}'
       gzipped: True
   
@@ -76,4 +76,5 @@ setup:
 snakemake:
   modules:
     - reseq_model_ind_file
+    - reseq_filter_selscan
     - reseq_calc_nsl_selscan

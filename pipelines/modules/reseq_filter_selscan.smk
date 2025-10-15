@@ -5,7 +5,8 @@ rule all:
 
 rule reseq_filter_selscan_bcftools:
     input:
-        f"reSEQ/VCF/Unfiltered/{config['species']}_{config['assembly_version']}.vcf.gz",
+        vcf=f"reSEQ/VCF/Unfiltered/{config['species']}_{config['assembly_version']}.vcf.gz",
+        ind_file=f"Models/{config['species']}.{config['model_name']}.ind.txt",
     output:
         temp(
             f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.vcf.gz"
@@ -22,4 +23,4 @@ rule reseq_filter_selscan_bcftools:
         mem_mb=8000,
     threads: 1
     shell:
-        "bcftools view -i 'F_MISSING=0.0' --min-alleles 2 --max-alleles 2 {params.exclude_chr} {input} | bcftools annotate --set-id '%CHROM\_%POS' -O z -o {output}"
+        "bcftools view --samples-file {input.ind_file} {params.exclude_chr} {input.vcf} | bcftools annotate --set-id '%CHROM\_%POS' -O z -o {output}"
