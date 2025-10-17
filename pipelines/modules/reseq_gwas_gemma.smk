@@ -1,7 +1,7 @@
 rule all:
     input:
         expand(
-            f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.{{method}}.filtered.assoc.txt",
+            f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.{{method}}.filtered.pve.txt",
             model=config["models"],
             method=["lmm", "bslmm"],
         ),
