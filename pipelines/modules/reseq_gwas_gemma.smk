@@ -49,7 +49,7 @@ rule gemma_model_phenotype_file:
     singularity:
         "docker://aewebb/pipemake_utils:v1.2.1"
     shell:
-        "ped-phenotype-file --fam {input.fam_file} --model-file {input.model_file} --model-name {wildcards.model} --numeric --out-prefix {params.out_prefix}"
+        "ped-phenotype-file --fam {input.fam_file} --model-file {input.model_file} --model-name {wildcards.model} --binary --out-prefix {params.out_prefix}"
 
 
 rule run_gemma_gk:
