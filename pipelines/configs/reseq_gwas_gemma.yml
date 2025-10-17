@@ -42,10 +42,14 @@ parser:
           help: "Kinship matrix type"
           type: int
           default: 1
-        linear-model:
+        lmm-model:
           help: "Linear model type"
           type: int
           default: 1
+        bslmm-model:
+          help: "Bayesian sparse linear model type"
+          type: int
+          default: 3
         maf:
           help: "MAF cutoff"
           type: float
