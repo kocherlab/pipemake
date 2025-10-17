@@ -1,14 +1,12 @@
 rule all:
     input:
         expand(
-            f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.{{method}}.filtered.pve.txt",
+            f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.lmm.filtered.pve.txt",
             model=config["models"],
-            method=["lmm", "bslmm"],
         ),
         expand(
-            f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.{{method}}.manhattan.png",
+            f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.lmm.manhattan.png",
             model=config["models"],
-            method=["lmm", "bslmm"],
         ),
 
 
@@ -108,8 +106,10 @@ rule run_gemma_bslmm:
         pheno_file=f"Models/GEMMA/{config['species']}.{{model}}.pheno.txt",
         gk_file=f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.gk.cXX.txt",
     output:
-        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.bslmm.assoc.txt",
-        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.bslmm.log.txt",
+        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.bslmm.param.txt",
+        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.bslmm.bv.txt",
+        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.bslmm.gamma.txt",
+        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.bslmm.hyp.txt",
     params:
         bed_prefix=f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned",
         out_prefix=f"{config['species']}_{config['assembly_version']}.pruned.bslmm",
@@ -141,12 +141,12 @@ rule calc_pve_gemma:
 
 rule filter_gemma:
     input:
-        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.{{method}}.pve.txt",
+        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.lmm.pve.txt",
     output:
-        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.{{method}}.filtered.pve.txt",
-        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.{{method}}.filtered.log",
+        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.lmm.filtered.pve.txt",
+        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.lmm.filtered.log",
     params:
-        out_prefix=f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.{{method}}",
+        out_prefix=f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.lmm",
         min_log_pvalue=config["min_log_pvalue"],
     resources:
         mem_mb=2000,
@@ -159,11 +159,11 @@ rule filter_gemma:
 
 rule plot_gemma:
     input:
-        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.{{method}}.assoc.txt",
+        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.lmm.assoc.txt",
     output:
-        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.{{method}}.manhattan.png",
+        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.lmm.manhattan.png",
     params:
-        out_prefix=f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.{{method}}",
+        out_prefix=f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.lmm",
     resources:
         mem_mb=2000,
     threads: 1
