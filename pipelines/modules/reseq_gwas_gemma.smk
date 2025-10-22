@@ -143,10 +143,9 @@ rule filter_gemma:
     input:
         f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.lmm.pve.txt",
     output:
-        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.lmm.filtered.pve.txt",
-        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.lmm.filtered.log",
+        filtered_file=f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.lmm.filtered.pve.txt",
+        log_file=f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.lmm.filtered.pve.txt.log",
     params:
-        out_prefix=f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.lmm",
         min_log_pvalue=config["min_log_pvalue"],
     resources:
         mem_mb=2000,
@@ -154,7 +153,7 @@ rule filter_gemma:
     singularity:
         "docker://aewebb/pipemake_utils:v1.3.2"
     shell:
-        "filter-gemma --gemma-file {input} --min-log-pvalue {params.min_log_pvalue} --out-prefix {params.out_prefix}"
+        "filter-gemma --gemma-file {input} --min-log-pvalue {params.min_log_pvalue} --out-filename {output.filtered_file}"
 
 
 rule plot_gemma:
