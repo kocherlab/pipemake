@@ -11,7 +11,7 @@ rule create_longest_aa_transcript:
     params:
         out_prefix=f"Annotations/EggNOG/{config['species']}_{config['assembly_version']}.{config['annotation_version']}_pep",
     singularity:
-        "docker://aewebb/pipemake_utils:v1.2.1"
+        "docker://aewebb/pipemake_utils:v1.3.2"
     resources:
         mem_mb=12000,
     threads: 1

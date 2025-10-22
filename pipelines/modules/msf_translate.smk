@@ -9,7 +9,7 @@ rule translate_msf:
     output:
         "MSF/AA/{sample}.fasta",
     singularity:
-        "docker://aewebb/pipemake_utils:v1.2.1"
+        "docker://aewebb/pipemake_utils:v1.3.2"
     resources:
         mem_mb=2000,
     threads: 1

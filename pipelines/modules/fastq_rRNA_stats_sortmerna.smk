@@ -20,11 +20,11 @@ rule sortmerna_in_single_end:
     singularity:
         "docker://aewebb/sortmerna:v4.3.7"
     resources:
-        mem_mb=48000,
+        mem_mb=12000,
     threads: 8
     shell:
         """
-        sortmerna --threads {threads} --ref /opt/DBs/{params.sortmerna_db} --reads {input.r1_reads} --workdir {output.work_dir} --idx-dir {params.index_dir} --aligned {params.read_prefix} --fastx 
+        sortmerna --num_alignments 1 --no-best True --threads {threads} --ref /opt/DBs/{params.sortmerna_db} --reads {input.r1_reads} --workdir {output.work_dir} --idx-dir {params.index_dir} --aligned {params.read_prefix} --fastx 
         mv {params.read_prefix}.fq.gz {output.r1_reads}
         """
 
@@ -45,11 +45,11 @@ rule sortmerna_in_pair_end:
     singularity:
         "docker://aewebb/sortmerna:v4.3.7"
     resources:
-        mem_mb=48000,
+        mem_mb=12000,
     threads: 8
     shell:
         """
-        sortmerna --threads {threads} --ref /opt/DBs/{params.sortmerna_db} --reads {input.r1_reads} --reads {input.r2_reads} --workdir {output.work_dir} --idx-dir {params.index_dir} --aligned {params.read_prefix} --fastx --out2 --paired_in
+        sortmerna --num_alignments 1 --no-best True --threads {threads} --ref /opt/DBs/{params.sortmerna_db} --reads {input.r1_reads} --reads {input.r2_reads} --workdir {output.work_dir} --idx-dir {params.index_dir} --aligned {params.read_prefix} --fastx --out2 --paired_in
         mv {params.read_prefix}_fwd.fq.gz {output.r1_reads}
         mv {params.read_prefix}_rev.fq.gz {output.r2_reads}
         """

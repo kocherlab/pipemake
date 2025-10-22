@@ -170,7 +170,7 @@ rule plot_norm_nsl_pipemake:
     params:
         out_prefix=f"reSEQ/PopGen/nSL/{config['species']}_{config['assembly_version']}",
     singularity:
-        "docker://aewebb/pipemake_utils:v1.2.1"
+        "docker://aewebb/pipemake_utils:v1.3.2"
     resources:
         mem_mb=16000,
     threads: 1
