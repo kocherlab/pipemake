@@ -52,9 +52,10 @@ parser:
             str: "Sp"
             suffix:
               - function: jobRandomString
-        skip-zero:
-          help: "Skip zero coverage regions"
-          action: store_true
+        tandem-repeats-bed:
+          help: "Tandem repeats BED file"
+          type: str
+          action: confirmFile
 
 setup:
   reseq_input:
@@ -73,6 +74,14 @@ setup:
       file-str: "{assembly-fasta}"
     args:
       standardized_filename: "Assembly/{species}_{assembly_version}.fa"
+      copy_method: "{assembly-copy-method}"
+      gzipped: False
+
+  tandem_repeats:
+    methods:
+      file-str: "{tandem-repeats-bed}"
+    args:
+      standardized_filename: "Assembly/{species}_{assembly_version}.bed"
       copy_method: "{assembly-copy-method}"
       gzipped: False
 
