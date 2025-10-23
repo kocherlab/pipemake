@@ -46,7 +46,7 @@ rule repeat_masker:
         mem_mb=24000,
     threads: 12
     singularity:
-        "docker://dfam/tetools:1.90"
+        "docker://dfam/tetools:1.94"
     shell:
         "RepeatMasker -par {threads} -dir {params.mask_dir} -lib {input.families} {input.assembly}"
 
