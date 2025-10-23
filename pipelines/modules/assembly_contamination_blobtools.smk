@@ -15,7 +15,7 @@ rule hifi_align_minimap2:
         hifi_fastq=f"HiFi/FASTQ/{config['species']}.fq.gz",
         assembly_fasta=f"Assembly/{config['species']}_{config['assembly_version']}.fa",
     output:
-        f"HiFi/BAM/Aligned/{config['species']}.reads.bam",
+        f"HiFi/BAM/Sorted/{config['species']}.reads.bam",
     singularity:
         "docker://aewebb/minimap2:v2.28"
     resources:
@@ -147,7 +147,7 @@ rule blobtk_blobtools_create:
 
 rule blobtk_blobtools_add_cov:
     input:
-        hifi_bam=f"HiFi/BAM/Aligned/{config['species']}.reads.bam",
+        hifi_bam=f"HiFi/BAM/Sorted/{config['species']}.reads.bam",
         create_chk="Tables/blobtools/.create.chk",
     output:
         temp("Tables/blobtools/.cov.chk"),

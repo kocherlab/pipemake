@@ -1,7 +1,7 @@
-pipeline: hifi-align-minimap2
+pipeline: hifi-assign-SVs-sniffles2
 version: 1.0
 parser:
-  help: Align hifi reseq reads to a genome assembly using minimap2
+  help: Assign structural variants to samples using Sniffles2
   arg-groups:
     basic:
       mutually-exclusive-args:
@@ -79,13 +79,5 @@ setup:
 snakemake:
   modules:
     - hifi_reseq_align_minimap2
-    - assembly_index
-    - reseq_bam_coverage
-    - bam_plot_coverage
-  links:
-    - input: hifi_align_minimap2
-      output: reseq_bam_coverage_deeptools
-    - input: hifi_align_minimap2
-      output: plot_coverage_deeptools
-
+    - hifi_reseq_structural_variants_sniffles2
 
