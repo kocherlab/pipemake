@@ -250,6 +250,7 @@ class ConfigPipelineIO:
                 logging.warning(
                     f"Setup method not assigned for {setup_arg_name}, skipping setup"
                 )
+                self.setup_pipeline_args[setup_arg_name] = None
                 break
 
             # Standardize the input arguments
