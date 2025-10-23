@@ -6,7 +6,7 @@ rule all:
 
 rule hifi_structural_variants_sniffles2:
     input:
-        hifi_bam="HiFi/BAM/Sorted/{sample}.bam",
+        hifi_bam="HiFi/BAM/Sorted/{sample}.sortedByCoord.bam",
         assembly_fasta=f"Assembly/{config['species']}_{config['assembly_version']}.fa",
     output:
         vcf="reSEQ/VCFs/{sample}.vcf.gz",
