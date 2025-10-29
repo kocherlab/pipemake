@@ -1,0 +1,106 @@
+pipeline: reseq-unpruned-gemma
+version: 1.0
+parser:
+  help: Perform GWAS on resequencing data using GEMMA with unpruned variants.
+  arg-groups:
+    basic:
+      args:
+        reseq-vcf:
+          help: "Resequencing VCF file"
+          type: str
+          required: True
+          action: confirmFile
+        reseq-copy-method:
+          help: "Specifies if resequencing files should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        model-file:
+          help: "Model filename"
+          type: str
+          required: True
+          action: confirmFile
+        models:
+          help: "Category names"
+          type: str
+          nargs: '+'
+          required: True
+        ld-window-size:
+          help: "LD window size"
+          type: str
+          default: 50
+        ld-window-step:
+          help: "LD window step"
+          type: str
+          default: 5
+        ld-threshold:
+          help: "LD threshold"
+          type: float
+          default: 0.2
+        kinship-matrix:
+          help: "Kinship matrix type"
+          type: int
+          default: 1
+        lmm-model:
+          help: "Linear model type"
+          type: int
+          default: 1
+        bslmm-model:
+          help: "Bayesian sparse linear model type"
+          type: int
+          default: 3
+        maf:
+          help: "MAF cutoff"
+          type: float
+          default: 0.05
+        min-log-pvalue:
+          help: "Minimum log10 p-values to keep"
+          type: float
+          default: 0.5
+        exclude-chr:
+          help: "List of chromosomes to exclude from analysis"
+          type: str
+          nargs: '+'
+        assembly-version:
+          help: "Assembly Version"
+          type: str
+          default:
+            str: "v"
+            suffix:
+              - function: jobRandomString
+        species:
+          help: "Species name"
+          type: str
+          default:
+            str: "Sp"
+            suffix:
+              - function: jobRandomString
+
+setup:
+  reseq_vcf:
+    methods:
+      file-str: "{reseq-vcf}"
+    args:
+      standardized_filename: "reSEQ/VCF/Filtered/{species}_{assembly-version}.filtered.vcf.gz"
+      copy_method: '{reseq-copy-method}'
+      gzipped: True
+  
+  model_input:
+    methods:
+      file-str: "{model-file}"
+    args:
+      standardized_filename: "Models/{species}.model"
+      copy_method: 'copy'
+      gzipped: False
+
+snakemake:
+  modules:
+    - reseq_filtered_vcf_to_plink
+    - reseq_model_ind_files
+    - reseq_gwas_gemma
+  links:
+    - input: convert_flitered_vcf_to_plink
+      output: gemma_model_bed
+
+
