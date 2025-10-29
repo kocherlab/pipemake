@@ -21,7 +21,7 @@ rule gemma_model_bed:
         f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.bim",
         f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.fam",
     params:
-        bed_prefix=f"reSEQ/PLINK/Pruned/{config['species']}_{config['assembly_version']}.pruned",
+        bed_prefix=subpath(input.bed_file, strip_suffix=".bed"),
         out_prefix=f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.pruned",
     resources:
         mem_mb=8000,
