@@ -65,7 +65,7 @@ rule run_gemma_gk:
         f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.gk.log.txt",
     params:
         bed_prefix=subpath(input.bed_file, strip_suffix=".bed"),
-        out_prefix=subpath(output[0], strip_suffix=".cXX.txt"),
+        out_prefix=subpath(output[0], basename=True, strip_suffix=".cXX.txt"),
         out_dir=subpath(output[0], parent=True),
         kinship_matrix=config["kinship_matrix"],
     resources:
