@@ -166,7 +166,7 @@ rule plot_gemma:
     output:
         f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.lmm.manhattan.png",
     params:
-        out_prefix=subpath(output, strip_suffix=".manhattan.png"),
+        out_prefix=subpath(output[0], strip_suffix=".manhattan.png"),
     resources:
         mem_mb=2000,
     threads: 1
