@@ -89,7 +89,7 @@ rule run_gemma_lmm:
         f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.lmm.log.txt",
     params:
         bed_prefix=subpath(input.bed_file, strip_suffix=".bed"),
-        out_prefix=subpath(output[0], strip_suffix=".assoc.txt"),
+        out_prefix=subpath(output[0], basename=True, strip_suffix=".assoc.txt"),
         out_dir=subpath(output[0], parent=True),
         lmm_model=config["lmm_model"],
         maf=config["maf"],
@@ -116,7 +116,7 @@ rule run_gemma_bslmm:
         f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.bslmm.hyp.txt",
     params:
         bed_prefix=subpath(input.bed_file, strip_suffix=".bed"),
-        out_prefix=subpath(output[0], strip_suffix=".param.txt"),
+        out_prefix=subpath(output[0], basename=True, strip_suffix=".param.txt"),
         out_dir=subpath(output[0], parent=True),
         bslmm_model=config["bslmm_model"],
         maf=config["maf"],
