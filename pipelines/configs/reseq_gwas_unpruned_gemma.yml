@@ -26,18 +26,6 @@ parser:
           type: str
           nargs: '+'
           required: True
-        ld-window-size:
-          help: "LD window size"
-          type: str
-          default: 50
-        ld-window-step:
-          help: "LD window step"
-          type: str
-          default: 5
-        ld-threshold:
-          help: "LD threshold"
-          type: float
-          default: 0.2
         kinship-matrix:
           help: "Kinship matrix type"
           type: int
