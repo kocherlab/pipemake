@@ -27,20 +27,6 @@ parser:
             - 'symbolic_link'
             - 'copy'
           default: 'symbolic_link'
-        assembly-version:
-          help: "Assembly Version"
-          type: str
-          default:
-            str: "v"
-            suffix:
-              - function: jobRandomString
-        species:
-          help: "Species name"
-          type: str
-          default:
-            str: "Sp"
-            suffix:
-              - function: jobRandomString
 
 setup:
   reseq_input:
