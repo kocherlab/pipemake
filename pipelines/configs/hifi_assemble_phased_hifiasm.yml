@@ -1,0 +1,60 @@
+pipeline: hifi-assemble-phased-hifiasm
+version: 1.0
+parser:
+  help: Create phased assemblies from HiFi long reads using hifiasm
+  arg-groups:
+    basic:
+      wildcards-args:
+        hifi-standardized-filename: "{samples}.fq.gz"
+      args:
+        hifi-wildcard:
+          help: "Wildcard statement to represent HiFi FASTQs"
+          type: str
+          mutually-exclusive: "input-parser"
+          wildcards: "hifi-standardized-filename"
+        hifi-table:
+          help: "Table with sample and FASTQs filenames"
+          type: str
+          action: confirmFile
+          mutually-exclusive: "input-parser"
+          wildcards: "hifi-standardized-filename"
+        hifi-copy-method:
+          help: "Specifies if HiFi FASTQs should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        busco-database:
+          help: "Name of BUSCO database"
+          type: str
+          required: True
+        assembly-version:
+          help: "Assembly Version"
+          type: str
+          default:
+            str: "v"
+            suffix:
+              - function: jobRandomString
+        species:
+          help: "Species name"
+          type: str
+          default:
+            str: "Sp"
+            suffix:
+              - function: jobRandomString
+
+setup:
+  reseq_input:
+    methods:
+      wildcard-str: "{hifi-wildcard}"
+      table-file: "{hifi-table}"
+    args:
+      standardized_filename: "HiFi/FASTQ/{hifi-standardized-filename}"
+      copy_method: '{hifi-copy-method}'
+      gzipped: True
+      sample_keywords: 
+        - 'samples'
+  
+snakemake:
+  modules:
+    - hifi_reseq_assemble_phased_hifiasm

@@ -24,7 +24,7 @@ rule repeat_modeler:
         BuildDatabase -name {params.repeatmodeler_db} {input}
         RepeatModeler -database {params.repeatmodeler_db} -threads {threads} -LTRStruct
         rm_working_dir=$(grep 'Using output directory' {params.repeatmodeler_db}-rmod.log | grep -o '[^/]*$')
-        tar -czf {params.wd_dir}/RepeatModeler_R1_WD.tar.gz $rm_working_dir
+        tar -czf {params.wd_dir}/RepeatModeler_WD.tar.gz $rm_working_dir
         rm -rf $rm_working_dir
         mv {params.repeatmodeler_db}-families.fa {output}
         mv {params.repeatmodeler_db}-families.stk {params.wd_dir}
