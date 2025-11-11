@@ -4,6 +4,9 @@ parser:
   help: Create phased assemblies from HiFi long reads using hifiasm
   arg-groups:
     basic:
+      mutually-exclusive-args:
+        input-parser:
+          required: True
       wildcards-args:
         hifi-standardized-filename: "{samples}.fq.gz"
       args:
