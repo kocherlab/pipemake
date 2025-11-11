@@ -27,10 +27,6 @@ parser:
             - 'symbolic_link'
             - 'copy'
           default: 'symbolic_link'
-        busco-database:
-          help: "Name of BUSCO database"
-          type: str
-          required: True
         assembly-version:
           help: "Assembly Version"
           type: str
