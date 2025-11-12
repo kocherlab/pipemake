@@ -9,7 +9,7 @@ rule create_longest_aa_transcript:
     output:
         f"Annotations/EggNOG/{config['species']}_{config['assembly_version']}.{config['annotation_version']}_pep.fa",
     params:
-        out_prefix=f"Annotations/EggNOG/{config['species']}_{config['assembly_version']}.{config['annotation_version']}_pep",
+        out_prefix=subpath(output[0], strip_suffix=".fa"),
     singularity:
         "docker://aewebb/pipemake_utils:v1.3.2"
     resources:
@@ -27,7 +27,7 @@ rule run_eggnog_mapper:
     output:
         f"Annotations/EggNOG/{config['species']}_{config['assembly_version']}.{config['annotation_version']}.emapper.annotations.xlsx",
     params:
-        out_prefix=f"Annotations/EggNOG/{config['species']}_{config['assembly_version']}.{config['annotation_version']}",
+        out_prefix=subpath(output[0], strip_suffix=".emapper.annotations.xlsx"),
         eggnod_dir="Annotations/EggNOG/",
         data_dir="Downloads/EggNOG/",
     singularity:
