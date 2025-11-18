@@ -11,6 +11,7 @@ rule fastq_Unprocessed_Wildcards:
             "FASTQ/Unprocessed_Wildcards/"
             + os.path.basename(config["fastq_file_input"]).replace(".fastq", ".fq")
         ),
+    localrule: True
     run:
         import os
 
@@ -25,6 +26,7 @@ rule fastq_rename_basic_single_end:
         r1_reads="FASTQ/Unprocessed_Wildcards/{sample}_1.fq.gz",
     output:
         r1_reads=temp("FASTQ/Unprocessed_Wildcards/{sample}_R1.fq.gz"),
+    localrule: True
     shell:
         "mv {input.r1_reads} {output.r1_reads}"
 
@@ -36,6 +38,7 @@ rule fastq_rename_basic_paired_end:
     output:
         r1_reads=temp("FASTQ/Unprocessed_Wildcards/{sample}_R1.fq.gz"),
         r2_reads=temp("FASTQ/Unprocessed_Wildcards/{sample}_R2.fq.gz"),
+    localrule: True
     shell:
         """
         mv {input.r1_reads} {output.r1_reads}
@@ -48,6 +51,7 @@ rule fastq_rename_reads_single_end:
         r1_reads="FASTQ/Unprocessed_Wildcards/{sample}_read-1.fq.gz",
     output:
         r1_reads=temp("FASTQ/Unprocessed_Wildcards/{sample}_R1.fq.gz"),
+    localrule: True
     shell:
         "mv {input.r1_reads} {output.r1_reads}"
 
@@ -59,6 +63,7 @@ rule fastq_rename_reads_paired_end:
     output:
         r1_reads=temp("FASTQ/Unprocessed_Wildcards/{sample}_R1.fq.gz"),
         r2_reads=temp("FASTQ/Unprocessed_Wildcards/{sample}_R2.fq.gz"),
+    localrule: True
     shell:
         """
         mv {input.r1_reads} {output.r1_reads}
@@ -71,6 +76,7 @@ rule fastq_process_single_end:
         r1_reads="FASTQ/Unprocessed_Wildcards/{sample}_R1.fq.gz",
     output:
         r1_reads=temp("FASTQ/Processed_Wildcard/{sample}_R1.fq.gz"),
+    localrule: True
     shell:
         "mv {input.r1_reads} {output.r1_reads}"
 
@@ -82,6 +88,7 @@ rule fastq_process_paired_end:
     output:
         r1_reads=temp("FASTQ/Processed_Wildcard/{sample}_R1.fq.gz"),
         r2_reads=temp("FASTQ/Processed_Wildcard/{sample}_R2.fq.gz"),
+    localrule: True
     shell:
         """
         mv {input.r1_reads} {output.r1_reads}

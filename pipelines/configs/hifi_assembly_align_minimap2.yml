@@ -1,0 +1,85 @@
+pipeline: hifi-assembly-align-minimap2
+version: 1.0
+parser:
+  help: Align hifi assemblies to a reference assembly for comparison using minimap2
+  arg-groups:
+    basic:
+      mutually-exclusive-args:
+        input-parser:
+          required: True
+      wildcards-args:
+        hifi-standardized-filename: "{samples}.fa"
+      args:
+        hifi-wildcard:
+          help: "Wildcard statement to represent hifi FASTQs"
+          type: str
+          mutually-exclusive: "input-parser"
+          wildcards: "hifi-standardized-filename"
+        hifi-table:
+          help: "Table with sample and FASTQs filenames"
+          type: str
+          action: confirmFile
+          mutually-exclusive: "input-parser"
+          wildcards: "hifi-standardized-filename"
+        hifi-copy-method:
+          help: "Specifies if hifi FASTQs should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        assembly-fasta:
+          help: "Assembly fasta"
+          type: str
+          required: True
+          action: confirmFile
+        assembly-copy-method:
+          help: "Specifies if assembly files should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        assembly-version:
+          help: "Assembly Version"
+          type: str
+          default:
+            str: "v"
+            suffix:
+              - function: jobRandomString
+        species:
+          help: "Species name"
+          type: str
+          default:
+            str: "Sp"
+            suffix:
+              - function: jobRandomString
+        skip-zero:
+          help: "Skip zero coverage regions"
+          action: store_true
+
+setup:
+  hifi_input:
+    methods:
+      wildcard-str: "{hifi-wildcard}"
+      table-file: "{hifi-table}"
+    args:
+      standardized_filename: "HiFi/Assembly/{hifi-standardized-filename}"
+      copy_method: '{hifi-copy-method}'
+      gzipped: False
+      sample_keywords: 
+        - 'samples'
+  
+  assembly_input:
+    methods:
+      file-str: "{assembly-fasta}"
+    args:
+      standardized_filename: "Assembly/{species}_{assembly_version}.fa"
+      copy_method: "{assembly-copy-method}"
+      gzipped: False
+
+snakemake:
+  modules:
+    - hifi_assembly_align_minimap2
+
+
+
+
