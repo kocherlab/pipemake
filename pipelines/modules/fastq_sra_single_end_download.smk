@@ -24,7 +24,7 @@ rule fasterq_dump_single_end:
         """
 
 
-rule compress_fastqs_paired_end:
+rule compress_fastqs_single_end:
     input:
         r1_reads="SRA/Downloads/{sample}_1.fastq",
     output:
