@@ -1,6 +1,9 @@
 rule all:
     input:
-        expand("HiFi/Assembly/{sample}.purged.fa", sample=config["samples"]),
+        expand(
+            "HiFi/Assembly/purge_dups/seqs/{sample}.purged.fa",
+            sample=config["samples"],
+        ),
 
 
 rule create_fastq_list:
@@ -15,7 +18,7 @@ rule create_fastq_list:
 
 rule build_config:
     input:
-        assembled_fasta="HiFi/Assembly/{sample}.fa",
+        assembled_fasta="HiFi/Assembly/Unpurged/{sample}.fa",
         fastq_list="HiFi/Assembly/purge_dups/{sample}.list",
     output:
         json=temp("HiFi/Assembly/purge_dups/{sample}.tmp.json"),
@@ -42,9 +45,7 @@ rule update_json:
     params:
         out_dir=subpath(output[0], parent=True),
         busco_db=config["busco_database"],
-    resources:
-        mem_mb=2000,
-    threads: 1
+    localrule: True
     run:
         import os
         import json
@@ -75,12 +76,3 @@ rule hifi_assembly_purge_dups:
         run_purge_dups.py {input.json} /opt/conda/envs/purge_dups/bin {wildcard.sample} -p bash
         rm -rf {params.tmp_dir}
         """
-
-
-rule collect_purged_fasta:
-    input:
-        "HiFi/Assembly/purge_dups/seqs/{sample}.purged.fa",
-    output:
-        "HiFi/Assembly/{sample}.purged.fa",
-    shell:
-        "cp {input} {output}"
