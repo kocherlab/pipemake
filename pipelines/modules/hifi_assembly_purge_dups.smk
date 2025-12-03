@@ -40,7 +40,7 @@ rule update_json:
     output:
         "HiFi/Assembly/purge_dups/{sample}/config.json",
     params:
-        out_dir=os.path.abspath(subpath(output[0], parent=True)),
+        out_dir=subpath(output[0], parent=True),
         busco_db=config["busco_database"],
     resources:
         mem_mb=2000,
@@ -50,7 +50,7 @@ rule update_json:
 
         with open(input[0], "r") as f:
             data = json.load(f)
-        data["out_dir"] = params.out_dir
+        data["out_dir"] = os.path.abspath(params.out_dir)
         data["busco"]["lineage"] = params.busco_db
         with open(output[0], "w") as f:
             json.dump(data, f, indent=2)
