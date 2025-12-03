@@ -73,6 +73,6 @@ rule hifi_assembly_purge_dups:
     threads: 12
     shell:
         """
-        run_purge_dups.py {input.json} /opt/conda/envs/purge_dups/bin {wildcard.sample} -p bash
+        run_purge_dups.py {input.json} /opt/conda/envs/purge_dups/bin {wildcards.sample} -p bash
         rm -rf {params.tmp_dir}
         """
