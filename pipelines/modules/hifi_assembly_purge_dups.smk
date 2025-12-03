@@ -1,6 +1,6 @@
 rule all:
     input:
-        expand("HiFi/Assembly/{sample}.purged.fa", sample=config["samples"]),
+        expand("HiFi/Assembly/purge_dups/{sample}.json", sample=config["samples"]),
 
 
 rule create_fastq_list:
