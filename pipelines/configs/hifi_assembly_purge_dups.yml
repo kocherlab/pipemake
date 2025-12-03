@@ -21,6 +21,10 @@ parser:
           action: confirmFile
           mutually-exclusive: "input-parser"
           wildcards: "hifi-standardized-filename"
+        busco-database:
+          help: "Name of BUSCO database"
+          type: str
+          required: True
 
 setup:
   hifi_input:
