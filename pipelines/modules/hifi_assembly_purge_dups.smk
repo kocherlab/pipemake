@@ -39,7 +39,7 @@ rule update_json:
     output:
         "HiFi/Assembly/purge_dups/{sample}.json",
     params:
-        out_dir=os.path.abspath(f"HiFi/Assembly/purge_dups/{sample}"),
+        out_dir=os.path.abspath("HiFi/Assembly/purge_dups/{sample}"),
         busco_db=config["busco_database"],
     resources:
         mem_mb=2000,
