@@ -1,0 +1,43 @@
+pipeline: hifi-assembly-purge-dups
+version: 1.0
+parser:
+  help: Purge duplicate haplotigs from HiFi assemblies
+  arg-groups:
+    basic:
+      mutually-exclusive-args:
+        input-parser:
+          required: True
+      wildcards-args:
+        hifi-standardized-filename: "{samples}.fa"
+      args:
+        hifi-wildcard:
+          help: "Wildcard statement to represent HiFi Assembly"
+          type: str
+          mutually-exclusive: "input-parser"
+          wildcards: "hifi-standardized-filename"
+        hifi-table:
+          help: "Table with sample and HiFi Assembly filenames"
+          type: str
+          action: confirmFile
+          mutually-exclusive: "input-parser"
+          wildcards: "hifi-standardized-filename"
+
+setup:
+  hifi_input:
+    methods:
+      wildcard-str: "{hifi-wildcard}"
+      table-file: "{hifi-table}"
+    args:
+      standardized_filename: "HiFi/Assembly/{hifi-standardized-filename}"
+      copy_method: 'copy'
+      gzipped: False
+      sample_keywords: 
+        - 'samples'
+
+snakemake:
+  modules:
+    - hifi_assembly_purge_dups
+
+
+
+
