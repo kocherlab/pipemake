@@ -20,9 +20,8 @@ rule build_config:
     output:
         json=temp("HiFi/Assembly/purge_dups/{sample}.tmp.json"),
         fofn=temp("HiFi/Assembly/purge_dups/{sample}_tmp/pb.fofn"),
-        fasta=temp("HiFi/Assembly/purge_dups/{sample}_tmp/{sample}.fa"),
     params:
-        output_dir=subpath(output.fofn, parent=True),
+        out_dir=subpath(output.fofn, parent=True),
     singularity:
         "docker://aewebb/purge_dups:v1.2.6"
     resources:
@@ -30,7 +29,7 @@ rule build_config:
     threads: 1
     shell:
         """
-        pd_config.py {input.assembled_fasta} {input.fastq_list} -n {output.json} -l {params.output_dir}
+        pd_config.py {input.assembled_fasta} {input.fastq_list} -n {output.json} -l {params.out_dir}
         sleep 30
         """
 
@@ -62,16 +61,20 @@ rule hifi_assembly_purge_dups:
     input:
         json="HiFi/Assembly/purge_dups/{sample}.json",
         fofn="HiFi/Assembly/purge_dups/{sample}_tmp/pb.fofn",
-        fasta="HiFi/Assembly/purge_dups/{sample}_tmp/{sample}.fa",
     output:
         "HiFi/Assembly/purge_dups/seqs/{sample}.purged.fa",
+    params:
+        tmp_dir=subpath(input.fofn, parent=True),
     singularity:
         "docker://aewebb/purge_dups:v1.2.6"
     resources:
         mem_mb=30000,
     threads: 12
     shell:
-        "run_purge_dups.py {input.json} /opt/conda/envs/purge_dups/bin {wildcard.sample} -p bash"
+        """
+        run_purge_dups.py {input.json} /opt/conda/envs/purge_dups/bin {wildcard.sample} -p bash
+        rm -rf {params.tmp_dir}
+        """
 
 
 rule collect_purged_fasta:
