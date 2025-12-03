@@ -78,10 +78,10 @@ rule collect_purged_fasta:
     output:
         "HiFi/Assembly/{sample}.purged.fa",
     params:
-        output_dir=subpath(input[0], parent=True) + "/.tmp",
+        output_dir=subpath(input[0], parent=True),
     localrule: True
     shell:
         """
         cp {input} {output}
-        rm -rf {params.output_dir}
+        rm -rf {params.output_dir}/.tmp
         """
