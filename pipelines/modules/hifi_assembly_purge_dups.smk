@@ -18,7 +18,7 @@ rule create_fastq_list:
 
 rule build_config:
     input:
-        assembled_fasta="HiFi/Assembly/Unpurged/{sample}.fa",
+        assembled_fasta="HiFi/Assembly/{sample}.fa",
         fastq_list="HiFi/Assembly/purge_dups/{sample}.list",
     output:
         json=temp("HiFi/Assembly/purge_dups/{sample}.tmp.json"),
