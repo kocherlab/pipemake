@@ -52,7 +52,7 @@ setup:
       file-str: "{hifi-fastq}"
     args:
       standardized_filename: "HiFi/FASTQ/{species}.fq.gz"
-      copy_method: "{fastq-copy-method}"
+      copy_method: "{hifi-copy-method}"
 
   assembly_input:
     methods:
