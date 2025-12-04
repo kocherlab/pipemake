@@ -4,9 +4,6 @@ parser:
   help: Purge duplicate haplotigs from HiFi assemblies
   arg-groups:
     basic:
-      mutually-exclusive-args:
-        input-parser:
-          required: True
       args:
         hifi-fastq:
           help: "Wildcard statement to represent HiFi FASTQs"
