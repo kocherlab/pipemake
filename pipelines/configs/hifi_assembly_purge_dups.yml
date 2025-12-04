@@ -41,6 +41,10 @@ parser:
             str: "v"
             suffix:
               - function: jobRandomString
+        busco-database:
+          help: "Name of BUSCO database"
+          type: str
+          required: True
 
 setup:
   hifi_input:
