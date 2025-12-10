@@ -8,9 +8,7 @@ rule create_fastq_list:
         f"HiFi/FASTQ/{config['species']}.fq.gz",
     output:
         temp(f"Assembly/purge_dups/{config['species']}.list"),
-    resources:
-        mem_mb=2000,
-    threads: 1
+    localrule: True
     shell:
         "echo {input} > {output}"
 
@@ -43,9 +41,7 @@ rule update_json:
     params:
         out_dir=os.path.abspath(f"Assembly/purge_dups/{config['species']}"),
         busco_db=config["busco_database"],
-    resources:
-        mem_mb=2000,
-    threads: 1
+    localrule: True
     run:
         import json
 
@@ -80,6 +76,7 @@ rule collect_purged_fasta:
         f"Assembly/purge_dups/{config['species']}_{config['assembly_version']}.fa",
     params:
         output_dir=f"Assembly/purge_dups/{config['species']}_tmp",
+    localrule: True
     shell:
         """
         cp {input} {output}

@@ -20,7 +20,7 @@ rule pacbio_bam_to_fasta:
         "bamtools convert -format fasta -in {input} -out {output}"
 
 
-rule hifi_fastq_to_fastq:
+rule hifi_fastq_to_fasta:
     input:
         "FASTQ/Unfiltered/{sample}.fastq.gz",
     output:

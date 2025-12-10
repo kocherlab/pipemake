@@ -4,23 +4,43 @@ parser:
   help: Purge duplicate haplotigs from HiFi assemblies
   arg-groups:
     basic:
-      mutually-exclusive-args:
-        input-parser:
-          required: True
-      wildcards-args:
-        hifi-standardized-filename: "{samples}.fa"
       args:
-        hifi-wildcard:
-          help: "Wildcard statement to represent HiFi Assembly"
+        hifi-fastq:
+          help: "Wildcard statement to represent HiFi FASTQs"
           type: str
-          mutually-exclusive: "input-parser"
-          wildcards: "hifi-standardized-filename"
-        hifi-table:
-          help: "Table with sample and HiFi Assembly filenames"
+          required: True
+          action: confirmFile
+        hifi-copy-method:
+          help: "Specifies if HiFi FASTQs should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        assembly-fasta:
+          help: "Wildcard statement to represent assembly FASTAs"
           type: str
           action: confirmFile
-          mutually-exclusive: "input-parser"
-          wildcards: "hifi-standardized-filename"
+          required: True
+        assembly-copy-method:
+          help: "Specifies if the assembly FASTA should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        species:
+          help: "Species name"
+          type: str
+          default:
+            str: "Sp"
+            suffix:
+              - function: jobRandomString
+        assembly-version:
+          help: "Assembly Version"
+          type: str
+          default:
+            str: "v"
+            suffix:
+              - function: jobRandomString
         busco-database:
           help: "Name of BUSCO database"
           type: str
@@ -28,19 +48,23 @@ parser:
 
 setup:
   hifi_input:
-    methods:
-      wildcard-str: "{hifi-wildcard}"
-      table-file: "{hifi-table}"
+    methods: 
+      file-str: "{hifi-fastq}"
     args:
-      standardized_filename: "HiFi/Assembly/{hifi-standardized-filename}"
-      copy_method: 'copy'
+      standardized_filename: "HiFi/FASTQ/{species}.fq.gz"
+      copy_method: "{hifi-copy-method}"
+
+  assembly_input:
+    methods:
+      file-str: "{assembly-fasta}"
+    args:
+      standardized_filename: "Assembly/hifiasm/{species}_{assembly-version}.fa"
+      copy_method: "{assembly-copy-method}"
       gzipped: False
-      sample_keywords: 
-        - 'samples'
 
 snakemake:
   modules:
-    - hifi_assembly_purge_dups
+    - hifi_reseq_purge_dups
 
 
 
