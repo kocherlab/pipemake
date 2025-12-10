@@ -11,12 +11,12 @@ parser:
         hifi-standardized-filename: "{samples}.fa"
       args:
         hifi-wildcard:
-          help: "Wildcard statement to represent hifi FASTQs"
+          help: "Wildcard statement to represent hifi assembly FASTA files"
           type: str
           mutually-exclusive: "input-parser"
           wildcards: "hifi-standardized-filename"
         hifi-table:
-          help: "Table with sample and FASTQs filenames"
+          help: "Table with sample and assembly FASTA filenames"
           type: str
           action: confirmFile
           mutually-exclusive: "input-parser"
