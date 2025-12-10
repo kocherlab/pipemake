@@ -101,7 +101,7 @@ snakemake:
     - iso_seq_align_minimap2
     - iso_seq_sort
     - iso_seq_merge
-    - repeatmasking
+    - assembly_mask_repeatmodeler
     - annotate_isoseq_braker3
     - process_braker3
     - download_compleasm

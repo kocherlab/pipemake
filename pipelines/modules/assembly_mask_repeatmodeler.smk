@@ -3,7 +3,7 @@ rule all:
         f"Assembly/{config['species']}_{config['assembly_version']}.fa.masked",
 
 
-rule repeat_modeler:
+rule mask_assembly_repeatmodeler:
     input:
         f"Assembly/{config['species']}_{config['assembly_version']}.fa",
     output:
@@ -32,7 +32,7 @@ rule repeat_modeler:
         """
 
 
-rule repeat_masker:
+rule mask_assembly_repeatmasker:
     input:
         assembly=f"Assembly/{config['species']}_{config['assembly_version']}.fa",
         families=f"Assembly/RepeatModeler/Families/{config['species']}_{config['assembly_version']}-families.fa",
@@ -51,12 +51,14 @@ rule repeat_masker:
         "RepeatMasker -par {threads} -dir {params.mask_dir} -lib {input.families} {input.assembly}"
 
 
-rule softmask:
+rule softmask_repeatmasker_assembly:
     input:
         assembly=f"Assembly/{config['species']}_{config['assembly_version']}.fa",
         masked_assembly=f"Assembly/RepeatModeler/MaskedAssembly/{config['species']}_{config['assembly_version']}.fa.masked",
     output:
-        f"Assembly/{config['species']}_{config['assembly_version']}.fa.masked",
+        temp(
+            f"Assembly/RepeatModeler/MaskedAssembly/{config['species']}_{config['assembly_version']}.fa.softmasked"
+        ),
     singularity:
         "docker://aewebb/pipemake_utils:v1.3.2"
     resources:
@@ -64,3 +66,13 @@ rule softmask:
     threads: 1
     shell:
         "softmask --input-fasta {input.assembly} --hard-masked-fasta {input.masked_assembly} --output-fasta {output}"
+
+
+rule store_repeatmasker_assembly:
+    input:
+        f"Assembly/RepeatModeler/MaskedAssembly/{config['species']}_{config['assembly_version']}.fa.softmasked",
+    output:
+        f"Assembly/{config['species']}_{config['assembly_version']}.fa.masked",
+    localrule: True
+    shell:
+        "cp {input} {output}"

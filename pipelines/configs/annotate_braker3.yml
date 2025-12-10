@@ -104,7 +104,7 @@ snakemake:
     - rna_seq_hisat2
     - rna_seq_sort
     - rna_seq_merge
-    - repeatmasking
+    - assembly_mask_repeatmodeler
     - annotate_rnaseq_braker3
     - process_braker3
     - download_compleasm
