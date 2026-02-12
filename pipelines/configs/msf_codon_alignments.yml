@@ -1,7 +1,7 @@
-pipeline: codon-alignments
+pipeline: msf-codon-alignments
 version: 1.0
 parser:
-  help: Create codon alignments from untransleted CDS multiple sequence files
+  help: Create codon alignments using MACSE
   arg-groups:
     basic:
       mutually-exclusive-args:
@@ -27,6 +27,24 @@ parser:
             - 'symbolic_link'
             - 'copy'
           default: 'symbolic_link'
+    macse_params:
+      args:
+        codon-final-stop:
+          help: "Codon to use for final stop codons in MACSE"
+          type: str
+          default: "---"
+        codon-external-fs:
+          help: "Codon to use for external frameshifts in MACSE"
+          type: str
+          default: "---"
+        codon-internal-fs:
+          help: "Codon to use for internal frameshifts in MACSE"
+          type: str
+          default: "NNN"
+        char-remaining-fs:
+          help: "Character to use for remaining frameshifts in MACSE"
+          type: str
+          default: "N"
 setup:
   msf_input:
     methods:
@@ -40,4 +58,4 @@ setup:
 
 snakemake:
   modules:
-    - msf_align_codons_prank
+    - msf_align_codons_macse
