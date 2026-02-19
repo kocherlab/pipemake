@@ -51,7 +51,7 @@ setup:
       wildcard-str: "{msf-wildcard}"
       table-file: "{msf-table}"
     args:
-      standardized_filename: "MSF/CDS/{msf-standardized-filename}"
+      standardized_filename: "MSF/AA/{msf-standardized-filename}"
       copy_method: '{msf-copy-method}'
       sample_keywords:
         - "samples"
