@@ -1,0 +1,61 @@
+pipeline: msf-amino-acid-alignments
+version: 1.0
+parser:
+  help: Create amino acid alignments using MUSCLE
+  arg-groups:
+    basic:
+      mutually-exclusive-args:
+        input-parser:
+          required: True
+      wildcards-args:
+        msf-standardized-filename: "{samples}.fa"
+      args:
+        msf-wildcard:
+          help: "Wildcard statement to represent MSF files"
+          type: str
+          mutually-exclusive: "input-parser"
+          wildcards: "msf-standardized-filename"
+        msf-table:
+          help: "Table with sample and MSF filenames"
+          type: str
+          action: confirmFile
+          mutually-exclusive: "input-parser"
+          wildcards: "msf-standardized-filename"
+        msf-copy-method:
+          help: "Specifies if MSFs should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+    macse_params:
+      args:
+        codon-final-stop:
+          help: "Codon to use for final stop codons in MACSE"
+          type: str
+          default: "---"
+        codon-external-fs:
+          help: "Codon to use for external frameshifts in MACSE"
+          type: str
+          default: "---"
+        codon-internal-fs:
+          help: "Codon to use for internal frameshifts in MACSE"
+          type: str
+          default: "NNN"
+        char-remaining-fs:
+          help: "Character to use for remaining frameshifts in MACSE"
+          type: str
+          default: "N"
+setup:
+  msf_input:
+    methods:
+      wildcard-str: "{msf-wildcard}"
+      table-file: "{msf-table}"
+    args:
+      standardized_filename: "MSF/CDS/{msf-standardized-filename}"
+      copy_method: '{msf-copy-method}'
+      sample_keywords:
+        - "samples"
+
+snakemake:
+  modules:
+    - msf_align_amino_acids_muscle
