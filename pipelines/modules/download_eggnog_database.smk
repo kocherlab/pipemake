@@ -11,7 +11,7 @@ rule download_eggnog_database:
     params:
         data_dir="Downloads/EggNOG",
     singularity:
-        "docker://aewebb/eggnog-mappper:v2.1.12"
+        "docker://aewebb/eggnog-mappper:v2.1.13"
     resources:
         mem_mb=4000,
     threads: 1

@@ -31,7 +31,7 @@ rule run_eggnog_mapper:
         eggnod_dir="Annotations/EggNOG/",
         data_dir="Downloads/EggNOG/",
     singularity:
-        "docker://aewebb/eggnog-mappper:v2.1.12"
+        "docker://aewebb/eggnog-mappper:v2.1.13"
     resources:
         mem_mb=12000,
     threads: 12
