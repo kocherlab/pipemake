@@ -10,7 +10,7 @@ rule download_augustus_config:
         out_dir="Downloads/augustus",
         tmp_dir="Downloads/tmp_augustus",
     singularity:
-        "docker://aewebb/pipemake_utils:v1.3.2"
+        "docker://aewebb/pipemake_utils:v1.3.7"
     resources:
         mem_mb=2000,
     threads: 1

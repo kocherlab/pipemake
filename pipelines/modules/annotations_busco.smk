@@ -8,6 +8,8 @@ rule annotations_busco:
         f"Annotations/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_pep.fa",
     output:
         "Annotations/BUSCO/summary.txt",
+    log:
+        "logs/BUSCO/annotations_busco.log",
     params:
         download_dir="Downloads/BUSCO",
         output_dir="Annotations/BUSCO",

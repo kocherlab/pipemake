@@ -13,7 +13,7 @@ rule joint_softmask_assemblies_pipemake:
     output:
         f"Assembly/{config['species']}_{config['assembly_version']}.fa.masked",
     singularity:
-        "docker://aewebb/pipemake_utils:v1.3.2"
+        "docker://aewebb/pipemake_utils:v1.3.7"
     resources:
         mem_mb=2000,
     threads: 1

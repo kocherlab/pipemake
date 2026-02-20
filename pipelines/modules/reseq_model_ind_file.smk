@@ -17,6 +17,6 @@ rule model_name_ind_file:
         mem_mb=2000,
     threads: 1
     singularity:
-        "docker://aewebb/pipemake_utils:v1.3.2"
+        "docker://aewebb/pipemake_utils:v1.3.7"
     shell:
         "model-inds --model-file {input} --model-name {params.model_name} --out-prefix {params.out_prefix}"

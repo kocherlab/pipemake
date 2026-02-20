@@ -49,7 +49,7 @@ rule gemma_model_phenotype_file:
         mem_mb=2000,
     threads: 1
     singularity:
-        "docker://aewebb/pipemake_utils:v1.3.2"
+        "docker://aewebb/pipemake_utils:v1.3.7"
     shell:
         "ped-phenotype-file --fam {input.fam_file} --model-file {input.model_file} --model-name {wildcards.model} --binary --out-prefix {params.out_prefix}"
 
@@ -138,7 +138,7 @@ rule calc_pve_gemma:
         mem_mb=2000,
     threads: 1
     singularity:
-        "docker://aewebb/pipemake_utils:v1.3.2"
+        "docker://aewebb/pipemake_utils:v1.3.7"
     shell:
         "calc-pve --input {input} --output {output}"
 
@@ -155,7 +155,7 @@ rule filter_gemma:
         mem_mb=2000,
     threads: 1
     singularity:
-        "docker://aewebb/pipemake_utils:v1.3.2"
+        "docker://aewebb/pipemake_utils:v1.3.7"
     shell:
         "filter-gemma --gemma-file {input} --min-log-pvalue {params.min_log_pvalue} --out-filename {output.filtered_file}"
 
@@ -171,6 +171,6 @@ rule plot_gemma:
         mem_mb=2000,
     threads: 1
     singularity:
-        "docker://aewebb/pipemake_utils:v1.3.2"
+        "docker://aewebb/pipemake_utils:v1.3.7"
     shell:
         "manhattan-plot --input-file {input} --chrom-col chr --pos-col ps --stat-col p_wald --plot-stat-text 'Wald test p-value' --chrom-pos-sep '_' --plot-neg-log --out-prefix {params.out_prefix}"

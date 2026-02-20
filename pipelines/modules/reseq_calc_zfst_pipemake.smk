@@ -15,7 +15,7 @@ rule reseq_model_calc_zfst_pipemake:
         out_prefix=f"reSEQ/PopGen/ZFst/{{model}}/{config['species']}_{config['assembly_version']}.filtered.{{pair}}.fst",
         fst_method=config["fst_method"],
     singularity:
-        "docker://aewebb/pipemake_utils:v1.3.2"
+        "docker://aewebb/pipemake_utils:v1.3.7"
     resources:
         mem_mb=8000,
     threads: 1
@@ -35,7 +35,7 @@ rule plot_zfst_pipemake:
     params:
         "reSEQ/PopGen/ZFst/{{model}}/{config['species']}_{config['assembly_version']}.{{pair}}.fst",
     singularity:
-        "docker://aewebb/pipemake_utils:v1.3.2"
+        "docker://aewebb/pipemake_utils:v1.3.7"
     resources:
         mem_mb=2000,
     threads: 1

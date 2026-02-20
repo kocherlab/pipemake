@@ -9,6 +9,8 @@ rule annotations_compleasm:
         compleasm_library=f"Downloads/compleasm/{config['busco_database']}.done",
     output:
         "Annotations/compleasm/summary.txt",
+    log:
+        "logs/compleasm/annotations_compleasm.log",
     params:
         output_dir="Annotations/compleasm",
         download_dir="Downloads/compleasm",

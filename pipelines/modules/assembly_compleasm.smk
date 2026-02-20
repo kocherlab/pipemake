@@ -9,6 +9,8 @@ rule assembly_compleasm:
         compleasm_library=f"Downloads/compleasm/{config['busco_database']}.done",
     output:
         "Assembly/compleasm/summary.txt",
+    log:
+        "logs/compleasm/assembly_compleasm.log",
     params:
         output_dir="Assembly/compleasm",
         download_dir="Downloads/compleasm",
