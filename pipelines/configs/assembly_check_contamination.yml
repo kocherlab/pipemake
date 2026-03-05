@@ -46,16 +46,19 @@ parser:
           help: "Path to the NCBI nt database"
           type: str
           required: True
+          setup-arg: path
         uniprot-db:
           help: "Path to the Uniprot database"
           type: str
           required: True
           action: confirmFile
+          setup-arg: path
         ncbi-taxa-db:
           help: "Path to the NCBI taxa database"
           type: str
           required: True
           action: confirmDir
+          setup-arg: path
 setup:
   hifi_input:
     methods:

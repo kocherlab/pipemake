@@ -83,18 +83,26 @@ class ConfigPipelineIO:
         self._snakefiles = set(config_dict["snakemake"]["modules"])
         logging.info(f"Loaded the following snakefiles: {self._snakefiles}")
 
-        # Set the pipeline paths
-        if "paths" in config_dict:
-            self._setup_paths = config_dict["paths"]
-            config_dict.pop("paths")
-        else:
-            self._setup_paths = {}
+        # Assign any setup paths as singularity bindings
+        self._setup_paths = []
+
+        # Check if any parser arguments has a setup argument
+        for parser_group_name in self.parser_dict["arg-groups"].keys():
+            for parser_arg_name, parser_arg_dict in self.parser_dict["arg-groups"][
+                parser_group_name
+            ]["args"].items():
+                if "setup-arg" not in parser_arg_dict:
+                    continue
+
+                # Assign any path arguments as singularity bindings
+                if parser_arg_dict["setup-arg"] == "path":
+                    self._setup_paths.append(f'{{{parser_arg_name.replace("-", "_")}}}')
+
+        # Create a list to store the linked rules
+        self._snakelinks = []
 
         # Check if linked rules are provided
         if "links" in config_dict["snakemake"]:
-            # Create a list to store the linked rules
-            self._snakelinks = []
-
             # Create set to store the linked output
             linked_output = set()
 
@@ -133,8 +141,17 @@ class ConfigPipelineIO:
 
                 # Append the rule to the linked rules
                 self._snakelinks.append(link)
-        else:
-            self._snakelinks = []
+
+        # Create a list to store the snakemake args
+        self._snakeargs = {}
+
+        # Check if linked rules are provided
+        if "args" in config_dict["snakemake"]:
+            # Loop through the snakemake args and assign them to the snakeargs dict
+            for snakearg_name, snakearg_value in config_dict["snakemake"][
+                "args"
+            ].items():
+                self._snakeargs[snakearg_name.replace("-", "_")] = snakearg_value
 
         config_dict.pop("snakemake")
 
@@ -209,6 +226,7 @@ class ConfigPipelineIO:
         if "workflow_dir" not in pipeline_args:
             raise Exception("Workflow prefix not found among pipeline arguments")
 
+        # Parse the setup block to assign the pipeline arguments and singularity bindings
         for setup_arg_name, setup_dict in self._setup_dict.items():
             # Create a dict to store the setup arguments
             setup_args = {
@@ -310,3 +328,8 @@ class ConfigPipelineIO:
 
             # Add the setup path to the singularity bindings
             self._singularity_bindings.add(setup_abs_path)
+
+        # Loop through the snakemake args and their values
+        for snake_arg_name, snake_arg_value in self._snakeargs.items():
+            # Assign the snakemake argument value to the setup pipeline args
+            self.setup_pipeline_args[snake_arg_name] = snake_arg_value

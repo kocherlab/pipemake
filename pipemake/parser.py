@@ -199,45 +199,52 @@ class PipelineParser:
 
             # Check if wildcards are present
             for pipeline_arg_name, arg_args in self._yeildGroup("args", group_args):
+                # Create a copy of the arg_args to avoid modifying the original
+                _arg_args = arg_args.copy()
+
                 # Process and arg type, if applicable
-                if "type" in arg_args:
-                    arg_args = self._processArgType(arg_args)
+                if "type" in _arg_args:
+                    _arg_args = self._processArgType(_arg_args)
 
                 # Process the arg action, if applicable
-                if "action" in arg_args:
-                    arg_args = self._processArgAction(arg_args)
+                if "action" in _arg_args:
+                    _arg_args = self._processArgAction(_arg_args)
 
                 # Process the arg default, if applicable
-                if "default" in arg_args:
-                    arg_args = self._processArgDefaults(arg_args)
+                if "default" in _arg_args:
+                    _arg_args = self._processArgDefaults(_arg_args)
 
                 # Assign the argument wildcards, if applicable
-                if "wildcards" in arg_args:
-                    arg_args = self._processArgWildcard(
-                        pipeline_arg_name, arg_args, arg_wildcards
+                if "wildcards" in _arg_args:
+                    _arg_args = self._processArgWildcard(
+                        pipeline_arg_name, _arg_args, arg_wildcards
                     )
 
                 # Check if a default value exists
-                elif "default" in arg_args and not isinstance(
-                    arg_args["default"], dict
+                elif "default" in _arg_args and not isinstance(
+                    _arg_args["default"], dict
                 ):
                     # Add the default string to the help message
-                    arg_args["help"] += f' (default: { arg_args["default"]})'
+                    _arg_args["help"] += f' (default: { _arg_args["default"]})'
 
                 # Reassign the pipeline_arg_group based on required status
-                if "mutually-exclusive" in arg_args:
-                    arg_group = arg_args["mutually-exclusive"]
-                    del arg_args["mutually-exclusive"]
-                elif pipeline_arg_group == "basic" and "required" in arg_args:
+                if "mutually-exclusive" in _arg_args:
+                    arg_group = _arg_args["mutually-exclusive"]
+                    del _arg_args["mutually-exclusive"]
+                elif pipeline_arg_group == "basic" and "required" in _arg_args:
                     arg_group = "required"
                 elif pipeline_arg_group == "basic":
                     arg_group = "optional"
                 else:
                     arg_group = pipeline_arg_group
 
+                # Skip setup arguments for now, they will be check by the pipelineIO module
+                if "setup-arg" in _arg_args:
+                    del _arg_args["setup-arg"]
+
                 # Assign the argument
                 pipeline_arg_groups[arg_group].add_argument(
-                    f"--{pipeline_arg_name}", **arg_args
+                    f"--{pipeline_arg_name}", **_arg_args
                 )
 
         # Add the common optional arguments, but at the end of the list
