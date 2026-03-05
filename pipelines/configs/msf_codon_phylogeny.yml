@@ -1,0 +1,95 @@
+pipeline: msf-codon-phylogeny
+version: 1.0
+parser:
+  help: Create codon phylogenies by aligning with MACSE and trimming with ClipKIT, and then inferring trees with IQ-TREE
+  arg-groups:
+    basic:
+      mutually-exclusive-args:
+        input-parser:
+          required: True
+      wildcards-args:
+        msf-standardized-filename: "{samples}.fa"
+      args:
+        msf-wildcard:
+          help: "Wildcard statement to represent MSF files"
+          type: str
+          mutually-exclusive: "input-parser"
+          wildcards: "msf-standardized-filename"
+        msf-table:
+          help: "Table with sample and MSF filenames"
+          type: str
+          action: confirmFile
+          mutually-exclusive: "input-parser"
+          wildcards: "msf-standardized-filename"
+        msf-copy-method:
+          help: "Specifies if MSFs should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+    macse_params:
+      args:
+        codon-final-stop:
+          help: "Codon to use for final stop codons in MACSE"
+          type: str
+          default: "---"
+        codon-external-fs:
+          help: "Codon to use for external frameshifts in MACSE"
+          type: str
+          default: "---"
+        codon-internal-fs:
+          help: "Codon to use for internal frameshifts in MACSE"
+          type: str
+          default: "NNN"
+        char-remaining-fs:
+          help: "Character to use for remaining frameshifts in MACSE"
+          type: str
+          default: "N"
+    clipkit_params:
+      args:
+        trim-method:
+          help: "Method to use for trimming alignments with ClipKIT"
+          choices:
+            - 'smart-gap'
+            - 'entropy'
+            - 'gappy'
+            - 'block-gappy'
+            - 'gappyout'
+            - 'composition-bias'
+            - 'heterotachy'
+            - 'kpic'
+            - 'kpic-smart-gap'
+            - 'kpic-gappy'
+            - 'kpi'
+            - 'kpi-smart-gap'
+            - 'kpi-gappy'
+            - 'c3'
+            - 'cst'
+          default: 'smart-gap'
+          
+setup:
+  msf_input:
+    methods:
+      wildcard-str: "{msf-wildcard}"
+      table-file: "{msf-table}"
+    args:
+      standardized_filename: "MSF/CDS/{msf-standardized-filename}"
+      copy_method: '{msf-copy-method}'
+      sample_keywords:
+        - "samples"
+
+snakemake:
+  modules:
+    - msf_align_codons_macse
+    - msa_trim_clipkit
+    - msa_tree_iqtree
+  links:
+    - input: msa_export_macse
+      output: trim_msa_clipkit
+      file_mappings:
+        - input: nt_msa
+          output: 0
+    - input: trim_msa_clipkit
+      output: reconstruct_tree_iqtree
+  args: 
+    codon-msa: True

@@ -3,7 +3,7 @@ rule all:
         expand("iqtree/{sample}.fa.contree", sample=config["samples"]),
 
 
-rule run_iqtree:
+rule reconstruct_tree_iqtree:
     input:
         "iqtree/{sample}.fa",
     output:
