@@ -234,6 +234,8 @@ class SnakePipelineIO:
         logging.info(f"Module added to pipeline: {module_filename}")
 
     def addSnakeLink(self, link_statement):
+        print(link_statement)
+
         # Assign the input and output rules from the link statement
         input_rule = link_statement["input"]
         output_block = link_statement["output"]
@@ -242,7 +244,7 @@ class SnakePipelineIO:
         file_mappings = []
 
         # Assign input and output rules if specified
-        if "files" in link_statement:
+        if "file_mappings" in link_statement:
             for files in link_statement["file_mappings"]:
                 file_mappings.append(files)
 
