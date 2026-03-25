@@ -116,6 +116,7 @@ class SnakePipelineIO:
 
         # Create arguments to populate
         self._module_filenames = []
+        self._inherited_module_filenames = []
         self._linked_rules = {}
         self._output_list = []
         self._config_params = set()
@@ -199,8 +200,11 @@ class SnakePipelineIO:
         # Create the job module file
         smk_module.write(storage_module_path)
 
-        # Add the module filename to the list
-        self._module_filenames.append(module_filename)
+        # Add the module filename to the list, depending on if it is an inherited file or not
+        if smk_module._is_inherited_file:
+            self._inherited_module_filenames.append(module_filename)
+        else:
+            self._module_filenames.append(module_filename)
 
         # Assign the snakefile IO attributes to the pipeline
         for rule, rule_io_attributes in smk_module._file_IO_attributes.items():
@@ -487,6 +491,16 @@ class SnakePipelineIO:
 
         logging.info(f"Module files written successfully: {self._module_filenames}")
 
+        if self._inherited_module_filenames:
+            for module_filename in self._inherited_module_filenames:
+                self._pipe_file.write(
+                    f'include: "{os.path.join(self._internal_module_job_dir, module_filename)}"\n'
+                )
+
+            logging.info(
+                f"Inherited module files written successfully: {self._inherited_module_filenames}"
+            )
+
         # Skip rule linking if no linked rules
         if not self._linked_rules.values():
             logging.info("Pipeline written successfully")
@@ -654,7 +668,6 @@ class SnakeFileIO:
         self._singularity_dir = singularity_dir
         self._indent_style = None
         self._output_rule = "all"
-        self._exclude_rules = [self._output_rule]
         self._file_rules = []
         self._non_rule_text = ""
 
@@ -702,6 +715,19 @@ class SnakeFileIO:
                 file_script_files.append(script_file)
         return file_script_files
 
+    @property
+    def _is_inherited_file(self):
+        # Create list to store the inherited rules
+        inherited_rules = [rule._inherited for rule in self._file_rules]
+
+        # Return error if the file has a mix of inherited and non-inherited rules
+        if any(inherited_rules) and not all(inherited_rules):
+            raise Exception(
+                f"File has a mix of inherited and non-inherited rules: {self.filename}"
+            )
+
+        return all(inherited_rules)
+
     def _assignIndent(self):
         # Bool to store if within a rule
         in_rule_block = False
@@ -718,6 +744,7 @@ class SnakeFileIO:
                     if (
                         smk_line.startswith("rule")
                         or smk_line.startswith("checkpoint")
+                        or smk_line.startswith("use")
                         or smk_line.startswith("def")
                     ):
                         continue
@@ -761,7 +788,11 @@ class SnakeFileIO:
                         raise Exception("Unable to assign indent style")
 
                 # Check if within first rule block
-                if smk_line.split(" ")[0] == "rule":
+                if smk_line.split(" ")[0] in [
+                    "rule",
+                    "checkpoint",
+                    "use",
+                ] and smk_line.rstrip().endswith(":"):
                     in_rule_block = True
 
     def _parseFile(self):
@@ -785,6 +816,7 @@ class SnakeFileIO:
                 is_rule_line = (
                     smk_list[0].startswith("rule")
                     or smk_list[0].startswith("checkpoint")
+                    or smk_list[0].startswith("use")
                 ) and smk_line.rstrip().endswith(":")
 
                 # Check if the line is the end of a rule
@@ -851,7 +883,13 @@ class SnakeRuleIO:
         # Assign the rule argument to populate
         self._original_text = rule_str
         self._original_text_list = self._original_text.splitlines()
-        self.rule_name = self._original_text_list[0].split()[1][:-1]
+        self._inherited = (
+            True if self._original_text_list[0].startswith("use rule") else False
+        )
+        if not self._inherited:
+            self.rule_name = self._original_text_list[0].split()[1][:-1]
+        else:
+            self.rule_name = self._original_text_list[0].split()[4]
         self._output_rule = self.rule_name == output_rule
         self._singularity_dir = singularity_dir
         self._indent_style = indent_style
