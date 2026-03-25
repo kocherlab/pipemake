@@ -66,6 +66,13 @@ jobs:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
         run: |
           conda build .conda/pipemake-internal-argo --output-folder build
+      - name: Build Ubuntu - Internal Della
+        if: matrix.os == 'ubuntu-latest'
+        shell: bash -l {0}
+        env:
+          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
+        run: |
+          conda build .conda/pipemake-internal-della --output-folder build
       - name: Upload Ubuntu
         if: matrix.os == 'ubuntu-latest'
         shell: bash -l {0}
