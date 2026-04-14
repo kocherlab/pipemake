@@ -1,4 +1,4 @@
-name: Conda Upload
+name: Conda Upload - Apple
 
 on:
   workflow_dispatch:
