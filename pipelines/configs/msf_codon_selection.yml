@@ -1,7 +1,7 @@
-pipeline: msf-codon-phylogeny
+pipeline: msf-codon-selection
 version: 1.0
 parser:
-  help: Create codon phylogenies by aligning with MACSE and trimming with ClipKIT, and then inferring trees with IQ-TREE
+  help: Perform HyPhy selection analyses on MSFs by aligning with MACSE, trimming with ClipKIT, and inferring trees with IQ-TREE
   arg-groups:
     basic:
       mutually-exclusive-args:
@@ -84,5 +84,7 @@ snakemake:
     - msa_trim_clipkit
     - msa_tree_iqtree
     - msf_codon_phylogeny_links
+    - msa_selection_BUSTED
+    - msa_selection_absrel
   args: 
     codon-msa: True
