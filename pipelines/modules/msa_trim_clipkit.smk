@@ -17,4 +17,4 @@ rule trim_msa_clipkit:
         mem_mb=16000,
     threads: 1
     shell:
-        "clipkit {params.codon} --method {params.method} --output {output} {input}"
+        "clipkit {params.codon} --mode {params.method} --output {output} {input}"

@@ -13,7 +13,7 @@ rule msf_align_macse:
     log:
         "logs/MACSE/{sample}.msf_align_macse.log",
     singularity:
-        "docker://ranwez/omm_macse:v10.02"
+        "docker://aewebb/macse:v2.07"
     resources:
         mem_mb=16000,
     threads: 1
@@ -35,7 +35,7 @@ rule msa_export_macse:
         codon_internal_fs=config["macse_params"]["codon_internal_fs"],
         char_remaining_fs=config["macse_params"]["char_remaining_fs"],
     singularity:
-        "docker://ranwez/omm_macse:v10.02"
+        "docker://aewebb/macse:v2.07"
     resources:
         mem_mb=8000,
     threads: 1
