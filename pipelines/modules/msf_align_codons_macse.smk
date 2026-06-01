@@ -12,13 +12,18 @@ rule msf_align_macse:
         nt_msa="MSA/MACSE/{sample}_NT.macse_fmt.fa",
     log:
         "logs/MACSE/{sample}.msf_align_macse.log",
+    params:
+        mem_mb_reduce=800,
     singularity:
         "docker://aewebb/macse:v2.07"
     resources:
         mem_mb=16000,
     threads: 1
     shell:
-        "macse -prog alignSequences -seq {input} -out_NT {output.nt_msa} -out_AA {output.aa_msa}"
+        """
+        let "mem_mb_reduced={resources.mem_mb} - {params.mem_mb_reduce}"
+        macse -Xms${{mem_mb_reduced}}m -Xmx${{mem_mb_reduced}}m -prog alignSequences -seq {input} -out_NT {output.nt_msa} -out_AA {output.aa_msa}
+        """
 
 
 rule msa_export_macse:
