@@ -16,4 +16,4 @@ rule msf_align_muscle:
         mem_mb=16000,
     threads: 1
     shell:
-        "muscle -align {input} -output {output}"
+        "muscle -align {input} -output {output} 2> {log}"
