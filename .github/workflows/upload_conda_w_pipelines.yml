@@ -20,13 +20,10 @@ jobs:
           channels: conda-forge,bioconda,conda-forge/label/python_rc
       - name: Setup (${{ matrix.os }})
         run: |
-          conda install -y conda-build anaconda-client
+          conda install -y conda-build anaconda::anaconda-client
       - name: Build (${{ matrix.os }}) - External
         run: |
           conda build .conda/pipemake --output-folder build
-      - name: Activate base
-        run: |
-          conda activate base
       - name: Upload Windows
         if: matrix.os == 'windows-latest'
         env:
