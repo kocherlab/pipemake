@@ -19,10 +19,10 @@ jobs:
           activate-environment: pipemake
           environment-file: .conda/environment_build.yml
           python-version: 3.9
-          channels: conda-forge,bioconda
+          channels: conda-forge,bioconda,conda-forge/label/python_rc
       - name: Setup (${{ matrix.os }})
         run: |
-          conda install -y conda-build anaconda-client
+          conda install -y conda-build main::anaconda-client
       - name: Build (${{ matrix.os }}) - External
         run: |
           conda build .conda/pipemake --output-folder build
