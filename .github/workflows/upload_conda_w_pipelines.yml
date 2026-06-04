@@ -19,8 +19,7 @@ jobs:
           activate-environment: pipemake
           environment-file: .conda/environment_build.yml
           python-version: 3.9
-          channels: conda-forge,bioconda,conda-forge/label/python_rc
-          channel-priority: true
+          channels: conda-forge,bioconda
       - name: Setup (${{ matrix.os }})
         run: |
           conda install -y conda-build anaconda-client
