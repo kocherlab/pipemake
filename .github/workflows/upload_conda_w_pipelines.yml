@@ -14,9 +14,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: conda-incubator/setup-miniconda@v4
         with:
-          activate-environment: pipemake
-          environment-file: .conda/environment_build.yml
-          python-version: 3.9
+          auto-activate: true
+          activate-environment: ""
           channels: conda-forge,bioconda,conda-forge/label/python_rc
       - name: Setup (${{ matrix.os }})
         run: |
