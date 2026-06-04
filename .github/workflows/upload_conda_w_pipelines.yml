@@ -50,7 +50,7 @@ jobs:
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
         run: |
-          anaconda -t "$env:ANACONDA_API_TOKEN" upload --force --user kocherlab build/osx-arm64/*.conda
+          anaconda -t "$ANACONDA_API_TOKEN" upload --force --user kocherlab build/osx-arm64/*.conda
       - name: Upload Ubuntu
         if: matrix.os == 'ubuntu-latest'
         shell: bash -el {0}
