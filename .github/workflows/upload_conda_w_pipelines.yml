@@ -22,6 +22,7 @@ jobs:
           python-version: 3.9
           channels: conda-forge,bioconda,conda-forge/label/python_rc
           channel-priority: true
+          conda-build-version: "latest"
       - name: Build Windows - External
         if: matrix.os == 'windows-latest'
         shell: powershell
