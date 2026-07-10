@@ -15,7 +15,7 @@ rule msf_align_macse:
     params:
         mem_mb_reduce=512,
         output_prefix=subpath(output.aa_msa, parent=True),
-        limit_max_refine_iter="-max_refine_iter 3" if config["max_refine_iter"] else "",
+        max_refine_iter=config["max_refine_iter"],
     singularity:
         "docker://aewebb/macse:v2.07"
     resources:
@@ -24,7 +24,7 @@ rule msf_align_macse:
     shell:
         """
         let "mem_mb_reduced={resources.mem_mb} - {params.mem_mb_reduce}"
-        macse -Xmx${{mem_mb_reduced}}m -prog alignSequences {params.limit_max_refine_iter} -seq {input} -out_NT {output.nt_msa} -out_AA {output.aa_msa} > {log}
+        macse -Xmx${{mem_mb_reduced}}m -prog alignSequences -max_refine_iter {params.max_refine_iter} -seq {input} -out_NT {output.nt_msa} -out_AA {output.aa_msa} > {log}
         """
 
 

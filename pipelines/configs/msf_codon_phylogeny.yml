@@ -29,6 +29,10 @@ parser:
           default: 'symbolic_link'
     macse_params:
       args:
+        max_refine_iter:
+          help: "Maximum number of refinement iterations for MACSE"
+          type: int
+          default: 3
         codon-final-stop:
           help: "Codon to use for final stop codons in MACSE"
           type: str
@@ -85,4 +89,4 @@ snakemake:
     - msa_tree_iqtree
     - msf_codon_phylogeny_links
   args: 
-    codon-msa: True
+    codon_msa: True
