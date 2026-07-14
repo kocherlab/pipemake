@@ -407,10 +407,10 @@ class SnakePipelineIO:
 
         # Create a list of config params to sort by length
         config_params_list = list(self._config_params)
-        config_params_list.sort(key=lambda t: len(t))
+        config_params_list.sort(key=lambda t: len(t[0]))
 
         # Populate the config yml dict with the pipeline args
-        for config_param in config_params_list:
+        for config_param, config_type in config_params_list:
             # Check if the config param is within a group
             if len(config_param) > 1:
                 group, config_arg = config_param
@@ -425,6 +425,9 @@ class SnakePipelineIO:
 
             # Raise an error if the pipeline arg is not in the pipeline args
             if pipeline_arg not in pipeline_args:
+                if config_type == "optional":
+                    logging.info(f"Optional pipeline arg not found: {pipeline_arg}")
+                    continue
                 raise Exception(f"Pipeline arg not found: {pipeline_arg}")
 
             # Check if the group is not in the yml dict
@@ -721,12 +724,12 @@ class SnakeFileIO:
         inherited_rules = [rule._inherited for rule in self._file_rules]
 
         # Return error if the file has a mix of inherited and non-inherited rules
-        if any(inherited_rules) and not all(inherited_rules):
+        if any(inherited_rules) and not all(inherited_rules) and not self._output_rule:
             raise Exception(
                 f"File has a mix of inherited and non-inherited rules: {self.filename}"
             )
 
-        return all(inherited_rules)
+        return any(inherited_rules)
 
     def _assignIndent(self):
         # Bool to store if within a rule
@@ -1026,10 +1029,12 @@ class SnakeRuleIO:
                 config_str = f"[{config_match.group(2)}]"
                 if config_match.group(3):
                     config_str = mergeLines(config_match.group(3)) + config_str
+                config_type = "optional"
 
             # Check if the match is a required config param
             else:
                 config_str = mergeLines(config_match.group(0))
+                config_type = "required"
 
             # Remove quotes from the config string
             config_str = config_str.replace('"', "").replace("'", "")
@@ -1053,7 +1058,7 @@ class SnakeRuleIO:
                 )
 
             # Add the config assignment to the set
-            self._rule_config_params.add(tuple(config_list))
+            self._rule_config_params.add(tuple([tuple(config_list), config_type]))
 
     def _updateRule(self):
         for rule_line in self._original_text_list[1:]:

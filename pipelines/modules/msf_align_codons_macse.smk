@@ -12,10 +12,12 @@ rule msf_align_macse:
         nt_msa="MSA/MACSE/{sample}_NT.macse_fmt.fa",
     log:
         "logs/MACSE/{sample}.msf_align_macse.log",
+    benchmark:
+        "benchmarks/MACSE/{sample}.msf_align_macse.benchmark"
     params:
         mem_mb_reduce=512,
         output_prefix=subpath(output.aa_msa, parent=True),
-        max_refine_iter=config["max_refine_iter"],
+        max_refine_iter=config["macse_params"]["max_refine_iter"],
     singularity:
         "docker://aewebb/macse:v2.07"
     resources:

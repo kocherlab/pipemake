@@ -10,7 +10,7 @@ rule trim_msa_clipkit:
         "MSA/Trimmed/{sample}.fa",
     params:
         method=config["clipkit_params"]["trim_method"],
-        codon="--codon" if config["codon_msa"] else "",
+        codon="--codon" if "codon_msa" in config else "",
     singularity:
         "docker://aewebb/clipkit:v2.11.4"
     resources:

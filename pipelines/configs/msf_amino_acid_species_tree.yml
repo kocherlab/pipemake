@@ -1,7 +1,7 @@
-pipeline: msf-codon-selection
+pipeline: msf-amino-acid-species-tree
 version: 1.0
 parser:
-  help: Perform HyPhy selection analyses on MSFs by aligning with MACSE, trimming with ClipKIT, and inferring trees with IQ-TREE
+  help: Create a species tree from amino acid MSF files using wASTRAL.
   arg-groups:
     basic:
       mutually-exclusive-args:
@@ -27,28 +27,11 @@ parser:
             - 'symbolic_link'
             - 'copy'
           default: 'symbolic_link'
-    macse_params:
-      args:
-        max_refine_iter:
-          help: "Maximum number of refinement iterations for MACSE"
-          type: int
-          default: 3
-        codon-final-stop:
-          help: "Codon to use for final stop codons in MACSE"
+        id-mappings:
+          help: "File with mappings of gene tree tip names to species names."
           type: str
-          default: "---"
-        codon-external-fs:
-          help: "Codon to use for external frameshifts in MACSE"
-          type: str
-          default: "---"
-        codon-internal-fs:
-          help: "Codon to use for internal frameshifts in MACSE"
-          type: str
-          default: "NNN"
-        char-remaining-fs:
-          help: "Character to use for remaining frameshifts in MACSE"
-          type: str
-          default: "N"
+          action: confirmFile
+          required: True
     clipkit_params:
       args:
         trim-method:
@@ -70,25 +53,28 @@ parser:
             - 'c3'
             - 'cst'
           default: 'smart-gap'
-          
 setup:
   msf_input:
     methods:
       wildcard-str: "{msf-wildcard}"
       table-file: "{msf-table}"
     args:
-      standardized_filename: "MSF/CDS/{msf-standardized-filename}"
+      standardized_filename: "MSF/AA/{msf-standardized-filename}"
       copy_method: '{msf-copy-method}'
       sample_keywords:
         - "samples"
+  id_mappings:
+    methods:
+      file-str: "{id-mappings}"
+    args:
+      standardized_filename: "wASTRAL/id_mappings.txt"
+      copy_method: 'copy'
 
 snakemake:
   modules:
-    - msf_align_codons_macse
+    - msf_align_muscle
+    - msf_align_muscle_aa_links
     - msa_trim_clipkit
     - msa_tree_iqtree
-    - msf_phylogeny_codon_links
-    - msa_selection_BUSTED
-    - msa_selection_absrel
-  args: 
-    codon_msa: True
+    - msf_phylogeny_aa_links
+    - tre_infer_species_tree_wASTRAL

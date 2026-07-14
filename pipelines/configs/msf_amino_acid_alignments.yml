@@ -58,4 +58,5 @@ setup:
 
 snakemake:
   modules:
-    - msf_align_amino_acids_muscle
+    - msf_align_muscle
+    - msf_align_muscle_aa_links

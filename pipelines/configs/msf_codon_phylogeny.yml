@@ -87,6 +87,6 @@ snakemake:
     - msf_align_codons_macse
     - msa_trim_clipkit
     - msa_tree_iqtree
-    - msf_codon_phylogeny_links
+    - msf_phylogeny_codon_links
   args: 
     codon_msa: True

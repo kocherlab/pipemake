@@ -14,5 +14,7 @@ rule msa_link_muscle_aa:
     output:
         "MSA/AA/{sample}.fa",
     localrule: True
-    shell:
-        "ln -s {input} {output}"
+    run:
+        import os
+
+        os.symlink(os.path.abspath(input[0]), output[0])
