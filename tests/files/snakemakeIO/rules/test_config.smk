@@ -15,7 +15,9 @@ rule script_call:
         test_param_optional_1=f"1" if "test3" in config else "0",
         test_param_optional_2=f'--test {config["test4"]}' if "test4" in config else "",
         test_param_optional_3=(
-            f"--test {config['test5']}" if "test5" in config["params"] else ""
+            f"--test {config["params"]['test5']}"
+            if "test5" in config["params"]
+            else ""
         ),
         test_param_optional_3=f"1" if "test6" in config["params"] else "0",
         config_test=config["test7"],

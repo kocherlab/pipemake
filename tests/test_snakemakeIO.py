@@ -233,9 +233,9 @@ def test_SnakeRuleIO_wo_error(rule_filename):
     assert test_rule.rule_name == "fastp_pair_end"
     assert test_rule._rule_resource_params == {"threads": 4, "mem_mb": 16000}
     assert test_rule._rule_config_params == {
-        ("paths", "unfiltered_fastq_dir"),
-        ("paths", "filtered_fastq_dir"),
-        ("min_length",),
+        (("paths", "unfiltered_fastq_dir"), "required"),
+        (("paths", "filtered_fastq_dir"), "required"),
+        (("min_length",), "required"),
     }
 
 
@@ -264,14 +264,14 @@ def test_SnakeRuleIO_w_config(rule_filename):
     # Test if the function raises an error
     config_test = SnakeRuleIO.read(rule_str=test_str, indent_style="    ")
 
-    assert ("test1",) in config_test._rule_config_params
-    assert ("params", "test2") in config_test._rule_config_params
-    assert ("test3",) in config_test._rule_config_params
-    assert ("test4",) in config_test._rule_config_params
-    assert ("params", "test5") in config_test._rule_config_params
-    assert ("params", "test6") in config_test._rule_config_params
-    assert ("test7",) in config_test._rule_config_params
-    assert ("params", "test8") in config_test._rule_config_params
+    assert (("test1",), "required") in config_test._rule_config_params
+    assert (("params", "test2"), "required") in config_test._rule_config_params
+    assert (("test3",), "optional") in config_test._rule_config_params
+    assert (("test4",), "required") in config_test._rule_config_params
+    assert (("params", "test5"), "required") in config_test._rule_config_params
+    assert (("params", "test6"), "optional") in config_test._rule_config_params
+    assert (("test7",), "required") in config_test._rule_config_params
+    assert (("params", "test8"), "required") in config_test._rule_config_params
 
 
 @pytest.mark.parametrize(

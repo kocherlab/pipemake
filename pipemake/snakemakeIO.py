@@ -1024,6 +1024,9 @@ class SnakeRuleIO:
             r"(?<=config)(\[[^:\]]+\]+)+|if\s*(.*?)\s*in\s*?config((\[(?![^\]]*:[^\]]*)[^\]]*\])*)?",
             self._original_text,
         ):
+            # Assign the config type, default to required
+            config_type = "required"
+
             # Check if the match is an optional config param
             if "if " in config_match.group(0):
                 config_str = f"[{config_match.group(2)}]"
@@ -1057,8 +1060,18 @@ class SnakeRuleIO:
                     f"Config param error. Too many param levels: {self._original_text}"
                 )
 
-            # Add the config assignment to the set
-            self._rule_config_params.add(tuple([tuple(config_list), config_type]))
+            # Check if the config param is already stored, and add it if not
+            if not any(_i[0] == tuple(config_list) for _i in self._rule_config_params):
+                self._rule_config_params.add(tuple([tuple(config_list), config_type]))
+                continue
+
+            # Update the config param type if it was previously stored as optional, and is now required
+            if (
+                tuple([tuple(config_list), "optional"]) in self._rule_config_params
+                and config_type == "required"
+            ):
+                self._rule_config_params.remove(tuple([tuple(config_list), "optional"]))
+                self._rule_config_params.add(tuple([tuple(config_list), "required"]))
 
     def _updateRule(self):
         for rule_line in self._original_text_list[1:]:
