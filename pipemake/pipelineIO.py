@@ -269,7 +269,7 @@ class ConfigPipelineIO:
                     f"Setup method not assigned for {setup_arg_name}, skipping setup"
                 )
                 self.setup_pipeline_args[setup_arg_name] = None
-                break
+                continue
 
             # Standardize the input arguments
             for setup_arg, setup_value in setup_dict["args"].items():
