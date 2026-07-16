@@ -1,0 +1,95 @@
+pipeline: fasta-align-assembly-miniprot
+version: 1.0
+parser:
+  help: Align coding or amino acid sequences to an assembly using miniprot
+  arg-groups:
+    basic:
+      mutually-exclusive-args:
+        input-parser:
+          required: True
+      wildcards-args:
+        fasta-standardized-filename: "{samples}.fa"
+      args:
+        aa-wildcard:
+          help: "Wildcard statement to represent amino acid files"
+          type: str
+          mutually-exclusive: "input-parser"
+          wildcards: "fasta-standardized-filename"
+        aa-table:
+          help: "Table with sample and amino acid filenames"
+          type: str
+          action: confirmFile
+          mutually-exclusive: "input-parser"
+          wildcards: "fasta-standardized-filename"
+        cds-wildcard:
+          help: "Wildcard statement to represent CDS files"
+          type: str
+          mutually-exclusive: "input-parser"
+          wildcards: "fasta-standardized-filename"
+        cds-table:
+          help: "Table with sample and CDS filenames"
+          type: str
+          action: confirmFile
+          mutually-exclusive: "input-parser"
+          wildcards: "fasta-standardized-filename"
+        fasta-copy-method:
+          help: "Specifies if MSFs should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        assembly-fasta:
+          help: "Assembly fasta"
+          type: str
+          required: True
+          action: confirmFile
+        assembly-copy-method:
+          help: "Specifies if assembly files should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        assembly-version:
+          help: "Assembly Version"
+          type: str
+          default:
+            str: "v"
+            suffix:
+              - function: jobRandomString
+        species:
+          help: "Species name"
+          type: str
+          default:
+            str: "Sp"
+            suffix:
+              - function: jobRandomString
+setup:
+  aa_input:
+    methods:
+      wildcard-str: "{aa-wildcard}"
+      table-file: "{aa-table}"
+    args:
+      standardized_filename: "Alignment/Query/AA/{fasta-standardized-filename}"
+      copy_method: '{fasta-copy-method}'
+      sample_keywords:
+        - "samples"
+  cds_input:
+    methods:
+      wildcard-str: "{cds-wildcard}"
+      table-file: "{cds-table}"
+    args:
+      standardized_filename: "Alignment/Query/CDS/{fasta-standardized-filename}"
+      copy_method: '{fasta-copy-method}'
+      sample_keywords:
+        - "samples"
+  assembly_input:
+    methods:
+      file-str: "{assembly-fasta}"
+    args:
+      standardized_filename: "Assembly/{species}_{assembly_version}.fa"
+      copy_method: "{assembly-copy-method}"
+      gzipped: False
+
+snakemake:
+  modules:
+    - fasta_align_miniprot
