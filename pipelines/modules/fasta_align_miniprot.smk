@@ -32,7 +32,7 @@ rule fasta_align_miniprot:
     shell:
         'miniprot -t {threads} --gff-only {input.assembly_fasta} {input.protein_fasta} > {output} 2> {log}'
 
-rule gff_to_proteins:
+rule miniprot_gff_to_proteins:
     input:
         gff_file="Alignment/miniprot/GFF/{sample}.gff",
         assembly_fasta=config["assembly_input"],
