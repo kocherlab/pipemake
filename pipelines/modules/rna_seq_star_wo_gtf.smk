@@ -40,8 +40,6 @@ rule star_single_end_rnaseq:
     resources:
         mem_mb=16000,
     threads: 4
-    resources:
-        mem_mb=1,
     shell:
         "STAR --runThreadN {threads} --runMode alignReads --genomeDir {params.index_dir} --outSAMtype BAM Unsorted --outFileNamePrefix {params.bam_prefix} --readFilesCommand zcat --readFilesIn {input.r1_reads} && "
         "mv {params.bam_prefix}Aligned.out.bam {params.bam_prefix}Aligned.bam"
