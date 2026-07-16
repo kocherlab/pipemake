@@ -1,6 +1,6 @@
 rule all:
     input:
-        expand("Alignment/miniprot/GFF/{sample}.gff", sample=config["samples"]),
+        expand("Alignment/miniprot/AA/{sample}.fa", sample=config["samples"]),
 
 
 rule fasta_translate_for_miniprot:
@@ -31,3 +31,17 @@ rule fasta_align_miniprot:
     threads: 4
     shell:
         'miniprot -t {threads} --gff-only {input.assembly_fasta} {input.protein_fasta} > {output} 2> {log}'
+
+rule gff_to_proteins:
+    input:
+        gff_file="Alignment/miniprot/GFF/{sample}.gff",
+        assembly_fasta=config["assembly_input"],
+    output:
+        "Alignment/miniprot/AA/{sample}.fa"
+    singularity:
+        "docker://aewebb/gffread:v0.12.7"
+    resources:
+        mem_mb=8000,
+    threads: 1
+    shell:
+        "gffread -y {output} -g {input.assembly_fasta} {input.gff_file}"
