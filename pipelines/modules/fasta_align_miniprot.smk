@@ -46,7 +46,7 @@ rule fasta_align_miniprot:
         mem_mb=8000,
     threads: 2
     shell:
-        'miniprot -t {threads} -P {params.species}-{wildcards.sample} --gff-only {input.assembly_fasta} {input.protein_fasta} > {output} 2> {log}'
+        'miniprot -t {threads} -P {params.species}-{wildcards.sample}- --gff-only {input.assembly_fasta} {input.protein_fasta} > {output} 2> {log}'
 
 rule miniprot_gff_to_proteins:
     input:
