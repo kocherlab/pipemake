@@ -1,0 +1,64 @@
+pipeline: msf-consensus-alignments
+version: 1.0
+parser:
+  help: Create consensus alignments using EMBOSS and MAFFT
+  arg-groups:
+    basic:
+      mutually-exclusive-args:
+        input-parser:
+          required: True
+      wildcards-args:
+        msf-standardized-filename: "{samples}.fa"
+      args:
+        msf-wildcard:
+          help: "Wildcard statement to represent MSF files"
+          type: str
+          mutually-exclusive: "input-parser"
+          wildcards: "msf-standardized-filename"
+        msf-table:
+          help: "Table with sample and MSF filenames"
+          type: str
+          action: confirmFile
+          mutually-exclusive: "input-parser"
+          wildcards: "msf-standardized-filename"
+        msf-copy-method:
+          help: "Specifies if MSFs should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+    mafft_params:
+      args:
+        run-mode:
+          help: "MAFFT run mode"
+          type: str
+          choices:
+            - 'linsi'
+            - 'ginsi'
+            - 'einsi'
+        op:
+          help: "MAFFT gap opening penalty"
+          type: float
+    emboss_cons_params:
+      args:
+        plurality:
+          help: "Plurality value for EMBOSS cons"
+          type: int
+          default: 1
+
+setup:
+  msf_input:
+    methods:
+      wildcard-str: "{msf-wildcard}"
+      table-file: "{msf-table}"
+    args:
+      standardized_filename: "MSF/CDS/{msf-standardized-filename}"
+      copy_method: '{msf-copy-method}'
+      sample_keywords:
+        - "samples"
+
+snakemake:
+  modules:
+    - msf_align_mafft
+    - msa_align_mafft_cds_links
+    - msa_con_emboss

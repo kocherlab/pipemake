@@ -6,7 +6,7 @@ rule all:
 rule hifi_align_minimap2:
     input:
         hifi_fastq="HiFi/FASTQ/{sample}.fq.gz",
-        assembly_fasta=f"Assembly/{config['species']}_{config['assembly_version']}.fa",
+        assembly_fasta=config["assembly_input"],
     output:
         bam="HiFi/BAM/Sorted/{sample}.sortedByCoord.bam",
         index="HiFi/BAM/Sorted/{sample}.sortedByCoord.bam.bai",

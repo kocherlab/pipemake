@@ -35,7 +35,7 @@ rule ln_scale_coverage_wiggletools:
 rule ln_wig_to_bigwig:
     input:
         wig_file="reSEQ/Coverage/{sample}.ln_scaled.wig",
-        assembly_file=f"Assembly/{config['species']}_{config['assembly_version']}.fa.fai",
+        assembly_file=f"{config['assembly_input']}.fai",
     output:
         "reSEQ/Coverage/{sample}.ln_scaled.bw",
     singularity:
