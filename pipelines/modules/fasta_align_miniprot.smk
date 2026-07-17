@@ -61,4 +61,4 @@ rule miniprot_gff_to_proteins:
         mem_mb=8000,
     threads: 1
     shell:
-        "gffread -y {output} -g {input.assembly_fasta} {input.gff_file}"
+        "gffread -V -y {output} -g {input.assembly_fasta} {input.gff_file}"
