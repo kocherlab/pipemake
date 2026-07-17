@@ -5,9 +5,9 @@ rule all:
 
 rule index_assembly:
     input:
-        f"Assembly/{config['species']}_{config['assembly_version']}.fa",
+        config["assembly_input"],
     output:
-        f"Assembly/{config['species']}_{config['assembly_version']}.fa.fai",
+        f"{config['assembly_input']}.fai",
     singularity:
         "docker://aewebb/samtools:v1.20"
     resources:

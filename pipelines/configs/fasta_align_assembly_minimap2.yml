@@ -92,4 +92,5 @@ setup:
 
 snakemake:
   modules:
+    - assembly_index
     - fasta_align_miniprot
