@@ -22,7 +22,7 @@ rule infer_species_tree_wASTRAL:
     log:
         "logs/wASTRAL/species_tree.log",
     singularity:
-        "docker://aewebb/aster:v1.25"
+        "docker://aewebb/aster:20260714"
     resources:
         mem_mb=32000,
     threads: 4
