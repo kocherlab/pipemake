@@ -1021,7 +1021,7 @@ class SnakeRuleIO:
 
         # Find all configs, separated by optional and required
         for config_match in re.finditer(
-            r"(?<=config)(\[[^:\]]+\]+)+|if\s*(.*?)\s*in\s*?config((\[(?![^\]]*:[^\]]*)[^\]]*\])*)?",
+            r"(?<=config)(\[[^:\]]+\]+)+|if\s*(.*?)\s*(?:not\s*in|in)\s*?config((\[(?![^\]]*:[^\]]*)[^\]]*\])*)?",
             self._original_text,
         ):
             # Assign the config type, default to required

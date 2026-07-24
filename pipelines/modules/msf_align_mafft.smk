@@ -9,8 +9,16 @@ rule msf_align_mafft:
     output:
         "MSA/MAFFT/{sample}.fa",
     params:
-        run_mode='' if not config['mafft_params']['run_mode'] else f"-{config['mafft_params']['run_mode']}",
-        op='' if not config['mafft_params']['op'] else f"--op {config['mafft_params']['op']}",
+        run_mode=(
+            ""
+            if "run_mode" not in config["mafft_params"]
+            else f"-{config['mafft_params']['run_mode']}"
+        ),
+        op=(
+            ""
+            if "op" not in config["mafft_params"]
+            else f"--op {config['mafft_params']['op']}"
+        ),
     log:
         "logs/MAFFT/{sample}.msf_align_mafft.log",
     singularity:
