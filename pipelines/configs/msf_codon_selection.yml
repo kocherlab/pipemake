@@ -27,6 +27,10 @@ parser:
             - 'symbolic_link'
             - 'copy'
           default: 'symbolic_link'
+        species-tree:
+          help: "Species tree in Newick format"
+          type: str
+          action: confirmFile
     busted_params:
       args:
         busted-label:
@@ -89,6 +93,12 @@ setup:
       copy_method: '{msf-copy-method}'
       sample_keywords:
         - "samples"
+  species_file:
+    methods:
+      file: "{species-tree}"
+    args:
+      standardized_filename: "Selection/species_tree.tre"
+      copy_method: 'copy'
 
 snakemake:
   modules:
