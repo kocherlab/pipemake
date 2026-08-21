@@ -8,6 +8,8 @@ rule trim_msa_clipkit:
         "MSA/Untrimmed/{sample}.fa",
     output:
         "MSA/Trimmed/{sample}.fa",
+    log:
+        "logs/clipkit/{sample}.log",
     params:
         method=config["clipkit_params"]["trim_method"],
         codon="--codon" if "codon_msa" in config else "",
@@ -17,4 +19,4 @@ rule trim_msa_clipkit:
         mem_mb=16000,
     threads: 1
     shell:
-        "clipkit {params.codon} --mode {params.method} --output {output} {input}"
+        "clipkit {params.codon} --mode {params.method} --output {output} {input} &> {log}"

@@ -2,6 +2,7 @@ rule all:
     input:
         expand("MSA/NT/{sample}.fa", sample=config["samples"]),
 
+ruleorder: link_msf_align_nt_mafft > msf_align_mafft
 
 use rule msf_align_mafft as link_msf_align_nt_mafft with:
     input:

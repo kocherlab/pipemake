@@ -8,6 +8,8 @@ rule reconstruct_tree_iqtree:
         "iqtree/{sample}.fa",
     output:
         "iqtree/{sample}.fa.contree",
+    log:
+        "logs/iqtree/{sample}.log",
     params:
         msa=subpath(output[0], strip_suffix=".contree"),
     singularity:
@@ -20,5 +22,5 @@ rule reconstruct_tree_iqtree:
         if [ "{input}" != "{params.msa}" ]; then
             cp {input} {params.msa}
         fi
-        iqtree -s {params.msa} -alrt 1000 -B 1000 -T {threads}
+        iqtree -s {params.msa} -alrt 1000 -B 1000 -T {threads} &> {log}
         """

@@ -9,10 +9,12 @@ rule absrel_selection_hyphy:
         tree="iqtree/{sample}.fa.contree",
     output:
         "Selection/absrel/{sample}.json"
+    log:
+        "logs/absrel/{sample}.log",
     singularity:
         "docker://aewebb/hyphy:v2.5.97_20260105"
     resources:
         mem_mb=32000,
     threads: 4
     shell:
-        "hyphy absrel --alignment {input.trimmed_msa} --tree {input.tree} --branches All --multiple-hits Double+Triple --output {output}"
+        "hyphy absrel --alignment {input.trimmed_msa} --tree {input.tree} --branches All --multiple-hits Double+Triple --output {output} &> {log}"

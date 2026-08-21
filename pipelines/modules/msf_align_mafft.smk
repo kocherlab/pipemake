@@ -8,6 +8,8 @@ rule msf_align_mafft:
         "MSF/{sample}.fa",
     output:
         "MSA/MAFFT/{sample}.fa",
+    log:
+        "logs/MAFFT/{sample}.log",
     params:
         run_mode=(
             ""
@@ -19,8 +21,6 @@ rule msf_align_mafft:
             if "op" not in config["mafft_params"]
             else f"--op {config['mafft_params']['op']}"
         ),
-    log:
-        "logs/MAFFT/{sample}.msf_align_mafft.log",
     singularity:
         "docker://aewebb/mafft:v7.525"
     resources:

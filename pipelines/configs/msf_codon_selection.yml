@@ -27,6 +27,14 @@ parser:
             - 'symbolic_link'
             - 'copy'
           default: 'symbolic_link'
+    busted_params:
+      args:
+        busted-label:
+          help: "Label to use for BUSTED output files"
+          type: str
+        busted-node:
+          help: "Node to use for BUSTED analysis"
+          type: str
     macse_params:
       args:
         max_refine_iter:

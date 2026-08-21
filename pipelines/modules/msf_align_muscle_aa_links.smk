@@ -2,6 +2,7 @@ rule all:
     input:
         expand("MSA/AA/{sample}.fa", sample=config["samples"]),
 
+ruleorder: link_msf_align_aa_muscle > msf_align_muscle
 
 use rule msf_align_muscle as link_msf_align_aa_muscle with:
     input:

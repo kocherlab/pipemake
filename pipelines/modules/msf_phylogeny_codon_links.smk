@@ -1,3 +1,5 @@
+ruleorder: link_trim_msa_clipkit > link_reconstruct_tree_iqtree > trim_msa_clipkit > reconstruct_tree_iqtree
+
 use rule trim_msa_clipkit as link_trim_msa_clipkit with:
     input:
         "MSA/Codon/{sample}.fa",
