@@ -95,7 +95,7 @@ setup:
         - "samples"
   species_file:
     methods:
-      file: "{species-tree}"
+      file-str: "{species-tree}"
     args:
       standardized_filename: "Selection/species_tree.tre"
       copy_method: 'copy'
