@@ -1,9 +1,3 @@
-config = {
-    "busted_label": "TEST",
-    "busted_node": "PRIMATES",
-    "samples": ["01"],
-}
-
 rule all:
     input:
         expand(f"Selection/BUSTED/{{sample}}.{config['busted_label']}.json", sample=config["samples"]),
