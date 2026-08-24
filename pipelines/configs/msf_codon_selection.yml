@@ -33,12 +33,14 @@ parser:
           action: confirmFile
     busted_params:
       args:
-        busted-label:
-          help: "Label to use for BUSTED output files"
+        busted-labels:
+          help: "Labels for BUSTED analysis"
           type: str
-        busted-node:
-          help: "Node to use for BUSTED analysis"
+          nargs: '+'
+        outgroup-file:
+          help: "File with outgroup species for BUSTED analysis. Order of species should be from most distant to least distant relative to ingroup."
           type: str
+          action: confirmFile
     macse_params:
       args:
         max_refine_iter:
@@ -98,6 +100,12 @@ setup:
       file-str: "{species-tree}"
     args:
       standardized_filename: "Selection/species_tree.tre"
+      copy_method: 'copy'
+  outgroup_file:
+    methods:
+      file-str: "{outgroup-file}"
+    args:
+      standardized_filename: "Selection/outgroup_species.txt"
       copy_method: 'copy'
 
 snakemake:
