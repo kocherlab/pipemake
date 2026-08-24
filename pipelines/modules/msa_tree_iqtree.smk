@@ -67,4 +67,7 @@ rule reconstruct_tree_iqtree_with_outgroup:
         mem_mb=16000,
     threads: 4
     shell:
-        "iqtree -s {params.msa} -o {input.outgroup} -alrt 1000 -B 1000 -T {threads} &> {log}"
+        """
+        outgroup=$(cat {input.outgroup})
+        iqtree -s {params.msa} -o $outgroup -alrt 1000 -B 1000 -T {threads} &> {log}
+        """
