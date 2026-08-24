@@ -10,7 +10,7 @@ rule create_codon_aligned_msa:
     output:
         "MSA/Codon/{sample}.fa",
     singularity:
-        "docker://aewebb/pipemake_utils:v1.3.8"
+        "docker://aewebb/pipemake_utils:v1.4.3"
     resources:
         mem_mb=4000,
     threads: 1

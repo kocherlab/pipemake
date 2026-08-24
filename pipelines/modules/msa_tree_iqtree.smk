@@ -42,13 +42,15 @@ rule create_outgroup_file:
         outgroup_file="Selection/outgroup_species.txt",
     output:
         "iqtree/{sample}.outgroup",
+    log:
+        "logs/iqtree/{sample}.log",
     singularity:
         "docker://aewebb/pipemake_utils:v1.4.3"
     resources:
         mem_mb=4000,
     threads: 1
     shell:
-        "confirm-ids-fasta --fasta {input.tree_msa} --ids-file {input.outgroup_file} --prefix-ids --first-only --output {output}"
+        "confirm-ids-fasta --fasta {input.tree_msa} --ids-file {input.outgroup_file} --prefix-ids --first-only --output {output} &> {log}"
 
 
 rule reconstruct_tree_iqtree_with_outgroup:

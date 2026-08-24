@@ -40,4 +40,4 @@ rule busted_selection_hyphy:
         mem_mb=32000,
     threads: 4
     shell:
-        "hyphy /hyphy/hyphy-analyses/BUSTED-MH/BUSTED-MH.bf --alignment {input.trimmed_msa} --tree {input.tree} --branches {wildcards.label} --output {output}"
+        "hyphy /hyphy/hyphy-analyses/BUSTED-MH/BUSTED-MH.bf --alignment {input.trimmed_msa} --tree {input.tree} --branches {wildcards.label} --output {output} &> {log}"
