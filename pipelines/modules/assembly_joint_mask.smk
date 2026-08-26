@@ -12,10 +12,12 @@ rule joint_softmask_assemblies_pipemake:
         windowmasker_masked=f"Assembly/WindowMasker/{config['species']}_{config['assembly_version']}.fa.masked",
     output:
         f"Assembly/{config['species']}_{config['assembly_version']}.fa.masked",
+    log:
+        f"logs/joint-softmask/{config['species']}_{config['assembly_version']}.log",
     singularity:
         "docker://aewebb/pipemake_utils:v1.4.3"
     resources:
         mem_mb=2000,
     threads: 1
     shell:
-        "joint-softmask --masked-fastas {input.repeatmodeler_masked} {input.windowmasker_masked} --output-fasta {output}"
+        "joint-softmask --masked-fastas {input.repeatmodeler_masked} {input.windowmasker_masked} --output-fasta {output} &> {log}"

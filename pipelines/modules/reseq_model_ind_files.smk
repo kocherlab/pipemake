@@ -10,8 +10,10 @@ rule model_ind_file:
     output:
         f"Models/{config['species']}.{{model}}.ind.txt",
         f"Models/{config['species']}.{{model}}.ind.log",
+    log:
+        f"logs/model-inds/{config['species']}.{{model}}.log",
     params:
-        out_prefix=f"Models/{config['species']}.{{model}}",
+        out_prefix=subpath(output[0], strip_suffix=".ind.txt"),
     resources:
         mem_mb=2000,
     threads: 1

@@ -12,6 +12,8 @@ rule process_braker3:
         f"Annotations/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.gff3",
         f"Annotations/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_trans.fa",
         f"Annotations/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_pep.fa",
+    log:
+        f"logs/process-braker3/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.log",
     params:
         out_dir="Annotations",
         species=config["species"],
@@ -23,4 +25,4 @@ rule process_braker3:
         mem_mb=2000,
     threads: 1
     shell:
-        "process-braker --gff {input.braker3_gff} --fasta-cds {input.braker3_cds} --fasta-aa {input.braker3_aa} --out-dir {params.out_dir} --species {params.species} --assembly-version {params.assembly_version} --annotation-version {params.annotation_version}"
+        "process-braker --gff {input.braker3_gff} --fasta-cds {input.braker3_cds} --fasta-aa {input.braker3_aa} --out-dir {params.out_dir} --species {params.species} --assembly-version {params.assembly_version} --annotation-version {params.annotation_version} &> {log}"

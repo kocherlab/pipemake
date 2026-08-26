@@ -18,6 +18,8 @@ rule process_egapx_gtf:
         temp(
             f"Processed/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.no_utrs.gff"
         ),
+    log:
+        f"logs/process-egapx-gtf/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.log",
     params:
         out_prefix=f"Processed/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}",
         species=config["species"],
@@ -30,7 +32,7 @@ rule process_egapx_gtf:
     threads: 1
     shell:
         """
-        process-ncbi-annotations --gtf {input} --species-tag {params.species}_{params.assembly_version}.{params.annotation_version} --out-prefix {params.out_prefix}
+        process-ncbi-annotations --gtf {input} --species-tag {params.species}_{params.assembly_version}.{params.annotation_version} --out-prefix {params.out_prefix} &> {log}
         mv {params.out_prefix}.gff {params.out_prefix}.no_utrs.gff
         """
 
@@ -40,13 +42,15 @@ rule add_utrs_to_gff:
         f"Processed/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.no_utrs.gff",
     output:
         f"Processed/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.gff",
+    log:
+        f"logs/add-utrs-to-gff/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.log",
     singularity:
         "docker://aewebb/ncbi-genome-tools:20250625"
     resources:
         mem_mb=2000,
     threads: 1
     shell:
-        "add_utrs_to_gff.py {input} > {output}"
+        "add_utrs_to_gff.py {input} > {output} &> {log}"
 
 
 rule assembly_stats_bbmap:
@@ -86,13 +90,15 @@ rule update_transcripts:
         transcript_fasta=f"Processed/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_trans.fa.tmp",
     output:
         f"Processed/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_trans.fa",
+    log:
+        f"logs/update-transcripts/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.log",
     singularity:
         "docker://aewebb/pipemake_utils:v1.4.3"
     resources:
         mem_mb=2000,
     threads: 1
     shell:
-        "update-fasta --gff-file {input.gff_file} --fasta-file {input.transcript_fasta} --out-file {output} --seq-type nucleotide"
+        "update-fasta --gff-file {input.gff_file} --fasta-file {input.transcript_fasta} --out-file {output} --seq-type nucleotide &> {log}"
 
 
 rule gff_to_proteins:
@@ -118,13 +124,15 @@ rule update_proteins:
         protein_fasta=f"Processed/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_pep.fa.tmp",
     output:
         f"Processed/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_pep.fa",
+    log:
+        f"logs/update-proteins/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.log",
     singularity:
         "docker://aewebb/pipemake_utils:v1.4.3"
     resources:
         mem_mb=2000,
     threads: 1
     shell:
-        "update-fasta --gff-file {input.gff_file} --fasta-file {input.protein_fasta} --out-file {output} --seq-type protein"
+        "update-fasta --gff-file {input.gff_file} --fasta-file {input.protein_fasta} --out-file {output} --seq-type protein &> {log}"
 
 
 rule gzip_assembly:

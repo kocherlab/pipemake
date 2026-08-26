@@ -181,8 +181,10 @@ rule plot_norm_xpnsl_pipemake:
     output:
         f"reSEQ/PopGen/XPnSL/{config['species']}_{config['assembly_version']}.xpnsl.manhattan.png",
         f"reSEQ/PopGen/XPnSL/{config['species']}_{config['assembly_version']}.abs_xpnsl.manhattan.png",
+    log:
+        f"logs/plot-xpnsl/{config['species']}_{config['assembly_version']}.log",
     params:
-        out_prefix=f"reSEQ/PopGen/XPnSL/{config['species']}_{config['assembly_version']}",
+        out_prefix=subpath(output[0], strip_suffix=".xpnsl.manhattan.png"),
     singularity:
         "docker://aewebb/pipemake_utils:v1.4.3"
     resources:
@@ -190,6 +192,6 @@ rule plot_norm_xpnsl_pipemake:
     threads: 1
     shell:
         """
-        manhattan-plot --input-file {input} --chrom-col id --pos-col id --stat-col normxpehh --plot-stat-text "Noramlized XPnSL" --chrom-pos-sep '_' --out-prefix {params.out_prefix}.xpnsl
-        manhattan-plot --input-file {input} --chrom-col id --pos-col id --stat-col normxpehh --plot-stat-text "Noramlized XPnSL" --chrom-pos-sep '_' --plot-abs --out-prefix {params.out_prefix}.abs_xpnsl
+        manhattan-plot --input-file {input} --chrom-col id --pos-col id --stat-col normxpehh --plot-stat-text "Noramlized XPnSL" --chrom-pos-sep '_' --out-prefix {params.out_prefix}.xpnsl &> {log}
+        manhattan-plot --input-file {input} --chrom-col id --pos-col id --stat-col normxpehh --plot-stat-text "Noramlized XPnSL" --chrom-pos-sep '_' --plot-abs --out-prefix {params.out_prefix}.abs_xpnsl &>> {log}
         """

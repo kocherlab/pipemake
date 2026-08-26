@@ -8,6 +8,8 @@ checkpoint pop_ind_file:
         f"Models/{config['species']}.model",
     output:
         temp(directory("Models/BCFtools")),
+    log:
+        f"logs/model-pop-files/{config['species']}.log",
     params:
         model_name=config["model_name"],
     resources:
@@ -16,7 +18,7 @@ checkpoint pop_ind_file:
     singularity:
         "docker://aewebb/pipemake_utils:v1.4.3"
     shell:
-        "model-pop-files --model-file {input} --model-name {params.model_name} --out-dir {output}"
+        "model-pop-files --model-file {input} --model-name {params.model_name} --out-dir {output} &> {log}"
 
 
 rule pop_vcf_bcftools:

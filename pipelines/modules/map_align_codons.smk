@@ -9,10 +9,12 @@ rule create_codon_aligned_msa:
         unaligned_cds="MSF/CDS/{sample}.fa",
     output:
         "MSA/Codon/{sample}.fa",
+    log:
+        "logs/codon-alignment/{sample}.log",
     singularity:
         "docker://aewebb/pipemake_utils:v1.4.3"
     resources:
         mem_mb=4000,
     threads: 1
     shell:
-        "codon-alignment --aligned-aa {input.aligned_aa} --unaligned-cds {input.unaligned_cds} --output {output}"
+        "codon-alignment --aligned-aa {input.aligned_aa} --unaligned-cds {input.unaligned_cds} --output {output} &> {log}"

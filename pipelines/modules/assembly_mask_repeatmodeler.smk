@@ -59,13 +59,15 @@ rule softmask_repeatmasker_assembly:
         temp(
             f"Assembly/RepeatModeler/MaskedAssembly/{config['species']}_{config['assembly_version']}.fa.softmasked"
         ),
+    log:
+        f"logs/softmask-repeatmasker/{config['species']}_{config['assembly_version']}.log",
     singularity:
         "docker://aewebb/pipemake_utils:v1.4.3"
     resources:
         mem_mb=2000,
     threads: 1
     shell:
-        "softmask --input-fasta {input.assembly} --hard-masked-fasta {input.masked_assembly} --output-fasta {output}"
+        "softmask --input-fasta {input.assembly} --hard-masked-fasta {input.masked_assembly} --output-fasta {output} &> {log}"
 
 
 rule store_repeatmasker_assembly:

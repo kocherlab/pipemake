@@ -65,6 +65,8 @@ rule reseq_model_plot_pca:
         model_file=f"Models/{config['species']}.model",
     output:
         f"reSEQ/PopGen/PCA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.pca.pdf",
+    log:
+        f"logs/plot-pca/{{model}}/{config['species']}_{config['assembly_version']}.log",
     params:
         pca_dir="reSEQ/PopGen/PCA/{model}/",
         out_prefix=f"reSEQ/PopGen/PCA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.pca",
@@ -74,4 +76,4 @@ rule reseq_model_plot_pca:
     singularity:
         "docker://aewebb/pipemake_utils:v1.4.3"
     shell:
-        "plot-pca --pca-dir {params.pca_dir} --model-file {input.model_file} --model-name {wildcards.model} --out-prefix {params.out_prefix}"
+        "plot-pca --pca-dir {params.pca_dir} --model-file {input.model_file} --model-name {wildcards.model} --out-prefix {params.out_prefix} &> {log}"

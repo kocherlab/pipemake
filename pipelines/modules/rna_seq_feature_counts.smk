@@ -51,6 +51,8 @@ rule feature_counts_report:
         ),
     output:
         f"RNAseq/Counts/{config['species']}_{config['assembly_version']}.featurecounts.tsv",
+    log:
+        f"logs/featurecounts-report/{config['species']}_{config['assembly_version']}.log",
     params:
         count_dir="RNAseq/Counts/featureCounts",
     singularity:
@@ -59,4 +61,4 @@ rule feature_counts_report:
         mem_mb=2000,
     threads: 1
     shell:
-        "featureCounts-report {params.count_dir} {output}"
+        "featureCounts-report {params.count_dir} {output} &> {log}"

@@ -3,11 +3,13 @@ rule all:
         f"Annotations/EggNOG/{config['species']}_{config['assembly_version']}.{config['annotation_version']}.emapper.annotations.xlsx",
 
 
-rule create_longest_aa_transcript:
+rule create_longest_aa_transcripts:
     input:
         f"Annotations/{config['species']}_{config['assembly_version']}.{config['annotation_version']}_pep.fa",
     output:
         f"Annotations/EggNOG/{config['species']}_{config['assembly_version']}.{config['annotation_version']}_pep.fa",
+    log:
+        f"logs/create-longest-aa-transcripts/{config['species']}_{config['assembly_version']}.{config['annotation_version']}.pep.log",
     params:
         out_prefix=subpath(output[0], strip_suffix=".fa"),
     singularity:
@@ -16,7 +18,7 @@ rule create_longest_aa_transcript:
         mem_mb=12000,
     threads: 1
     shell:
-        "longest-transcript --input-filename {input} --output-prefix {params.out_prefix} --input-type AA --database pipemake --output-primary-id gene"
+        "longest-transcript --input-filename {input} --output-prefix {params.out_prefix} --input-type AA --database pipemake --output-primary-id gene &> {log}"
 
 
 rule run_eggnog_mapper:

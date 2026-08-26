@@ -30,13 +30,15 @@ checkpoint split_assembly:
         f"Assembly/{config['species']}_{config['assembly_version']}.fa",
     output:
         directory("Assembly/split"),
+    log:
+        f"logs/split-assembly/{config['species']}_{config['assembly_version']}.log",
     singularity:
         "docker://aewebb/pipemake_utils:v1.4.3"
     resources:
         mem_mb=4000,
     threads: 1
     shell:
-        "split-fasta --input-fasta {input} --output-dir {output}"
+        "split-fasta --input-fasta {input} --output-dir {output} &> {log}"
 
 
 rule chunk_file:
@@ -44,6 +46,8 @@ rule chunk_file:
         "Assembly/split/{chrom}.fasta",
     output:
         temp("Assembly/chunked/{chrom}.chunked.fasta"),
+    log:
+        "logs/chunk-assembly/{chrom}.chunked.log",
     params:
         chunk_size=config["chunk_size"],
     singularity:
@@ -52,7 +56,7 @@ rule chunk_file:
         mem_mb=4000,
     threads: 1
     shell:
-        "chunk-fasta --input-fasta {input} --chunk-size {params.chunk_size} --output-fasta {output}"
+        "chunk-fasta --input-fasta {input} --chunk-size {params.chunk_size} --output-fasta {output} &> {log}"
 
 
 rule blastn_chunked_assembly_nt:
@@ -120,13 +124,15 @@ rule unchunk_blast:
         f"BLAST/Assembly/{{blast_type}}/{config['species']}_{config['assembly_version']}.chunked.out",
     output:
         f"BLAST/Assembly/{{blast_type}}/{config['species']}_{config['assembly_version']}.out",
+    log:
+        "logs/unchunk-blast/{blast_type}.log",
     singularity:
         "docker://aewebb/pipemake_utils:v1.4.3"
     resources:
         mem_mb=16000,
     threads: 1
     shell:
-        "unchunk-blast --chunked-blast {input} --unchunked-blast {output}"
+        "unchunk-blast --chunked-blast {input} --unchunked-blast {output} &> {log}"
 
 
 rule blobtk_blobtools_create:

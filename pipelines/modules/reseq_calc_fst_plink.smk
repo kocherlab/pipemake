@@ -13,6 +13,8 @@ rule reseq_model_fst_phenotype_file:
     output:
         f"Models/Fst/{config['species']}.{{model}}.pheno.txt",
         f"Models/Fst/{config['species']}.{{model}}.pheno.log",
+    log:
+        f"logs/reseq-model-fst-phenotype/{config['species']}.{{model}}.log",
     params:
         out_prefix=f"Models/Fst/{config['species']}.{{model}}",
     resources:
@@ -21,7 +23,7 @@ rule reseq_model_fst_phenotype_file:
     singularity:
         "docker://aewebb/pipemake_utils:v1.4.3"
     shell:
-        "ped-phenotype-file --fam {input.fam_file} --model-file {input.model_file} --model-name {wildcards.model} --out-prefix {params.out_prefix} --out-format plink2 --pheno-header {wildcards.model}"
+        "ped-phenotype-file --fam {input.fam_file} --model-file {input.model_file} --model-name {wildcards.model} --out-prefix {params.out_prefix} --out-format plink2 --pheno-header {wildcards.model} &> {log}"
 
 
 checkpoint reseq_model_calc_fst_plink:

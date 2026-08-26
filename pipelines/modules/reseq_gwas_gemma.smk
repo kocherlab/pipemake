@@ -8,10 +8,6 @@ rule all:
             f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.lmm.manhattan.png",
             model=config["models"],
         ),
-        expand(
-            f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.bslmm.param.txt",
-            model=config["models"],
-        ),
 
 
 rule gemma_model_bed:
@@ -43,6 +39,8 @@ rule gemma_model_phenotype_file:
     output:
         f"Models/GEMMA/{config['species']}.{{model}}.pheno.txt",
         f"Models/GEMMA/{config['species']}.{{model}}.pheno.log",
+    log:
+        f"logs/gemma-phenotype/{config['species']}.{{model}}.log",
     params:
         out_prefix=f"Models/GEMMA/{config['species']}.{{model}}",
     resources:
@@ -51,7 +49,7 @@ rule gemma_model_phenotype_file:
     singularity:
         "docker://aewebb/pipemake_utils:v1.4.3"
     shell:
-        "ped-phenotype-file --fam {input.fam_file} --model-file {input.model_file} --model-name {wildcards.model} --binary --out-prefix {params.out_prefix}"
+        "ped-phenotype-file --fam {input.fam_file} --model-file {input.model_file} --model-name {wildcards.model} --binary --out-prefix {params.out_prefix} &> {log}"
 
 
 rule run_gemma_gk:
@@ -102,45 +100,20 @@ rule run_gemma_lmm:
         "gemma -p {input.pheno_file} -bfile {params.bed_prefix} -lmm {params.lmm_model} -k {input.gk_file} -maf {params.maf} -outdir {params.out_dir} -o {params.out_prefix}"
 
 
-rule run_gemma_bslmm:
-    input:
-        bed_file=f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.bed",
-        bim_file=f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.bim",
-        fam_file=f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.fam",
-        pheno_file=f"Models/GEMMA/{config['species']}.{{model}}.pheno.txt",
-        gk_file=f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.gk.cXX.txt",
-    output:
-        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.bslmm.param.txt",
-        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.bslmm.bv.txt",
-        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.bslmm.gamma.txt",
-        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.bslmm.hyp.txt",
-    params:
-        bed_prefix=subpath(input.bed_file, strip_suffix=".bed"),
-        out_prefix=subpath(output[0], basename=True, strip_suffix=".param.txt"),
-        out_dir=subpath(output[0], parent=True),
-        bslmm_model=config["bslmm_model"],
-        maf=config["maf"],
-    resources:
-        mem_mb=8000,
-    threads: 1
-    singularity:
-        "docker://aewebb/gemma:v0.98.5"
-    shell:
-        "gemma -p {input.pheno_file} -bfile {params.bed_prefix} -bslmm {params.bslmm_model} -k {input.gk_file} -maf {params.maf} -outdir {params.out_dir} -o {params.out_prefix}"
-
-
 rule calc_pve_gemma:
     input:
         f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.{{method}}.assoc.txt",
     output:
         f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.{{method}}.pve.txt",
+    log:
+        f"logs/calc-pve-gemma/{{model}}/{config['species']}_{config['assembly_version']}.{{method}}.log",
     resources:
         mem_mb=2000,
     threads: 1
     singularity:
         "docker://aewebb/pipemake_utils:v1.4.3"
     shell:
-        "calc-pve --input {input} --output {output}"
+        "calc-pve --input {input} --output {output} &> {log}"
 
 
 rule filter_gemma:
@@ -149,6 +122,8 @@ rule filter_gemma:
     output:
         filtered_file=f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.lmm.filtered.pve.txt",
         log_file=f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.lmm.filtered.pve.txt.log",
+    log:
+        f"logs/filter-gemma/{{model}}/{config['species']}_{config['assembly_version']}.log",
     params:
         min_log_pvalue=config["min_log_pvalue"],
     resources:
@@ -157,7 +132,7 @@ rule filter_gemma:
     singularity:
         "docker://aewebb/pipemake_utils:v1.4.3"
     shell:
-        "filter-gemma --gemma-file {input} --min-log-pvalue {params.min_log_pvalue} --out-filename {output.filtered_file}"
+        "filter-gemma --gemma-file {input} --min-log-pvalue {params.min_log_pvalue} --out-filename {output.filtered_file} &> {log}"
 
 
 rule plot_gemma:
@@ -165,6 +140,8 @@ rule plot_gemma:
         f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.lmm.assoc.txt",
     output:
         f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.lmm.manhattan.png",
+    log:
+        f"logs/plot-gemma/{{model}}/{config['species']}_{config['assembly_version']}.log",
     params:
         out_prefix=subpath(output[0], strip_suffix=".manhattan.png"),
     resources:
@@ -173,4 +150,4 @@ rule plot_gemma:
     singularity:
         "docker://aewebb/pipemake_utils:v1.4.3"
     shell:
-        "manhattan-plot --input-file {input} --chrom-col chr --pos-col ps --stat-col p_wald --plot-stat-text 'Wald test p-value' --chrom-pos-sep '_' --plot-neg-log --out-prefix {params.out_prefix}"
+        "manhattan-plot --input-file {input} --chrom-col chr --pos-col ps --stat-col p_wald --plot-stat-text 'Wald test p-value' --chrom-pos-sep '_' --plot-neg-log --out-prefix {params.out_prefix} &> {log}"

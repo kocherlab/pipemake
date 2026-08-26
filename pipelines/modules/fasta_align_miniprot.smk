@@ -8,13 +8,15 @@ rule fasta_translate_for_miniprot:
         "Alignment/Query/CDS/{sample}.fa",
     output:
         "Alignment/Query/AA/{sample}.fa",
+    log:
+        "logs/translate-seq-file/{sample}.log",
     singularity:
         "docker://aewebb/pipemake_utils:v1.4.3"
     resources:
         mem_mb=2000,
     threads: 1
     shell:
-        "translate-seq-file --input {input} --output {output}"
+        "translate-seq-file --input {input} --output {output} &> {log}"
 
 
 rule index_assembly_for_miniprot:

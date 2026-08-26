@@ -10,8 +10,10 @@ rule model_name_ind_file:
     output:
         f"Models/{config['species']}.{config['model_name']}.ind.txt",
         f"Models/{config['species']}.{config['model_name']}.ind.log",
+    log:
+        f"logs/model-inds/{config['species']}.{config['model_name']}.log",
     params:
-        out_prefix=f"Models/{config['species']}.{config['model_name']}",
+        out_prefix=subpath(output[0], strip_suffix=".ind.txt"),
         model_name=config["model_name"],
     resources:
         mem_mb=2000,
@@ -19,4 +21,4 @@ rule model_name_ind_file:
     singularity:
         "docker://aewebb/pipemake_utils:v1.4.3"
     shell:
-        "model-inds --model-file {input} --model-name {params.model_name} --out-prefix {params.out_prefix}"
+        "model-inds --model-file {input} --model-name {params.model_name} --out-prefix {params.out_prefix} &> {log}"
