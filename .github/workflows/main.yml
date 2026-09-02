@@ -19,6 +19,7 @@ jobs:
           auto-activate: true
           auto-update-conda: true
           python-version: "3.12"
+          activate-environment: "build"
           channels: conda-forge,bioconda,conda-forge/label/python_rc
 
       - name: Setup (${{ matrix.os }}) packages
