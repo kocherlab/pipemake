@@ -22,18 +22,18 @@ jobs:
 
       - name: Setup (${{ matrix.os }}) packages
         shell: bash -el {0}
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-22.04'
         run: |
           conda install -y conda-build anaconda::anaconda-client
 
       - name: Build Ubuntu packages
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-22.04'
         shell: bash -el {0}
         run: |
           conda build .conda/pipemake-internal-atlas --output-folder build
           
       - name: Upload Ubuntu
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-22.04'
         shell: bash -el {0}
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
