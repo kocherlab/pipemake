@@ -11,31 +11,30 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: ["ubuntu-22.04"]
-        python-version: ["3.12"]
+        os: ["ubuntu-latest"]
     steps:
       - uses: actions/checkout@v2
       - uses: conda-incubator/setup-miniconda@v4
         with:
           auto-activate: true
-          auto-update-conda: true
+          python-version: "3.12"
           activate-environment: ""
           channels: conda-forge,bioconda,conda-forge/label/python_rc
 
       - name: Setup (${{ matrix.os }}) packages
         shell: bash -el {0}
-        if: matrix.os == 'ubuntu-22.04'
+        if: matrix.os == 'ubuntu-latest'
         run: |
           conda install -y conda-build anaconda::anaconda-client
 
       - name: Build Ubuntu packages
-        if: matrix.os == 'ubuntu-22.04'
+        if: matrix.os == 'ubuntu-latest'
         shell: bash -el {0}
         run: |
           conda build .conda/pipemake-internal-atlas --output-folder build
           
       - name: Upload Ubuntu
-        if: matrix.os == 'ubuntu-22.04'
+        if: matrix.os == 'ubuntu-latest'
         shell: bash -el {0}
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
