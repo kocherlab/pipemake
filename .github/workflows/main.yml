@@ -19,7 +19,7 @@ jobs:
           activate-environment: ""
           python-version: "3.12"
           auto-activate-base: True
-          channels: conda-forge,bioconda,conda-forge/label/python_rc
+          channels: conda-forge,bioconda,conda-forge/label/python_rc,conda-forge/label/python_debug
 
       - name: Setup (${{ matrix.os }}) packages
         shell: bash -el {0}
