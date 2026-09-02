@@ -17,8 +17,8 @@ jobs:
       - uses: conda-incubator/setup-miniconda@v4
         with:
           auto-activate: true
+          auto-update-conda: true
           python-version: "3.12"
-          activate-environment: ""
           channels: conda-forge,bioconda,conda-forge/label/python_rc
 
       - name: Setup (${{ matrix.os }}) packages
