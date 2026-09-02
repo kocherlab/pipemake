@@ -19,14 +19,13 @@ jobs:
           auto-activate: true
           auto-update-conda: true
           python-version: "3.12"
-          activate-environment: "build"
           channels: conda-forge,bioconda,conda-forge/label/python_rc
 
       - name: Setup (${{ matrix.os }}) packages
         shell: bash -el {0}
         if: matrix.os == 'ubuntu-latest'
         run: |
-          conda install -y conda-build anaconda::anaconda-client
+          conda install -n base -y conda-build anaconda::anaconda-client
 
       - name: Build Ubuntu packages
         if: matrix.os == 'ubuntu-latest'
