@@ -18,6 +18,7 @@ jobs:
       - uses: conda-incubator/setup-miniconda@v4
         with:
           auto-activate: true
+          auto-update-conda: true
           activate-environment: ""
           channels: conda-forge,bioconda,conda-forge/label/python_rc
 
