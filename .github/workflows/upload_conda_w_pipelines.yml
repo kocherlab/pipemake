@@ -16,7 +16,7 @@ jobs:
         with:
           auto-activate: true
           activate-environment: ""
-          channels: conda-forge,bioconda,conda-forge/label/python_rc
+          channels: conda-forge,bioconda,conda-forge/label/python_rc,conda-forge/label/python_debug
 
       - name: Setup Windows package
         if: matrix.os == 'windows-latest'
