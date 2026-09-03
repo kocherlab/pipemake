@@ -4,18 +4,28 @@ import subprocess
 
 
 def checkSingularity():
+    # Update to add support for apptainer
     try:
         subprocess.run(
-            ["singularity", "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            ["singularit", "version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
-    except FileNotFoundError:
-        raise FileNotFoundError("Singularity is not installed on this system")
+        return "singularity"
+    except (FileNotFoundError, PermissionError):
+        try:
+            subprocess.run(
+                ["apptainer", "version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            )
+            return "apptainer"
+        except (FileNotFoundError, PermissionError):
+            raise Exception(
+                "Neither Singularity nor Apptainer is installed on this system"
+            )
 
 
 class Singularity:
     def __init__(self, url="", singularity_path=""):
         # Check if singularity is installed
-        checkSingularity()
+        self._singularity_executable = checkSingularity()
 
         # Set the singularity attributes
         self._url = url
@@ -56,7 +66,7 @@ class Singularity:
 
         # Download the image using singularity
         singularity_process = subprocess.Popen(
-            ["singularity", "pull", self._image_filename, self._url],
+            [self._singularity_executable, "pull", self._image_filename, self._url],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
@@ -84,3 +94,12 @@ class Singularity:
     @classmethod
     def fromURL(cls, url, singularity_path=""):
         return cls(url=url, singularity_path=singularity_path)
+
+
+if __name__ == "__main__":
+    # Example usage
+    singularity = Singularity.fromURL(
+        "docker://alpine:latest", singularity_path="test_images"
+    )
+    singularity.download()
+    print(f"Image path: {singularity.returnPath()}")
