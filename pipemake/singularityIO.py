@@ -7,7 +7,7 @@ def checkSingularity():
     # Update to add support for apptainer
     try:
         subprocess.run(
-            ["singularit", "version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            ["singularity", "version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
         return "singularity"
     except (FileNotFoundError, PermissionError):
