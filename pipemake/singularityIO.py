@@ -94,12 +94,3 @@ class Singularity:
     @classmethod
     def fromURL(cls, url, singularity_path=""):
         return cls(url=url, singularity_path=singularity_path)
-
-
-if __name__ == "__main__":
-    # Example usage
-    singularity = Singularity.fromURL(
-        "docker://alpine:latest", singularity_path="test_images"
-    )
-    singularity.download()
-    print(f"Image path: {singularity.returnPath()}")
