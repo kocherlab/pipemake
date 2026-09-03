@@ -14,7 +14,7 @@ rule label_tree_busted:
     output:
         "Selection/BUSTED/{sample}.fa.{label}.tre",
     log:
-        "logs/BUSTED/{sample}.{label}.log",
+        "logs/BUSTED/{sample}.{label}.label.log",
     params:
         output_dir=subpath(output[0], parent=True),
     singularity:
