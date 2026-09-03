@@ -10,10 +10,12 @@ rule download_eggnog_database:
         "Downloads/EggNOG/eggnog.taxa.db",
     params:
         data_dir="Downloads/EggNOG",
+    log:
+        "logs/eggnog-mapper/download-eggnog-database.log",
     singularity:
         "docker://aewebb/eggnog-mappper:v2.1.13"
     resources:
         mem_mb=4000,
     threads: 1
     shell:
-        "download_eggnog_data.py --data_dir {params.data_dir} -y"
+        "download_eggnog_data.py --data_dir {params.data_dir} -y &> {log}"

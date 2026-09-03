@@ -9,6 +9,8 @@ rule filter_model_vcf_bcftools:
         ind_file=f"Models/{config['species']}.{config['model_name']}.ind.txt",
     output:
         f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.filtered.vcf.gz",
+    log:
+        f"logs/bcftools/{config['species']}_{config['assembly_version']}.filter_model.log",
     params:
         min_alleles=config["min_alleles"],
         max_alleles=config["max_alleles"],
@@ -21,4 +23,4 @@ rule filter_model_vcf_bcftools:
     singularity:
         "docker://aewebb/bcftools:v1.20"
     shell:
-        "bcftools view --samples-file {input.ind_file} {input.vcf_file} | bcftools view --min-alleles {params.min_alleles} --max-alleles {params.max_alleles} --types snps --include 'MAF>={params.maf} && QUAL>={params.qual} && F_MISSING<={params.missing_cutoff}' --output-type z --output-file {output} --threads {threads}"
+        "bcftools view --samples-file {input.ind_file} {input.vcf_file} | bcftools view --min-alleles {params.min_alleles} --max-alleles {params.max_alleles} --types snps --include 'MAF>={params.maf} && QUAL>={params.qual} && F_MISSING<={params.missing_cutoff}' --output-type z --output-file {output} --threads {threads} 2> {log}"

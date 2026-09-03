@@ -29,15 +29,17 @@ rule isoseq_align_flair:
         temp(
             f"Annotations/flair/{config['species']}_{config['assembly_version']}.aligned.bam.bai"
         ),
+    log:
+        f"logs/flair/{config['species']}_{config['assembly_version']}.align.log",
     params:
-        out_prefix=f"Annotations/flair/{config['species']}_{config['assembly_version']}.aligned",
+        out_prefix=subpath(output[0], strip_suffix=".bed"),
     singularity:
         "docker://aewebb/flair:v2.0.0"
     resources:
         mem_mb=16000,
     threads: 4
     shell:
-        "flair align --threads {threads} --genome {input.fasta_file} --reads {input.reseq_fastq} --output {params.out_prefix}"
+        "flair align --threads {threads} --genome {input.fasta_file} --reads {input.reseq_fastq} --output {params.out_prefix} &> {log}"
 
 
 rule isoseq_correct_flair_w_gtf:
@@ -47,15 +49,17 @@ rule isoseq_correct_flair_w_gtf:
         align_bed=f"Annotations/flair/{config['species']}_{config['assembly_version']}.aligned.bed",
     output:
         f"Annotations/flair/{config['species']}_{config['assembly_version']}_all_corrected.bed",
+    log:
+        f"logs/flair/{config['species']}_{config['assembly_version']}.correct.log",
     params:
-        out_prefix=f"Annotations/flair/{config['species']}_{config['assembly_version']}",
+        out_prefix=subpath(output[0], strip_suffix="_all_corrected.bed"),
     singularity:
         "docker://aewebb/flair:v2.0.0"
     resources:
         mem_mb=16000,
     threads: 4
     shell:
-        "flair correct --threads {threads} --genome {input.fasta_file} --query {input.align_bed} --gtf {input.gtf_file} --output {params.out_prefix}"
+        "flair correct --threads {threads} --genome {input.fasta_file} --query {input.align_bed} --gtf {input.gtf_file} --output {params.out_prefix} &> {log}"
 
 
 rule isoseq_correct_flair_w_rnaseq:
@@ -66,14 +70,16 @@ rule isoseq_correct_flair_w_rnaseq:
     output:
         f"Annotations/flair/{config['species']}_{config['assembly_version']}_all_corrected.bed",
     params:
-        out_prefix=f"Annotations/flair/{config['species']}_{config['assembly_version']}",
+        out_prefix=subpath(output[0], strip_suffix="_all_corrected.bed"),
+    log:
+        f"logs/flair/{config['species']}_{config['assembly_version']}.correct.log",
     singularity:
         "docker://aewebb/flair:v2.0.0"
     resources:
         mem_mb=16000,
     threads: 4
     shell:
-        "flair correct --threads {threads} --genome {input.fasta_file} --query {input.align_bed} --shortread {input.splice_junctions} --output {params.out_prefix}"
+        "flair correct --threads {threads} --genome {input.fasta_file} --query {input.align_bed} --shortread {input.splice_junctions} --output {params.out_prefix} &> {log}"
 
 
 rule isoseq_collapse_flair:
@@ -90,15 +96,17 @@ rule isoseq_collapse_flair:
         temp(
             f"Annotations/flair/{config['species']}_{config['assembly_version']}.{config['annotation_version']}.isoforms.fa"
         ),
+    log:
+        f"logs/flair/{config['species']}_{config['assembly_version']}.collapse.log",
     params:
-        out_prefix=f"Annotations/flair/{config['species']}_{config['assembly_version']}.{config['annotation_version']}",
+        out_prefix=subpath(output[0], strip_suffix=f".isoforms.gtf"),
     singularity:
         "docker://aewebb/flair:v2.0.0"
     resources:
         mem_mb=16000,
     threads: 4
     shell:
-        "flair collapse --threads {threads} --genome {input.fasta_file} --gtf {input.gtf_file} --reads {input.reseq_fastq} --no_gtf_end_adjustment --stringent --quality -1 --check_splice --query {input.corrected_bed} --output {params.out_prefix}"
+        "flair collapse --threads {threads} --genome {input.fasta_file} --gtf {input.gtf_file} --reads {input.reseq_fastq} --no_gtf_end_adjustment --stringent --quality -1 --check_splice --query {input.corrected_bed} --output {params.out_prefix} &> {log}"
 
 
 rule process_flair_output:

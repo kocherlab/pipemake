@@ -27,13 +27,15 @@ rule pop_vcf_bcftools:
         pop_file="Models/BCFtools/{model_pop}.pop",
     output:
         f"reSEQ/VCF/Filtered/{{model_pop}}/{config['species']}_{config['assembly_version']}.filtered.vcf.gz",
+    log:
+        "logs/bcftools/{model_pop}.vcf.log",
     resources:
         mem_mb=8000,
     threads: 1
     singularity:
         "docker://aewebb/bcftools:v1.20"
     shell:
-        "bcftools view --samples-file {input.pop_file} --output-type z --output-file {output} {input.vcf_file}"
+        "bcftools view --samples-file {input.pop_file} --output-type z --output-file {output} {input.vcf_file} 2> {log}"
 
 
 def aggregate_pop_reseq(wildcards):

@@ -12,16 +12,20 @@ rule reseq_phased_map_plink:
     output:
         temp("reSEQ/VCF/Phased/SplitByChrom/{sweep_chrom}.map"),
         temp("reSEQ/VCF/Phased/SplitByChrom/{sweep_chrom}.ped"),
-        temp("reSEQ/VCF/Phased/SplitByChrom/{sweep_chrom}.log"),
+    log:
+        "logs/plink/{sweep_chrom}.map.log",
     params:
-        out_prefix="reSEQ/VCF/Phased/SplitByChrom/{sweep_chrom}",
+        out_prefix=subpath(output[0], strip_suffix=".map"),
     singularity:
         "docker://aewebb/plink2:20240418"
     resources:
         mem_mb=2000,
     threads: 1
     shell:
-        "plink2 --vcf {input} --export ped --out {params.out_prefix} --set-all-var-ids @:# --allow-extra-chr"
+        """
+        plink2 --vcf {input} --export ped --out {params.out_prefix} --set-all-var-ids @:# --allow-extra-chr
+        mv {params.out_prefix}.log {log}
+        """
 
 
 rule reseq_phased_ids_bcftools:
@@ -29,15 +33,17 @@ rule reseq_phased_ids_bcftools:
         "reSEQ/VCF/Phased/SplitByChrom/{sweep_chrom}.vcf.gz",
     output:
         temp("reSEQ/VCF/Phased/SplitByChrom/{sweep_chrom}.id.vcf.gz"),
+    log:
+        "logs/bcftools/{sweep_chrom}.id.vcf.log",
     params:
-        out_prefix="reSEQ/VCF/Phased/SplitByChrom/{sweep_chrom}",
+        out_prefix=subpath(output[0], strip_suffix=".id.vcf.gz"),
     singularity:
         "docker://aewebb/bcftools:v1.20"
     resources:
         mem_mb=2000,
     threads: 1
     shell:
-        "bcftools annotate --set-id '%CHROM\_%POS' {input} -O z -o {output}"
+        "bcftools annotate --set-id '%CHROM\_%POS' {input} -O z -o {output} 2> {log}"
 
 
 rule reseq_ihs_selscan:
@@ -46,9 +52,10 @@ rule reseq_ihs_selscan:
         map="reSEQ/VCF/Phased/SplitByChrom/{sweep_chrom}.map",
     output:
         temp("reSEQ/PopGen/ihs/{sweep_chrom}.ihs.out"),
-        temp("reSEQ/PopGen/ihs/{sweep_chrom}.ihs.log"),
+    log:
+        "logs/selscan/{sweep_chrom}.ihs.log",
     params:
-        out_prefix="reSEQ/PopGen/ihs/{sweep_chrom}",
+        out_prefix=subpath(output[0], strip_suffix=".ihs.out"),
         maf=config["maf"],
     singularity:
         "docker://aewebb/selscan:v2.0.3"
@@ -56,7 +63,10 @@ rule reseq_ihs_selscan:
         mem_mb=24000,
     threads: 12
     shell:
-        "selscan --ihs --ihs-detail --vcf {input.vcf} --map {input.map} --pmap --maf {params.maf} --threads {threads} --out {params.out_prefix}"
+        """
+        selscan --ihs --ihs-detail --vcf {input.vcf} --map {input.map} --pmap --maf {params.maf} --threads {threads} --out {params.out_prefix}
+        mv {params.out_prefix}.ihs.log {log}
+        """
 
 
 rule reseq_ihs_normalize_norm:
@@ -64,9 +74,9 @@ rule reseq_ihs_normalize_norm:
         "reSEQ/PopGen/ihs/{sweep_chrom}.ihs.out",
     output:
         temp(f"reSEQ/PopGen/ihs/{{sweep_chrom}}.ihs.out.{config['bins']}bins.norm"),
-        temp(f"reSEQ/PopGen/ihs/{{sweep_chrom}}.ihs.out.{config['bins']}bins.log"),
+    log:
+        f"logs/selscan/{{sweep_chrom}}.ihs.out.{config['bins']}bins.log",
     params:
-        out_prefix="reSEQ/PopGen/ihs/{sweep_chrom}.ihs.out",
         bins=config["bins"],
     singularity:
         "docker://aewebb/selscan:v2.0.3"
@@ -74,7 +84,7 @@ rule reseq_ihs_normalize_norm:
         mem_mb=2000,
     threads: 1
     shell:
-        "norm --ihs --files {input} --bins {params.bins} 2> {params.out_prefix}.{params.bins}bins.log"
+        "norm --ihs --files {input} --bins {params.bins} 2> {log}"
 
 
 def aggregate_ihs_reseq(wildcards):

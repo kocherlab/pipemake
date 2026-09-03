@@ -20,8 +20,8 @@ rule annotations_busco:
         mem_mb=12000,
     threads: 12
     shell:
-        r"""
-        busco -i {input} -o {params.output_dir} -l {params.busco_db} -m proteins -c {threads} --download_path {params.download_dir} -f &&
-        summary_prefix=$(ls {params.output_dir} | grep -o 'short_summary.*BUSCO' | uniq) &&
+        """
+        busco -i {input} -o {params.output_dir} -l {params.busco_db} -m proteins -c {threads} --download_path {params.download_dir} -f &> {log}
+        summary_prefix=$(ls {params.output_dir} | grep -o 'short_summary.*BUSCO' | uniq)
         cp {params.output_dir}/${{summary_prefix}}.txt {params.output_dir}/summary.txt
         """

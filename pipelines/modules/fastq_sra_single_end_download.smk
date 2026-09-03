@@ -7,8 +7,10 @@ rule fasterq_dump_single_end:
     output:
         r1_reads=temp("SRA/Downloads/{sample}_1.fastq"),
     params:
-        sra_dir="SRA/Downloads",
-        tmp_dir="SRA/Downloads/{sample}_TMP",
+        sra_dir=subpath(input[0], parent=True),
+        tmp_dir=os.path.join(subpath(input[0], parent=True), "{wildcards.sample}_TMP"),
+    log:
+        "logs/fasterq_dump/{sample}.log",
     singularity:
         "docker://ncbi/sra-tools:3.1.0"
     resources:
@@ -17,7 +19,7 @@ rule fasterq_dump_single_end:
     threads: 4
     shell:
         """
-        fasterq-dump {wildcards.sample} -O {params.sra_dir} --temp {params.tmp_dir} --threads {threads}
+        fasterq-dump {wildcards.sample} -O {params.sra_dir} --temp {params.tmp_dir} --threads {threads} &> {log}
         sleep 30
         rm -f {params.sra_dir}/{wildcards.sample}.fastq
         rm -rf {params.tmp_dir}

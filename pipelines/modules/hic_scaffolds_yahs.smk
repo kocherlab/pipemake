@@ -16,6 +16,8 @@ rule index_hifi_assembly:
     output:
         f"Assembly/hifiasm/{config['species']}_{config['assembly_version']}.fa.fai",
         f"Assembly/hifiasm/{config['species']}_{config['assembly_version']}.fa.bwt.2bit.64",
+    log:
+        f"logs/bwa-mem2/{config['species']}_{config['assembly_version']}.index.log",
     singularity:
         "docker://aewebb/bwa-mem2:v2.2.1"
     resources:
@@ -23,7 +25,7 @@ rule index_hifi_assembly:
     threads: 1
     shell:
         """
-        bwa-mem2 index {input}
+        bwa-mem2 index {input} 2> {log}
         samtools faidx {input}
         """
 
@@ -35,13 +37,15 @@ rule align_hic_reads_bwa:
         index_fasta=f"Assembly/hifiasm/{config['species']}_{config['assembly_version']}.fa.fai",
     output:
         temp(f"HiC/BAM/Aligned/{config['species']}_{{read}}.aligned.bam"),
+    log:
+        f"logs/bwa-mem2/{config['species']}_{config['assembly_version']}.hic_align.log",
     singularity:
         "docker://aewebb/bwa-mem2:v2.2.1"
     resources:
         mem_mb=32000,
     threads: 4
     shell:
-        "bwa-mem2 mem -t {threads} {input.assembly_fasta} {input.read_fastq} | samtools view --threads {threads} -bh -o {output}"
+        "bwa-mem2 mem -t {threads} {input.assembly_fasta} {input.read_fastq} | samtools view --threads {threads} -bh -o {output} 2> {log}"
 
 
 rule filter_hic_reads:
@@ -49,13 +53,15 @@ rule filter_hic_reads:
         f"HiC/BAM/Aligned/{config['species']}_{{read}}.aligned.bam",
     output:
         temp(f"HiC/BAM/Aligned/{config['species']}_{{read}}.filtered.bam"),
+    log:
+        f"logs/filter_hic_reads/{config['species']}_{{read}}.filter.log",
     singularity:
         "docker://aewebb/arima_mapping:05222024"
     resources:
         mem_mb=16000,
     threads: 4
     shell:
-        "samtools view -h {input} | filter_five_end.pl | samtools view --threads {threads} -bh -o {output}"
+        "samtools view -h {input} | filter_five_end.pl | samtools view --threads {threads} -bh -o {output} 2> {log}"
 
 
 rule combine_hic_reads:
@@ -65,6 +71,8 @@ rule combine_hic_reads:
         index_fasta=f"Assembly/hifiasm/{config['species']}_{config['assembly_version']}.fa",
     output:
         temp(f"HiC/BAM/Sorted/{config['species']}.sorted.bam"),
+    log:
+        f"logs/combine_hic_reads/{config['species']}.combine.log",
     params:
         mapq_filter="10",
     singularity:
@@ -73,7 +81,7 @@ rule combine_hic_reads:
         mem_mb=16000,
     threads: 4
     shell:
-        "two_read_bam_combiner.pl {input.r1_bam} {input.r2_bam} samtools {params.mapq_filter} | samtools view -bh -t {input.index_fasta} | samtools sort -@ {threads} -o {output}"
+        "two_read_bam_combiner.pl {input.r1_bam} {input.r2_bam} samtools {params.mapq_filter} | samtools view -bh -t {input.index_fasta} | samtools sort -@ {threads} -o {output} 2> {log}"
 
 
 rule add_read_groups:
@@ -81,6 +89,8 @@ rule add_read_groups:
         f"HiC/BAM/Sorted/{config['species']}.sorted.bam",
     output:
         temp(f"HiC/BAM/Sorted/{config['species']}.sorted_groups.bam"),
+    log:
+        f"logs/add_read_groups/{config['species']}.add_read_groups.log",
     params:
         species=config["species"],
     singularity:
@@ -89,7 +99,7 @@ rule add_read_groups:
         mem_mb=8000,
     threads: 1
     shell:
-        "gatk AddOrReplaceReadGroups INPUT={input} OUTPUT={output} ID={params.species} LB={params.species} SM={params.species} PL=ILLUMINA PU=none"
+        "gatk AddOrReplaceReadGroups INPUT={input} OUTPUT={output} ID={params.species} LB={params.species} SM={params.species} PL=ILLUMINA PU=none &> {log}"
 
 
 rule mark_duplicates:
@@ -98,6 +108,8 @@ rule mark_duplicates:
     output:
         bam=f"HiC/BAM/Sorted/{config['species']}.dedup.bam",
         metrics=f"HiC/BAM/Sorted/{config['species']}.dedup.metrics.txt",
+    log:
+        f"logs/mark_duplicates/{config['species']}.mark_duplicates.log",
     params:
         tmp_dir=".tmp",
     singularity:
@@ -107,8 +119,8 @@ rule mark_duplicates:
     threads: 1
     shell:
         """
-        gatk MarkDuplicates INPUT={input} OUTPUT={output.bam} METRICS_FILE={output.metrics} TMP_DIR={params.tmp_dir} ASSUME_SORTED=TRUE VALIDATION_STRINGENCY=LENIENT REMOVE_DUPLICATES=TRUE
-        samtools index {output.bam}
+        gatk MarkDuplicates INPUT={input} OUTPUT={output.bam} METRICS_FILE={output.metrics} TMP_DIR={params.tmp_dir} ASSUME_SORTED=TRUE VALIDATION_STRINGENCY=LENIENT REMOVE_DUPLICATES=TRUE &> {log}
+        samtools index {output.bam} 2>> {log}
         """
 
 
@@ -117,13 +129,15 @@ rule dedup_bam_stats:
         f"HiC/BAM/Sorted/{config['species']}.dedup.bam",
     output:
         f"HiC/BAM/Sorted/{config['species']}.dedup.stats.txt",
+    log:
+        f"logs/dedup_bam_stats/{config['species']}.dedup.stats.log",
     singularity:
         "docker://aewebb/arima_mapping:05222024"
     resources:
         mem_mb=8000,
     threads: 1
     shell:
-        "get_stats.pl {input} > {output}"
+        "get_stats.pl {input} > {output} 2> {log}"
 
 
 rule yahs_ec:
@@ -137,15 +151,17 @@ rule yahs_ec:
         temp(
             f"Assembly/YaHS/{config['species']}_{config['assembly_version']}_yahsout_ec_scaffolds_final.agp"
         ),
+    log:
+        f"logs/yahs/{config['species']}_{config['assembly_version']}_yahsout_ec.log",
     params:
-        out_prefix=f"Assembly/YaHS/{config['species']}_{config['assembly_version']}_yahsout_ec",
+        out_prefix=subpath(output[0], strip_suffix=".bin"),
     singularity:
         "docker://aewebb/yahs:v1.2.2"
     resources:
         mem_mb=32000,
     threads: 1
     shell:
-        "yahs {input.index_fasta} {input.dedup_bam} -o {params.out_prefix}"
+        "yahs {input.index_fasta} {input.dedup_bam} -o {params.out_prefix} &> {log}"
 
 
 rule yahs_noec:
@@ -159,15 +175,17 @@ rule yahs_noec:
         temp(
             f"Assembly/YaHS/{config['species']}_{config['assembly_version']}_yahsout_noec_scaffolds_final.agp"
         ),
+    log:
+        f"logs/yahs/{config['species']}_{config['assembly_version']}_yahsout_noec.log",
     params:
-        out_prefix=f"Assembly/YaHS/{config['species']}_{config['assembly_version']}_yahsout_noec",
+        out_prefix=subpath(output[0], strip_suffix=".bin"),
     singularity:
         "docker://aewebb/yahs:v1.2.2"
     resources:
         mem_mb=32000,
     threads: 1
     shell:
-        "yahs --no-contig-ec {input.index_fasta} {input.dedup_bam} -o {params.out_prefix}"
+        "yahs --no-contig-ec {input.index_fasta} {input.dedup_bam} -o {params.out_prefix} &> {log}"
 
 
 rule yahs_juicer_pre:
@@ -182,7 +200,8 @@ rule yahs_juicer_pre:
         agp=temp(
             f"Assembly/Juicebox/{config['species']}_{config['assembly_version']}_{{ec_type}}.liftover.agp"
         ),
-        log=f"Assembly/Juicebox/{config['species']}_{config['assembly_version']}_{{ec_type}}_juicer_pre.log",
+    log:
+        f"logs/Juicebox/{config['species']}_{config['assembly_version']}_{{ec_type}}_juicer_pre.log",
     params:
         out_prefix=f"Assembly/Juicebox/{config['species']}_{config['assembly_version']}_{{ec_type}}",
     singularity:
@@ -191,15 +210,17 @@ rule yahs_juicer_pre:
         mem_mb=16000,
     threads: 1
     shell:
-        "juicer pre -a -o {params.out_prefix} {input.reads_bin} {input.assembly_agp} {input.assembly_index} 2> {output.log}"
+        "juicer pre -a -o {params.out_prefix} {input.reads_bin} {input.assembly_agp} {input.assembly_index} 2> {log}"
 
 
 rule juicer_tools_pre:
     input:
         txt=f"Assembly/Juicebox/{config['species']}_{config['assembly_version']}_{{ec_type}}.txt",
-        log=f"Assembly/Juicebox/{config['species']}_{config['assembly_version']}_{{ec_type}}_juicer_pre.log",
+        log=f"logs/Juicebox/{config['species']}_{config['assembly_version']}_{{ec_type}}_juicer_pre.log",
     output:
         hic=f"Assembly/Juicebox/{config['species']}_{config['assembly_version']}_{{ec_type}}.hic",
+    log:
+        f"logs/Juicebox/{config['species']}_{config['assembly_version']}_{{ec_type}}_juicer_tools_pre.log",
     singularity:
         "docker://aewebb/juicer_tools:v1.19.02"
     resources:
@@ -208,7 +229,7 @@ rule juicer_tools_pre:
     shell:
         """
         assembly_size=$(grep 'PRE_C_SIZE' {input.log} | awk '{{print $3}}')
-        java -jar /opt/juicer_tools.jar pre {input.txt} {output.hic} <(echo "assembly ${{assembly_size}}")
+        java -jar /opt/juicer_tools.jar pre {input.txt} {output.hic} <(echo "assembly ${{assembly_size}}") &> {log}
         """
 
 
@@ -221,6 +242,8 @@ rule create_converted_fasta:
             f"Assembly/Juicebox/{config['species']}_{config['assembly_version']}_{{ec_type}}.bed"
         ),
         fasta=f"Assembly/Juicebox/{config['species']}_{config['assembly_version']}_{{ec_type}}_converted.fasta",
+    log:
+        f"logs/Juicebox/{config['species']}_{config['assembly_version']}_{{ec_type}}_create_converted_fasta.log",
     singularity:
         "docker://aewebb/bedtools:v2.31.1"
     resources:
@@ -229,5 +252,5 @@ rule create_converted_fasta:
     shell:
         """
         awk -v OFS='\t' '{{print $6, $7, $8, $1}}' {input.agp} > {output.bed}
-        bedtools getfasta -nameOnly -fi {input.fasta} -bed {output.bed} > {output.fasta}
+        bedtools getfasta -nameOnly -fi {input.fasta} -bed {output.bed} > {output.fasta} 2> {log}
         """

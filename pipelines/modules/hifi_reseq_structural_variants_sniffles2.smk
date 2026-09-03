@@ -11,6 +11,8 @@ rule hifi_structural_variants_sniffles2:
     output:
         vcf="reSEQ/VCFs/{sample}.SVs.vcf.gz",
         sif=temp("reSEQ/SNFs/{sample}.snf"),
+    log:
+        "logs/sniffles2/{sample}.log",
     params:
         tandem_repeats=(
             f"--tandem-repeats {config['tandem_repeats']}"
@@ -23,7 +25,7 @@ rule hifi_structural_variants_sniffles2:
         mem_mb=4000,
     threads: 8
     shell:
-        "sniffles --input {input.hifi_bam} --reference {input.assembly_fasta} --vcf {output.vcf} --snf {output.sif} --threads {threads} {params.tandem_repeats}"
+        "sniffles --input {input.hifi_bam} --reference {input.assembly_fasta} --vcf {output.vcf} --snf {output.sif} --threads {threads} {params.tandem_repeats} &> {log}"
 
 
 rule multisample_vcf_sniffles2:
@@ -31,10 +33,13 @@ rule multisample_vcf_sniffles2:
         expand("reSEQ/SNFs/{sample}.snf", sample=config["samples"]),
     output:
         f"reSEQ/VCFs/{config['species']}_{config['assembly_version']}.SVs.vcf.gz",
+    log:
+        "logs/sniffles2/{sample}.vcf.log",
+    params:
     singularity:
         "docker://aewebb/sniffles:v2.6.3"
     resources:
         mem_mb=8000,
     threads: 1
     shell:
-        "sniffles --input {input} --vcf {output}"
+        "sniffles --input {input} --vcf {output} &> {log}"

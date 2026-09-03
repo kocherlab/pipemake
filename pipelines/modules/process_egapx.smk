@@ -50,7 +50,7 @@ rule add_utrs_to_gff:
         mem_mb=2000,
     threads: 1
     shell:
-        "add_utrs_to_gff.py {input} > {output} &> {log}"
+        "add_utrs_to_gff.py {input} > {output} 2> {log}"
 
 
 rule assembly_stats_bbmap:
@@ -58,13 +58,15 @@ rule assembly_stats_bbmap:
         config["assembly_fasta"],
     output:
         f"Processed/{config['species']}_genome_{config['assembly_version']}.assembly.stats",
+    log:
+        f"logs/bbmap/{config['species']}_genome_{config['assembly_version']}.assembly.stats.log",
     singularity:
         "docker://biocontainers/bbmap:39.26--he5f24ec_0"
     resources:
         mem_mb=4000,
     threads: 1
     shell:
-        "stats.sh in={input} > {output}"
+        "stats.sh in={input} > {output} 2> {log}"
 
 
 rule gff_to_transcripts:
@@ -75,13 +77,15 @@ rule gff_to_transcripts:
         temp(
             f"Processed/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_trans.fa.tmp"
         ),
+    log:
+        f"logs/gffread/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.transcripts.log",
     singularity:
         "docker://aewebb/gffread:v0.12.7"
     resources:
         mem_mb=8000,
     threads: 1
     shell:
-        "gffread -x {output} -g {input.assembly_fasta} {input.gff_file}"
+        "gffread -x {output} -g {input.assembly_fasta} {input.gff_file} &> {log}"
 
 
 rule update_transcripts:
@@ -109,13 +113,15 @@ rule gff_to_proteins:
         temp(
             f"Processed/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_pep.fa.tmp"
         ),
+    log:
+        f"logs/gffread/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.proteins.log",
     singularity:
         "docker://aewebb/gffread:v0.12.7"
     resources:
         mem_mb=8000,
     threads: 1
     shell:
-        "gffread -y {output} -g {input.assembly_fasta} {input.gff_file}"
+        "gffread -y {output} -g {input.assembly_fasta} {input.gff_file} &> {log}"
 
 
 rule update_proteins:
@@ -140,13 +146,15 @@ rule gzip_assembly:
         config["assembly_fasta"],
     output:
         f"Processed/{config['species']}_genome_{config['assembly_version']}.fasta.gz",
+    log:
+        f"logs/bgzip/{config['species']}_genome_{config['assembly_version']}.fasta.gz.log",
     singularity:
         "docker://aewebb/tabix:v1.11"
     resources:
         mem_mb=4000,
     threads: 1
     shell:
-        "bgzip -c {input} > {output}"
+        "bgzip -c {input} > {output} 2> {log}"
 
 
 rule index_assembly:
@@ -155,10 +163,12 @@ rule index_assembly:
     output:
         f"Processed/{config['species']}_genome_{config['assembly_version']}.fasta.gz.fai",
         f"Processed/{config['species']}_genome_{config['assembly_version']}.fasta.gz.gzi",
+    log:
+        f"logs/samtools/{config['species']}_genome_{config['assembly_version']}.fasta.gz.fai.log",
     singularity:
         "docker://aewebb/samtools:v1.20"
     resources:
         mem_mb=4000,
     threads: 1
     shell:
-        "samtools faidx {input}"
+        "samtools faidx {input} 2> {log}"

@@ -10,6 +10,8 @@ rule run_sleap:
         input_video="Tracking/Videos/{video_id}.mp4",
     output:
         "Tracking/SLEAP/{video_id}_sleap_tracked.slp",
+    logs:
+        "logs/sleap/{video_id}_sleap_tracked.log",
     params:
         centroid_model="Tracking/Models/centroid_model",
         instance_model="Tracking/Models/instance_model",

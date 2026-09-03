@@ -20,4 +20,4 @@ rule model_ind_file:
     singularity:
         "docker://aewebb/pipemake_utils:v1.4.3"
     shell:
-        "model-inds --model-file {input} --model-name {wildcards.model} --out-prefix {params.out_prefix}"
+        "model-inds --model-file {input} --model-name {wildcards.model} --out-prefix {params.out_prefix} &> {log}"

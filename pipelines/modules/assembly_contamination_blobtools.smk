@@ -16,13 +16,15 @@ rule hifi_align_minimap2:
         assembly_fasta=f"Assembly/{config['species']}_{config['assembly_version']}.fa",
     output:
         f"HiFi/BAM/Sorted/{config['species']}.reads.bam",
+    log:
+        f"logs/minimap2/{config['species']}.map-hifi.log",
     singularity:
         "docker://aewebb/minimap2:v2.28"
     resources:
         mem_mb=56000,
     threads: 16
     shell:
-        "minimap2 -ax map-hifi -t {threads} {input.assembly_fasta} {input.hifi_fastq} | samtools sort --threads {threads} -O bam -o {output}"
+        "minimap2 -ax map-hifi -t {threads} {input.assembly_fasta} {input.hifi_fastq} | samtools sort --threads {threads} -O bam -o {output} &> {log}"
 
 
 checkpoint split_assembly:
@@ -64,6 +66,8 @@ rule blastn_chunked_assembly_nt:
         "Assembly/chunked/{chrom}.chunked.fasta",
     output:
         temp("BLAST/Assembly/blastn/chunked/{chrom}.chunked.out"),
+    log:
+        "logs/blastn/{chrom}.chunked.log",
     params:
         ncbi_nt_db=config["ncbi_nt_db"],
     singularity:
@@ -72,7 +76,7 @@ rule blastn_chunked_assembly_nt:
         mem_mb=56000,
     threads: 16
     shell:
-        'blastn -query {input} -db {params.ncbi_nt_db} -outfmt "6 qseqid staxids bitscore std" -max_target_seqs 10 -max_hsps 1 -evalue 1e-25 -num_threads {threads} -out {output}'
+        'blastn -query {input} -db {params.ncbi_nt_db} -outfmt "6 qseqid staxids bitscore std" -max_target_seqs 10 -max_hsps 1 -evalue 1e-25 -num_threads {threads} -out {output} &> {log}'
 
 
 rule blastx_chunked_assembly_records_diamond:
@@ -80,6 +84,8 @@ rule blastx_chunked_assembly_records_diamond:
         "Assembly/chunked/{chunk}.chunked.fasta",
     output:
         temp("BLAST/Assembly/blastx/chunked/{chunk}.chunked.out"),
+    log:
+        "logs/blastx/{chunk}.chunked.log",
     params:
         uniprot_db=config["uniprot_db"],
     singularity:
@@ -88,7 +94,7 @@ rule blastx_chunked_assembly_records_diamond:
         mem_mb=56000,
     threads: 16
     shell:
-        "diamond blastx --query {input} --db {params.uniprot_db} --outfmt 6 qseqid staxids bitscore qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore --sensitive --max-target-seqs 1 --evalue 1e-25 --threads {threads} > {output}"
+        "diamond blastx --query {input} --db {params.uniprot_db} --outfmt 6 qseqid staxids bitscore qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore --sensitive --max-target-seqs 1 --evalue 1e-25 --threads {threads} > {output} 2> {log}"
 
 
 def aggregate_blast(wildcards):
@@ -140,6 +146,8 @@ rule blobtk_blobtools_create:
         f"Assembly/{config['species']}_{config['assembly_version']}.fa",
     output:
         temp("Tables/blobtools/.create.chk"),
+    log:
+        "logs/blobtools/create.log",
     params:
         blob_dir=f"Tables/blobtools/{config['species']}_{config['assembly_version']}",
     singularity:
@@ -148,7 +156,7 @@ rule blobtk_blobtools_create:
         mem_mb=16000,
     threads: 1
     shell:
-        "blobtools create --fasta {input} {params.blob_dir} && touch {output}"
+        "blobtools create --fasta {input} {params.blob_dir} && touch {output} &> {log}"
 
 
 rule blobtk_blobtools_add_cov:
@@ -157,6 +165,8 @@ rule blobtk_blobtools_add_cov:
         create_chk="Tables/blobtools/.create.chk",
     output:
         temp("Tables/blobtools/.cov.chk"),
+    log:
+        "logs/blobtools/add-cov.log",
     params:
         blob_dir=f"Tables/blobtools/{config['species']}_{config['assembly_version']}",
     singularity:
@@ -165,7 +175,7 @@ rule blobtk_blobtools_add_cov:
         mem_mb=16000,
     threads: 1
     shell:
-        "blobtools add --cov {input.hifi_bam} {params.blob_dir} && touch {output}"
+        "blobtools add --cov {input.hifi_bam} {params.blob_dir} && touch {output} &> {log}"
 
 
 rule blobtk_blobtools_add_hits:
@@ -175,6 +185,8 @@ rule blobtk_blobtools_add_hits:
         cov_check="Tables/blobtools/.cov.chk",
     output:
         temp("Tables/blobtools/.hits.chk"),
+    log:
+        "logs/blobtools/add-hits.log",
     params:
         blob_dir=f"Tables/blobtools/{config['species']}_{config['assembly_version']}",
         ncbi_taxa_db=config["ncbi_taxa_db"],
@@ -184,7 +196,7 @@ rule blobtk_blobtools_add_hits:
         mem_mb=16000,
     threads: 1
     shell:
-        "blobtools add --hits {input.blastn_hits} --hits {input.blastx_hits} --taxrule bestsumorder --taxdump {params.ncbi_taxa_db} {params.blob_dir} && touch {output}"
+        "blobtools add --hits {input.blastn_hits} --hits {input.blastx_hits} --taxrule bestsumorder --taxdump {params.ncbi_taxa_db} {params.blob_dir} && touch {output} &> {log}"
 
 
 rule blobtk_blobtools_add_busco:
@@ -193,6 +205,8 @@ rule blobtk_blobtools_add_busco:
         cov_check="Tables/blobtools/.cov.chk",
     output:
         temp("Tables/blobtools/.busco.chk"),
+    log:
+        "logs/blobtools/add-busco.log",
     params:
         blob_dir=f"Tables/blobtools/{config['species']}_{config['assembly_version']}",
     singularity:
@@ -201,7 +215,7 @@ rule blobtk_blobtools_add_busco:
         mem_mb=16000,
     threads: 1
     shell:
-        "blobtools add --busco {input.busco_table} {params.blob_dir} && touch {output}"
+        "blobtools add --busco {input.busco_table} {params.blob_dir} && touch {output} &> {log}"
 
 
 rule blobblurb:
@@ -211,6 +225,8 @@ rule blobblurb:
         busco_chk="Tables/blobtools/.busco.chk",
     output:
         f"Tables/blobtools/{config['species']}_{config['assembly_version']}_blobblurbout.tsv",
+    log:
+        "logs/blobtools/blobblurb.log",
     params:
         blob_dir=f"Tables/blobtools/{config['species']}_{config['assembly_version']}",
     singularity:
@@ -219,7 +235,7 @@ rule blobblurb:
         mem_mb=16000,
     threads: 1
     shell:
-        "blobblurb {params.blob_dir} {input.busco_table}"
+        "blobblurb {params.blob_dir} {input.busco_table} &> {log}"
 
 
 rule blobbtk_plot:
@@ -230,6 +246,8 @@ rule blobbtk_plot:
         snail_png=f"Figures/blobtools/{config['species']}_{config['assembly_version']}_scaff_snail.png",
         blob_png=f"Figures/blobtools/{config['species']}_{config['assembly_version']}_scaff_blob.png",
         cumulative_png=f"Figures/blobtools/{config['species']}_{config['assembly_version']}_scaff_cumulative.png",
+    log:
+        "logs/blobtools/plot.log",
     params:
         blob_dir=f"Tables/blobtools/{config['species']}_{config['assembly_version']}",
     singularity:
@@ -240,7 +258,7 @@ rule blobbtk_plot:
     shell:
         """
         sed -i '/level/d' {params.blob_dir}/meta.json
-        blobtk plot -v snail -d {params.blob_dir} -o {output.snail_png}
-        blobtk plot -v blob -d {params.blob_dir} -o {output.blob_png}
-        blobtk plot -v cumulative -d {params.blob_dir} -o {output.cumulative_png}
+        blobtk plot -v snail -d {params.blob_dir} -o {output.snail_png} &> {log}
+        blobtk plot -v blob -d {params.blob_dir} -o {output.blob_png} &>> {log}
+        blobtk plot -v cumulative -d {params.blob_dir} -o {output.cumulative_png} &>> {log}
         """

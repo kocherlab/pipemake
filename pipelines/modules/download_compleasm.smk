@@ -8,6 +8,8 @@ rule download_compleasm_library:
         f"Assembly/{config['species']}_{config['assembly_version']}.fa",
     output:
         f"Downloads/compleasm/{config['busco_database']}.done",
+    log:
+        f"logs/compleasm/{config['busco_database']}.download.log",
     params:
         busco_db=config["busco_database"],
         downloads_dir="Downloads/compleasm",
@@ -17,4 +19,4 @@ rule download_compleasm_library:
         mem_mb=2000,
     threads: 1
     shell:
-        "compleasm download {params.busco_db} --library_path {params.downloads_dir}"
+        "compleasm download {params.busco_db} --library_path {params.downloads_dir} &> {log}"

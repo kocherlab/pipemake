@@ -15,13 +15,15 @@ rule hifi_wo_hic_reseq_assemble_phased_hifiasm:
         "HiFi/Assembly/hifiasm/{sample}.bp.hap2.p_ctg.gfa",
     params:
         output_prefix=subpath(output[0], strip_suffix=".bp.hap1.p_ctg.gfa"),
+    log:
+        "logs/hifiasm/{sample}.log",
     singularity:
         "docker://aewebb/hifiasm:v0.24.0-r702"
     resources:
         mem_mb=56000,
     threads: 16
     shell:
-        "hifiasm -t {threads} -o {params.output_prefix} {input}"
+        "hifiasm -t {threads} -o {params.output_prefix} {input} &> {log}"
 
 
 rule hifi_cvt_phased_hifiasm_gfa_to_fasta:

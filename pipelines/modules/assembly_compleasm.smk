@@ -21,4 +21,4 @@ rule assembly_compleasm:
         mem_mb=12000,
     threads: 12
     shell:
-        "compleasm run -t{threads} -L {params.download_dir} -l {params.busco_db} -a {input.assembly_fasta} -o {params.output_dir}"
+        "compleasm run -t{threads} -L {params.download_dir} -l {params.busco_db} -a {input.assembly_fasta} -o {params.output_dir} &> {log}"

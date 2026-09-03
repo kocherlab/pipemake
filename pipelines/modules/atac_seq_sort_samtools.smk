@@ -10,10 +10,12 @@ rule sort_bam:
         "ATAC_seq/BAM/Aligned/{sample}.Aligned.bam",
     output:
         temp("ATAC_seq/BAM/Sorted/{sample}.sortedByCoord.bam"),
+    log:
+        "logs/samtools/{sample}.sorted.log",
     singularity:
         "docker://aewebb/samtools:v1.20"
     resources:
         mem_mb=16000,
     threads: 4
     shell:
-        "samtools sort -@ {threads} -o {output} {input}"
+        "samtools sort -@ {threads} -o {output} {input} &> {log}"

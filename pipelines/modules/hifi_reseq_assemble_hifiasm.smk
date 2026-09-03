@@ -9,15 +9,17 @@ rule hifi_wo_hic_reseq_assemble_hifiasm:
     output:
         f"Assembly/hifiasm/{config['species']}_{config['assembly_version']}.a_ctg.gfa",
         f"Assembly/hifiasm/{config['species']}_{config['assembly_version']}.p_ctg.gfa",
+    log:
+        f"logs/hifiasm/{config['species']}_{config['assembly_version']}.log",
     params:
-        output_prefix=f"Assembly/hifiasm/{config['species']}",
+        output_prefix=subpath(output[0], strip_suffix=f"_{config['assembly_version']}.a_ctg.gfa"),
     singularity:
         "docker://aewebb/hifiasm:v0.24.0-r702"
     resources:
         mem_mb=56000,
     threads: 16
     shell:
-        "hifiasm --primary -t {threads} -o {params.output_prefix} {input}"
+        "hifiasm --primary -t {threads} -o {params.output_prefix} {input} &> {log}"
 
 
 rule hifi_cvt_hifiasm_gfa_to_fasta:

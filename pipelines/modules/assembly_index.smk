@@ -8,10 +8,12 @@ rule index_assembly:
         config["assembly_input"],
     output:
         f"{config['assembly_input']}.fai",
+    log:
+        "logs/samtools/index-assembly.log",
     singularity:
         "docker://aewebb/samtools:v1.20"
     resources:
         mem_mb=4000,
     threads: 1
     shell:
-        "samtools faidx {input}"
+        "samtools faidx {input} &> {log}"

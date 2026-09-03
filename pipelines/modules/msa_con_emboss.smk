@@ -8,6 +8,8 @@ rule concencus_sequence_emboss:
         "MSA/{sample}.fa",
     output:
         "Consensus/{sample}.fa",
+    log:
+        "logs/emboss/{sample}.consensus.log",
     params:
         plurality=config["emboss_cons_params"]["plurality"],
     singularity:
@@ -16,4 +18,4 @@ rule concencus_sequence_emboss:
         mem_mb=4000,
     threads: 1
     shell:
-        "/usr/lib/emboss/cons -plurality {params.plurality} -sequence {input} -outseq {output} -name {wildcards.sample}"
+        "/usr/lib/emboss/cons -plurality {params.plurality} -sequence {input} -outseq {output} -name {wildcards.sample} &> {log}"

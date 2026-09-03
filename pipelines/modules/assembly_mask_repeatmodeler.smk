@@ -8,6 +8,8 @@ rule mask_assembly_repeatmodeler:
         f"Assembly/{config['species']}_{config['assembly_version']}.fa",
     output:
         f"Assembly/RepeatModeler/Families/{config['species']}_{config['assembly_version']}-families.fa",
+    log:
+        f"logs/repeatmodeler/{config['species']}_{config['assembly_version']}.log",
     params:
         repeatmodeler_db=f"Assembly/RepeatModeler/DB/{config['species']}_{config['assembly_version']}_DB",
         db_dir="Assembly/RepeatModeler/DB",
@@ -21,8 +23,8 @@ rule mask_assembly_repeatmodeler:
         r"""
         mkdir -p {params.db_dir}
         mkdir -p {params.wd_dir}
-        BuildDatabase -name {params.repeatmodeler_db} {input}
-        RepeatModeler -database {params.repeatmodeler_db} -threads {threads} -LTRStruct
+        BuildDatabase -name {params.repeatmodeler_db} {input} &> {log}
+        RepeatModeler -database {params.repeatmodeler_db} -threads {threads} -LTRStruct &>> {log}
         rm_working_dir=$(grep 'Using output directory' {params.repeatmodeler_db}-rmod.log | grep -o '[^/]*$')
         tar -czf {params.wd_dir}/RepeatModeler_WD.tar.gz $rm_working_dir
         rm -rf $rm_working_dir
@@ -40,6 +42,8 @@ rule mask_assembly_repeatmasker:
         os.path.join(
             f"Assembly/RepeatModeler/MaskedAssembly/{config['species']}_{config['assembly_version']}.fa.masked",
         ),
+    log:
+        f"logs/repeatmasker/{config['species']}_{config['assembly_version']}.log",
     params:
         mask_dir="Assembly/RepeatModeler/MaskedAssembly",
     resources:
@@ -48,7 +52,7 @@ rule mask_assembly_repeatmasker:
     singularity:
         "docker://dfam/tetools:1.94"
     shell:
-        "RepeatMasker -par {threads} -dir {params.mask_dir} -lib {input.families} {input.assembly}"
+        "RepeatMasker -par {threads} -dir {params.mask_dir} -lib {input.families} {input.assembly} &> {log}"
 
 
 rule softmask_repeatmasker_assembly:

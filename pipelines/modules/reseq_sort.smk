@@ -12,6 +12,8 @@ rule sort_bam_reseq:
     output:
         bam="reSEQ/BAM/Sorted/{sample}.sortedByCoord.bam",
         index="reSEQ/BAM/Sorted/{sample}.sortedByCoord.bam.bai",
+    log:
+        "logs/samtools/{sample}.sort.log",
     singularity:
         "docker://aewebb/samtools:v1.20"
     resources:
@@ -19,6 +21,6 @@ rule sort_bam_reseq:
     threads: 4
     shell:
         """
-        samtools sort -@ {threads} -o {output.bam} {input}
-        samtools index {output.bam}
+        samtools sort -@ {threads} -o {output.bam} {input} 2> {log}
+        samtools index {output.bam} 2>> {log}
         """

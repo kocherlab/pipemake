@@ -24,7 +24,7 @@ rule msf_align_macse:
     shell:
         """
         let "mem_mb_reduced={resources.mem_mb} - {params.mem_mb_reduce}"
-        macse -Xmx${{mem_mb_reduced}}m -prog alignSequences -max_refine_iter {params.max_refine_iter} -seq {input} -out_NT {output.nt_msa} -out_AA {output.aa_msa} > {log}
+        macse -Xmx${{mem_mb_reduced}}m -prog alignSequences -max_refine_iter {params.max_refine_iter} -seq {input} -out_NT {output.nt_msa} -out_AA {output.aa_msa} &> {log}
         """
 
 
@@ -52,5 +52,5 @@ rule msa_export_macse:
     shell:
         """
         let "mem_mb_reduced={resources.mem_mb} - {params.mem_mb_reduce}"
-        macse -Xmx${{mem_mb_reduced}}m -prog exportAlignment -align {input} -codonForFinalStop {params.codon_final_stop} -codonForExternalFS {params.codon_external_fs} -codonForInternalFS {params.codon_internal_fs}  -charForRemainingFS {params.char_remaining_fs} -out_NT {output.nt_msa} -out_AA {output.aa_msa} > {log}
+        macse -Xmx${{mem_mb_reduced}}m -prog exportAlignment -align {input} -codonForFinalStop {params.codon_final_stop} -codonForExternalFS {params.codon_external_fs} -codonForInternalFS {params.codon_internal_fs}  -charForRemainingFS {params.char_remaining_fs} -out_NT {output.nt_msa} -out_AA {output.aa_msa} &> {log}
         """

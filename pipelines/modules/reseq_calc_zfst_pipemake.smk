@@ -44,7 +44,7 @@ rule plot_zfst_pipemake:
         mem_mb=2000,
     threads: 1
     shell:
-        "manhattan-plot --input-file {input} --chrom-col #CHROM --pos-col POS --stat-col 'Z(HUDSON_FST)' --out-prefix {params.out_prefix} &> {log}  "
+        "manhattan-plot --input-file {input} --chrom-col #CHROM --pos-col POS --stat-col 'Z(HUDSON_FST)' --out-prefix {params.out_prefix} &> {log}"
 
 
 def get_zfst_files(wildcards):

@@ -9,6 +9,8 @@ rule sort_bam_isoseq:
     output:
         bam="IsoSeq/BAM/Sorted/{sample}.sortedByCoord.bam",
         index="IsoSeq/BAM/Sorted/{sample}.sortedByCoord.bam.bai",
+    log:
+        "logs/samtools/sort_{sample}.log",
     singularity:
         "docker://aewebb/samtools:v1.20"
     resources:
@@ -16,6 +18,6 @@ rule sort_bam_isoseq:
     threads: 4
     shell:
         """
-        samtools sort -@ {threads} -o {output.bam} {input}
-        samtools index {output.bam}
+        samtools sort -@ {threads} -o {output.bam} {input} 2> {log}
+        samtools index {output.bam} 2>> {log}
         """

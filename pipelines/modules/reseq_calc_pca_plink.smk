@@ -22,16 +22,18 @@ rule reseq_calc_freq_plink:
         ind_file=f"Models/{config['species']}.{{model}}.ind.txt",
     output:
         f"reSEQ/PopGen/PCA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.afreq",
+    log:
+        f"logs/plink/{config['species']}_{config['assembly_version']}.calc_freq_{{model}}.log",
     params:
-        bed_prefix=f"reSEQ/PLINK/Pruned/{config['species']}_{config['assembly_version']}.pruned",
-        pca_prefix=f"reSEQ/PopGen/PCA/{{model}}/{config['species']}_{config['assembly_version']}.pruned",
+        bed_prefix=subpath(input.bed_file, strip_suffix=".bed"),
+        pca_prefix=subpath(output[0], strip_suffix=".afreq"),
     resources:
         mem_mb=2000,
     threads: 1
     singularity:
         "docker://aewebb/plink2:20240418"
     shell:
-        "plink2 --bfile {params.bed_prefix} --keep {input.ind_file} --freq --allow-extra-chr --out {params.pca_prefix}"
+        "plink2 --bfile {params.bed_prefix} --keep {input.ind_file} --freq --allow-extra-chr --out {params.pca_prefix} &> {log}"
 
 
 rule reseq_model_calc_pca_plink:
@@ -45,9 +47,11 @@ rule reseq_model_calc_pca_plink:
         f"reSEQ/PopGen/PCA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.pca.eigenvec",
         f"reSEQ/PopGen/PCA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.pca.eigenval",
         f"reSEQ/PopGen/PCA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.pca.log",
+    log:
+        f"logs/plink/{config['species']}_{config['assembly_version']}.calc_pca_{{model}}.log",
     params:
-        bed_prefix=f"reSEQ/PLINK/Pruned/{config['species']}_{config['assembly_version']}.pruned",
-        pca_prefix=f"reSEQ/PopGen/PCA/{{model}}/{config['species']}_{config['assembly_version']}.pruned.pca",
+        bed_prefix=subpath(input.bed_file, strip_suffix=".bed"),
+        pca_prefix=subpath(output[0], strip_suffix=".eigenvec"),
         pca_count=config["pca_count"],
     resources:
         mem_mb=2000,
@@ -55,7 +59,7 @@ rule reseq_model_calc_pca_plink:
     singularity:
         "docker://aewebb/plink2:20240418"
     shell:
-        "plink2 --bfile {params.bed_prefix} --keep {input.ind_file} --read-freq {input.freq_file} --pca {params.pca_count} --allow-extra-chr --out {params.pca_prefix}"
+        "plink2 --bfile {params.bed_prefix} --keep {input.ind_file} --read-freq {input.freq_file} --pca {params.pca_count} --allow-extra-chr --out {params.pca_prefix} &> {log}"
 
 
 rule reseq_model_plot_pca:

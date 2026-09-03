@@ -40,7 +40,7 @@ rule gemma_model_phenotype_file:
         f"Models/GEMMA/{config['species']}.{{model}}.pheno.txt",
         f"Models/GEMMA/{config['species']}.{{model}}.pheno.log",
     log:
-        f"logs/gemma-phenotype/{config['species']}.{{model}}.log",
+        f"logs/ped-phenotype-file/{config['species']}.{{model}}.gemma.log",
     params:
         out_prefix=f"Models/GEMMA/{config['species']}.{{model}}",
     resources:
@@ -60,7 +60,8 @@ rule run_gemma_gk:
         pheno_file=f"Models/GEMMA/{config['species']}.{{model}}.pheno.txt",
     output:
         f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.gk.cXX.txt",
-        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.gk.log.txt",
+    log:
+        f"logs/gemma/{{model}}/{config['species']}_{config['assembly_version']}.gk.log",
     params:
         bed_prefix=subpath(input.bed_file, strip_suffix=".bed"),
         out_prefix=subpath(output[0], basename=True, strip_suffix=".cXX.txt"),
@@ -72,7 +73,10 @@ rule run_gemma_gk:
     singularity:
         "docker://aewebb/gemma:v0.98.5"
     shell:
-        "gemma -bfile {params.bed_prefix} -p {input.pheno_file} -gk {params.kinship_matrix} -outdir {params.out_dir} -o {params.out_prefix}"
+        """
+        gemma -bfile {params.bed_prefix} -p {input.pheno_file} -gk {params.kinship_matrix} -outdir {params.out_dir} -o {params.out_prefix}
+        mv {params.out_prefix}.log.txt {log}
+        """
 
 
 rule run_gemma_lmm:
@@ -85,6 +89,8 @@ rule run_gemma_lmm:
     output:
         f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.lmm.assoc.txt",
         f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.lmm.log.txt",
+    log:
+        f"logs/gemma/{{model}}/{config['species']}_{config['assembly_version']}.lmm.log",
     params:
         bed_prefix=subpath(input.bed_file, strip_suffix=".bed"),
         out_prefix=subpath(output[0], basename=True, strip_suffix=".assoc.txt"),
@@ -97,7 +103,10 @@ rule run_gemma_lmm:
     singularity:
         "docker://aewebb/gemma:v0.98.5"
     shell:
-        "gemma -p {input.pheno_file} -bfile {params.bed_prefix} -lmm {params.lmm_model} -k {input.gk_file} -maf {params.maf} -outdir {params.out_dir} -o {params.out_prefix}"
+        """
+        gemma -p {input.pheno_file} -bfile {params.bed_prefix} -lmm {params.lmm_model} -k {input.gk_file} -maf {params.maf} -outdir {params.out_dir} -o {params.out_prefix}
+        mv {params.out_prefix}.log.txt {log}
+        """
 
 
 rule calc_pve_gemma:
@@ -106,7 +115,7 @@ rule calc_pve_gemma:
     output:
         f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.{{method}}.pve.txt",
     log:
-        f"logs/calc-pve-gemma/{{model}}/{config['species']}_{config['assembly_version']}.{{method}}.log",
+        f"logs/calc-pve/{{model}}/{config['species']}_{config['assembly_version']}.{{method}}.gemma.log",
     resources:
         mem_mb=2000,
     threads: 1

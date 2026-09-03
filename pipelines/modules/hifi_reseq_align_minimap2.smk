@@ -10,6 +10,8 @@ rule hifi_align_minimap2:
     output:
         bam="HiFi/BAM/Sorted/{sample}.sortedByCoord.bam",
         index="HiFi/BAM/Sorted/{sample}.sortedByCoord.bam.bai",
+    log:
+        "logs/minimap2/{sample}.log",
     singularity:
         "docker://aewebb/minimap2:v2.28"
     resources:
@@ -17,6 +19,6 @@ rule hifi_align_minimap2:
     threads: 16
     shell:
         """
-        minimap2 -ax map-hifi -t {threads} {input.assembly_fasta} {input.hifi_fastq} | samtools sort --threads {threads} -O bam -o {output.bam}
-        samtools index {output.bam}
+        minimap2 -ax map-hifi -t {threads} {input.assembly_fasta} {input.hifi_fastq} | samtools sort --threads {threads} -O bam -o {output.bam} 2> {log}
+        samtools index {output.bam} 2>> {log}
         """

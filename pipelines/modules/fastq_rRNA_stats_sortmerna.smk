@@ -13,9 +13,11 @@ rule sortmerna_in_single_end:
     output:
         r1_reads="FASTQ/FIltered/rRNA/{sample}_R1.fq.gz",
         work_dir=temp(directory("FASTQ/FIltered/rRNA/{sample}")),
+    log:
+        "logs/sortmerna/{sample}.sortmerna.log",
     params:
-        read_prefix="FASTQ/FIltered/rRNA/{sample}",
-        index_dir="Indices/sortmerna",
+        read_prefix=subpath(output.r1_reads, strip_suffix="_R1.fq.gz"),
+        index_dir=subpath(input.index_chk, parent=True),
         sortmerna_db=config["sortmerna_db"],
     singularity:
         "docker://aewebb/sortmerna:v4.3.7"
@@ -24,7 +26,7 @@ rule sortmerna_in_single_end:
     threads: 8
     shell:
         """
-        sortmerna --num_alignments 1 --no-best True --threads {threads} --ref /opt/DBs/{params.sortmerna_db} --reads {input.r1_reads} --workdir {output.work_dir} --idx-dir {params.index_dir} --aligned {params.read_prefix} --fastx 
+        sortmerna --num_alignments 1 --no-best True --threads {threads} --ref /opt/DBs/{params.sortmerna_db} --reads {input.r1_reads} --workdir {output.work_dir} --idx-dir {params.index_dir} --aligned {params.read_prefix} --fastx &> {log}
         mv {params.read_prefix}.fq.gz {output.r1_reads}
         """
 
@@ -38,9 +40,11 @@ rule sortmerna_in_pair_end:
         r1_reads="FASTQ/FIltered/rRNA/{sample}_R1.fq.gz",
         r2_reads="FASTQ/FIltered/rRNA/{sample}_R2.fq.gz",
         work_dir=temp(directory("FASTQ/FIltered/rRNA/{sample}")),
+    log:
+        "logs/sortmerna/{sample}.sortmerna.log",
     params:
-        read_prefix="FASTQ/FIltered/rRNA/{sample}",
-        index_dir="Indices/sortmerna",
+        read_prefix=subpath(output.r1_reads, strip_suffix="_R1.fq.gz"),
+        index_dir=subpath(input.index_chk, parent=True),
         sortmerna_db=config["sortmerna_db"],
     singularity:
         "docker://aewebb/sortmerna:v4.3.7"
@@ -49,7 +53,7 @@ rule sortmerna_in_pair_end:
     threads: 8
     shell:
         """
-        sortmerna --num_alignments 1 --no-best True --threads {threads} --ref /opt/DBs/{params.sortmerna_db} --reads {input.r1_reads} --reads {input.r2_reads} --workdir {output.work_dir} --idx-dir {params.index_dir} --aligned {params.read_prefix} --fastx --out2 --paired_in
+        sortmerna --num_alignments 1 --no-best True --threads {threads} --ref /opt/DBs/{params.sortmerna_db} --reads {input.r1_reads} --reads {input.r2_reads} --workdir {output.work_dir} --idx-dir {params.index_dir} --aligned {params.read_prefix} --fastx --out2 --paired_in &> {log}
         mv {params.read_prefix}_fwd.fq.gz {output.r1_reads}
         mv {params.read_prefix}_rev.fq.gz {output.r2_reads}
         """
@@ -60,13 +64,15 @@ rule rrna_seqkit_stats:
         expand("FASTQ/FIltered/rRNA/{sample}_R1.fq.gz", sample=config["samples"]),
     output:
         "Statistics/filtered_fastq_stats.tsv",
+    log:
+        "logs/seqkit/filtered_fastq_stats.log",
     params:
-        filtered_dir="FASTQ/FIltered/rRNA",
-        filtered_wildcard="FASTQ/FIltered/rRNA/*.fq.gz",
+        filtered_dir=subpath(input[0], parent=True),
+        filtered_wildcard=os.path.join(subpath(input[0], parent=True), "*.fq.gz"),
     singularity:
         "docker://aewebb/seqkit:v2.10.0"
     resources:
         mem_mb=12000,
     threads: 8
     shell:
-        "seqkit stats -j {threads} {params.filtered_wildcard} > {output} && rm -r {params.filtered_dir}"
+        "seqkit stats -j {threads} {params.filtered_wildcard} > {output} 2> {log} && rm -r {params.filtered_dir}"

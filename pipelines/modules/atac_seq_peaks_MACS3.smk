@@ -13,8 +13,10 @@ rule MACS3_peaks_pair_end:
         r2_reads="ATAC_seq/FASTQ/{sample}_R2.fastq.gz",
     output:
         "ATAC_seq/MACS3/{sample}_peaks.narrowPeak",
+    log:
+        "logs/macs3/{sample}.peaks.log",
     params:
-        out_prefix="ATAC_seq/MACS3/{sample}",
+        out_prefix=subpath(output[0], strip_suffix="_peaks.narrowPeak"),
         gs=config["genome_size"],
     singularity:
         "docker://aewebb/macs3:v3.0.1"
@@ -22,7 +24,7 @@ rule MACS3_peaks_pair_end:
         mem_mb=64000,
     threads: 4
     shell:
-        "macs3 callpeak -t {input.bam} -f BAMPE -g {params.gs} -n {params.out_prefix} --keep-dup all"
+        "macs3 callpeak -t {input.bam} -f BAMPE -g {params.gs} -n {params.out_prefix} --keep-dup all &> {log}"
 
 
 rule MACS3_peaks_single_end:
@@ -31,8 +33,10 @@ rule MACS3_peaks_single_end:
         r1_reads="ATAC_seq/FASTQ/{sample}_R1.fastq.gz",
     output:
         "ATAC_seq/MACS3/{sample}_peaks.narrowPeak",
+    log:
+        "logs/macs3/{sample}.peaks.log",
     params:
-        out_prefix="ATAC_seq/MACS3/{sample}",
+        out_prefix=subpath(output[0], strip_suffix="_peaks.narrowPeak"),
         gs=config["genome_size"],
     singularity:
         "docker://aewebb/macs3:v3.0.1"
@@ -40,4 +44,4 @@ rule MACS3_peaks_single_end:
         mem_mb=64000,
     threads: 4
     shell:
-        "macs3 callpeak -t {input.bam} -f BAM -g {params.gs} -n {params.out_prefix} --keep-dup all"
+        "macs3 callpeak -t {input.bam} -f BAM -g {params.gs} -n {params.out_prefix} --keep-dup all &> {log}"

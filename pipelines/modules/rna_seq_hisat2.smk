@@ -18,15 +18,17 @@ rule hisat2_build:
         "Indices/hisat2/hisat2_index.6.ht2",
         "Indices/hisat2/hisat2_index.7.ht2",
         "Indices/hisat2/hisat2_index.8.ht2",
+    log:
+        "logs/hisat2/hisat2_build.log",
     params:
-        index_prefix="Indices/hisat2/hisat2_index",
+        index_prefix=subpath(output[0], strip_suffix=".1.ht2"),
     singularity:
         "docker://aewebb/hisat2:v2.2.1"
     resources:
         mem_mb=16000,
     threads: 4
     shell:
-        "hisat2-build -p {threads} {input} {params.index_prefix}"
+        "hisat2-build -p {threads} {input} {params.index_prefix} &> {log}"
 
 
 rule hisat2_single_end:
@@ -35,15 +37,17 @@ rule hisat2_single_end:
         index1="Indices/hisat2/hisat2_index.1.ht2",
     output:
         "RNAseq/BAM/Aligned/{sample}.Aligned.bam",
+    log:
+        "logs/hisat2/{sample}.aligned.log",
     params:
-        index_prefix="Indices/hisat2/hisat2_index",
+        index_prefix=subpath(input.index1, strip_suffix=".1.ht2"),
     singularity:
         "docker://aewebb/hisat2:v2.2.1"
     resources:
         mem_mb=16000,
     threads: 4
     shell:
-        "hisat2 --threads {threads} --dta -q -x {params.index_prefix} -U {input.r1_reads} | samtools view -@ {threads} -bh -o {output}"
+        "hisat2 --threads {threads} --dta -q -x {params.index_prefix} -U {input.r1_reads} 2> {log} | samtools view -@ {threads} -bh -o {output} 2>> {log}"
 
 
 rule hisat2_pair_end:
@@ -53,12 +57,14 @@ rule hisat2_pair_end:
         index1="Indices/hisat2/hisat2_index.1.ht2",
     output:
         "RNAseq/BAM/Aligned/{sample}.Aligned.bam",
+    log:
+        "logs/hisat2/{sample}.aligned.log",
     params:
-        index_prefix="Indices/hisat2/hisat2_index",
+        index_prefix=subpath(input.index1, strip_suffix=".1.ht2"),
     singularity:
         "docker://aewebb/hisat2:v2.2.1"
     resources:
         mem_mb=16000,
     threads: 4
     shell:
-        "hisat2 --threads {threads} --dta -q -x {params.index_prefix} -1 {input.r1_reads} -2 {input.r2_reads} | samtools view -@ {threads} -bh -o {output}"
+        "hisat2 --threads {threads} --dta -q -x {params.index_prefix} -1 {input.r1_reads} -2 {input.r2_reads} 2> {log} | samtools view -@ {threads} -bh -o {output} 2>> {log}"

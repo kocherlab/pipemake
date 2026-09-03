@@ -9,10 +9,12 @@ rule hifi_assembly_align_minimap2:
         assembly_fasta=f"Assembly/{config['species']}_{config['assembly_version']}.fa",
     output:
         "HiFi/PAF/{sample}.paf",
+    log:
+        "logs/minimap2/{sample}.log",
     singularity:
         "docker://aewebb/minimap2:v2.28"
     resources:
         mem_mb=32000,
     threads: 16
     shell:
-        "minimap2 -x asm5 -t {threads} {input.assembly_fasta} {input.hifi_assembly_fasta} > {output}"
+        "minimap2 -x asm5 -t {threads} {input.assembly_fasta} {input.hifi_assembly_fasta} > {output} 2> {log}"

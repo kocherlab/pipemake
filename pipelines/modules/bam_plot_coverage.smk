@@ -11,6 +11,8 @@ rule plot_coverage_deeptools:
         ),
     output:
         f"Plots/Coverage/{config['species']}_{config['assembly_version']}.png",
+    log:
+        f"logs/deeptools/{config['species']}_{config['assembly_version']}.coverage.log",
     params:
         skip_zero="--skipZeros" if config["skip_zero"] else "",
     singularity:
@@ -19,4 +21,4 @@ rule plot_coverage_deeptools:
         mem_mb=16000,
     threads: 1
     shell:
-        "plotCoverage -b {input.bam} -o {output} {params.skip_zero}"
+        "plotCoverage -b {input.bam} -o {output} {params.skip_zero} &> {log}"

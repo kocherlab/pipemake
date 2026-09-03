@@ -16,9 +16,11 @@ rule star_single_end:
     output:
         r1_reads="RNAseq/BAM/Aligned/{sample}_R1.Unmapped.fq.gz",
         log="RNAseq/BAM/Aligned/{sample}.Log.final.out",
+    log:
+        "logs/star/{sample}.unmapped.log",
     params:
-        index_dir="Indices/STAR",
-        bam_prefix="RNAseq/BAM/Aligned/{sample}.",
+        index_dir=subpath(input.index_file, parent=True),
+        bam_prefix=subpath(output[0], strip_suffix="_R1.Unmapped.fq.gz") + '.',
     singularity:
         "docker://aewebb/star:v2.7.11b"
     resources:
@@ -26,7 +28,7 @@ rule star_single_end:
     threads: 4
     shell:
         """
-        STAR --runThreadN {threads} --runMode alignReads --genomeDir {params.index_dir} --outReadsUnmapped Fastx --outFilterMultimapScoreRange 0 --outFilterMultimapNmax 1 --outSAMmode None --outFileNamePrefix {params.bam_prefix} --readFilesCommand zcat --readFilesIn {input.r1_reads}
+        STAR --runThreadN {threads} --runMode alignReads --genomeDir {params.index_dir} --outReadsUnmapped Fastx --outFilterMultimapScoreRange 0 --outFilterMultimapNmax 1 --outSAMmode None --outFileNamePrefix {params.bam_prefix} --readFilesCommand zcat --readFilesIn {input.r1_reads} 2> {log}
         gzip {params.bam_prefix}Unmapped.out.mate1
         sleep 30
         mv {params.bam_prefix}Unmapped.out.mate1.gz {output.r1_reads}
@@ -42,9 +44,11 @@ rule star_pair_end:
         r1_reads="RNAseq/BAM/Aligned/{sample}_R1.Unmapped.fq.gz",
         r2_reads="RNAseq/BAM/Aligned/{sample}_R2.Unmapped.fq.gz",
         log="RNAseq/BAM/Aligned/{sample}.Log.final.out",
+    log:
+        "logs/star/{sample}.unmapped.log",
     params:
-        index_dir="Indices/STAR",
-        bam_prefix="RNAseq/BAM/Aligned/{sample}.",
+        index_dir=subpath(input.index_file, parent=True),
+        bam_prefix=subpath(output[0], strip_suffix="_R1.Unmapped.fq.gz") + '.',
     singularity:
         "docker://aewebb/star:v2.7.11b"
     resources:
@@ -52,7 +56,7 @@ rule star_pair_end:
     threads: 4
     shell:
         """
-        STAR --runThreadN {threads} --runMode alignReads --genomeDir {params.index_dir} --outReadsUnmapped Fastx --outFilterMultimapNmax 1 --outSAMtype BAM Unsorted --outFileNamePrefix {params.bam_prefix} --readFilesCommand zcat --readFilesIn {input.r1_reads} {input.r2_reads}
+        STAR --runThreadN {threads} --runMode alignReads --genomeDir {params.index_dir} --outReadsUnmapped Fastx --outFilterMultimapNmax 1 --outSAMtype BAM Unsorted --outFileNamePrefix {params.bam_prefix} --readFilesCommand zcat --readFilesIn {input.r1_reads} {input.r2_reads} 2> {log}
         gzip {params.bam_prefix}Unmapped.out.mate1
         gzip {params.bam_prefix}Unmapped.out.mate2
         sleep 30

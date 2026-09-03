@@ -8,13 +8,15 @@ rule mask_assembly_counts_windowmasker:
         f"Assembly/{config['species']}_{config['assembly_version']}.fa",
     output:
         f"Assembly/WindowMasker/{config['species']}_{config['assembly_version']}.windowmasker.counts",
+    log:
+        "logs/windowmasker/counts.log",
     resources:
         mem_mb=16000,
     threads: 1
     singularity:
         "docker://"
     shell:
-        "windowmasker -mk_counts -in {input} -infmt fasta -sformat obinary -out {output}"
+        "windowmasker -mk_counts -in {input} -infmt fasta -sformat obinary -out {output} &> {log}"
 
 
 rule run_windowmasker:

@@ -13,6 +13,8 @@ rule reseq_header_bcftools:
         chrom_log=temp(
             f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.chrom.log"
         ),
+    log:
+        f"logs/bcftools/{config['species']}_{config['assembly_version']}.header.log",
     singularity:
         "docker://aewebb/bcftools:v1.20"
     resources:
@@ -20,7 +22,7 @@ rule reseq_header_bcftools:
     threads: 1
     shell:
         """
-        bcftools view -h {input} > {output.header}
+        bcftools view -h {input} > {output.header} 2> {log}
         touch {output.chrom_log}
         """
 
@@ -31,8 +33,7 @@ checkpoint reseq_split_unphased_bcftools:
     output:
         directory(f"reSEQ/VCF/Filtered/SplitByChrom"),
     params:
-        out_dir=f"reSEQ/VCF/Filtered/SplitByChrom",
-        out_prefix=f"reSEQ/VCF/Filtered/SplitByChrom/",
+        out_prefix=os.path.join(output[0],),
     singularity:
         "docker://aewebb/bcftools:v1.20"
     resources:
@@ -40,9 +41,9 @@ checkpoint reseq_split_unphased_bcftools:
     threads: 1
     shell:
         """
-        mkdir {params.out_dir}
-        bcftools index -f {input}
-        bcftools index -s {input} | cut -f 1 | while read chrom; do bcftools view --regions $chrom -O z -o {params.out_prefix}${{chrom}}.vcf.gz {input}; done
+        mkdir {output}
+        bcftools index -f {input} 2> {log}
+        bcftools index -s {input} | cut -f 1 | while read chrom; do bcftools view --regions $chrom -O z -o {params.out_prefix}${{chrom}}.vcf.gz {input} 2>> {log}; done
         """
 
 
@@ -51,13 +52,15 @@ rule reseq_index_unphased_bcftools:
         "reSEQ/VCF/Filtered/SplitByChrom/{chrom}.vcf.gz",
     output:
         "reSEQ/VCF/Filtered/SplitByChrom/{chrom}.vcf.gz.csi",
+    log:
+        "logs/bcftools/{chrom}.index.log",
     singularity:
         "docker://aewebb/bcftools:v1.20"
     resources:
         mem_mb=24000,
     threads: 12
     shell:
-        "bcftools index -f {input}"
+        "bcftools index -f {input} 2> {log}"
 
 
 rule reseq_phase_chroms_shapeit4:
@@ -67,6 +70,8 @@ rule reseq_phase_chroms_shapeit4:
         chrom_log=f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.{{chrom}}.log",
     output:
         temp("reSEQ/VCF/Phased/SplitByChrom/{chrom}.vcf.gz"),
+    log:
+        "logs/shapeit4/{chrom}.phase.log",
     singularity:
         "docker://aewebb/shapeit4:v4.2.2"
     resources:
@@ -76,7 +81,7 @@ rule reseq_phase_chroms_shapeit4:
         """
         date=$(date +'%a %b %H:%M:%S %Y')
         echo "##shapeit4_phaseCommand=--input {input.vcf} --region {wildcards.chrom} --output {output} --thread {threads};  Date=$date" >> {input.chrom_log}
-        shapeit4 --input {input.vcf} --region {wildcards.chrom} --output {output} --thread {threads}
+        shapeit4 --input {input.vcf} --region {wildcards.chrom} --output {output} --thread {threads} --log {log}
         """
 
 
@@ -104,8 +109,10 @@ rule reseq_cat_phased_bcftools:
         temp(
             f"reSEQ/VCF/Phased/{config['species']}_{config['assembly_version']}.shapeit_header.vcf.gz"
         ),
+    log:
+        f"logs/bcftools/{config['species']}_{config['assembly_version']}.concat.log",
     params:
-        unphased_split_dir="reSEQ/VCF/Filtered/SplitByChrom",
+        unphased_split_dir=subpath(input.vcfs[0], parent=True),
     singularity:
         "docker://aewebb/bcftools:v1.20"
     resources:
@@ -118,7 +125,7 @@ rule reseq_cat_phased_bcftools:
         awk -v n=$insert_pos -v s="##bcftools_concatCommand=concat --threads {threads} -O z -o {output} {input.vcfs};  Date=$date" 'NR == n {{print s}} {{print}}' {input.header} > {input.header}.tmp && mv {input.header}.tmp {input.header}
         let "insert_pos_0_based=$insert_pos - 1"
         sed -i -e "${{insert_pos_0_based}}r {input.chrom_log}" {input.header}
-        bcftools concat --threads {threads} -O z -o {output} {input.vcfs}
+        bcftools concat --threads {threads} -O z -o {output} {input.vcfs} 2> {log}
         """
 
 
@@ -128,6 +135,8 @@ rule reseq_replace_header_bcftools:
         header=f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.header",
     output:
         f"reSEQ/VCF/Phased/{config['species']}_{config['assembly_version']}.vcf.gz",
+    log:
+        f"logs/bcftools/{config['species']}_{config['assembly_version']}.reheader.log",
     singularity:
         "docker://aewebb/bcftools:v1.20"
     resources:
@@ -138,5 +147,5 @@ rule reseq_replace_header_bcftools:
         date=$(date +'%a %b %H:%M:%S %Y')
         insert_pos=$(wc -l < {input.header})
         awk -v n=$insert_pos -v s="##bcftools_viewCommand=view {input.shapeit_vcf} | reheader {input.header};  Date=$date" 'NR == n {{print s}} {{print}}' {input.header} > {input.header}.tmp && mv {input.header}.tmp {input.header}
-        bcftools view {input.shapeit_vcf} | bcftools reheader -h {input.header} | bcftools view -O z -o {output}
+        bcftools view {input.shapeit_vcf} | bcftools reheader -h {input.header} | bcftools view -O z -o {output} 2> {log}
         """

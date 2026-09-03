@@ -9,9 +9,10 @@ checkpoint reseq_split_unphased_bcftools:
         f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.vcf.gz",
     output:
         temp(directory("reSEQ/VCF/Filtered/SplitByChrom")),
+    log:
+        f"logs/bcftools/{config['species']}_{config['assembly_version']}.split_by_chrom.log",
     params:
-        out_dir="reSEQ/VCF/Filtered/SplitByChrom",
-        out_prefix="reSEQ/VCF/Filtered/SplitByChrom/",
+        out_prefix=os.path.join(output[0],),
     singularity:
         "docker://aewebb/bcftools:v1.20"
     resources:
@@ -19,9 +20,9 @@ checkpoint reseq_split_unphased_bcftools:
     threads: 1
     shell:
         """
-        mkdir {params.out_dir}
+        mkdir {output}
         bcftools index -f {input}
-        bcftools index -s {input} | cut -f 1 | while read chrom; do bcftools view --regions $chrom -O z -o {params.out_prefix}${{chrom}}.vcf.gz {input}; done
+        bcftools index -s {input} | cut -f 1 | while read chrom; do bcftools view --regions $chrom -O z -o {params.out_prefix}${{chrom}}.vcf.gz {input} 2> {log}; done
         """
 
 
@@ -30,13 +31,15 @@ rule reseq_index_unphased_bcftools:
         "reSEQ/VCF/Filtered/SplitByChrom/{chrom}.vcf.gz",
     output:
         "reSEQ/VCF/Filtered/SplitByChrom/{chrom}.vcf.gz.csi",
+    log:
+        "logs/bcftools/{chrom}.index.log",
     singularity:
         "docker://aewebb/bcftools:v1.20"
     resources:
         mem_mb=4000,
     threads: 1
     shell:
-        "bcftools index -f {input}"
+        "bcftools index -f {input} 2> {log}"
 
 
 rule reseq_phase_chroms_shapeit4:
@@ -45,13 +48,15 @@ rule reseq_phase_chroms_shapeit4:
         index="reSEQ/VCF/Filtered/SplitByChrom/{chrom}.vcf.gz.csi",
     output:
         temp("reSEQ/VCF/Phased/SplitByChrom/{chrom}.vcf.gz"),
+    log:
+        "logs/shapeit4/{chrom}.phase.log",
     singularity:
         "docker://aewebb/shapeit4:v4.2.2"
     resources:
         mem_mb=24000,
     threads: 12
     shell:
-        "shapeit4 --input {input.vcf} --region {wildcards.chrom} --output {output} --thread {threads}"
+        "shapeit4 --input {input.vcf} --region {wildcards.chrom} --output {output} --thread {threads} --log {log}"
 
 
 rule reseq_create_pop_xpnsl_vcf_bcftools:
@@ -61,6 +66,8 @@ rule reseq_create_pop_xpnsl_vcf_bcftools:
     output:
         ref_vcf="reSEQ/VCF/Phased/SplitByChrom/{chrom}.ref.vcf.gz",
         query_vcf="reSEQ/VCF/Phased/SplitByChrom/{chrom}.query.vcf.gz",
+    log:
+        "logs/bcftools/{chrom}.create_pop_xpnsl_vcf.log",
     singularity:
         "docker://aewebb/bcftools:v1.20"
     resources:
@@ -68,9 +75,9 @@ rule reseq_create_pop_xpnsl_vcf_bcftools:
     threads: 1
     shell:
         """
-        bcftools index {input}
-        bcftools view --samples-file {input.ref_inds} -O z -o {output.ref_vcf} {input.vcf}
-        bcftools view --samples-file ^{input.ref_inds} -O z -o {output.query_vcf} {input.vcf}
+        bcftools index {input} 2> {log}
+        bcftools view --samples-file {input.ref_inds} -O z -o {output.ref_vcf} {input.vcf} 2>> {log}
+        bcftools view --samples-file ^{input.ref_inds} -O z -o {output.query_vcf} {input.vcf} 2>> {log}
         """
 
 
@@ -81,8 +88,10 @@ rule reseq_xpnsl_selscan:
     output:
         temp("reSEQ/PopGen/XPnSL/{chrom}.xpnsl.out"),
         temp("reSEQ/PopGen/XPnSL/{chrom}.xpnsl.log"),
+    log:
+        "logs/selscan/{chrom}.xpnsl.log",
     params:
-        out_prefix="reSEQ/PopGen/XPnSL/{chrom}",
+        out_prefix=subpath(output[0], strip_suffix=".xpnsl.out"),
         maf=config["maf"],
     singularity:
         "docker://aewebb/selscan:v2.0.3"
@@ -90,17 +99,17 @@ rule reseq_xpnsl_selscan:
         mem_mb=24000,
     threads: 12
     shell:
-        "selscan --xpnsl --vcf-ref {input.ref_vcf} --vcf {input.query_vcf} --maf {params.maf} --threads {threads} --out {params.out_prefix}"
+        "selscan --xpnsl --vcf-ref {input.ref_vcf} --vcf {input.query_vcf} --maf {params.maf} --threads {threads} --out {params.out_prefix} &> {log}"
 
 
 rule reseq_normalize_xpnsl_norm:
     input:
         "reSEQ/PopGen/XPnSL/{chrom}.xpnsl.out",
     output:
-        temp("reSEQ/PopGen/XPnSL/{{chrom}}.xpnsl.out.norm"),
-        temp("reSEQ/PopGen/XPnSL/{{chrom}}.xpnsl.norm.log"),
+        temp("reSEQ/PopGen/XPnSL/{chrom}.xpnsl.out.norm"),
+    log:
+        "logs/selscan/{chrom}.xpnsl.norm.log",
     params:
-        out_prefix="reSEQ/PopGen/XPnSL/{chrom}.xpnsl",
         bins=config["bins"],
     singularity:
         "docker://aewebb/selscan:v2.0.3"
@@ -108,7 +117,7 @@ rule reseq_normalize_xpnsl_norm:
         mem_mb=2000,
     threads: 1
     shell:
-        "norm --xpnsl --files {input} --bins {params.bins} 2> {params.out_prefix}.norm.log"
+        "norm --xpnsl --files {input} --bins {params.bins} 2> {log}"
 
 
 def aggregate_xpnsl_reseq(wildcards):

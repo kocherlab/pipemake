@@ -11,6 +11,8 @@ rule reseq_filter_selscan_bcftools:
         temp(
             f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.vcf.gz"
         ),
+    log:
+        f"logs/bcftools/{config['species']}_{config['assembly_version']}.filter_selscan.log",
     params:
         exclude_chr=(
             f"-t ^{','.join(config['exclude_chr'])}"
@@ -23,4 +25,4 @@ rule reseq_filter_selscan_bcftools:
         mem_mb=8000,
     threads: 1
     shell:
-        "bcftools view --samples-file {input.ind_file} {params.exclude_chr} {input.vcf} | bcftools annotate --set-id '%CHROM\_%POS' -O z -o {output}"
+        "bcftools view --samples-file {input.ind_file} {params.exclude_chr} {input.vcf} 2> {log} | bcftools annotate --set-id '%CHROM\_%POS' -O z -o {output} 2>> {log}"

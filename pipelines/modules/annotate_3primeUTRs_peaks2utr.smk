@@ -9,14 +9,15 @@ rule annotate_3prime_utrs_peaks2utr:
         base_gff=f"Annotations/{config['species']}_{config['assembly_version']}.{config['annotation_version']}.gff3",
     output:
         f"Annotations/peaks2utr/{config['species']}_{config['assembly_version']}.{config['annotation_version']}.{config['utr_version']}.gff3",
+    log:
+        f"logs/peaks2utr/{config['species']}_{config['assembly_version']}.{config['annotation_version']}.{config['utr_version']}.log",
     resources:
         mem_mb=120000,
     threads: 10
     singularity:
         "docker://aewebb/peaks2utr:v1.2.5"
     shell:
-        "peaks2utr {input.base_gff} {input.merged_bam} -o {output} -p {threads}"
-
+        "peaks2utr {input.base_gff} {input.merged_bam} -o {output} -p {threads} &> {log}"
 
 rule process_peaks2utr_utrs:
     input:

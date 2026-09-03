@@ -7,8 +7,10 @@ rule sortmerna_index:
     output:
         index_chk=temp("Indices/sortmerna/.idx.chk"),
         work_dir=temp(directory("Indices/.sortmerna_work_dir")),
+    log:
+        "logs/sortmerna/index.log",
     params:
-        index_dir="Indices/sortmerna",
+        index_dir=subpath(input[0], parent=True),
         sortmerna_db=config["sortmerna_db"],
     singularity:
         "docker://aewebb/sortmerna:v4.3.7"
@@ -16,4 +18,4 @@ rule sortmerna_index:
         mem_mb=16000,
     threads: 1
     shell:
-        "sortmerna -index 1 --ref /opt/DBs/{params.sortmerna_db} --idx-dir {params.index_dir} --workdir {output.work_dir} && touch {output.index_chk}"
+        "sortmerna -index 1 --ref /opt/DBs/{params.sortmerna_db} --idx-dir {params.index_dir} --workdir {output.work_dir} &> {log} && touch {output.index_chk}"

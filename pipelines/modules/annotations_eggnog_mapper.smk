@@ -28,6 +28,8 @@ rule run_eggnog_mapper:
         transcripts=f"Annotations/EggNOG/{config['species']}_{config['assembly_version']}.{config['annotation_version']}_pep.fa",
     output:
         f"Annotations/EggNOG/{config['species']}_{config['assembly_version']}.{config['annotation_version']}.emapper.annotations.xlsx",
+    log:
+        f"logs/eggnog-mapper/{config['species']}_{config['assembly_version']}.{config['annotation_version']}.log",
     params:
         out_prefix=subpath(output[0], strip_suffix=".emapper.annotations.xlsx"),
         eggnod_dir="Annotations/EggNOG/",
@@ -38,4 +40,4 @@ rule run_eggnog_mapper:
         mem_mb=12000,
     threads: 12
     shell:
-        "emapper.py --override --data_dir {params.data_dir} -i {input.transcripts} -o {params.out_prefix} --cpu {threads} --excel --temp_dir {params.eggnod_dir}"
+        "emapper.py --override --data_dir {params.data_dir} -i {input.transcripts} -o {params.out_prefix} --cpu {threads} --excel --temp_dir {params.eggnod_dir} &> {log}"

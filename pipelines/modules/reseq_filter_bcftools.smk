@@ -8,6 +8,8 @@ rule filter_basic_vcf_bcftools:
         f"reSEQ/VCF/Unfiltered/{config['species']}_{config['assembly_version']}.vcf.gz",
     output:
         f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.filtered.vcf.gz",
+    log:
+        f"logs/bcftools/{config['species']}_{config['assembly_version']}.filter.log",
     params:
         min_alleles=config["min_alleles"],
         max_alleles=config["max_alleles"],
@@ -30,4 +32,4 @@ rule filter_basic_vcf_bcftools:
     singularity:
         "docker://aewebb/bcftools:v1.20"
     shell:
-        "bcftools view {params.include_regions} {params.exclude_regions} --min-alleles {params.min_alleles} --max-alleles {params.max_alleles} --types snps --include 'MAF>={params.maf} && QUAL>={params.qual} && F_MISSING<={params.missing_cutoff}' --output-type z --output-file {output} --threads {threads} {input}"
+        "bcftools view {params.include_regions} {params.exclude_regions} --min-alleles {params.min_alleles} --max-alleles {params.max_alleles} --types snps --include 'MAF>={params.maf} && QUAL>={params.qual} && F_MISSING<={params.missing_cutoff}' --output-type z --output-file {output} --threads {threads} {input} 2> {log}"

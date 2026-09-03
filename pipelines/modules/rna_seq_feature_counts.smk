@@ -14,6 +14,8 @@ rule feature_counts_pair_end:
         sorted_bam="RNAseq/BAM/Sorted/{sample}.sortedByCoord.bam",
     output:
         "RNAseq/Counts/featureCounts/{sample}.featurecounts.txt",
+    log:
+        "logs/featurecounts/{sample}.featurecounts.log",
     params:
         count_strand=config["count_strand"],
     singularity:
@@ -22,7 +24,7 @@ rule feature_counts_pair_end:
         mem_mb=4000,
     threads: 4
     shell:
-        "featureCounts -s {params.count_strand} -p -T {threads} -a {input.gtf_file} -o {output} {input.sorted_bam}"
+        "featureCounts -s {params.count_strand} -p -T {threads} -a {input.gtf_file} -o {output} {input.sorted_bam} &> {log}"
 
 
 rule feature_counts_single_end:
@@ -32,6 +34,8 @@ rule feature_counts_single_end:
         sorted_bam="RNAseq/BAM/Sorted/{sample}.sortedByCoord.bam",
     output:
         "RNAseq/Counts/featureCounts/{sample}.featurecounts.txt",
+    log:
+        "logs/featurecounts/{sample}.featurecounts.log",
     params:
         count_strand=config["count_strand"],
     singularity:
@@ -40,7 +44,7 @@ rule feature_counts_single_end:
         mem_mb=4000,
     threads: 4
     shell:
-        "featureCounts -s {params.count_strand} -T {threads} -a {input.gtf_file} -o {output} {input.sorted_bam}"
+        "featureCounts -s {params.count_strand} -T {threads} -a {input.gtf_file} -o {output} {input.sorted_bam} &> {log}"
 
 
 rule feature_counts_report:

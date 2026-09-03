@@ -14,6 +14,8 @@ rule filter_basic_vcf_bcftools:
         idx_file=temp(
             f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.filtered.woMD.vcf.gz.csi"
         ),
+    log:
+        f"logs/bcftools/{config['species']}_{config['assembly_version']}.filter.log",
     params:
         min_alleles=config["min_alleles"],
         max_alleles=config["max_alleles"],
@@ -26,8 +28,8 @@ rule filter_basic_vcf_bcftools:
         "docker://aewebb/bcftools:v1.20"
     shell:
         """
-        bcftools view --samples-file {input.ind_file} {input.vcf_file} | bcftools view --min-alleles {params.min_alleles} --max-alleles {params.max_alleles} --types snps --include 'MAF>={params.maf} && QUAL>={params.qual}' --output-type z --output-file {output.vcf_file} --threads {threads}
-        bcftools index {output.vcf_file}
+        bcftools view --samples-file {input.ind_file} {input.vcf_file} 2> {log} | bcftools view --min-alleles {params.min_alleles} --max-alleles {params.max_alleles} --types snps --include 'MAF>={params.maf} && QUAL>={params.qual}' --output-type z --output-file {output.vcf_file} --threads {threads} 2>> {log}
+        bcftools index {output.vcf_file} 2>> {log}
         """
 
 
@@ -60,6 +62,8 @@ rule pop_vcf_bcftools:
         idx_file=temp(
             f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.filtered.woMD.{{model_pop}}.vcf.gz.csi"
         ),
+    log:
+        f"logs/bcftools/{{model_pop}}.filter_pop.log",
     params:
         missing_cutoff=config["missing_cutoff"],
     resources:
@@ -69,8 +73,8 @@ rule pop_vcf_bcftools:
         "docker://aewebb/bcftools:v1.20"
     shell:
         """
-        bcftools view --samples-file {input.pop_file} {input.vcf_file} | bcftools view -i 'F_MISSING<={params.missing_cutoff}' --output-type z --output-file {output.vcf_file}
-        bcftools index {output.vcf_file}
+        bcftools view --samples-file {input.pop_file} {input.vcf_file} 2> {log} | bcftools view -i 'F_MISSING<={params.missing_cutoff}' --output-type z --output-file {output.vcf_file} 2>> {log}
+        bcftools index {output.vcf_file} 2>> {log}
         """
 
 
@@ -105,6 +109,8 @@ rule isec_pop_vcfs_bcftools:
         temp(
             f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.filtered.missing_data.sites"
         ),
+    log:
+        f"logs/bcftools/{config['species']}_{config['assembly_version']}.isec.log",
     params:
         pop_count=lambda wildcards, input: len(input) / 2,
     resources:
@@ -113,7 +119,7 @@ rule isec_pop_vcfs_bcftools:
     singularity:
         "docker://aewebb/bcftools:v1.20"
     shell:
-        "bcftools isec {input.vcf_file} -n={params.pop_count} | cut -f1,2 > {output}"
+        "bcftools isec {input.vcf_file} -n={params.pop_count} 2> {log} | cut -f1,2 > {output}"
 
 
 rule filter_pops_missing_data_vcf_bcftools:
@@ -123,10 +129,12 @@ rule filter_pops_missing_data_vcf_bcftools:
         sites_file=f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.filtered.missing_data.sites",
     output:
         f"reSEQ/VCF/Filtered/{config['species']}_{config['assembly_version']}.filtered.vcf.gz",
+    log:
+        f"logs/bcftools/{config['species']}_{config['assembly_version']}.filter_missing_data.log",
     resources:
         mem_mb=8000,
     threads: 4
     singularity:
         "docker://aewebb/bcftools:v1.20"
     shell:
-        "bcftools view -R {input.sites_file} --output-type z --output-file {output} --threads {threads} {input.vcf_file}"
+        "bcftools view -R {input.sites_file} --output-type z --output-file {output} --threads {threads} {input.vcf_file} 2> {log}"

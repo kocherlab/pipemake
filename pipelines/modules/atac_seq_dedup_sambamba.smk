@@ -11,10 +11,12 @@ rule dedup_bam_sambamba:
         "ATAC_seq/BAM/Sorted/{sample}.sortedByCoord.bam",
     output:
         "ATAC_seq/BAM/Deduplicated/{sample}.deduplicated.bam",
+    log:
+        "logs/sambamba/{sample}.dedup.log",
     singularity:
         "docker://aewebb/sambamba:v1.0.1"
     resources:
         mem_mb=16000,
     threads: 4
     shell:
-        "sambamba markdup -t {threads} {input} {output}"
+        "sambamba markdup -t {threads} {input} {output} &> {log}"

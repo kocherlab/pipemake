@@ -8,10 +8,12 @@ rule pacbio_bam_to_fastq:
         "BAM/PacBio/{sample}.bam",
     output:
         temp("FASTQ/Unfiltered/{sample}.fastq.gz"),
+    log:
+        "logs/bamtools/{sample}.bam_to_fastq.log",
     singularity:
         "docker://aewebb/bamtools:v2.5.2"
     resources:
         mem_mb=16000,
     threads: 1
     shell:
-        "bamtools convert -format fastq -in {input} | gzip > {output}"
+        "bamtools convert -format fastq -in {input} 2> {log} | gzip > {output}"

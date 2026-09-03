@@ -19,8 +19,10 @@ rule build_config:
         fastq_list=f"Assembly/purge_dups/{config['species']}.list",
     output:
         temp(f"Assembly/purge_dups/{config['species']}.tmp.json"),
+    log:
+        f"logs/purge_dups/{config['species']}.log",
     params:
-        output_dir=f"Assembly/purge_dups/{config['species']}_tmp",
+        output_dir=subpath(output[0], strip_suffix=".tmp.json") + "_tmp",
     singularity:
         "docker://aewebb/purge_dups:v1.2.6"
     resources:
@@ -28,7 +30,7 @@ rule build_config:
     threads: 1
     shell:
         """
-        pd_config.py {input.assembled_fasta} {input.fastq_list} -n {output} -l {params.output_dir}
+        pd_config.py {input.assembled_fasta} {input.fastq_list} -n {output} -l {params.output_dir} &> {log}
         sleep 30
         """
 
@@ -39,7 +41,7 @@ rule update_json:
     output:
         f"Assembly/purge_dups/{config['species']}.json",
     params:
-        out_dir=os.path.abspath(f"Assembly/purge_dups/{config['species']}"),
+        out_dir=os.path.abspath(subpath(output[0], strip_suffix=".json")),
         busco_db=config["busco_database"],
     localrule: True
     run:
@@ -58,6 +60,8 @@ rule hifi_assembly_purge_dups:
         f"Assembly/purge_dups/{config['species']}.json",
     output:
         f"Assembly/purge_dups/{config['species']}/seqs/{config['species']}_{config['assembly_version']}.purged.fa",
+    log:
+        f"logs/purge_dups/{config['species']}.log",
     params:
         species=config["species"],
     singularity:
@@ -66,7 +70,7 @@ rule hifi_assembly_purge_dups:
         mem_mb=30000,
     threads: 12
     shell:
-        "run_purge_dups.py {input} /opt/conda/envs/purge_dups/bin {params.species} -p bash"
+        "run_purge_dups.py {input} /opt/conda/envs/purge_dups/bin {params.species} -p bash &> {log}"
 
 
 rule collect_purged_fasta:
@@ -75,7 +79,7 @@ rule collect_purged_fasta:
     output:
         f"Assembly/purge_dups/{config['species']}_{config['assembly_version']}.fa",
     params:
-        output_dir=f"Assembly/purge_dups/{config['species']}_tmp",
+        output_dir=subpath(output[0], strip_suffix=f"_{config['assembly_version']}.fa") + "_tmp",
     localrule: True
     shell:
         """
