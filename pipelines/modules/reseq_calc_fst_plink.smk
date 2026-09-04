@@ -38,7 +38,7 @@ checkpoint reseq_model_calc_fst_plink:
         f"logs/plink/{config['species']}_{config['assembly_version']}.calc_fst_{{model}}.log",
     params:
         bed_prefix=subpath(input.bed_file, strip_suffix=".bed"),
-        fst_prefix=os.path.join(output.fst_dir,f"{config['species']}_{config['assembly_version']}.filtered"),
+        fst_prefix=lambda wildcards, output: os.path.join(output.fst_dir, f"{config['species']}_{config['assembly_version']}.filtered"),
         fst_method=config["fst_method"],
     resources:
         mem_mb=2000,
