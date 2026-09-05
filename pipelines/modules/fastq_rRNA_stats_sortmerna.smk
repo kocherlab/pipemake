@@ -68,7 +68,7 @@ rule rrna_seqkit_stats:
         "logs/seqkit/filtered_fastq_stats.log",
     params:
         filtered_dir=subpath(input[0], parent=True),
-        filtered_wildcard=os.path.join(subpath(input[0], parent=True), "*.fq.gz"),
+        filtered_wildcard=lambda wildcards, input: os.path.join(subpath(input[0], parent=True), "*.fq.gz"),
     singularity:
         "docker://aewebb/seqkit:v2.10.0"
     resources:
