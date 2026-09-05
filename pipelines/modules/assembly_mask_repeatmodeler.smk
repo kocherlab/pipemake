@@ -39,9 +39,7 @@ rule mask_assembly_repeatmasker:
         assembly=f"Assembly/{config['species']}_{config['assembly_version']}.fa",
         families=f"Assembly/RepeatModeler/Families/{config['species']}_{config['assembly_version']}-families.fa",
     output:
-        os.path.join(
-            f"Assembly/RepeatModeler/MaskedAssembly/{config['species']}_{config['assembly_version']}.fa.masked",
-        ),
+        f"Assembly/RepeatModeler/MaskedAssembly/{config['species']}_{config['assembly_version']}.fa.masked",
     log:
         f"logs/repeatmasker/{config['species']}_{config['assembly_version']}.log",
     params:
