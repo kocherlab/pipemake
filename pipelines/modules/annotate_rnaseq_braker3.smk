@@ -19,7 +19,8 @@ rule annotate_braker3:
         "logs/annotate_rnaseq_braker3.log",
     params:
         annotations_dir=subpath(output[0], parent=True),
-        augustus_config=os.path.abspath(os.path.join(subpath(input.augustus_check, parent=True), "config")),
+        augustus_config=lambda wildcards, input: os.path.abspath(os.path.join(subpath(input.augustus_check, parent=True), "config")),
+    params:
     singularity:
         "docker://teambraker/braker3:v3.0.7.6"
     resources:
