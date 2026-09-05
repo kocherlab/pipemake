@@ -33,7 +33,7 @@ checkpoint reseq_split_unphased_bcftools:
     output:
         directory(f"reSEQ/VCF/Filtered/SplitByChrom"),
     params:
-        out_prefix=os.path.join(output[0],),
+        out_prefix=lambda wildcards, output: os.path.join(output[0],),
     singularity:
         "docker://aewebb/bcftools:v1.20"
     resources:

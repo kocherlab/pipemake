@@ -12,7 +12,7 @@ checkpoint reseq_split_unphased_bcftools:
     log:
         f"logs/bcftools/{config['species']}_{config['assembly_version']}.split_by_chrom.log",
     params:
-        out_prefix=os.path.join(output[0],),
+        out_prefix=lambda wildcards, output: os.path.join(output[0],),
     singularity:
         "docker://aewebb/bcftools:v1.20"
     resources:
