@@ -95,9 +95,9 @@ snakemake:
     - rna_seq_star_multimapped_reads
   links:
     - input: fastq_process_single_end
-      output: star_single_end
+      output: star_single_end_multimap
     - input: fastq_process_paired_end
-      output: star_pair_end
+      output: star_pair_end_multimap
 
 
     
