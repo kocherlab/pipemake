@@ -92,7 +92,7 @@ setup:
 snakemake:
   modules:
     - star_create_index
-    - rna_seq_star_multimap_fastqs
+    - rna_seq_star_multimapped_reads
   links:
     - input: fastq_process_single_end
       output: star_single_end
