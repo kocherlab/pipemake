@@ -23,7 +23,7 @@ rule star_genome_generate_rnaseq:
     shell:
         """
         let "index_mem_b={resources.mem_mb} * 10**6"
-        STAR --runThreadN {threads} --runMode genomeGenerate --genomeDir {params.index_dir} --genomeFastaFiles {input} --limitGenomeGenerateRAM $index_mem_b --genomeSAindexNbases 13 2> {log}
+        STAR --runThreadN {threads} --runMode genomeGenerate --genomeDir {params.index_dir} --genomeFastaFiles {input} --limitGenomeGenerateRAM $index_mem_b --genomeSAindexNbases 13 &> {log}
         """
 
 
