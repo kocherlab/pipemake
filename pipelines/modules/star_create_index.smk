@@ -23,5 +23,5 @@ rule star_genome_generate_rnaseq:
         """
         let "index_mem_b={resources.mem_mb} * 10**6"
         let "index_read_len={params.read_len} - 1"
-        STAR --runThreadN {threads} --runMode genomeGenerate --genomeDir {params.index_dir} --genomeFastaFiles {input.fasta_file} --limitGenomeGenerateRAM $index_mem_b --genomeSAindexNbases 13 --sjdbGTFfile {input.gtf_file} --sjdbOverhang $index_read_len 2> {log}
+        STAR --runThreadN {threads} --runMode genomeGenerate --genomeDir {params.index_dir} --genomeFastaFiles {input.fasta_file} --limitGenomeGenerateRAM $index_mem_b --genomeSAindexNbases 13 --sjdbGTFfile {input.gtf_file} --sjdbOverhang $index_read_len &> {log}
         """
