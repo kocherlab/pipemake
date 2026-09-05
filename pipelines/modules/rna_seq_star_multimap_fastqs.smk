@@ -48,7 +48,7 @@ rule star_pair_end:
         "logs/star/{sample}.unmapped.log",
     params:
         index_dir=subpath(input.index_file, parent=True),
-        bam_prefix=subpath(output[0], strip_suffix="_R1.Unmapped.fq.gz") + '.',
+        bam_prefix=lambda wildcards, output: subpath(output[0], strip_suffix="_R1.Unmapped.fq.gz") + '.',
     singularity:
         "docker://aewebb/star:v2.7.11b"
     resources:
