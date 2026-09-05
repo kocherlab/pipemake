@@ -10,7 +10,7 @@ rule sortmerna_index:
     log:
         "logs/sortmerna/index.log",
     params:
-        index_dir=subpath(output.index_file, parent=True),
+        index_dir=subpath(output.index_chk, parent=True),
         sortmerna_db=config["sortmerna_db"],
     singularity:
         "docker://aewebb/sortmerna:v4.3.7"
