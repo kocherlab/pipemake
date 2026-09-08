@@ -12,7 +12,7 @@ rule fasterq_dump_paired_end:
         "logs/fasterq_dump/{sample}.log",
     params:
         sra_dir=subpath(input[0], parent=True),
-        tmp_dir=os.path.join(subpath(input[0], parent=True), "{wildcards.sample}_TMP"),
+        tmp_dir=lambda wildcards, input: os.path.join(subpath(input[0], parent=True), "{wildcards.sample}_TMP"),
     singularity:
         "docker://ncbi/sra-tools:3.1.0"
     resources:

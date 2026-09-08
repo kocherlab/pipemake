@@ -8,7 +8,7 @@ rule fasterq_dump_single_end:
         r1_reads=temp("SRA/Downloads/{sample}_1.fastq"),
     params:
         sra_dir=subpath(input[0], parent=True),
-        tmp_dir=os.path.join(subpath(input[0], parent=True), "{wildcards.sample}_TMP"),
+        tmp_dir=lambda wildcards, input: os.path.join(subpath(input[0], parent=True), "{wildcards.sample}_TMP"),
     log:
         "logs/fasterq_dump/{sample}.log",
     singularity:

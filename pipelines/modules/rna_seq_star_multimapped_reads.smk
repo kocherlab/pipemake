@@ -5,9 +5,9 @@ ruleorder: bam_to_fastq_pair_end > bam_to_fastq_single_end
 rule all:
     input:
         expand(
-            "RNAseq/FASTQ/Multimapped/{sample}_R1.Multimapped.fq.gz", sample=config["samples"]
+            "Multimapped/FASTQ/{sample}_R1.Multimapped.fq.gz", sample=config["samples"]
         ),
-        expand("RNAseq/BAM/Multimapped/{sample}.Log.final.out", sample=config["samples"]),
+        expand("Multimapped/BAM/{sample}.Log.final.out", sample=config["samples"]),
 
 
 rule star_single_end_multimap:
@@ -15,8 +15,8 @@ rule star_single_end_multimap:
         r1_reads="RNAseq/FASTQ/{sample}_R1.fq.gz",
         index_file="Indices/STAR/SAindex",
     output:
-        bam="RNAseq/BAM/Multimapped/{sample}.Aligned.bam",
-        log="RNAseq/BAM/Multimapped/{sample}.Log.final.out",
+        bam="Multimapped/BAM/{sample}.Aligned.bam",
+        log="Multimapped/BAM/{sample}.Log.final.out",
     log:
         "logs/star/{sample}.multimapped.log",
     params:
@@ -40,8 +40,8 @@ rule star_pair_end_multimap:
         r2_reads="RNAseq/FASTQ/{sample}_R2.fq.gz",
         index_file="Indices/STAR/SAindex",
     output:
-        bam="RNAseq/BAM/Multimapped/{sample}.Aligned.bam",
-        log="RNAseq/BAM/Multimapped/{sample}.Log.final.out",
+        bam="Multimapped/BAM/{sample}.Aligned.bam",
+        log="Multimapped/BAM/{sample}.Log.final.out",
     log:
         "logs/star/{sample}.multimapped.log",
     params:
@@ -61,9 +61,9 @@ rule star_pair_end_multimap:
 
 rule filter_multimapped_reads:
     input:
-        "RNAseq/BAM/Multimapped/{sample}.Aligned.bam",
+        "Multimapped/BAM/{sample}.Aligned.bam",
     output:
-        "RNAseq/BAM/Multimapped/{sample}.Filtered.bam",
+        "Multimapped/BAM/{sample}.Filtered.bam",
     log:
         "logs/samtools/{sample}.multimap_filter.log",
     singularity:
@@ -77,10 +77,10 @@ rule filter_multimapped_reads:
 
 rule bam_to_fastq_single_end:
     input:
-        bam="RNAseq/BAM/Multimapped/{sample}.Filtered.bam",
+        bam="Multimapped/BAM/{sample}.Filtered.bam",
         r1_reads="RNAseq/FASTQ/{sample}_R1.fq.gz",
     output:
-        "RNAseq/FASTQ/Multimapped/{sample}_R1.Multimapped.fq.gz",
+        "Multimapped/FASTQ/{sample}_R1.Multimapped.fq.gz",
     log:
         "logs/samtools/{sample}.multimap_fastq.log",
     singularity:
@@ -94,12 +94,12 @@ rule bam_to_fastq_single_end:
 
 rule bam_to_fastq_pair_end:
     input:
-        bam="RNAseq/BAM/Multimapped/{sample}.Filtered.bam",
+        bam="Multimapped/BAM/{sample}.Filtered.bam",
         r1_reads="RNAseq/FASTQ/{sample}_R1.fq.gz",
         r2_reads="RNAseq/FASTQ/{sample}_R2.fq.gz",
     output:
-        r1="RNAseq/FASTQ/Multimapped/{sample}_R1.Multimapped.fq.gz",
-        r2="RNAseq/FASTQ/Multimapped/{sample}_R2.Multimapped.fq.gz",
+        r1="Multimapped/FASTQ/{sample}_R1.Multimapped.fq.gz",
+        r2="Multimapped/FASTQ/{sample}_R2.Multimapped.fq.gz",
     log:
         "logs/samtools/{sample}.multimap_fastq.log",
     singularity:
