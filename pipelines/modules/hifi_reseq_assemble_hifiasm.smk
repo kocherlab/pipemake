@@ -12,7 +12,7 @@ rule hifi_wo_hic_reseq_assemble_hifiasm:
     log:
         f"logs/hifiasm/{config['species']}_{config['assembly_version']}.log",
     params:
-        output_prefix=subpath(output[0], strip_suffix=f"_{config['assembly_version']}.a_ctg.gfa"),
+        output_prefix=subpath(output[0], strip_suffix=f".a_ctg.gfa"),
     singularity:
         "docker://aewebb/hifiasm:v0.24.0-r702"
     resources:
