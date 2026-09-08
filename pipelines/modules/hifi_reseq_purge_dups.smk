@@ -41,7 +41,7 @@ rule update_json:
     output:
         f"Assembly/purge_dups/{config['species']}.json",
     params:
-        out_dir=os.path.abspath(subpath(output[0], strip_suffix=".json")),
+        out_dir=lambda wildcards, output: os.path.abspath(subpath(output[0], strip_suffix=".json")),
         busco_db=config["busco_database"],
     localrule: True
     run:
@@ -79,7 +79,7 @@ rule collect_purged_fasta:
     output:
         f"Assembly/purge_dups/{config['species']}_{config['assembly_version']}.fa",
     params:
-        output_dir=subpath(output[0], strip_suffix=f"_{config['assembly_version']}.fa") + "_tmp",
+        output_dir=lambda wildcards, output: subpath(output[0], strip_suffix=f"_{config['assembly_version']}.fa") + "_tmp",
     localrule: True
     shell:
         """
