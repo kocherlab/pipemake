@@ -22,7 +22,7 @@ rule build_config:
     log:
         f"logs/purge_dups/{config['species']}.log",
     params:
-        output_dir=subpath(output[0], strip_suffix=".tmp.json") + "_tmp",
+        output_dir=lambda wildcards, output: subpath(output[0], strip_suffix=".tmp.json") + "_tmp",
     singularity:
         "docker://aewebb/purge_dups:v1.2.6"
     resources:
