@@ -1,7 +1,7 @@
-pipeline: unmapped-fastqs-star
+pipeline: multimapped-fastqs-star
 version: 1.0
 parser:
-  help: Create unmapped FASTQs using STAR
+  help: Create multimapped FASTQs using STAR
   arg-groups:
     basic:
       mutually-exclusive-args:
