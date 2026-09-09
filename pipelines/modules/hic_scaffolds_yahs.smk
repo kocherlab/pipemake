@@ -25,7 +25,7 @@ rule index_hifi_assembly:
     threads: 1
     shell:
         """
-        bwa-mem2 index {input} 2> {log}
+        bwa-mem2 index {input} &> {log}
         samtools faidx {input}
         """
 
@@ -45,7 +45,7 @@ rule align_hic_reads_bwa:
         mem_mb=32000,
     threads: 4
     shell:
-        "bwa-mem2 mem -t {threads} {input.assembly_fasta} {input.read_fastq} | samtools view --threads {threads} -bh -o {output} 2> {log}"
+        "bwa-mem2 mem -t {threads} {input.assembly_fasta} {input.read_fastq} 2> {log} | samtools view --threads {threads} -bh -o {output} 2>> {log}"
 
 
 rule filter_hic_reads:
@@ -81,7 +81,7 @@ rule combine_hic_reads:
         mem_mb=16000,
     threads: 4
     shell:
-        "two_read_bam_combiner.pl {input.r1_bam} {input.r2_bam} samtools {params.mapq_filter} | samtools view -bh -t {input.index_fasta} | samtools sort -@ {threads} -o {output} 2> {log}"
+        "two_read_bam_combiner.pl {input.r1_bam} {input.r2_bam} samtools {params.mapq_filter} 2> {log} | samtools view -bh -t {input.index_fasta} 2>> {log} | samtools sort -@ {threads} -o {output} 2>> {log}"
 
 
 rule add_read_groups:
@@ -229,7 +229,6 @@ rule juicer_tools_pre:
     shell:
         """
         assembly_size=$(grep 'PRE_C_SIZE' {input.log} | awk '{{print $3}}')
-        java -jar /opt/juicer_tools.jar pre {input.txt} {output.hic} <(echo "assembly ${{assembly_size}}") &> {log}
         """
 
 
