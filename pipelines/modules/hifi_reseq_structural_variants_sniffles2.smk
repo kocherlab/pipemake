@@ -34,7 +34,7 @@ rule multisample_vcf_sniffles2:
     output:
         f"reSEQ/VCFs/{config['species']}_{config['assembly_version']}.SVs.vcf.gz",
     log:
-        "logs/sniffles2/{sample}.vcf.log",
+        f"logs/sniffles2/{config['species']}_{config['assembly_version']}.vcf.log",
     params:
     singularity:
         "docker://aewebb/sniffles:v2.6.3"
