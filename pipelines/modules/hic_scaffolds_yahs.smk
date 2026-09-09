@@ -38,7 +38,7 @@ rule align_hic_reads_bwa:
     output:
         temp(f"HiC/BAM/Aligned/{config['species']}_{{read}}.aligned.bam"),
     log:
-        f"logs/bwa-mem2/{config['species']}_{config['assembly_version']}.hic_align.log",
+        f"logs/bwa-mem2/{config['species']}_{{read}}.hic_align.log",
     singularity:
         "docker://aewebb/bwa-mem2:v2.2.1"
     resources:
