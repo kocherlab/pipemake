@@ -75,7 +75,7 @@ rule run_gemma_gk:
     shell:
         """
         gemma -bfile {params.bed_prefix} -p {input.pheno_file} -gk {params.kinship_matrix} -outdir {params.out_dir} -o {params.out_prefix}
-        mv {params.out_prefix}.log.txt {log}
+        mv {params.out_prefix}.log {log}
         """
 
 
@@ -88,7 +88,6 @@ rule run_gemma_lmm:
         gk_file=f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.gk.cXX.txt",
     output:
         f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.lmm.assoc.txt",
-        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.lmm.log.txt",
     log:
         f"logs/gemma/{{model}}/{config['species']}_{config['assembly_version']}.lmm.log",
     params:
