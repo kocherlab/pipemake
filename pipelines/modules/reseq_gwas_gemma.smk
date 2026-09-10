@@ -94,7 +94,7 @@ rule run_gemma_lmm:
     params:
         bed_prefix=subpath(input.bed_file, strip_suffix=".bed"),
         out_prefix=subpath(output[0], basename=True, strip_suffix=".assoc.txt"),
-        out_prefix_path=subpath(output[0], strip_suffix=".cXX.txt"),
+        out_prefix_path=subpath(output[0], strip_suffix=".assoc.txt"),
         out_dir=subpath(output[0], parent=True),
         lmm_model=config["lmm_model"],
         maf=config["maf"],
