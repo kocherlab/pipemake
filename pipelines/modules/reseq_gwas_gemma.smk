@@ -65,6 +65,7 @@ rule run_gemma_gk:
     params:
         bed_prefix=subpath(input.bed_file, strip_suffix=".bed"),
         out_prefix=subpath(output[0], basename=True, strip_suffix=".cXX.txt"),
+        out_prefix_path=subpath(output[0], strip_suffix=".cXX.txt"),
         out_dir=subpath(output[0], parent=True),
         kinship_matrix=config["kinship_matrix"],
     resources:
@@ -75,7 +76,7 @@ rule run_gemma_gk:
     shell:
         """
         gemma -bfile {params.bed_prefix} -p {input.pheno_file} -gk {params.kinship_matrix} -outdir {params.out_dir} -o {params.out_prefix}
-        mv {params.out_prefix}.log {log}
+        mv {params.out_prefix_path}.log.txt {log}
         """
 
 
@@ -93,6 +94,7 @@ rule run_gemma_lmm:
     params:
         bed_prefix=subpath(input.bed_file, strip_suffix=".bed"),
         out_prefix=subpath(output[0], basename=True, strip_suffix=".assoc.txt"),
+        out_prefix_path=subpath(output[0], strip_suffix=".cXX.txt"),
         out_dir=subpath(output[0], parent=True),
         lmm_model=config["lmm_model"],
         maf=config["maf"],
@@ -104,7 +106,7 @@ rule run_gemma_lmm:
     shell:
         """
         gemma -p {input.pheno_file} -bfile {params.bed_prefix} -lmm {params.lmm_model} -k {input.gk_file} -maf {params.maf} -outdir {params.out_dir} -o {params.out_prefix}
-        mv {params.out_prefix}.log.txt {log}
+        mv {params.out_prefix_path}.log.txt {log}
         """
 
 
@@ -128,8 +130,7 @@ rule filter_gemma:
     input:
         f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.lmm.pve.txt",
     output:
-        filtered_file=f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.lmm.filtered.pve.txt",
-        log_file=f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.lmm.filtered.pve.txt.log",
+        f"reSEQ/PopGen/GEMMA/{{model}}/{config['species']}_{config['assembly_version']}.lmm.filtered.pve.txt",
     log:
         f"logs/filter-gemma/{{model}}/{config['species']}_{config['assembly_version']}.log",
     params:
@@ -140,7 +141,7 @@ rule filter_gemma:
     singularity:
         "docker://aewebb/pipemake_utils:v1.4.3"
     shell:
-        "filter-gemma --gemma-file {input} --min-log-pvalue {params.min_log_pvalue} --out-filename {output.filtered_file} &> {log}"
+        "filter-gemma --gemma-file {input} --min-log-pvalue {params.min_log_pvalue} --out-filename {output} &> {log}"
 
 
 rule plot_gemma:
