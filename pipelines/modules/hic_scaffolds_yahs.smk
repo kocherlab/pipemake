@@ -229,6 +229,7 @@ rule juicer_tools_pre:
     shell:
         """
         assembly_size=$(grep 'PRE_C_SIZE' {input.log} | awk '{{print $3}}')
+        java -jar /opt/juicer_tools.jar pre {input.txt} {output.hic} <(echo "assembly ${{assembly_size}}") &> {log}
         """
 
 
