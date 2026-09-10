@@ -3,7 +3,7 @@ rule all:
         expand("FASTQ/Filtered/{sample}.fcsfilt.fastq.gz", sample=config["samples"]),
 
 
-ruleorder: pacbio_bam_to_fasta > hifi_fastq_to_fastq
+ruleorder: pacbio_bam_to_fasta > hifi_fastq_to_fasta
 
 
 rule pacbio_bam_to_fasta:
