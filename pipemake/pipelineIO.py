@@ -315,16 +315,26 @@ class ConfigPipelineIO:
                 self._snakefiles.update(setup_dict["snakefiles"])
 
         for setup_path in self._setup_paths:
+
             # Get absolute path for the setup path
             setup_abs_path = os.path.abspath(processSetupArgs(setup_path))
-
-            # Confirm the setup path exists
-            if not os.path.exists(setup_abs_path):
-                raise Exception(f"Setup path {setup_abs_path} does not exist")
 
             # Check if the path is a file, and if so return the directory
             if os.path.isfile(setup_abs_path):
                 setup_abs_path = os.path.dirname(setup_abs_path)
+
+            # Check if the path is a directory, and if so return the directory
+            elif os.path.isdir(setup_abs_path):
+                pass
+
+            # Check that the parent directory exists, and if so return the parent directory
+            elif os.path.isdir(os.path.dirname(setup_abs_path)):
+                setup_abs_path = os.path.dirname(setup_abs_path)
+
+            # Raise an exception if the setup path does not exist
+            else:
+                raise Exception(f"Setup path {setup_abs_path} does not exist")
+            
 
             # Add the setup path to the singularity bindings
             self._singularity_bindings.add(setup_abs_path)
