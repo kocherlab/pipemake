@@ -24,7 +24,7 @@ rule hifi_align_minimap2:
         mem_mb=56000,
     threads: 16
     shell:
-        "minimap2 -ax map-hifi -t {threads} {input.assembly_fasta} {input.hifi_fastq} | samtools sort --threads {threads} -O bam -o {output} &> {log}"
+        "minimap2 -ax map-hifi -t {threads} {input.assembly_fasta} {input.hifi_fastq} 2> {log} | samtools sort --threads {threads} -O bam -o {output} &>> {log}"
 
 
 checkpoint split_assembly:
@@ -156,7 +156,7 @@ rule blobtk_blobtools_create:
         mem_mb=16000,
     threads: 1
     shell:
-        "blobtools create --fasta {input} {params.blob_dir} && touch {output} &> {log}"
+        "blobtools create --fasta {input} {params.blob_dir} &> {log} && touch {output}"
 
 
 rule blobtk_blobtools_add_cov:
@@ -175,7 +175,7 @@ rule blobtk_blobtools_add_cov:
         mem_mb=16000,
     threads: 1
     shell:
-        "blobtools add --cov {input.hifi_bam} {params.blob_dir} && touch {output} &> {log}"
+        "blobtools add --cov {input.hifi_bam} {params.blob_dir} &> {log} && touch {output}"
 
 
 rule blobtk_blobtools_add_hits:
@@ -196,7 +196,7 @@ rule blobtk_blobtools_add_hits:
         mem_mb=16000,
     threads: 1
     shell:
-        "blobtools add --hits {input.blastn_hits} --hits {input.blastx_hits} --taxrule bestsumorder --taxdump {params.ncbi_taxa_db} {params.blob_dir} && touch {output} &> {log}"
+        "blobtools add --hits {input.blastn_hits} --hits {input.blastx_hits} --taxrule bestsumorder --taxdump {params.ncbi_taxa_db} {params.blob_dir} &> {log} && touch {output}"
 
 
 rule blobtk_blobtools_add_busco:
@@ -215,7 +215,7 @@ rule blobtk_blobtools_add_busco:
         mem_mb=16000,
     threads: 1
     shell:
-        "blobtools add --busco {input.busco_table} {params.blob_dir} && touch {output} &> {log}"
+        "blobtools add --busco {input.busco_table} {params.blob_dir} &> {log} && touch {output}"
 
 
 rule blobblurb:

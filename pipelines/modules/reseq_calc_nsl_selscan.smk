@@ -134,7 +134,7 @@ def aggregate_nsl_reseq(wildcards):
     ).chrom
     return {
         "scan_nsl": expand("reSEQ/PopGen/nSL/{chrom}.nsl.out", chrom=chrom_wildcards),
-        "scan_log": expand("reSEQ/PopGen/nSL/{chrom}.nsl.log", chrom=chrom_wildcards),
+        "scan_log": expand("logs/selscan/{chrom}.nsl.log", chrom=chrom_wildcards),
         "norm_nsl": expand(
             f"reSEQ/PopGen/nSL/{{chrom}}.nsl.out.{config['bins']}bins.norm",
             chrom=chrom_wildcards,
@@ -144,7 +144,7 @@ def aggregate_nsl_reseq(wildcards):
             chrom=chrom_wildcards,
         ),
         "norm_log": expand(
-            f"reSEQ/PopGen/nSL/{{chrom}}.nsl.out.{config['bins']}bins.log",
+            f"logs/selscan/{{chrom}}.nsl.out.{config['bins']}bins.log",
             chrom=chrom_wildcards,
         ),
     }
