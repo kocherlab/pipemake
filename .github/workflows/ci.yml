@@ -6,6 +6,7 @@ on:
     paths-ignore:
       - '.conda/**'
       - '.github/**'
+      - '**/__init__.py'
 
 jobs:
   build:
