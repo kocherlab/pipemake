@@ -12,7 +12,7 @@ checkpoint reseq_split_unphased_bcftools:
     log:
         f"logs/bcftools/{config['species']}_{config['assembly_version']}.split_by_chrom.log",
     params:
-        out_prefix=lambda wildcards, output: os.path.join(output[0],),
+        out_prefix=lambda wildcards, output: os.path.join(output[0], ""),
     singularity:
         "docker://aewebb/bcftools:v1.20"
     resources:
@@ -135,7 +135,7 @@ def aggregate_xpnsl_reseq(wildcards):
             ).chrom,
         ),
         "scan_log": expand(
-            "reSEQ/PopGen/XPnSL/{chrom}.xpnsl.log",
+            "logs/selscan/{chrom}.xpnsl.log",
             chrom=glob_wildcards(
                 os.path.join(
                     checkpoint_output,
@@ -153,7 +153,7 @@ def aggregate_xpnsl_reseq(wildcards):
             ).chrom,
         ),
         "norm_log": expand(
-            "reSEQ/PopGen/XPnSL/{chrom}.xpnsl.norm.log",
+            "logs/selscan/{chrom}.xpnsl.norm.log",
             chrom=glob_wildcards(
                 os.path.join(
                     checkpoint_output,
@@ -201,6 +201,6 @@ rule plot_norm_xpnsl_pipemake:
     threads: 1
     shell:
         """
-        manhattan-plot --input-file {input} --chrom-col id --pos-col id --stat-col normxpehh --plot-stat-text "Noramlized XPnSL" --chrom-pos-sep '_' --out-prefix {params.out_prefix}.xpnsl &> {log}
-        manhattan-plot --input-file {input} --chrom-col id --pos-col id --stat-col normxpehh --plot-stat-text "Noramlized XPnSL" --chrom-pos-sep '_' --plot-abs --out-prefix {params.out_prefix}.abs_xpnsl &>> {log}
+        manhattan-plot --input-file {input} --chrom-col id --pos-col id --stat-col normxpnsl --plot-stat-text "Noramlized XPnSL" --chrom-pos-sep '_' --out-prefix {params.out_prefix}.xpnsl &> {log}
+        manhattan-plot --input-file {input} --chrom-col id --pos-col id --stat-col normxpnsl --plot-stat-text "Noramlized XPnSL" --chrom-pos-sep '_' --plot-abs --out-prefix {params.out_prefix}.abs_xpnsl &>> {log}
         """
