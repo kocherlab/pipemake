@@ -11,6 +11,8 @@ rule run_naps:
         input_video="Tracking/Videos/{video_id}.mp4",
     output:
         "Tracking/NAPS/{video_id}_naps_tracked.slp",
+    log:
+        "logs/naps/{video_id}_naps_tracked.log",
     params:
         output_prefix="Tracking/NAPS/{video_id}_naps_tracked",
         start_frame=config["start_frame"],
@@ -47,5 +49,5 @@ rule run_naps:
         --aruco-adaptive-thresh-win-size-min {params.aruco_adaptive_thresh_win_size_min} \
         --half-rolling-window-size {params.half_rolling_window_size} \
         --aruco-crop-size {params.aruco_crop_size} \
-        --output {params.output_prefix}
+        --output {params.output_prefix} &> {log}
         """

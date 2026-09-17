@@ -10,7 +10,7 @@ rule run_sleap:
         input_video="Tracking/Videos/{video_id}.mp4",
     output:
         "Tracking/SLEAP/{video_id}_sleap_tracked.slp",
-    logs:
+    log:
         "logs/sleap/{video_id}_sleap_tracked.log",
     params:
         centroid_model="Tracking/Models/centroid_model",
@@ -68,5 +68,5 @@ rule run_sleap:
         {params.tracking_target_instance_count} \
         {params.tracking_clean_instance_count} \
         {params.tracking_max_tracking} \
-        {params.tracking_max_tracks}
+        {params.tracking_max_tracks} $> {log}
         """
