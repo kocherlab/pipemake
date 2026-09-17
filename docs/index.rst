@@ -69,7 +69,7 @@ mamba
 
 .. code-block:: bash
 
-    mamba create -c conda-forge -c bioconda -c kocherlab -n pipemake pipemake
+   mamba create -c conda-forge -c bioconda kocherlab::pipemake
 
 For more information, see the :ref:`installation`.
 
