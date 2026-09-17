@@ -16,7 +16,7 @@ rule annotate_isoseq_braker3:
         "Annotations/BRAKER3/braker.codingseq",
         "Annotations/BRAKER3/braker.aa",
     log:
-        "logs/annotate_isoseq_braker3.log",
+        "logs/BRAKER3/annotate_isoseq_braker3.log",
     params:
         annotations_dir=subpath(output[0], parent=True),
         augustus_config=lambda wildcards, input: os.path.abspath(os.path.join(subpath(input.augustus_check, parent=True), "config")),
