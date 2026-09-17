@@ -8,6 +8,7 @@ Currently Available Pipelines
     :file: _static/pipelines.csv
     :header-rows: 1
     :align: left
+    :delim: tab
 
 .. note::
 

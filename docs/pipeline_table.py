@@ -38,7 +38,7 @@ with open(pipeline_table_filename, "w") as table_file:
 
         # Write the pipeline data to the pipelines list
         pipeline_list.append(
-            f'{pipeline_data["pipeline"]},{pipeline_data["parser"]["help"]}\n'
+            f'{pipeline_data["pipeline"]}\t{pipeline_data["parser"]["help"]}\n'
         )
 
         # Report the pipeline file that was parsed
