@@ -1,7 +1,7 @@
 pipeline: msf-codon-selection
 version: 1.0
 parser:
-  help: Perform HyPhy selection analyses on MSFs by aligning with MACSE, trimming with ClipKIT, and inferring trees with IQ-TREE
+  help: Perform HyPhy selection analyses by aligning MSFs with MACSE, trimming with ClipKIT, and inferring trees with IQ-TREE
   arg-groups:
     basic:
       mutually-exclusive-args:

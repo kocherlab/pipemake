@@ -1,7 +1,7 @@
 pipeline: msf-codon-phylogeny
 version: 1.0
 parser:
-  help: Create codon phylogenies by aligning with MACSE and trimming with ClipKIT, and then inferring trees with IQ-TREE
+  help: Create codon phylogenies by aligning with MACSE, trimming with ClipKIT, and then inferring trees with IQ-TREE
   arg-groups:
     basic:
       mutually-exclusive-args:
