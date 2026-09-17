@@ -14,7 +14,7 @@ pipeline_table_filename = os.path.join(pipeline_table_dir, "pipelines.csv")
 # Open the pipelines table file
 with open(pipeline_table_filename, "w") as table_file:
     # Write the header to the pipelines table file
-    table_file.write("Pipeline,Description\n")
+    table_file.write("Pipeline\tDescription\n")
 
     # Assign the pipeline directory
     pipeline_dir = os.path.join("pipelines", "configs")
