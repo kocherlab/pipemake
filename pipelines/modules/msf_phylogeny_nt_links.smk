@@ -1,4 +1,9 @@
-ruleorder: link_trim_msa_clipkit > link_create_iqtree_msa > trim_msa_clipkit > create_iqtree_msa
+ruleorder: link_tcs_score > link_trim_msa_clipkit > link_create_iqtree_msa > tcs_score > trim_msa_clipkit > create_iqtree_msa
+
+
+use rule tcs_score as link_tcs_score with:
+    input:
+        "MSA/NT/{sample}.fa",
 
 
 use rule trim_msa_clipkit as link_trim_msa_clipkit with:

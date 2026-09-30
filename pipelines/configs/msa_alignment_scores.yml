@@ -1,0 +1,66 @@
+pipeline: msa-alignment-scores
+version: 1.0
+parser:
+  help: Compute alignment scores for multiple sequence alignments (MSAs) using various methods.
+  arg-groups:
+    basic:
+      mutually-exclusive-args:
+        msa-parser:
+          required: True
+        log-parser:
+          required: True
+      wildcards-args:
+        msa-standardized-filename: "{samples}.fa"
+        log-standardized-filename: "{samples}.log"
+      args:
+        msa-wildcard:
+          help: "Wildcard statement to represent MSA files"
+          type: str
+          mutually-exclusive: "msa-parser"
+          wildcards: "msa-standardized-filename"
+        msa-table:
+          help: "Table with sample and MSA filenames"
+          type: str
+          action: confirmFile
+          mutually-exclusive: "msa-parser"
+          wildcards: "msa-standardized-filename"
+        msa-copy-method:
+          help: "Specifies if MSAs should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        clipkit-wildcard:
+          help: "Wildcard statement to represent ClipKIT files"
+          type: str
+          mutually-exclusive: "log-parser"
+          wildcards: "log-standardized-filename"
+        clipkit-table:
+          help: "Table with sample and ClipKIT filenames"
+          type: str
+          action: confirmFile
+          mutually-exclusive: "log-parser"
+          wildcards: "log-standardized-filename"
+
+setup:
+  msf_input:
+    methods:
+      wildcard-str: "{msa-wildcard}"
+      table-file: "{msa-table}"
+    args:
+      standardized_filename: "MSA/{msa-standardized-filename}"
+      copy_method: '{msa-copy-method}'
+      sample_keywords:
+        - "samples"
+  clipkit_input:
+    methods:
+      wildcard-str: "{clipkit-wildcard}"
+      table-file: "{clipkit-table}"
+    args:
+      standardized_filename: "logs/clipkit/{log-standardized-filename}"
+      copy_method: 'copy'
+
+snakemake:
+  modules:
+    - msa_tcs_score
+    - msa_trim_score

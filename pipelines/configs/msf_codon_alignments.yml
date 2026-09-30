@@ -49,6 +49,27 @@ parser:
           help: "Character to use for remaining frameshifts in MACSE"
           type: str
           default: "N"
+    clipkit_params:
+      args:
+        trim-method:
+          help: "Method to use for trimming alignments with ClipKIT"
+          choices:
+            - 'smart-gap'
+            - 'entropy'
+            - 'gappy'
+            - 'block-gappy'
+            - 'gappyout'
+            - 'composition-bias'
+            - 'heterotachy'
+            - 'kpic'
+            - 'kpic-smart-gap'
+            - 'kpic-gappy'
+            - 'kpi'
+            - 'kpi-smart-gap'
+            - 'kpi-gappy'
+            - 'c3'
+            - 'cst'
+          default: 'smart-gap'
 setup:
   msf_input:
     methods:
@@ -63,3 +84,8 @@ setup:
 snakemake:
   modules:
     - msf_align_codons_macse
+    - msa_tcs_score
+    - msa_trim_clipkit
+    - msa_trim_score
+    - msf_alignment_codon_links
+    

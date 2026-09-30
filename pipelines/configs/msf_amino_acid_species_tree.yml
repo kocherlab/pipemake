@@ -74,7 +74,9 @@ snakemake:
   modules:
     - msf_align_muscle
     - msf_align_muscle_aa_links
+    - msa_tcs_score
     - msa_trim_clipkit
+    - msa_trim_score
     - msa_tree_iqtree
     - msf_phylogeny_aa_links
     - tre_infer_species_tree_wASTRAL

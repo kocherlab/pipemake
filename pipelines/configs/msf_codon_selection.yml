@@ -111,7 +111,9 @@ setup:
 snakemake:
   modules:
     - msf_align_codons_macse
+    - msa_tcs_score
     - msa_trim_clipkit
+    - msa_trim_score
     - msa_tree_iqtree
     - msf_phylogeny_codon_links
     - msa_selection_BUSTED
