@@ -38,11 +38,14 @@
 ********
 pipemake
 ********
-pipemake is a lightweight, flexible, and easy-to-use tool for creating and managing `Snakemake <https://snakemake.readthedocs.io/>`_ pipelines. It was designed with three primary goals: 
+pipemake is a lightweight, flexible, and easy-to-use tool for creating and managing `Snakemake <https://snakemake.readthedocs.io/>`_ pipelines. It makes Snakemake's reproducibility safeguards automatic, reusable, and accessible to researchers who would otherwise struggle to implement them. It was designed with four primary goals:
 
 1. Offer a collection of curated, customizable genomic analysis pipelines for researchers seeking to rapidly integrate Snakemake-based workflows into their research.
-2. Optimize computational efficiency and reproducibility by fully operating in the Snakemake ecosystem.
-3. Streamline development by creating a flexible platform with swappable pipelines that easily reuse previously written Snakemake code.
+2. Build safeguards into every pipeline as enforced defaults, including validated command-line arguments, mandatory containerization, and standardized record-keeping in a workflow directory.
+3. Optimize computational efficiency and reproducibility by fully operating in the Snakemake ecosystem. pipemake generates standard Snakemake files, so a workflow can be run with Snakemake alone.
+4. Streamline development and sharing by creating a flexible platform with swappable pipelines that easily reuse previously written Snakemake code, allowing a group to maintain and share a single collection of pipelines.
+
+pipemake is most useful for analyses that need to be repeated, shared, or reproduced by someone other than the original designer, such as in research groups whose members have different levels of computational expertise. It is not intended to replace community-curated pipelines, such as those from `nf-core <https://nf-co.re/>`_, where one already exists for the analysis.
 
 ================
 Getting pipemake
@@ -56,12 +59,23 @@ mamba
 
    mamba create -c conda-forge -c bioconda kocherlab::pipemake
 
+For more information, see the `installation instructions <https://pipemake.readthedocs.io/en/latest/installation.html>`_.
+
 ======
 Issues
 ======
 
 1. Check the `docs <https://pipemake.rtfd.io/>`_.
 2. Search the `issues on GitHub <https://github.com/kocherlab/pipemake/issues>`_ or open a new one.
+
+============
+Contributors
+============
+
+* **Andrew Webb**, Department of Ecology and Evolutionary Biology, Lewis-Sigler Institute for Integrative Genomics, Princeton University, Howard Hughes Medical Institute, Chevy Chase, MD, USA
+* **Scott Wolf**, Research Computing, Princeton University, Princeton, NJ, USA
+* **Ian M Traniello**, Department of Ecology and Evolutionary Biology and Lewis-Sigler Institute for Integrative Genomics, Princeton University
+* **Sarah Kocher**, Department of Ecology and Evolutionary Biology, Lewis-Sigler Institute for Integrative Genomics, Princeton University, Howard Hughes Medical Institute, Chevy Chase, MD, USA
 
 =======
 License

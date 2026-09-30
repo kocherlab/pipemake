@@ -99,9 +99,3 @@ pipemake has been used to build and run pipelines spanning genomic and non-genom
 * Automated behavioral tracking in the common eastern bumble bee *Bombus impatiens* using NAPS (``tracking-naps``)
 
 To see the full list of available pipelines, see :ref:`pipelines`.
-
-*************
-Future Plans
-*************
-
-Future updates to pipemake will primarily focus on features that facilitate pipeline development and availability. Planned work includes a graphical user interface (GUI) to simplify the creation of pipeline configuration files, and an online database for storing and maintaining pipelines.
