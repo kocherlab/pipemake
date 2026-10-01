@@ -72,10 +72,10 @@ Issues
 Contributors
 ============
 
-* **Andrew Webb**, Department of Ecology and Evolutionary Biology, Lewis-Sigler Institute for Integrative Genomics, Princeton University, Howard Hughes Medical Institute, Chevy Chase, MD, USA
-* **Scott Wolf**, Research Computing, Princeton University, Princeton, NJ, USA
-* **Ian M Traniello**, Department of Ecology and Evolutionary Biology and Lewis-Sigler Institute for Integrative Genomics, Princeton University
-* **Sarah Kocher**, Department of Ecology and Evolutionary Biology, Lewis-Sigler Institute for Integrative Genomics, Princeton University, Howard Hughes Medical Institute, Chevy Chase, MD, USA
+* **Andrew Webb**, Department of Integrative Biology, University of California Berkeley, Berkeley, CA, USA, Howard Hughes Medical Institute, Chevy Chase, MD, USA
+* **Scott Wolf**, Department of Integrative Biology, University of California Berkeley, Berkeley, CA, USA
+* **Ian M Traniello**, Department of Ecology and Evolutionary Biology and Lewis-Sigler Institute for Integrative Genomics, Princeton University, Princeton, NJ, USA
+* **Sarah Kocher**, Department of Integrative Biology, University of California Berkeley, Berkeley, CA, USA, Howard Hughes Medical Institute, Chevy Chase, MD, USA
 
 =======
 License
