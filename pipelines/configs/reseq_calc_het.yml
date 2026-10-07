@@ -1,0 +1,44 @@
+pipeline: reseq-calc-het
+version: 1.0
+parser:
+  help: "Calculate heterozygosity in windows from a VCF using vcftools"
+  arg-groups:
+    basic:
+      args:
+        reseq-vcf:
+          help: "Input bgzipped VCF file"
+          type: str
+          required: true
+          action: confirmFile
+        species:
+          help: "Species name, used in output file names"
+          type: str
+          required: true
+        assembly-version:
+          help: "Assembly version, used in output file names"
+          type: str
+          required: true
+    region:
+      args:
+        chrom:
+          help: "Restrict to this chromosome"
+          type: str
+        start:
+          help: "Start position in bp (may only be specified if chrom is given)"
+          type: int
+        end:
+          help: "End position in bp (may only be specified if chrom is given)"
+          type: int
+
+setup:
+  standardize_inputs:
+    methods:
+      file-str: "{reseq-vcf}"
+    args:
+      standardized_filename: "reSEQ/VCF/{species}_{assembly_version}.vcf.gz"
+      copy_method: symbolic_link
+      gzipped: True
+
+snakemake:
+  modules:
+    - reseq_heterogeneity_vcftools
