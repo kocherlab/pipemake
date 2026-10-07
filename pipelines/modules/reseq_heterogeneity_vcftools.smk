@@ -25,6 +25,6 @@ rule het_per_indv:
     input:
         f"reSEQ/PopGen/vcftools/{config['species']}_{config['assembly_version']}.site.het",
     output:
-        f"reSEQ/PopGen/vcftools/{config['species']}_{config['assembly_version']}.sample.het2",
+        f"reSEQ/PopGen/vcftools/{config['species']}_{config['assembly_version']}.sample.het",
     shell:
         """awk 'NR==1{{print "INDV\\tN_SITES\\tN_HET\\tHET_FRAC\\tF"; next}} {{het=$4-$2; printf "%s\\t%d\\t%d\\t%.6f\\t%s\\n",$1,$4,het,het/$4,$5}}' {input} > {output}"""
