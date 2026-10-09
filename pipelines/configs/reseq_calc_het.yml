@@ -41,4 +41,4 @@ setup:
 
 snakemake:
   modules:
-    - reseq_heterogeneity_vcftools
+    - reseq_calc_heterogeneity_vcftools
