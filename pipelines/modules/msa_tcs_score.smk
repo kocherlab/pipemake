@@ -18,6 +18,8 @@ rule tcs_score:
         out_prefix=subpath(output.ascii_results, strip_suffix=".score_ascii"),
     singularity:
         "docker://aewebb/tcoffee:v13.41.0.28bdc39"
+    resources:
+        mem_mb=16000,
     threads: 1
     shell:
         """

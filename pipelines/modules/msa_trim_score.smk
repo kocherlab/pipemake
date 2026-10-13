@@ -10,6 +10,7 @@ rule clipkit_trim_fraction:
         "Stats/MSA/{sample}.trim_fraction.txt",
     log:
         "logs/clipkit/{sample}.trim_fraction.log",
+    localrule: True
     run:
         import re
 
