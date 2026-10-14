@@ -21,5 +21,4 @@ rule tcs_score:
         """
         t_coffee -infile {input} -evaluate -mode fmcoffee -outfile {output.ascii_results} -no_warning -output score_ascii &> {log}
         sed -n 's/^SCORE=//p' {output.ascii_results} | awk '{{printf \"%.2f\\n\", $1/100}}' > {output.tcs_score}
-        rm {params.out_prefix}
         """
