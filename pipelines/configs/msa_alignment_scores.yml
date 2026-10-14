@@ -41,6 +41,14 @@ parser:
           action: confirmFile
           mutually-exclusive: "log-parser"
           wildcards: "log-standardized-filename"
+    tcoffee:
+      args:
+        evaluate-mode:
+          help: "Specifies the evaluation mode for T-Coffee."
+          choices:
+            - 'evaluate'
+            - 'fmcoffee'
+          default: 'fmcoffee'
 
 setup:
   msf_input:
