@@ -1,0 +1,49 @@
+pipeline: reseq-calc-hwe
+version: 1.0
+parser:
+  help: "Calculate Hardy-Weinberg equilibrium (HWE) for resequencing data using PLINK"
+  arg-groups:
+    basic:
+      args:
+        reseq-vcf:
+          help: "Input bgzipped VCF file"
+          type: str
+          required: true
+          action: confirmFile
+        model-file:
+          help: "Model filename"
+          type: str
+          required: True
+          action: confirmFile
+        models:
+          help: "Category names"
+          type: str
+          nargs: '+'
+          required: True
+        species:
+          help: "Species name, used in output file names"
+          type: str
+        assembly-version:
+          help: "Assembly version, used in output file names"
+          type: str
+setup:
+  reseq_vcf:
+    methods:
+      file-str: "{reseq-vcf}"
+    args:
+      standardized_filename: "reSEQ/VCF/Filtered/{species}_{assembly_version}.vcf.gz"
+      copy_method: symbolic_link
+      gzipped: True
+  
+  model_input:
+    methods:
+      file-str: "{model-file}"
+    args:
+      standardized_filename: "Models/{species}.model"
+      copy_method: 'copy'
+      gzipped: False
+
+snakemake:
+  modules:
+    - reseq_model_ind_files
+    - reseq_calc_hwe_plink

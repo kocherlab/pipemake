@@ -31,7 +31,7 @@ parser:
           type: int
 
 setup:
-  standardize_inputs:
+  reseq_vcf:
     methods:
       file-str: "{reseq-vcf}"
     args:
