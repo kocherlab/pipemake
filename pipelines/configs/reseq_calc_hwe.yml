@@ -45,5 +45,6 @@ setup:
 
 snakemake:
   modules:
+    - reseq_filtered_vcf_to_plink
     - reseq_model_ind_files
     - reseq_calc_hwe_plink
