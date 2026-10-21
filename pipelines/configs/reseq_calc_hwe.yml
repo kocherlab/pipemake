@@ -20,6 +20,10 @@ parser:
           type: str
           nargs: '+'
           required: True
+        exclude-chr:
+          help: "List of chromosomes to exclude from analysis"
+          type: str
+          nargs: '+'
         species:
           help: "Species name, used in output file names"
           type: str
