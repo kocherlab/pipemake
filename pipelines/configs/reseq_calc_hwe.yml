@@ -35,7 +35,7 @@ setup:
     methods:
       file-str: "{reseq-vcf}"
     args:
-      standardized_filename: "reSEQ/VCF/Filtered/{species}_{assembly_version}.vcf.gz"
+      standardized_filename: "reSEQ/VCF/Filtered/{species}_{assembly_version}.filtered.vcf.gz"
       copy_method: symbolic_link
       gzipped: True
   
