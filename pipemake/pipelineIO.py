@@ -10,6 +10,9 @@ class ConfigPipelinesIO(dict):
     def __init__(self, *arg, **kwargs):
         super(ConfigPipelinesIO, self).__init__(*arg, **kwargs)
 
+        # Messages from loading the configs, displayed after the parser text
+        self.load_warnings = []
+
     @classmethod
     def fromDirectory(cls, directory):
         # Check the config directory exists
@@ -20,21 +23,54 @@ class ConfigPipelinesIO(dict):
         # Create dict to store the pipeline configs
         pipeline_configs = {}
 
+        # Create a list to store the loading warnings
+        load_warnings = []
+
         # Loop the configs
-        for config_filename in os.listdir(config_dir):
+        for config_filename in sorted(os.listdir(config_dir)):
             config_file = os.path.join(config_dir, config_filename)
 
             # Confirm the path is a file
             if not os.path.isfile(config_file):
                 continue
 
-            # Load the config file
-            pipeline_config = ConfigPipelineIO.fromYAML(config_file)
+            # Only attempt YAML files (ignores things like .DS_Store)
+            if not config_filename.lower().endswith((".yml", ".yaml")):
+                logging.debug(f"Ignoring non-YAML file in config directory: {config_filename}")
+                continue
+
+            # Load the config file, skipping any pipeline that fails to load
+            try:
+                pipeline_config = ConfigPipelineIO.fromYAML(config_file)
+            except Exception as e:
+                load_warnings.append(
+                    f"Skipping pipeline config {config_filename}: {type(e).__name__}: {e}"
+                )
+                continue
+
+            # Warn if a pipeline name has already been loaded
+            if pipeline_config.name in pipeline_configs:
+                load_warnings.append(
+                    f"Pipeline '{pipeline_config.name}' in {config_filename} replaces a previously loaded pipeline with the same name"
+                )
 
             # Store the pipeline config
             pipeline_configs[pipeline_config.name] = pipeline_config
 
-        return cls(**pipeline_configs)
+        # Confirm at least one pipeline loaded successfully
+        if not pipeline_configs:
+            raise Exception(
+                "\n".join(
+                    [f"No valid pipeline configs found in: {config_dir}"]
+                    + load_warnings
+                )
+            )
+
+        # Create the object and store the warnings
+        configs = cls(**pipeline_configs)
+        configs.load_warnings = load_warnings
+
+        return configs
 
 
 class ConfigPipelineIO:
@@ -68,8 +104,7 @@ class ConfigPipelineIO:
             logging.warning("No setup provided in the configuration file")
 
         # Set the pipeline setup
-        self._setup_dict = config_dict["setup"]
-        config_dict.pop("setup")
+        self._setup_dict = config_dict.pop("setup", {})
 
         # Check if the pipeline snakefiles are provided
         if "snakemake" not in config_dict:

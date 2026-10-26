@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import logging
 import shutil
 
 from pipemake.logger import startLogger, logArgDict
@@ -68,6 +69,10 @@ def main():
         )
     )
     logArgDict(pipeline_args, omit=["pipeline_job_dir"])
+
+    # Log any warnings from loading the pipeline configs
+    for load_warning in pipeline_configs.load_warnings:
+        logging.warning(load_warning)
 
     # Assign the pipeline config
     pipeline_config = pipeline_configs[pipeline_args["pipeline"]]

@@ -56,11 +56,31 @@ def confirmFile():
 
     return customAction
 
+def ValueRange (num_type, min, max):
+
+    # Check if the num_type is valid
+    if num_type not in (int, float):
+        raise TypeError("num_type must be int or float")
+
+    # Check if the lo and hi values are valid
+    def checker(value):
+        try:
+            x = num_type(value)
+        except ValueError:
+            raise argparse.ArgumentTypeError(f"{value!r} is not a valid {num_type.__name__}")
+        if not (min <= x <= max):
+            raise argparse.ArgumentTypeError(f"{x} not in range [{min}, {max}]")
+        return x
+
+    return checker
+
+
 
 class MyParser(argparse.ArgumentParser):
     def error(self, message):
-        sys.stderr.write("error: %s\n\n" % message)
-        self.print_help()
+        # Print the help text first, so the error is the last thing displayed
+        self.print_help(sys.stderr)
+        sys.stderr.write("\nerror: %s\n" % message)
         sys.exit(2)
 
 
@@ -75,7 +95,15 @@ class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
 class PipelineParser:
     def __init__(self, config_pipelines):
         # Create the pipeline selection parser
-        self._pipeline_parser = MyParser(formatter_class=SubcommandHelpFormatter)
+        # Assign the config loading warnings, displayed after the help text
+        epilog = "\n".join(
+            f"WARNING: {warning}"
+            for warning in getattr(config_pipelines, "load_warnings", [])
+        )
+
+        self._pipeline_parser = MyParser(
+            formatter_class=SubcommandHelpFormatter, epilog=epilog
+        )
         self._pipeline_parser._positionals.title = (
             "Pipeline selection argument options (positional)"
         )
@@ -106,6 +134,7 @@ class PipelineParser:
                 pipeline_name,
                 help=pipeline_parser_dict["help"] + f" (v{pipeline_config.version})",
                 add_help=False,
+                epilog=self._pipeline_parser.epilog,
             )
         )
 
@@ -227,6 +256,10 @@ class PipelineParser:
                     # Add the default string to the help message
                     _arg_args["help"] += f' (default: { _arg_args["default"]})'
 
+                # Process the arg range, if applicable
+                if "range" in _arg_args:
+                    _arg_args["type"] = self._processArgRange(_arg_args)["type"]
+
                 # Reassign the pipeline_arg_group based on required status
                 if "mutually-exclusive" in _arg_args:
                     arg_group = _arg_args["mutually-exclusive"]
@@ -324,7 +357,33 @@ class PipelineParser:
         return arg_args
 
     @staticmethod
+    def _processArgRange(arg_args):
+        # Skip if the range is not a dictionary
+        if not isinstance(arg_args["range"], dict):
+            return arg_args
+
+        # Check if the min and max values are present
+        if "min" not in arg_args["range"] or "max" not in arg_args["range"]:
+            raise Exception(f"Range must contain min and max values: {arg_args['range']}")
+
+        # Assign the min and max values
+        min_value = arg_args["range"]["min"]
+        max_value = arg_args["range"]["max"]
+        value_type = arg_args["type"]
+
+        # Check if the min and max values are valid
+        if not isinstance(min_value, (int, float)) or not isinstance(max_value, (int, float)):
+            raise Exception(f"Range min and max values must be int or float: {arg_args['range']}")
+
+        arg_args["type"] = ValueRange(value_type, min_value, max_value)
+        del arg_args["range"]
+
+        arg_args["help"] += (f' (supported range: {min_value} to {max_value})')
+        return arg_args
+
+    @staticmethod
     def _processArgDefaults(arg_args):
+
         # Skip if the default is not a dictionary
         if not isinstance(arg_args["default"], dict):
             return arg_args
