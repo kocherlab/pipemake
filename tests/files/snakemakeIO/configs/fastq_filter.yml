@@ -40,6 +40,18 @@ parser:
           help: "Path to the test directory"
           type: str
           action: confirmDir
+        int-range-test:
+          help: "Range test"
+          type: int
+          range:
+            min: 1
+            max: 10
+        float-range-test:
+          help: "Float range test"
+          type: float
+          range:
+            min: 0.0
+            max: 1.0
     paths:
       args:
         unfiltered-fastq-dir:

@@ -1,3 +1,4 @@
+from ctypes.util import test
 import os
 import pytest
 import tempfile
@@ -143,6 +144,90 @@ def test_pipemake_main_table_w_error(table_str):
             main()
 
 
+@pytest.mark.parametrize(
+    "table_str",
+    [
+        "tests/files/fileIO/test_table.tsv",
+    ],
+)
+def test_pipemake_main_table_w_int_range_error(table_str):
+    test_dir = tempfile.mkdtemp()
+    os.environ["PM_SNAKEMAKE_DIR"] = "tests/files/snakemakeIO"
+
+    # Assign the workflow prefix
+    workflow_prefix = os.path.join(test_dir, "test_workflow")
+
+    # Create the test path
+    test_prefix = os.path.join(test_dir, "test_dir")
+    os.makedirs(test_prefix, exist_ok=True)
+
+    # Assign the command line arguments
+    test_cmd = [
+        "",
+        "fastq-filter",
+        "--fastq-table",
+        table_str,
+        "--workflow-dir",
+        workflow_prefix,
+        "--resource-yml",
+        "--dir-test",
+        "tests/files/fileIO",
+        "--path-test",
+        test_prefix,
+        "--int-range-test",
+        "20",
+    ]
+
+    # Run pipemake with the test command
+    with unittest.mock.patch("sys.argv", test_cmd):
+        with pytest.raises(SystemExit) as excinfo:
+            main()
+        
+        assert excinfo.type == SystemExit    
+        assert excinfo.value.code == 2
+
+@pytest.mark.parametrize(
+    "table_str",
+    [
+        "tests/files/fileIO/test_table.tsv",
+    ],
+)
+def test_pipemake_main_table_w_float_range_error(table_str):
+    test_dir = tempfile.mkdtemp()
+    os.environ["PM_SNAKEMAKE_DIR"] = "tests/files/snakemakeIO"
+
+    # Assign the workflow prefix
+    workflow_prefix = os.path.join(test_dir, "test_workflow")
+
+    # Create the test path
+    test_prefix = os.path.join(test_dir, "test_dir")
+    os.makedirs(test_prefix, exist_ok=True)
+
+    # Assign the command line arguments
+    test_cmd = [
+        "",
+        "fastq-filter",
+        "--fastq-table",
+        table_str,
+        "--workflow-dir",
+        workflow_prefix,
+        "--resource-yml",
+        "--dir-test",
+        "tests/files/fileIO",
+        "--path-test",
+        test_prefix,
+        "--float-range-test",
+        "2.0",
+    ]
+
+    # Run pipemake with the test command
+    with unittest.mock.patch("sys.argv", test_cmd):
+        with pytest.raises(SystemExit) as excinfo:
+            main()
+
+        assert excinfo.type == SystemExit    
+        assert excinfo.value.code == 2
+    
 def test_pipemake_main_help_wo_error():
     os.environ["PM_SNAKEMAKE_DIR"] = "tests/files/snakemakeIO"
 

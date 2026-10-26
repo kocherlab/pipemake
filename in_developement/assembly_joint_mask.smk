@@ -15,7 +15,7 @@ rule joint_softmask_assemblies_pipemake:
     log:
         f"logs/joint-softmask/{config['species']}_{config['assembly_version']}.log",
     singularity:
-        "docker://aewebb/pipemake_utils:v1.4.3"
+        "docker://aewebb/pipemake_utils:v1.5.0"
     resources:
         mem_mb=2000,
     threads: 1
