@@ -28,11 +28,11 @@ parser:
           required: True
         ld-window-size:
           help: "LD window size"
-          type: str
+          type: int
           default: 50
         ld-window-step:
           help: "LD window step"
-          type: str
+          type: int
           default: 5
         ld-threshold:
           help: "LD threshold"
