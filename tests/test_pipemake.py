@@ -301,3 +301,84 @@ def test_pipemake_main_links_wo_error(wildcard_str):
     )
     assert os.path.isdir(f"{workflow_prefix}/pipemake/modules")
     assert os.path.isdir(f"{workflow_prefix}/FASTQ/Input")
+
+
+# Absolute path to the test directory (resolved before any test changes directory)
+TEST_DIR = os.path.abspath("tests")
+
+
+def runPipemake(monkeypatch, workflow_dir, *extra_args):
+    """Run pipemake on the fastq-filter test pipeline"""
+    monkeypatch.setenv("PM_SNAKEMAKE_DIR", os.path.join(TEST_DIR, "files/snakemakeIO"))
+    test_cmd = [
+        "",
+        "fastq-filter",
+        "--fastq-wildcard",
+        os.path.join(TEST_DIR, "files/wildcardIO/{samples}_{reads}.fq.gz"),
+        "--workflow-dir",
+        str(workflow_dir),
+        "--path-test",
+        TEST_DIR,
+        *extra_args,
+    ]
+    with unittest.mock.patch("sys.argv", test_cmd):
+        main()
+
+
+def test_pipemake_main_existing_workflow_dir_not_deleted(tmp_path, monkeypatch):
+    workflow = tmp_path / "workflow"
+    runPipemake(monkeypatch, workflow)
+
+    # Add a result to the workflow directory
+    result = workflow / "result.txt"
+    result.write_text("important")
+
+    # Running again without --overwrite must stop and keep the results
+    with pytest.raises(Exception, match="already exists"):
+        runPipemake(monkeypatch, workflow)
+    assert result.read_text() == "important"
+
+
+def test_pipemake_main_no_overwrite_flag_removed(tmp_path, monkeypatch, capsys):
+    # The old --no-overwrite flag is no longer accepted, so users of the old
+    # default get an error instead of silently running
+    with pytest.raises(SystemExit):
+        runPipemake(monkeypatch, tmp_path / "workflow", "--no-overwrite")
+    assert "unrecognized arguments: --no-overwrite" in capsys.readouterr().err
+    assert not (tmp_path / "workflow").exists()
+
+
+def test_pipemake_main_overwrite_previous_workflow(tmp_path, monkeypatch):
+    workflow = tmp_path / "workflow"
+    runPipemake(monkeypatch, workflow)
+    result = workflow / "result.txt"
+    result.write_text("old")
+
+    runPipemake(monkeypatch, workflow, "--overwrite")
+
+    assert not result.exists()
+    assert (workflow / "Snakefile").is_file()
+    assert (workflow / "pipemake" / "pipeline.log").is_file()
+
+
+def test_pipemake_main_overwrite_non_workflow_dir_refused(tmp_path, monkeypatch):
+    other_dir = tmp_path / "results"
+    other_dir.mkdir()
+    (other_dir / "data.vcf").write_text("vcf")
+
+    with pytest.raises(Exception, match="previous pipemake workflow"):
+        runPipemake(monkeypatch, other_dir, "--overwrite")
+    assert (other_dir / "data.vcf").read_text() == "vcf"
+
+
+def test_pipemake_main_overwrite_current_directory_refused(tmp_path, monkeypatch):
+    workflow = tmp_path / "workflow"
+    runPipemake(monkeypatch, workflow)
+    (workflow / "input.vcf").write_text("vcf")
+
+    # --workflow-dir . would otherwise delete the current directory
+    monkeypatch.chdir(workflow)
+    with pytest.raises(Exception, match="current directory"):
+        runPipemake(monkeypatch, ".", "--overwrite")
+    assert (workflow / "input.vcf").read_text() == "vcf"
+

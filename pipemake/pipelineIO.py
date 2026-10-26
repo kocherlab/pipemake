@@ -101,7 +101,7 @@ class ConfigPipelineIO:
 
         # Check if the pipeline setup is provided
         if "setup" not in config_dict:
-            logging.warning("No setup provided in the configuration file")
+            raise Exception("No setup provided in the configuration file")
 
         # Set the pipeline setup
         self._setup_dict = config_dict.pop("setup", {})

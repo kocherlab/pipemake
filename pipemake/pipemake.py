@@ -8,6 +8,7 @@ from pipemake.logger import startLogger, logArgDict
 from pipemake.parser import PipelineParser
 from pipemake.snakemakeIO import SnakePipelineIO
 from pipemake.pipelineIO import ConfigPipelinesIO
+from pipemake.workflowIO import confirmSafeToOverwrite, collectExistingPaths
 
 
 def main():
@@ -43,12 +44,23 @@ def main():
     pipeline_args["pipeline_job_dir"] = "pipemake"
 
     # Check for a previous workflow directory
-    if os.path.exists(pipeline_args["workflow_dir"]) and pipeline_args["overwrite"]:
-        shutil.rmtree(pipeline_args["workflow_dir"])
-    elif os.path.exists(pipeline_args["workflow_dir"]):
-        raise Exception(
-            f"Workflow directory already exists: {pipeline_args['workflow_dir']}"
+    if os.path.exists(pipeline_args["workflow_dir"]):
+        # Never delete the directory unless explicitly requested
+        if not pipeline_args["overwrite"]:
+            raise Exception(
+                f"Workflow directory already exists: {pipeline_args['workflow_dir']}. "
+                "Please choose a new --workflow-dir, or use --overwrite to permanently "
+                "delete the existing directory and everything in it."
+            )
+
+        # Confirm the directory is safe to delete
+        confirmSafeToOverwrite(
+            pipeline_args["workflow_dir"],
+            input_paths=collectExistingPaths(pipeline_args, omit=["workflow_dir"]),
+            job_dir=pipeline_args["pipeline_job_dir"],
         )
+
+        shutil.rmtree(pipeline_args["workflow_dir"])
 
     # Create the pipeline job directory
     if not os.path.exists(

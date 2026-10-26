@@ -310,9 +310,9 @@ class PipelineParser:
             type=str,
         )
         pipeline_arg_groups["optional"].add_argument(
-            "--no-overwrite",
-            help="Do not overwrite existing files",
-            action="store_false",
+            "--overwrite",
+            help="If the workflow directory already exists, permanently delete it and everything in it before creating the workflow (by default pipemake stops if the directory exists)",
+            action="store_true",
             dest="overwrite",
         )
         pipeline_arg_groups["optional"].add_argument(

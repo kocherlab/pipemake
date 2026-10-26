@@ -34,7 +34,7 @@ Columns should be named based on the relevant standardized wildcard argument. Th
                                 [--scale-mem SCALE_MEM] 
                                 [--resource-yml] 
                                 [--singularity-dir SINGULARITY_DIR] 
-                                [--no-overwrite]
+                                [--overwrite]
                                 [-h]
 
     trim-fastqs required arguments:
@@ -64,7 +64,7 @@ Columns should be named based on the relevant standardized wildcard argument. Th
     --resource-yml        Create a seperate resource yaml
     --singularity-dir SINGULARITY_DIR
                             Assign different directory of singularity images
-    --no-overwrite        Do not overwrite existing files
+    --overwrite           If the workflow directory already exists, permanently delete it and everything in it before creating the workflow (by default pipemake stops if the directory exists)
     -h, --help            show this help message and exit
 
 In this example, a table file would contain the following columns: **samples** and **reads**. Let's look at an example table file:

@@ -91,7 +91,8 @@ def test_ConfigPipelineIO_fromYAML_parser_dict(config_yaml):
         "mutually-exclusive"
         in config.parser_dict["arg-groups"]["basic"]["args"]["fastq-wildcard"]
     )
-    assert "range-test" in config.parser_dict["arg-groups"]["basic"]["args"]
+    assert "int-range-test" in config.parser_dict["arg-groups"]["basic"]["args"]
+    assert "float-range-test" in config.parser_dict["arg-groups"]["basic"]["args"]
 
 
 @pytest.mark.parametrize(

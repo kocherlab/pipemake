@@ -35,7 +35,7 @@ This would display the following information:
                                 [--scale-mem SCALE_MEM] 
                                 [--resource-yml] 
                                 [--singularity-dir SINGULARITY_DIR] 
-                                [--no-overwrite]
+                                [--overwrite]
                                 [-h]
 
     trim-fastqs required arguments:
@@ -65,7 +65,7 @@ This would display the following information:
     --resource-yml        Create a seperate resource yaml
     --singularity-dir SINGULARITY_DIR
                             Assign different directory of singularity images
-    --no-overwrite        Do not overwrite existing files
+    --overwrite           If the workflow directory already exists, permanently delete it and everything in it before creating the workflow (by default pipemake stops if the directory exists)
     -h, --help            show this help message and exit
 
 You may notice that the arguments are divided into two categories: required and optional.
