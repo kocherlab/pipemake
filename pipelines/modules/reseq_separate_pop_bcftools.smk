@@ -16,7 +16,7 @@ checkpoint pop_ind_file:
         mem_mb=2000,
     threads: 1
     singularity:
-        "docker://aewebb/pipemake_utils:v1.4.3"
+        "docker://aewebb/pipemake_utils:v1.5.0"
     shell:
         "model-pop-files --model-file {input} --model-name {params.model_name} --out-dir {output} &> {log}"
 

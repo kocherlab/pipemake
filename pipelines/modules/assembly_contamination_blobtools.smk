@@ -35,7 +35,7 @@ checkpoint split_assembly:
     log:
         f"logs/split-assembly/{config['species']}_{config['assembly_version']}.log",
     singularity:
-        "docker://aewebb/pipemake_utils:v1.4.3"
+        "docker://aewebb/pipemake_utils:v1.5.0"
     resources:
         mem_mb=4000,
     threads: 1
@@ -53,7 +53,7 @@ rule chunk_file:
     params:
         chunk_size=config["chunk_size"],
     singularity:
-        "docker://aewebb/pipemake_utils:v1.4.3"
+        "docker://aewebb/pipemake_utils:v1.5.0"
     resources:
         mem_mb=4000,
     threads: 1
@@ -133,7 +133,7 @@ rule unchunk_blast:
     log:
         "logs/unchunk-blast/{blast_type}.log",
     singularity:
-        "docker://aewebb/pipemake_utils:v1.4.3"
+        "docker://aewebb/pipemake_utils:v1.5.0"
     resources:
         mem_mb=16000,
     threads: 1

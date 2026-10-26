@@ -12,7 +12,7 @@ rule create_codon_aligned_msa:
     log:
         "logs/codon-alignment/{sample}.log",
     singularity:
-        "docker://aewebb/pipemake_utils:v1.4.3"
+        "docker://aewebb/pipemake_utils:v1.5.0"
     resources:
         mem_mb=4000,
     threads: 1

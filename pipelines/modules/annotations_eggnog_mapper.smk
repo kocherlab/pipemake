@@ -13,7 +13,7 @@ rule create_longest_aa_transcripts:
     params:
         out_prefix=subpath(output[0], strip_suffix=".fa"),
     singularity:
-        "docker://aewebb/pipemake_utils:v1.4.3"
+        "docker://aewebb/pipemake_utils:v1.5.0"
     resources:
         mem_mb=12000,
     threads: 1

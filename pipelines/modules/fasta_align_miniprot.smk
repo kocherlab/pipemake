@@ -11,7 +11,7 @@ rule fasta_translate_for_miniprot:
     log:
         "logs/translate-seq-file/{sample}.log",
     singularity:
-        "docker://aewebb/pipemake_utils:v1.4.3"
+        "docker://aewebb/pipemake_utils:v1.5.0"
     resources:
         mem_mb=2000,
     threads: 1

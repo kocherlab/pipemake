@@ -78,6 +78,6 @@ rule reseq_model_plot_pca:
         mem_mb=2000,
     threads: 1
     singularity:
-        "docker://aewebb/pipemake_utils:v1.4.3"
+        "docker://aewebb/pipemake_utils:v1.5.0"
     shell:
         "plot-pca --pca-dir {params.pca_dir} --model-file {input.model_file} --model-name {wildcards.model} --out-prefix {params.out_prefix} &> {log}"

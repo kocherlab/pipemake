@@ -18,7 +18,7 @@ rule label_tree_busted:
     params:
         output_dir=subpath(output[0], parent=True),
     singularity:
-        "docker://aewebb/pipemake_utils:v1.4.3"
+        "docker://aewebb/pipemake_utils:v1.5.0"
     resources:
         mem_mb=4000,
     threads: 1

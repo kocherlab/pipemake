@@ -195,7 +195,7 @@ rule plot_norm_xpnsl_pipemake:
     params:
         out_prefix=subpath(output[0], strip_suffix=".xpnsl.manhattan.png"),
     singularity:
-        "docker://aewebb/pipemake_utils:v1.4.3"
+        "docker://aewebb/pipemake_utils:v1.5.0"
     resources:
         mem_mb=16000,
     threads: 1

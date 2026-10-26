@@ -17,7 +17,7 @@ rule reseq_model_calc_zfst_pipemake:
         out_prefix=subpath(output[0], strip_suffix=".tsv"),
         fst_method=config["fst_method"],
     singularity:
-        "docker://aewebb/pipemake_utils:v1.4.3"
+        "docker://aewebb/pipemake_utils:v1.5.0"
     resources:
         mem_mb=8000,
     threads: 1
@@ -39,7 +39,7 @@ rule plot_zfst_pipemake:
     params:
         out_prefix=subpath(output[0], strip_suffix=".manhattan.png"),
     singularity:
-        "docker://aewebb/pipemake_utils:v1.4.3"
+        "docker://aewebb/pipemake_utils:v1.5.0"
     resources:
         mem_mb=2000,
     threads: 1

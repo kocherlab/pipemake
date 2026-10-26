@@ -26,7 +26,7 @@ rule process_egapx_gtf:
         assembly_version=config["assembly_version"],
         annotation_version=config["annotation_version"],
     singularity:
-        "docker://aewebb/pipemake_utils:v1.4.3"
+        "docker://aewebb/pipemake_utils:v1.5.0"
     resources:
         mem_mb=2000,
     threads: 1
@@ -97,7 +97,7 @@ rule update_transcripts:
     log:
         f"logs/update-transcripts/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.log",
     singularity:
-        "docker://aewebb/pipemake_utils:v1.4.3"
+        "docker://aewebb/pipemake_utils:v1.5.0"
     resources:
         mem_mb=2000,
     threads: 1
@@ -133,7 +133,7 @@ rule update_proteins:
     log:
         f"logs/update-proteins/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}.log",
     singularity:
-        "docker://aewebb/pipemake_utils:v1.4.3"
+        "docker://aewebb/pipemake_utils:v1.5.0"
     resources:
         mem_mb=2000,
     threads: 1

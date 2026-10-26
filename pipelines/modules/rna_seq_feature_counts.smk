@@ -60,7 +60,7 @@ rule feature_counts_report:
     params:
         count_dir="RNAseq/Counts/featureCounts",
     singularity:
-        "docker://aewebb/pipemake_utils:v1.4.3"
+        "docker://aewebb/pipemake_utils:v1.5.0"
     resources:
         mem_mb=2000,
     threads: 1
