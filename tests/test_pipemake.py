@@ -1,4 +1,3 @@
-from ctypes.util import test
 import os
 import pytest
 import tempfile
