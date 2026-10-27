@@ -28,12 +28,16 @@ parser:
           required: True
         ld-window-size:
           help: "LD window size"
-          type: str
+          type: int
           default: 50
+          range:
+            min: 1
         ld-window-step:
           help: "LD window step"
-          type: str
+          type: int
           default: 5
+          range:
+            min: 1
         ld-threshold:
           help: "LD threshold"
           type: float
