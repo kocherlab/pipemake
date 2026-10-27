@@ -56,24 +56,39 @@ def confirmFile():
 
     return customAction
 
-def ValueRange (num_type, min, max):
+def ValueRange(num_type, min_value=None, max_value=None):
+    """Return an argparse type function that casts to num_type (int or float) and
+    confirms the value is within the range. Either bound may be None (unbounded)."""
 
     # Check if the num_type is valid
     if num_type not in (int, float):
         raise TypeError("num_type must be int or float")
 
-    # Check if the lo and hi values are valid
+    # Confirm at least one bound is provided
+    if min_value is None and max_value is None:
+        raise ValueError("At least one of min_value or max_value must be provided")
+
+    # Unbounded sides use infinity, which also rejects NaN values
+    lo = float("-inf") if min_value is None else min_value
+    hi = float("inf") if max_value is None else max_value
+
     def checker(value):
         try:
             x = num_type(value)
         except ValueError:
-            raise argparse.ArgumentTypeError(f"{value!r} is not a valid {num_type.__name__}")
-        if not (min <= x <= max):
-            raise argparse.ArgumentTypeError(f"{x} not in range [{min}, {max}]")
+            raise argparse.ArgumentTypeError(
+                f"{value!r} is not a valid {num_type.__name__}"
+            )
+
+        if not (lo <= x <= hi):
+            if min_value is None:
+                raise argparse.ArgumentTypeError(f"{x} is above the maximum ({max_value})")
+            if max_value is None:
+                raise argparse.ArgumentTypeError(f"{x} is below the minimum ({min_value})")
+            raise argparse.ArgumentTypeError(f"{x} not in range [{min_value}, {max_value}]")
         return x
 
     return checker
-
 
 
 class MyParser(argparse.ArgumentParser):
@@ -362,23 +377,48 @@ class PipelineParser:
         if not isinstance(arg_args["range"], dict):
             return arg_args
 
-        # Check if the min and max values are present
-        if "min" not in arg_args["range"] or "max" not in arg_args["range"]:
-            raise Exception(f"Range must contain min and max values: {arg_args['range']}")
+        range_dict = arg_args["range"]
 
-        # Assign the min and max values
-        min_value = arg_args["range"]["min"]
-        max_value = arg_args["range"]["max"]
+        # Check for unsupported range keys
+        unsupported_keys = set(range_dict) - {"min", "max"}
+        if unsupported_keys:
+            raise Exception(
+                f"Range only supports min and max values, found: {sorted(unsupported_keys)}"
+            )
+
+        # Assign the min and max values, either may be omitted
+        min_value = range_dict.get("min")
+        max_value = range_dict.get("max")
         value_type = arg_args["type"]
 
+        # Check that at least one value is present
+        if min_value is None and max_value is None:
+            raise Exception(f"Range must contain a min and/or max value: {range_dict}")
+
         # Check if the min and max values are valid
-        if not isinstance(min_value, (int, float)) or not isinstance(max_value, (int, float)):
-            raise Exception(f"Range min and max values must be int or float: {arg_args['range']}")
+        for bound in (min_value, max_value):
+            if bound is not None and (
+                isinstance(bound, bool) or not isinstance(bound, (int, float))
+            ):
+                raise Exception(
+                    f"Range min and max values must be int or float: {range_dict}"
+                )
+
+        # Check that min is not greater than max
+        if min_value is not None and max_value is not None and min_value > max_value:
+            raise Exception(f"Range min is greater than max: {range_dict}")
 
         arg_args["type"] = ValueRange(value_type, min_value, max_value)
         del arg_args["range"]
 
-        arg_args["help"] += (f' (supported range: {min_value} to {max_value})')
+        # Add the range to the help message
+        if min_value is not None and max_value is not None:
+            range_str = f"{min_value} to {max_value}"
+        elif min_value is not None:
+            range_str = f"at least {min_value}"
+        else:
+            range_str = f"at most {max_value}"
+        arg_args["help"] += f" (supported range: {range_str})"
         return arg_args
 
     @staticmethod
