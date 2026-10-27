@@ -42,6 +42,8 @@ parser:
           help: "Chunk size for processing"
           type: int
           default: 250000
+          range:
+            min: 1
         ncbi-nt-db:
           help: "Path to the NCBI nt database"
           type: str

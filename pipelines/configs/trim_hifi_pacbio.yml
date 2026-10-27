@@ -30,13 +30,16 @@ parser:
         min-length:
           help: "Minimum length of reads to keep"
           type: int
-          default:
-            str: "44"
+          default: 44
+          range:
+            min: 1
         min-match:
           help: "Minimum number of matches to keep"
           type: int
-          default:
-            str: "97"
+          default: 97
+          range:
+            min: 1
+            max: 100
 setup:
   pacbio_input:
     methods:

@@ -43,8 +43,9 @@ parser:
         min-length:
           help: "Minimum length of reads to keep"
           type: int
-          default:
-            str: "50"
+          default: 50
+          range:
+            min: 1
         cut-front:
           help: "Trim from the front of the reads"
           action: store_true

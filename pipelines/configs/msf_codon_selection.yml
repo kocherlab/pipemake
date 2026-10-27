@@ -47,6 +47,8 @@ parser:
           help: "Maximum number of refinement iterations for MACSE"
           type: int
           default: 3
+          range:
+            min: 0
         codon-final-stop:
           help: "Codon to use for final stop codons in MACSE"
           type: str

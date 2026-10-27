@@ -30,18 +30,27 @@ parser:
           help: "LD window size"
           type: int
           default: 50
+          range:
+            min: 1
         ld-window-step:
           help: "LD window step"
           type: int
           default: 5
+          range:
+            min: 1
         ld-threshold:
           help: "LD threshold"
           type: float
           default: 0.2
+          range:
+            min: 0.0
+            max: 1.0
         pca-count:
           help: "Number of principal components"
           type: int
           default: 10
+          range:
+            min: 1
         fst-method:
           help: "FST method"
           type: str

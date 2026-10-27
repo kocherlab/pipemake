@@ -39,12 +39,16 @@ parser:
         op:
           help: "MAFFT gap opening penalty"
           type: float
+          range:
+            min: 0.0
     emboss_cons_params:
       args:
         plurality:
           help: "Plurality value for EMBOSS cons"
           type: int
           default: 1
+          range:
+            min: 1
 
 setup:
   msf_input:

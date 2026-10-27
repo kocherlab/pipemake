@@ -23,22 +23,34 @@ parser:
           help: "Missing data cutoff"
           type: float
           default: 0.25
+          range:
+            min: 0.0
+            max: 1.0
         maf-cutoff:
           help: "MAF cutoff"
           type: float
           default: 0.05
+          range:
+            min: 0.0
+            max: 0.5
         qual-cutoff:
           help: "Quality cutoff"
-          type: float
+          type: int
           default: 30
+          range:
+            min: 0
         min-alleles:
           help: "Minimum allele count"
           type: int
           default: 2
+          range:
+            min: 1
         max-alleles:
           help: "Maximum allele count"
           type: int
           default: 2
+          range:
+            min: 1
         include-regions:
           help: "Region(s) to include. Multiple regions can be specified by separating them with a comma."
           type: str

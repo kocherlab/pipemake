@@ -31,6 +31,8 @@ parser:
           help: "Genome size in basepairs for focal species"
           type: int
           required: True
+          range:
+            min: 1
         assembly-fasta:
           help: "Assembly fasta"
           type: str

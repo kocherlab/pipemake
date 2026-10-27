@@ -22,6 +22,8 @@ parser:
           help: "Window size in bp for --TajimaD"
           type: int
           default: 100000
+          range:
+            min: 1
     region:
       args:
         chrom:
@@ -30,9 +32,13 @@ parser:
         start:
           help: "Start position in bp (may only be specified if chrom is given)"
           type: int
+          range:
+            min: 1
         end:
           help: "End position in bp (may only be specified if chrom is given)"
           type: int
+          range:
+            min: 1
 
 setup:
   standardize_inputs:

@@ -47,10 +47,16 @@ parser:
           help: "Read Length"
           type: int
           required: True
+          range:
+            min: 1
         count-strand:
           help: "Strandedness for counting (0 = unstranded, 1 = stranded, 2 = reverse stranded)"
           type: int
           default: 0
+          choices:
+            - 0
+            - 1
+            - 2
         assembly-version:
           help: "Assembly Version"
           type: str
