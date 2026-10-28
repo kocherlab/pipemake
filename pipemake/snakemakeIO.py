@@ -1,5 +1,6 @@
 import os
 import re
+import math
 import yaml
 import shutil
 import logging
@@ -9,6 +10,89 @@ from collections import defaultdict
 
 from snakemake.io import glob_wildcards
 from pipemake.singularityIO import Singularity
+
+
+class ResourceScaler:
+
+    MEM_TYPES = (
+        "mem_b",
+        "mem_kb",
+        "mem_mb",
+        "mem_gb",
+        "mem_tb",
+        "mem_pb",
+        "mem_kib",
+        "mem_mib",
+        "mem_gib",
+        "mem_tib",
+        "mem_pib",
+    )
+
+    def __init__(self, threads=None, mem=None):
+        self._threads = self._checkScale("threads", threads)
+        self._mem = self._checkScale("mem", mem)
+
+    @staticmethod
+    def _checkScale(name, scale):
+        # A scale of None means the resource is not scaled
+        if scale is None:
+            return None
+
+        # Confirm the scale is a finite number greater than 0
+        if (
+            isinstance(scale, bool)
+            or not isinstance(scale, (int, float))
+            or not math.isfinite(scale)
+            or scale <= 0
+        ):
+            raise ValueError(
+                f"Scale for {name} must be a number greater than 0: {scale!r}"
+            )
+
+        return float(scale)
+
+    def scale(self, resource_type, value, rule_name=""):
+        if resource_type == "threads":
+            # Threads are always returned as an integer
+            if self._threads is None:
+                return int(value)
+            return self._scaleThreads(value, self._threads)
+
+        if resource_type.lower() in self.MEM_TYPES and self._mem is not None:
+            return self._scaleMem(value, self._mem, resource_type, rule_name)
+
+        return value
+
+    @staticmethod
+    def _scale(value, scale):
+        # Scale and return the value as an integer
+        return int(int(value) * scale)
+
+    @staticmethod
+    def _scaleThreads(value, scale):
+        # Convert the value to an integer, so it can be compared to 1
+        threads = int(value)
+
+        # Keep single-threaded rules fixed
+        if threads <= 1:
+            return 1
+
+        # Scale the threads, with a minimum of 1
+        return max(1, ResourceScaler._scale(threads, scale))
+
+    @staticmethod
+    def _scaleMem(value, scale, resource_type, rule_name):
+        scaled_mem = ResourceScaler._scale(value, scale)
+
+        # Confirm the scaled memory is not zero
+        if scaled_mem <= 0:
+            raise Exception(
+                f"Scaling {resource_type} ({value}) by {scale} results in {scaled_mem}"
+                + (f" for rule {rule_name}" if rule_name else "")
+                + ". Please increase --scale-mem"
+            )
+
+        return scaled_mem
 
 
 class SnakePipelineIO:
@@ -65,21 +149,7 @@ class SnakePipelineIO:
             os.path.join(self._workflow_dir, self.smkp_filename), "w"
         )
         self._resource_yml = resource_yml
-        self._scale_threads = scale_threads
-        self._scale_mem = scale_mem
-        self._mem_types = [
-            "mem_b",
-            "mem_kb",
-            "mem_mb",
-            "mem_gb",
-            "mem_tb",
-            "mem_pb",
-            "mem_kib",
-            "mem_mib",
-            "mem_gib",
-            "mem_tib",
-            "mem_pib",
-        ]
+        self._resource_scaler = ResourceScaler(threads=scale_threads, mem=scale_mem)
         self._indent_style = indent_style
 
         # Assign the module storage directory, and confirm it exists
@@ -184,14 +254,9 @@ class SnakePipelineIO:
 
             # Scale and save the resource params
             for resource_type, resource_value in rule._rule_resource_params.items():
-                if resource_type == "threads" and self._scale_threads:
-                    resource_value = self._scaler(resource_value, self._scale_threads)
-                elif (
-                    "mem_" in resource_type
-                    and resource_type.lower() in self._mem_types
-                    and self._scale_mem
-                ):
-                    resource_value = self._scaler(resource_value, self._scale_mem)
+                resource_value = self._resource_scaler.scale(
+                    resource_type, resource_value, rule_name=rule.rule_name
+                )
                 self._resource_params[rule.rule_name][resource_type] = resource_value
 
         # Create the job module filepath
@@ -630,22 +695,6 @@ class SnakePipelineIO:
             link_rule_order_list.append(link_rule_order_str + "\n")
 
         return link_rule_order_list
-
-    @staticmethod
-    def _scaler(value, scaler, value_type=float, output_type=int, **kwargs):
-        # Confirm a scaler was given
-        if not scaler:
-            raise Exception(f"No scaler given for: {value}")
-
-        # Convert the value to the correct type
-        try:
-            value = value_type(value)
-        except:
-            logging.exception(f"Unable to convert value to type: {value}")
-            raise
-
-        # Scale and return the input
-        return output_type(value * scaler)
 
     @staticmethod
     def _createYml(yml_dict, yml_filename, **kwargs):
