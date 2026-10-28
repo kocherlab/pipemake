@@ -37,10 +37,12 @@ parser:
           help: "Labels for BUSTED analysis"
           type: str
           nargs: '+'
+          required: True
         outgroup-file:
           help: "File with outgroup species for BUSTED analysis. Order of species should be from most distant to least distant relative to ingroup."
           type: str
           action: confirmFile
+          required: True
     macse_params:
       args:
         max_refine_iter:
