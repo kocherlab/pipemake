@@ -59,9 +59,9 @@ This would display the following information:
     --workflow-dir WORKFLOW_DIR
                             Assign the workflow directory. If not provided a default will be used.
     --scale-threads SCALE_THREADS
-                            Scale the threads for each task
+                            Scale the threads for each task (must be greater than 0)
     --scale-mem SCALE_MEM
-                            Scale the memory (RAM) for each task
+                            Scale the memory (RAM) for each task (must be greater than 0)
     --resource-yml        Create a seperate resource yaml
     --singularity-dir SINGULARITY_DIR
                             Assign different directory of singularity images
