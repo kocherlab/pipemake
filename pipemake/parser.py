@@ -1,6 +1,7 @@
 import os
 import re
 import sys
+import math
 import random
 import string
 import logging
@@ -57,8 +58,6 @@ def confirmFile():
     return customAction
 
 def ValueRange(num_type, min_value=None, max_value=None):
-    """Return an argparse type function that casts to num_type (int or float) and
-    confirms the value is within the range. Either bound may be None (unbounded)."""
 
     # Check if the num_type is valid
     if num_type not in (int, float):
@@ -89,6 +88,20 @@ def ValueRange(num_type, min_value=None, max_value=None):
         return x
 
     return checker
+
+
+def PositiveFloat(value):
+
+    # Check if the value can be converted to a float
+    try:
+        x = float(value)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"{value!r} is not a valid float")
+
+    # NaN and infinity are rejected along with zero and negative values
+    if not math.isfinite(x) or x <= 0:
+        raise argparse.ArgumentTypeError(f"{value!r} must be a number greater than 0")
+    return x
 
 
 class MyParser(argparse.ArgumentParser):
@@ -304,14 +317,14 @@ class PipelineParser:
         )
         pipeline_arg_groups["optional"].add_argument(
             "--scale-threads",
-            help="Scale the threads for each task",
-            type=float,
+            help="Scale the threads for each task (must be greater than 0)",
+            type=PositiveFloat,
             default=1.0,
         )
         pipeline_arg_groups["optional"].add_argument(
             "--scale-mem",
-            help="Scale the memory (RAM) for each task",
-            type=float,
+            help="Scale the memory (RAM) for each task (must be greater than 0)",
+            type=PositiveFloat,
             default=1.0,
         )
         pipeline_arg_groups["optional"].add_argument(
