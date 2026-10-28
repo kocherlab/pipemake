@@ -5,6 +5,7 @@ import yaml
 import filecmp
 
 from pipemake.snakemakeIO import (
+    ResourceScaler,
     SnakePipelineIO,
     SnakeFileIO,
     SnakeRuleIO,
@@ -411,3 +412,112 @@ def test_SnakeLinks_wo_error(
         assert 16000 == config_dict["resources"]["fastp_pair_end"]["mem_mb"]
         assert "threads" in config_dict["resources"]["fastp_pair_end"]
         assert 4 == config_dict["resources"]["fastp_pair_end"]["threads"]
+
+
+@pytest.mark.parametrize(
+    "threads, mem",
+    [(None, None), (1.0, 1.0), (0.5, 2.0), (2, 3), (0.001, None), (None, 4.5)],
+)
+def test_ResourceScaler_wo_error(threads, mem):
+    ResourceScaler(threads=threads, mem=mem)
+
+
+@pytest.mark.parametrize(
+    "scale", [0, 0.0, -1, -0.5, float("nan"), float("inf"), "1.0", True]
+)
+def test_ResourceScaler_invalid_scale(scale):
+    with pytest.raises(ValueError):
+        ResourceScaler(threads=scale)
+    with pytest.raises(ValueError):
+        ResourceScaler(mem=scale)
+
+
+@pytest.mark.parametrize(
+    "threads, scale, expected",
+    [
+        (1, 4.0, 1),  # single-threaded rules are fixed
+        (1, 0.5, 1),
+        ("1", 2.0, 1),
+        (4, 2.0, 8),
+        (16, 0.5, 8),
+        ("12", 0.5, 6),  # values from the module files may be strings
+        (4, 1.0, 4),
+        (4, 0.1, 1),  # the minimum number of threads is 1
+        (2, 0.4, 1),
+        (4, 0.25, 1),
+        (5, 0.5, 2),  # scaled values are truncated to an integer
+    ],
+)
+def test_ResourceScaler_threads(threads, scale, expected):
+    scaled_threads = ResourceScaler(threads=scale).scale("threads", threads)
+    assert scaled_threads == expected
+    assert isinstance(scaled_threads, int)
+    assert scaled_threads >= 1
+
+
+@pytest.mark.parametrize(
+    "resource_type",
+    ["mem_b", "mem_mb", "mem_gb", "mem_gib", "mem_pib", "MEM_MB", "Mem_Gb"],
+)
+def test_ResourceScaler_mem_types(resource_type):
+    scaled_mem = ResourceScaler(mem=0.5).scale(resource_type, 4000)
+    assert scaled_mem == 2000
+    assert isinstance(scaled_mem, int)
+
+
+@pytest.mark.parametrize(
+    "mem, scale, expected",
+    [
+        (4000, 1.0, 4000),
+        (4000, 0.5, 2000),
+        ("16000", 2.0, 32000),  # values from the module files may be strings
+        (2000, 0.0005, 1),  # the smallest scaled value that is not zero
+        (5, 0.5, 2),  # scaled values are truncated to an integer
+    ],
+)
+def test_ResourceScaler_mem(mem, scale, expected):
+    assert ResourceScaler(mem=scale).scale("mem_mb", mem) == expected
+
+
+@pytest.mark.parametrize("mem, scale", [(2000, 0.0001), (1, 0.5), ("100", 0.001)])
+def test_ResourceScaler_mem_zero_w_error(mem, scale):
+    with pytest.raises(Exception, match="--scale-mem"):
+        ResourceScaler(mem=scale).scale("mem_mb", mem, rule_name="test_rule")
+
+
+def test_ResourceScaler_mem_error_names_rule():
+    with pytest.raises(Exception, match="test_rule"):
+        ResourceScaler(mem=0.5).scale("mem_mb", 1, rule_name="test_rule")
+
+
+def test_ResourceScaler_unscaled_resources_unchanged():
+    scaler = ResourceScaler(threads=2.0, mem=2.0)
+
+    # Other resource types are never scaled
+    assert scaler.scale("runtime", "10m") == "10m"
+    assert scaler.scale("disk_mb", 500) == 500
+
+    # Memory without a scale is returned unchanged
+    assert ResourceScaler().scale("mem_mb", "4000") == "4000"
+    assert ResourceScaler(threads=2.0).scale("mem_mb", "4000") == "4000"
+
+
+@pytest.mark.parametrize("threads", [4, "4", 4.0])
+def test_ResourceScaler_threads_always_int(threads):
+    # Threads are returned as an integer, even if they are not scaled
+    for scaler in [ResourceScaler(), ResourceScaler(mem=2.0), ResourceScaler(threads=1.0)]:
+        scaled_threads = scaler.scale("threads", threads)
+        assert scaled_threads == 4
+        assert isinstance(scaled_threads, int)
+
+
+def test_ResourceScaler_threads_and_mem_are_independent():
+    scaler = ResourceScaler(threads=0.5, mem=2.0)
+    assert scaler.scale("threads", 8) == 4
+    assert scaler.scale("mem_mb", 8000) == 16000
+
+
+@pytest.mark.parametrize("resource_type", ["threads", "mem_mb"])
+def test_ResourceScaler_non_numeric_value_w_error(resource_type):
+    with pytest.raises(ValueError):
+        ResourceScaler(threads=2.0, mem=2.0).scale(resource_type, "not_a_number")

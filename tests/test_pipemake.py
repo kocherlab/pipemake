@@ -4,6 +4,7 @@ import tempfile
 import unittest.mock
 
 
+import pipemake
 from pipemake.pipemake import main
 
 
@@ -322,6 +323,27 @@ def runPipemake(monkeypatch, workflow_dir, *extra_args):
     ]
     with unittest.mock.patch("sys.argv", test_cmd):
         main()
+
+
+@pytest.mark.parametrize("scale_arg", ["--scale-threads", "--scale-mem"])
+@pytest.mark.parametrize("scale_value", ["0", "0.0", "-1", "nan"])
+def test_pipemake_main_scale_must_be_positive(
+    tmp_path, monkeypatch, capsys, scale_arg, scale_value
+):
+    with pytest.raises(SystemExit) as excinfo:
+        runPipemake(monkeypatch, tmp_path / "workflow", scale_arg, scale_value)
+
+    assert excinfo.value.code == 2
+    assert scale_arg in capsys.readouterr().err
+    assert not (tmp_path / "workflow").exists()
+
+
+def test_pipemake_main_logs_version(tmp_path, monkeypatch):
+    workflow = tmp_path / "workflow"
+    runPipemake(monkeypatch, workflow)
+
+    log_text = (workflow / "pipemake" / "pipeline.log").read_text()
+    assert f"pipemake version: {pipemake.__version__}" in log_text
 
 
 def test_pipemake_main_existing_workflow_dir_not_deleted(tmp_path, monkeypatch):

@@ -1,7 +1,7 @@
 import argparse
 import pytest
 
-from pipemake.parser import PipelineParser, ValueRange
+from pipemake.parser import PipelineParser, ValueRange, PositiveFloat
 
 
 def buildArgParser(range_dict, num_type=int):
@@ -109,3 +109,19 @@ def test_processArgRange_invalid_range(range_dict):
 def test_processArgRange_non_dict_range_skipped():
     arg_args = {"type": int, "help": "test arg", "range": "1-10"}
     assert PipelineParser._processArgRange(arg_args) is arg_args
+
+
+@pytest.mark.parametrize(
+    "value, expected",
+    [("1", 1.0), ("0.5", 0.5), ("0.001", 0.001), ("2.5", 2.5), ("10", 10.0)],
+)
+def test_PositiveFloat_valid(value, expected):
+    assert PositiveFloat(value) == expected
+
+
+@pytest.mark.parametrize(
+    "value", ["0", "0.0", "-1", "-0.5", "nan", "inf", "-inf", "abc", ""]
+)
+def test_PositiveFloat_invalid(value):
+    with pytest.raises(argparse.ArgumentTypeError):
+        PositiveFloat(value)
