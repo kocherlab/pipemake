@@ -4,6 +4,7 @@ import os
 import logging
 import shutil
 
+from pipemake import __version__
 from pipemake.logger import startLogger, logArgDict
 from pipemake.parser import PipelineParser
 from pipemake.snakemakeIO import SnakePipelineIO
@@ -80,6 +81,7 @@ def main():
             "pipeline.log",
         )
     )
+    logging.info(f"pipemake version: {__version__}")
     logArgDict(pipeline_args, omit=["pipeline_job_dir"])
 
     # Log any warnings from loading the pipeline configs
