@@ -57,8 +57,22 @@ def confirmFile():
 
     return customAction
 
-def ValueRange(num_type, min_value=None, max_value=None):
 
+def externalPath():
+    class customAction(argparse.Action):
+        def __call__(self, parser, args, value, option_string=None):
+            if not os.path.exists(value):
+                parent_dir = os.path.dirname(value)
+                if not os.path.isdir(parent_dir):
+                    raise argparse.ArgumentTypeError(
+                        f"Path {value} does not exist and its parent directory {parent_dir} does not exist"
+                    )
+            setattr(args, self.dest, os.path.abspath(value))
+
+    return customAction
+
+
+def ValueRange(num_type, min_value=None, max_value=None):
     # Check if the num_type is valid
     if num_type not in (int, float):
         raise TypeError("num_type must be int or float")
@@ -81,17 +95,22 @@ def ValueRange(num_type, min_value=None, max_value=None):
 
         if not (lo <= x <= hi):
             if min_value is None:
-                raise argparse.ArgumentTypeError(f"{x} is above the maximum ({max_value})")
+                raise argparse.ArgumentTypeError(
+                    f"{x} is above the maximum ({max_value})"
+                )
             if max_value is None:
-                raise argparse.ArgumentTypeError(f"{x} is below the minimum ({min_value})")
-            raise argparse.ArgumentTypeError(f"{x} not in range [{min_value}, {max_value}]")
+                raise argparse.ArgumentTypeError(
+                    f"{x} is below the minimum ({min_value})"
+                )
+            raise argparse.ArgumentTypeError(
+                f"{x} not in range [{min_value}, {max_value}]"
+            )
         return x
 
     return checker
 
 
 def PositiveFloat(value):
-
     # Check if the value can be converted to a float
     try:
         x = float(value)
@@ -382,6 +401,10 @@ class PipelineParser:
         elif arg_args["action"] == "confirmFile":
             arg_args["action"] = confirmFile()
 
+        # Assign the ExternalPath action
+        elif arg_args["action"] == "externalPath":
+            arg_args["action"] = externalPath()
+
         return arg_args
 
     @staticmethod
@@ -436,7 +459,6 @@ class PipelineParser:
 
     @staticmethod
     def _processArgDefaults(arg_args):
-
         # Skip if the default is not a dictionary
         if not isinstance(arg_args["default"], dict):
             return arg_args

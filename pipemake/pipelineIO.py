@@ -36,7 +36,9 @@ class ConfigPipelinesIO(dict):
 
             # Only attempt YAML files (ignores things like .DS_Store)
             if not config_filename.lower().endswith((".yml", ".yaml")):
-                logging.debug(f"Ignoring non-YAML file in config directory: {config_filename}")
+                logging.debug(
+                    f"Ignoring non-YAML file in config directory: {config_filename}"
+                )
                 continue
 
             # Load the config file, skipping any pipeline that fails to load
@@ -119,19 +121,18 @@ class ConfigPipelineIO:
         logging.info(f"Loaded the following snakefiles: {self._snakefiles}")
 
         # Assign any setup paths as singularity bindings
-        self._setup_paths = []
+        self._external_paths = []
 
         # Check if any parser arguments has a setup argument
-        for parser_group_name in self.parser_dict["arg-groups"].keys():
-            for parser_arg_name, parser_arg_dict in self.parser_dict["arg-groups"][
-                parser_group_name
-            ]["args"].items():
-                if "setup-arg" not in parser_arg_dict:
+        for parser_group_dict in self.parser_dict["arg-groups"].values():
+            for parser_arg_name, parser_arg_dict in parser_group_dict["args"].items():
+                if "action" not in parser_arg_dict:
                     continue
 
-                # Assign any path arguments as singularity bindings
-                if parser_arg_dict["setup-arg"] == "path":
-                    self._setup_paths.append(f'{{{parser_arg_name.replace("-", "_")}}}')
+                if "ExternalPath" not in parser_arg_dict["action"]:
+                    continue
+
+                self._external_paths.append(f"{{{parser_arg_name}}}")
 
         # Create a list to store the linked rules
         self._snakelinks = []
@@ -349,30 +350,28 @@ class ConfigPipelineIO:
             if "snakefiles" in setup_dict:
                 self._snakefiles.update(setup_dict["snakefiles"])
 
-        for setup_path in self._setup_paths:
-
-            # Get absolute path for the setup path
-            setup_abs_path = os.path.abspath(processSetupArgs(setup_path))
+        for setup_path in self._external_paths:
+            # Assign the path from the pipeline args
+            setup_path = processSetupArgs(setup_path)
 
             # Check if the path is a file, and if so return the directory
-            if os.path.isfile(setup_abs_path):
-                setup_abs_path = os.path.dirname(setup_abs_path)
+            if os.path.isfile(setup_path):
+                setup_path = os.path.dirname(setup_path)
 
             # Check if the path is a directory, and if so return the directory
-            elif os.path.isdir(setup_abs_path):
+            elif os.path.isdir(setup_path):
                 pass
 
             # Check that the parent directory exists, and if so return the parent directory
-            elif os.path.isdir(os.path.dirname(setup_abs_path)):
-                setup_abs_path = os.path.dirname(setup_abs_path)
+            elif os.path.isdir(os.path.dirname(setup_path)):
+                setup_path = os.path.dirname(setup_path)
 
             # Raise an exception if the setup path does not exist
             else:
-                raise Exception(f"Setup path {setup_abs_path} does not exist")
-            
+                raise Exception(f"Setup path {setup_path} does not exist")
 
             # Add the setup path to the singularity bindings
-            self._singularity_bindings.add(setup_abs_path)
+            self._singularity_bindings.add(setup_path)
 
         # Loop through the snakemake args and their values
         for snake_arg_name, snake_arg_value in self._snakeargs.items():
