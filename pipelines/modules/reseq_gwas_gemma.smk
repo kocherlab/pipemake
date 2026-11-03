@@ -38,7 +38,6 @@ rule gemma_model_phenotype_file:
         model_file=f"Models/{config['species']}.model",
     output:
         f"Models/GEMMA/{config['species']}.{{model}}.pheno.txt",
-        f"Models/GEMMA/{config['species']}.{{model}}.pheno.log",
     log:
         f"logs/ped-phenotype-file/{config['species']}.{{model}}.gemma.log",
     params:

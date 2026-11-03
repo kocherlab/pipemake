@@ -1,7 +1,6 @@
 rule all:
     input:
         expand(f"Models/{config['species']}.{{model}}.ind.txt", model=config["models"]),
-        expand(f"Models/{config['species']}.{{model}}.ind.log", model=config["models"]),
 
 
 rule model_ind_file:
@@ -9,7 +8,6 @@ rule model_ind_file:
         f"Models/{config['species']}.model",
     output:
         f"Models/{config['species']}.{{model}}.ind.txt",
-        f"Models/{config['species']}.{{model}}.ind.log",
     log:
         f"logs/model-inds/{config['species']}.{{model}}.log",
     params:

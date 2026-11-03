@@ -48,19 +48,17 @@ parser:
           help: "Path to the NCBI nt database"
           type: str
           required: True
-          setup-arg: path
+          action: externalPath
         uniprot-db:
           help: "Path to the Uniprot database"
           type: str
           required: True
-          action: confirmFile
-          setup-arg: path
+          action: externalPath
         ncbi-taxa-db:
           help: "Path to the NCBI taxa database"
           type: str
           required: True
-          action: confirmDir
-          setup-arg: path
+          action: externalPath
 setup:
   hifi_input:
     methods:
@@ -85,11 +83,6 @@ setup:
       standardized_filename: "Assembly/{species}_{assembly_version}.busco.full_table.tsv"
       copy_method: copy
       gzipped: False
-
-paths:
-  - "{ncbi_nt_db}"
-  - "{ncbi_taxa_db}"
-  - "{uniprot_db}"
 
 snakemake:
   modules:
