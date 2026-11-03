@@ -384,6 +384,7 @@ Beyond built-in actions, `pipemake` also supports the following actions:
 
 * `confirmFile`: Require the given string to be a file. If the file does not exist, an error will be raised.
 * `confirmDir`: Require the given string to be a directory. If the directory does not exist, an error will be raised.
+* `externalPath`: Assigns the given string as an external path, indicating that it will be outside of the workflow directory. Also ensures that apptainer/singularity can access the path.
 
 .. note::
 
