@@ -61,7 +61,7 @@ rule assembly_stats_bbmap:
     log:
         f"logs/bbmap/{config['species']}_genome_{config['assembly_version']}.assembly.stats.log",
     singularity:
-        "docker://biocontainers/bbmap:39.26--he5f24ec_0"
+        "docker://bryce911/bbtools:40.05"
     resources:
         mem_mb=4000,
     threads: 1
