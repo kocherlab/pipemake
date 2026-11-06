@@ -13,7 +13,7 @@ parser:
         eggnog-data-dir:
           help: "eggNOG database directory"
           type: str
-          action: confirmDir
+          action: externalPath
         eggnog-copy-method:
           help: "Specifies if EggNOG directory should be copied or symbolically linked."
           choices:
@@ -46,16 +46,8 @@ setup:
     methods: 
       file-str: "{aa-transcript-fasta}"
     args:
-      standardized_filename: "Annotations/{species}_{assembly-version}.{annotation-version}_pep.fa"
+      standardized_filename: "Annotations/Unprocessed/{species}_{assembly-version}.{annotation-version}_pep.fa"
       copy_method: "copy"
-      gzipped: False
-  
-  eggnog_db:
-    methods:
-      dir-str: "{eggnog-data-dir}"
-    args:
-      standardized_directory: "Downloads/EggNOG"
-      copy_method: "{eggnog-copy-method}"
       gzipped: False
 
 snakemake:

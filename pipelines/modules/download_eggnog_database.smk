@@ -1,15 +1,15 @@
 rule all:
     input:
-        "Downloads/EggNOG/eggnog.db",
-        "Downloads/EggNOG/eggnog.taxa.db",
+        f"{config['eggnog_data_dir']}eggnog.db",
+        f"{config['eggnog_data_dir']}eggnog.taxa.db",
 
 
 rule download_eggnog_database:
     output:
-        "Downloads/EggNOG/eggnog.db",
-        "Downloads/EggNOG/eggnog.taxa.db",
+        f"{config['eggnog_data_dir']}eggnog.db",
+        f"{config['eggnog_data_dir']}eggnog.taxa.db",
     params:
-        data_dir="Downloads/EggNOG",
+        data_dir=subpath(output[0], parent=True),
     log:
         "logs/eggnog-mapper/download-eggnog-database.log",
     singularity:

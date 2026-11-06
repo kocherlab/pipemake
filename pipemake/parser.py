@@ -401,7 +401,7 @@ class PipelineParser:
         elif arg_args["action"] == "confirmFile":
             arg_args["action"] = confirmFile()
 
-        # Assign the ExternalPath action
+        # Assign the externalPath action
         elif arg_args["action"] == "externalPath":
             arg_args["action"] = externalPath()
 

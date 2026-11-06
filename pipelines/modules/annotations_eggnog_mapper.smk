@@ -5,7 +5,7 @@ rule all:
 
 rule create_longest_aa_transcripts:
     input:
-        f"Annotations/{config['species']}_{config['assembly_version']}.{config['annotation_version']}_pep.fa",
+        f"Annotations/Unprocessed/{config['species']}_{config['assembly_version']}.{config['annotation_version']}_pep.fa",
     output:
         f"Annotations/EggNOG/{config['species']}_{config['assembly_version']}.{config['annotation_version']}_pep.fa",
     log:
@@ -23,8 +23,8 @@ rule create_longest_aa_transcripts:
 
 rule run_eggnog_mapper:
     input:
-        eggnog_db="Downloads/EggNOG/eggnog.db",
-        taxa_db="Downloads/EggNOG/eggnog.taxa.db",
+        eggnog_db=f"{config['eggnog_data_dir']}eggnog.db",
+        taxa_db=f"{config['eggnog_data_dir']}eggnog.taxa.db",
         transcripts=f"Annotations/EggNOG/{config['species']}_{config['assembly_version']}.{config['annotation_version']}_pep.fa",
     output:
         f"Annotations/EggNOG/{config['species']}_{config['assembly_version']}.{config['annotation_version']}.emapper.annotations.xlsx",
@@ -32,8 +32,8 @@ rule run_eggnog_mapper:
         f"logs/eggnog-mapper/{config['species']}_{config['assembly_version']}.{config['annotation_version']}.log",
     params:
         out_prefix=subpath(output[0], strip_suffix=".emapper.annotations.xlsx"),
-        eggnod_dir="Annotations/EggNOG/",
-        data_dir="Downloads/EggNOG/",
+        eggnod_dir=subpath(output[0], parent=True),
+        data_dir=subpath(input.eggnog_db, parent=True),
     singularity:
         "docker://aewebb/eggnog-mapper:v2.1.13"
     resources:

@@ -126,9 +126,12 @@ class ConfigPipelineIO:
         # Check if any parser arguments has a setup argument
         for parser_group_dict in self.parser_dict["arg-groups"].values():
             for parser_arg_name, parser_arg_dict in parser_group_dict["args"].items():
+
+                # Check if the parser argument has an action
                 if "action" not in parser_arg_dict:
                     continue
 
+                # Check if the parser argument has an externalPath action
                 if "externalPath" not in parser_arg_dict["action"]:
                     continue
 
