@@ -1,12 +1,12 @@
 rule all:
     input:
-        f"{config['eggnog_data_dir']}eggnog.db",
-        f"{config['eggnog_data_dir']}eggnog.taxa.db",
+        f"{config['eggnog_data_dir']}/eggnog.db",
+        f"{config['eggnog_data_dir']}/eggnog.taxa.db",
 
 
 rule download_eggnog_database:
     output:
-        f"{config['eggnog_data_dir']}eggnog.db",
+        f"{config['eggnog_data_dir']}/eggnog.db",
         f"{config['eggnog_data_dir']}eggnog.taxa.db",
     params:
         data_dir=subpath(output[0], parent=True),

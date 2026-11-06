@@ -1,0 +1,16 @@
+pipeline: download-eggnog-database
+version: 1.0
+parser:
+  help: Download the eggNOG database for subsequent use in the annotate-genes-eggnog pipeline
+  arg-groups:
+    basic:
+      args:
+        eggnog-data-dir:
+          help: "The eggNOG database directory. If the database is not present, it will be downloaded. Please note: The eggNOG database is large and ideally should be downloaded once and shared across multiple runs of this pipeline."
+          type: str
+          required: True
+          action: externalPath
+
+snakemake:
+  modules:
+    - download_eggnog_database

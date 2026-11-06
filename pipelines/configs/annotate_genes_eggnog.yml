@@ -11,15 +11,10 @@ parser:
           required: True
           action: confirmFile
         eggnog-data-dir:
-          help: "eggNOG database directory"
+          help: "The eggNOG database directory. If the database is not present, it will be downloaded. Please note: The eggNOG database is large and ideally should be downloaded once and shared across multiple runs of this pipeline."
           type: str
+          required: True
           action: externalPath
-        eggnog-copy-method:
-          help: "Specifies if EggNOG directory should be copied or symbolically linked."
-          choices:
-            - 'symbolic_link'
-            - 'copy'
-          default: 'symbolic_link'
         assembly-version:
           help: "Assembly Version"
           type: str

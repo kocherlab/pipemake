@@ -23,8 +23,8 @@ rule create_longest_aa_transcripts:
 
 rule run_eggnog_mapper:
     input:
-        eggnog_db=f"{config['eggnog_data_dir']}eggnog.db",
-        taxa_db=f"{config['eggnog_data_dir']}eggnog.taxa.db",
+        eggnog_db=f"{config['eggnog_data_dir']}/eggnog.db",
+        taxa_db=f"{config['eggnog_data_dir']}/eggnog.taxa.db",
         transcripts=f"Annotations/EggNOG/{config['species']}_{config['assembly_version']}.{config['annotation_version']}_pep.fa",
     output:
         f"Annotations/EggNOG/{config['species']}_{config['assembly_version']}.{config['annotation_version']}.emapper.annotations.xlsx",
