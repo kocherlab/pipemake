@@ -8,7 +8,6 @@ from pipemake.pipelineIO import ConfigPipelinesIO, ConfigPipelineIO
     [
         "tests/files/snakemakeIO_error/pipeline_version_error.yml",
         "tests/files/snakemakeIO_error/pipeline_parser_error.yml",
-        "tests/files/snakemakeIO_error/pipeline_setup_error.yml",
         "tests/files/snakemakeIO_error/pipeline_snakemake_error.yml",
         "tests/files/snakemakeIO_error/pipeline_smk_modules_error.yml",
     ],

@@ -5,7 +5,7 @@ import logging
 import shutil
 
 from pipemake import __version__
-from pipemake.logger import startLogger, logArgDict
+from pipemake.logger import startEarlyLogger, startLogger, logArgDict
 from pipemake.parser import PipelineParser
 from pipemake.snakemakeIO import SnakePipelineIO
 from pipemake.pipelineIO import ConfigPipelinesIO
@@ -13,6 +13,9 @@ from pipemake.workflowIO import confirmSafeToOverwrite, collectExistingPaths
 
 
 def main():
+    # Log in the console format until the log file exists
+    startEarlyLogger()
+
     # Assign the pipeline directory
     if os.environ.get("PM_SNAKEMAKE_DIR"):
         pipeline_storage_dir = os.environ.get("PM_SNAKEMAKE_DIR")

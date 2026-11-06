@@ -101,9 +101,10 @@ class ConfigPipelineIO:
         self.parser_dict = config_dict["parser"]
         config_dict.pop("parser")
 
-        # Check if the pipeline setup is provided
-        if "setup" not in config_dict:
-            raise Exception("No setup provided in the configuration file")
+        # Make the absence of the setup block a warning instead of an error
+        if 'setup' not in config_dict:
+            logging.warning("No setup block provided in the configuration file. Unless the pipeline requires no input, this may result in an error when running the pipeline.")
+            self._setup_dict = {}
 
         # Set the pipeline setup
         self._setup_dict = config_dict.pop("setup", {})
