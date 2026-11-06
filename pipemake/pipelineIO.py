@@ -129,7 +129,7 @@ class ConfigPipelineIO:
                 if "action" not in parser_arg_dict:
                     continue
 
-                if "ExternalPath" not in parser_arg_dict["action"]:
+                if "externalPath" not in parser_arg_dict["action"]:
                     continue
 
                 self._external_paths.append(f"{{{parser_arg_name}}}")
