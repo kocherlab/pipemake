@@ -155,7 +155,7 @@ rule kmc_query:
 
 rule kmc_sample_single_end:
     input:
-        r1_reads="FASTQ/Kmer/{sample}_R1.fq.gz",
+        r1_reads="FASTQ/Trimmed/{sample}_R1.fq.gz",
     output:
         multiext("KmerCopyNumber/Samples/{sample}", ".kmc_pre", ".kmc_suf"),
     log:
@@ -183,8 +183,8 @@ rule kmc_sample_single_end:
 
 rule kmc_sample_paired_end:
     input:
-        r1_reads="FASTQ/Kmer/{sample}_R1.fq.gz",
-        r2_reads="FASTQ/Kmer/{sample}_R2.fq.gz",
+        r1_reads="FASTQ/Trimmed/{sample}_R1.fq.gz",
+        r2_reads="FASTQ/Trimmed/{sample}_R2.fq.gz",
     output:
         multiext("KmerCopyNumber/Samples/{sample}", ".kmc_pre", ".kmc_suf"),
     log:
