@@ -140,6 +140,15 @@ def test_TableIO_no_table_error(filename):
     with pytest.raises(IOError):
         TableIO.fromFilenameStr(filename)
 
+@pytest.mark.parametrize(
+    "filename",
+    ["tests/files/fileIO/test_table_dup_files.tsv"]
+)
+def test_TableIO_table_dup_file_error(filename):
+    test_dir = tempfile.mkdtemp()
+    with pytest.raises(Exception):
+        test_seqtable = TableIO.fromFilenameStr(filename, sample_keywords=["samples"])
+        test_seqtable.standardizedFiles("{samples}_{reads}.test.fq.gz", workflow_dir=test_dir, copy_method="symbolic_link")
 
 @pytest.mark.parametrize(
     "filename",

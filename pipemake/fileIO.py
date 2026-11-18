@@ -185,6 +185,10 @@ class TableIO:
         )
 
     def standardizedFiles(self, standardized_wildcard, **kwargs):
+
+        # Create a list to store the input files, to check for duplicates
+        input_files = []
+
         # Skip if no file columns
         if not list(self._file_columns):
             return
@@ -238,6 +242,11 @@ class TableIO:
                     file_wildcard_dict = dict([file_col.split(":")])
                     str_wildcards.update(file_wildcard_dict)
                     # file_wildcard_dict.update(str_wildcards)
+
+                # Check for duplicate input files
+                if sample_filename in input_files:
+                    raise Exception(f"Duplicate input file found: {sample_filename}")
+                input_files.append(sample_filename)
 
                 # Create the standardized filename
                 standardized_filename = standardized_wildcard.format(**str_wildcards)
