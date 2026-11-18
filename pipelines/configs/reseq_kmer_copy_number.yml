@@ -1,0 +1,129 @@
+pipeline: reseq-kmer-depth
+version: 1.0
+parser:
+  help: Compare read depth of a known duplicated region across samples from reseq FASTQs using k-mer counts (KMC)
+  arg-groups:
+    basic:
+      mutually-exclusive-args:
+        input-parser:
+          required: True
+      wildcards-args:
+        fastq-standardized-wildcard: "{samples}_{reads}.fq.gz"
+      args:
+        fastq-wildcard:
+          help: "Wildcard statement to represent reseq FASTQs"
+          type: str
+          mutually-exclusive: "input-parser"
+          wildcards: "fastq-standardized-wildcard"
+        fastq-table:
+          help: "Table with sample and FASTQs filenames"
+          type: str
+          action: confirmFile
+          mutually-exclusive: "input-parser"
+          wildcards: "fastq-standardized-wildcard"
+        fastq-copy-method:
+          help: "Specifies if FASTQs should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        assembly-fasta:
+          help: "Assembly fasta"
+          type: str
+          required: True
+          action: confirmFile
+        assembly-copy-method:
+          help: "Specifies if assembly files should be copied or symbolically linked."
+          choices:
+            - 'symbolic_link'
+            - 'copy'
+          default: 'symbolic_link'
+        assembly-version:
+          help: "Assembly Version"
+          type: str
+          default:
+            str: "v"
+            suffix:
+              - function: jobRandomString
+        species:
+          help: "Species name"
+          type: str
+          default:
+            str: "Sp"
+            suffix:
+              - function: jobRandomString
+    region:
+      args:
+        chrom:
+          help: "Chromosome/scaffold of the target (duplicated) region"
+          type: str
+          required: True
+        start:
+          help: "Start position (bp, 1-based) of the target region"
+          type: int
+          required: True
+          range:
+            min: 1
+        end:
+          help: "End position (bp, 1-based, inclusive) of the target region"
+          type: int
+          required: True
+          range:
+            min: 1
+    kmers:
+      args:
+        k:
+          help: "K-mer size"
+          type: int
+          default: 31
+          range:
+            min: 15
+            max: 31
+        min-count:
+          help: "Ignore k-mers seen fewer than this many times in the reads"
+          type: int
+          default: 2
+          range:
+            min: 1
+        max-assembly-count:
+          help: "Keep region k-mers seen at most this many times in the assembly (1 = duplicate collapsed, 2 = both copies present)"
+          type: int
+          default: 1
+          range:
+            min: 1
+
+setup:
+  fastq_file_input:
+    methods:
+      wildcard_str: "{fastq-wildcard}"
+      table_file: "{fastq-table}"
+    args:
+      standardized_filename: "FASTQ/Input/{fastq-standardized-wildcard}"
+      copy_method: '{fastq-copy-method}'
+      sample_keywords:
+        - 'samples'
+      gzipped: True
+    snakefiles:
+      - fastq_process_wildcards
+
+  assembly_input:
+    methods:
+      file-str: "{assembly-fasta}"
+    args:
+      standardized_filename: "Assembly/{species}_{assembly_version}.fa"
+      copy_method: "{assembly-copy-method}"
+      gzipped: False
+
+snakemake:
+  modules:
+    - reseq_kmer_copy_number_kmc
+  links:
+    - input: fastq_process_single_end
+      output: kmc_sample_single_end
+    - input: fastq_process_paired_end
+      output: kmc_sample_paired_end
+      file_mappings:
+        - input: r1_reads
+          output: r1_reads
+        - input: r2_reads
+          output: r2_reads
