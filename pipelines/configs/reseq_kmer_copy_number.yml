@@ -52,6 +52,12 @@ parser:
             str: "Sp"
             suffix:
               - function: jobRandomString
+        min-length:
+          help: "Minimum length of reads to keep"
+          type: int
+          default: 50
+          range:
+            min: 1
     region:
       args:
         chrom:
