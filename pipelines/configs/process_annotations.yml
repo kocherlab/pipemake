@@ -1,0 +1,80 @@
+pipeline: process-annotations
+version: 1.0
+parser:
+  help: Add kocherlab IDs to a GFF and GTF, and create the transcript and protein FASTAs
+  arg-groups:
+    basic:
+      args:
+        assembly-fasta:
+          help: "Assembly FASTA file"
+          type: str
+          required: True
+          action: confirmFile
+        annotations-gff:
+          help: "Annotations GFF"
+          type: str
+          required: True
+          action: confirmFile
+        annotations-gtf:
+          help: "Annotations GTF"
+          type: str
+          required: True
+          action: confirmFile
+        busco-database:
+          help: "Name of BUSCO database"
+          type: str
+          required: True
+        id-prefix:
+          help: "Prefix for the assign to IDs (e.g. LPRA gives LPRA_<ID>)"
+          type: str
+          required: True
+        assembly-version:
+          help: "Assembly Version"
+          type: str
+          default:
+            str: "v"
+            suffix:
+              - function: jobRandomString
+        annotation-version:
+          help: "Annotation Version"
+          type: str
+          default:
+            str: ""
+            suffix:
+              - function: jobRandomString
+        species:
+          help: "Species name"
+          type: str
+          default:
+            str: "Sp"
+            suffix:
+              - function: jobRandomString
+setup:
+  assembly_fasta:
+    methods:
+      file-str: "{assembly-fasta}"
+    args:
+      standardized_filename: "Assembly/{species}_{assembly-version}.fa"
+      copy_method: copy
+      gzipped: False
+  gff_input:
+    methods:
+      file-str: "{annotations-gff}"
+    args:
+      standardized_filename: "Annotations/Unprocessed/{species}_{assembly-version}.{annotation-version}.gff"
+      copy_method: copy
+      gzipped: False
+  gtf_input:
+    methods:
+      file-str: "{annotations-gtf}"
+    args:
+      standardized_filename: "Annotations/Unprocessed/{species}_{assembly-version}.{annotation-version}.gtf"
+      copy_method: copy
+      gzipped: False
+
+snakemake:
+  modules:
+    - process_annotations
+    - assembly_compleasm
+    - annotations_compleasm
+    - download_compleasm

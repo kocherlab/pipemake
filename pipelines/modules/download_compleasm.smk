@@ -14,7 +14,7 @@ rule download_compleasm_library:
         busco_db=config["busco_database"],
         downloads_dir="Downloads/compleasm",
     singularity:
-        "docker://huangnengcsu/compleasm:v0.2.6"
+        "docker://aewebb/compleasm:v0.2.10"
     resources:
         mem_mb=2000,
     threads: 1

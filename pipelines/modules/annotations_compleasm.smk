@@ -12,11 +12,11 @@ rule annotations_compleasm:
     log:
         "logs/compleasm/annotations_compleasm.log",
     params:
-        output_dir="Annotations/compleasm",
-        download_dir="Downloads/compleasm",
+        output_dir=subpath(output[0], parent=True),
+        download_dir=subpath(input.compleasm_library, parent=True),
         busco_db=config["busco_database"],
     singularity:
-        "docker://huangnengcsu/compleasm:v0.2.8"
+        "docker://aewebb/compleasm:v0.2.10"
     resources:
         mem_mb=12000,
     threads: 12

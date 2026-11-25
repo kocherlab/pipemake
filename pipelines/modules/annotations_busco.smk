@@ -12,10 +12,10 @@ rule annotations_busco:
         "logs/BUSCO/annotations_busco.log",
     params:
         download_dir="Downloads/BUSCO",
-        output_dir="Annotations/BUSCO",
+        output_dir=subpath(output[0], parent=True),
         busco_db=config["busco_database"],
     singularity:
-        "docker://ezlabgva/busco:v5.7.1_cv1"
+        "docker://ezlabgva/busco:v6.1.0_cv3"
     resources:
         mem_mb=12000,
     threads: 12
