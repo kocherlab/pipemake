@@ -5,6 +5,9 @@ rule all:
         f"Processed/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_trans.fa",
         f"Processed/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_pep.fa",
 
+
+ruleorder: link_assembly_compleasm > link_annotations_compleasm > assembly_compleasm > annotations_compleasm
+
 use rule assembly_compleasm as link_assembly_compleasm with:
     input:
         assembly_fasta=config["assembly_fasta"],
