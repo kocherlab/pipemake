@@ -11,6 +11,7 @@ ruleorder: link_assembly_compleasm > link_annotations_compleasm > assembly_compl
 use rule assembly_compleasm as link_assembly_compleasm with:
     input:
         assembly_fasta=config["assembly_fasta"],
+        compleasm_library=f"Downloads/compleasm/{config['busco_database']}.done",
 
 rule add_kocherlab_ids_gff:
     input:
@@ -91,6 +92,7 @@ rule update_headers:
 use rule annotations_compleasm as link_annotations_compleasm with:
     input:
         transcript_fasta=f"Processed/{config['species']}_OGS_{config['assembly_version']}.{config['annotation_version']}_trans.fa",
+        compleasm_library=f"Downloads/compleasm/{config['busco_database']}.done",
 
 
 

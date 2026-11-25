@@ -12,7 +12,7 @@ rule download_compleasm_library:
         f"logs/compleasm/{config['busco_database']}.download.log",
     params:
         busco_db=config["busco_database"],
-        downloads_dir="Downloads/compleasm",
+        downloads_dir=subpath(output[0], parent=True),
     singularity:
         "docker://aewebb/compleasm:v0.2.10"
     resources:
