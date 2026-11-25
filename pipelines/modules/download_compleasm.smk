@@ -19,4 +19,4 @@ rule download_compleasm_library:
         mem_mb=2000,
     threads: 1
     shell:
-        "compleasm download {params.busco_db} --library_path {params.downloads_dir} &> {log}"
+        "compleasm download {params.busco_db} --library_path {params.downloads_dir} &> {log} && sleep 60"
